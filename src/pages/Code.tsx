@@ -2,9 +2,10 @@ import { useState } from "react";
 import Tabs from "../components/Tabs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Code = () => {
+const Code = ({ setShowSidebar }: { setShowSidebar: any }) => {
   const [activeContract, setActiveContract] = useState<string>("");
   const [activeFile, setActiveFile] = useState<string>("");
+  setShowSidebar(true)
 
   return (
     <div className="flex w-full ">
