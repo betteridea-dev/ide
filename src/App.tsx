@@ -1,28 +1,29 @@
-import { Route,Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Deploy from './pages/Deploy';
-import Code from './pages/Code';
+import CodeEditor from './pages/CodeEditor';
 import PersonalCloud from './pages/PersonalCloud';
 import GlobalCloud from './pages/GlobalCloud';
-import './App.css'
 import Sidebar from './components/Sidebar';
+import Code from './pages/Code';
 
 function App() {
-  
+
   return (
     <>
-    <div className='flex'>
-    <Sidebar/>
-    <div>
-    <Routes>
-        <Route path="/" element={<Home />}/>
-        <Route path="/code" element={<Code />}></Route>
-        <Route path="/deploy" element={<Deploy />}></Route>
-        <Route path="/personal-cloud" element={<PersonalCloud />}></Route>
-        <Route path="/global-cloud" element={<GlobalCloud />}></Route>
-    </Routes>
-    </div>
-    </div>
+      <div className='flex w-full'>
+        <Sidebar />
+        <div className='w-full'>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/editor" element={<CodeEditor />}></Route>
+            <Route path="/code" element={<Code />}></Route>
+            <Route path="/deploy" element={<Deploy />}></Route>
+            <Route path="/personal-cloud" element={<PersonalCloud />}></Route>
+            <Route path="/global-cloud" element={<GlobalCloud />}></Route>
+          </Routes>
+        </div>
+      </div>
     </>
   )
 }
