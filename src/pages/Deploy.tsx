@@ -142,7 +142,7 @@ const Deploy = ({ setShowSidebar }: { setShowSidebar: any }) => {
   }
 
   return (
-    <div className="p-5 h-screen bg-white/10 flex flex-col justify-evenly items-center">
+    <div className="p-5 h-screen flex flex-col justify-evenly items-center">
       {
         !deploySuccess ? <> <div className="flex gap-10 justify-center">
           <div>

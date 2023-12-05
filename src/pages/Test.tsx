@@ -1,124 +1,170 @@
-import {useState} from 'react'
+import { useEffect, useState } from 'react'
+import { viewContractState, writeContract } from 'arweavekit'
 
+type deployments = {
+  [key: string]: {
+    id: string,
+    env: "local" | "mainnet",
+    functions: string[]
+  }
+}
+
+const sampleInput = '{ "name": "ankushKun" }'
 const Test = ({ setShowSidebar }: { setShowSidebar: any }) => {
-    // to show the side bar
-    setShowSidebar(true);
-    const [accessLevel, setAccessLevel] = useState('read');
-    const [functionName, setFunctionName] = useState('function1');
-    const [inputJson, setInputJson] = useState('');
-    const handleChange=(e)=>{
-        const {name,value}=e.target;
-        if(name=="accessLevel")
-        {
-            setAccessLevel(value);
-        }
-        else if(name=="functionName")
-        {
-            setFunctionName(value);
-        }
-        else if(name=="inputJson")
-        {
-            setInputJson(value);
-        }
-        else
-        {
-            console.log("wrong name in the form");  
-        }
+  // to show the side bar
+  setShowSidebar(true);
+  // const [functionType, setFunctionType] = useState('read');
+  // const [functionArgs, setFunctionArgs] = useState('');
+
+  const [deployments, setDeployments] = useState<deployments>({})
+  const [selectedContract, setSelectedContract] = useState<string>("")
+  const [functionType, setFunctionType] = useState<string>("read")
+  const [functionName, setFunctionName] = useState<string>("")
+  const [result, setResult] = useState<string>("")
+  const [state, setState] = useState<string>("")
+  const [success, setSuccess] = useState(false)
+
+  const urlParams = new URLSearchParams(window.location.search)
+  const conName = urlParams.get("conName")
+
+
+  useEffect(() => {
+    const deployments = sessionStorage.getItem("deployments")
+    if (!deployments) return
+    const parsed = JSON.parse(deployments)
+    setDeployments(parsed)
+    if (conName) setSelectedContract(conName)
+  }, [])
+
+  async function interact() {
+    if (!selectedContract) setResult("please select a contract")
+    else if (functionType == "") setResult("please select a function type")
+    else if (!functionName) setResult("please enter a function name")
+
+    if (functionType == "read") {
+      const res = await viewContractState({
+        environment: deployments[selectedContract].env,
+        contractTxId: deployments[selectedContract].id,
+        options: {
+          function: functionName,
+          ...JSON.parse(sessionStorage.getItem("jsonArgs") || sampleInput)
+        },
+        strategy: "arweave"
+      })
+      console.log(res)
+      if (res.result.status == 200) {
+        setSuccess(true)
+        setResult(JSON.stringify({ result: res.viewContract.result }, null, 2))
+      } else {
+        setSuccess(false)
+        setResult(`error: ${res.result.status}
+                ${res.result.statusText}
+                
+                ${res.viewContract.errorMessage}`)
+      }
+      setState(JSON.stringify(res.viewContract.state, null, 2))
     }
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // You can perform actions with the form data here
-      };
+    else if (functionType == "write") {
+      try {
+        const res = await writeContract({
+          wallet: "use_wallet",
+          environment: deployments[selectedContract].env,
+          contractTxId: deployments[selectedContract].id,
+          options: {
+            function: functionName,
+            ...JSON.parse(sessionStorage.getItem("jsonArgs") || sampleInput)
+          },
+          strategy: "arweave"
+        })
+        console.log(res)
+        if (res.result.status == 200) {
+          setSuccess(true)
+          setResult("TXN ID: " + res.writeContract.originalTxId)
+        } else {
+          setSuccess(false)
+          setResult(`error: ${res.result.status}
+${res.result.statusText}
+
+${res.writeContract.errorMessage}`)
+
+        }
+        setState(JSON.stringify(res.state, null, 2))
+      }
+      catch (e) {
+        console.log(e)
+        setResult(e as string)
+      }
+    }
+  }
+
+  function goDownOnJSON(e) {
+    console.log(e)
+    if (e.keyCode == 9) {
+      e.preventDefault()
+      var v = e.target.value, s = e.target.selectionStart, e = e.target.selectionEnd;
+      e.target.value = v.substring(0, s) + '\t' + v.substring(e);
+      e.target.selectionStart = e.target.selectionEnd = s + 1;
+      return false;
+    }
+  }
+
   return (
-    <div>
-        <div className='w-full flex justify-center'>
-        <div className='flex flex-col w-fit pt-24 pb-10'>
-            <span className=' text-sm text-[#B9B9B9]'></span>Select contracts to test
-            <select id="selectOption" className='p-2 text-base border rounded outline-none cursor-pointer bg-transparent hover:border-gray-600 focus:border-green-500 focus:ring focus:ring-green-100'>
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
+    <div className='flex flex-col gap-10 justify-center items-center min-h-screen'>
+      <div>
+        <div>Select contract to test</div>
+        <select className="border border-gray-500 rounded" value={selectedContract} onChange={(e) => setSelectedContract(e.target.value)}>
+          <option value="">Select Contract</option>
+          {
+            Object.keys(deployments).map((key) => {
+              return <option value={key}>{key} ({deployments[key].id})</option>
+            })
+          }
+        </select>
+      </div>
+      <div className='grid grid-cols-2 min-w-[70%] gap-10'>
+        <div className='flex flex-col gap-4'>
+          <div className='font-bold text-xl'>Call a function</div>
+          <div className='flex gap-5 font-light'>type of action:
+            <span className='flex gap-1'>
+              <input type="radio" id='read' checked={functionType == "read"} onClick={() => setFunctionType("read")} />
+              <label htmlFor="read">read</label>
+            </span>
+            <span className='flex gap-1'>
+              <input type="radio" id='write' checked={functionType == "write"} onClick={() => setFunctionType("write")} />
+              <label htmlFor="write">write</label>
+            </span>
+          </div>
+          <div className="">
+            <div className='font-light'>Function Name</div>
+            <select className="border border-gray-500 rounded" value={functionName} onChange={(e) => setFunctionName(e.target.value)}>
+              <option value="" disabled>Select Function</option>
+              {
+                deployments[selectedContract]?.functions.map((func) => {
+                  return <option value={func}>{func}</option>
+                })
+              }
             </select>
+          </div>
+          <div>
+            <div className='font-light'>Input JSON</div>
+            <iframe src="/betterIDE/?open=jsonArgs" className="w-full h-64 ring-1 rounded ring-white/30"></iframe>
+          </div>
+          <button className='bg-[#093E49] w-fit rounded p-2 px-6' onClick={interact}>Get Results</button>
         </div>
-        </div>
-        <div className='grid grid-cols-2 '>
-        <div className="flex place-content-center w-full  flex-1 justify-center items-center h-fit">
-          <form className="w-1/2 p-6 bg-transparent rounded-lg" onSubmit={handleSubmit}>
-            <div className="mb-4">
-                <span className='font-semibold text-lg'>Call a function</span>
-              <div className='flex gap-5 items-center'>
-              <label className="block  mb-2 text-sm text-[#B9B9B9] mt-4">Type of action:</label>
-              <input
-                type="radio"
-                id="read"
-                name="accessLevel"
-                value="read"
-                className="mr-2"
-                checked={accessLevel === 'read'}
-                onChange={() => setAccessLevel('read')}
-              />
-              <label htmlFor="read" className="mr-4">
-                Read
-              </label>
-              <input
-                type="radio"
-                id="write"
-                name="accessLevel"
-                value="write"
-                className="mr-2"
-                checked={accessLevel === 'write'}
-                onChange={() => setAccessLevel('write')}
-              />
-              <label htmlFor="write">Write</label>
-              </div>
+        <div>
+          <div className='text-2xl font-bold'>Output</div>
+          <div>
+            <div className='my-5'>
+              <div>Result</div>
+              <pre className={`p-2 rounded bg-white/10 ${success ? "text-green-400" : "text-red-400"}`}>{result}</pre>
             </div>
-
-            <div className="mb-4">
-              <label className="block   text-sm text-[#B9B9B9] mb-4">Function Name</label>
-              <select
-                id="functionName"
-                name="functionName"
-                className=" bg-transparent  w-fit p-2 border rounded outline-none"
-                value={functionName}
-                onChange={(e) => setFunctionName(e.target.value)}
-              >
-                <option className='bg-transparent bg-black' value="function1">Function 1</option>
-                <option className="bg-transparent" value="function2">Function 2</option>
-                <option className='bg-transparent' value="function3">Function 3</option>
-              </select>
+            <div className='my-5'>
+              <div>State</div>
+              <pre className="p-2 rounded bg-white/10">{state}</pre>
             </div>
-
-            <div className="mb-6">
-              <label className="block text-sm text-[#B9B9B9] mb-4">Input JSON</label>
-              <textarea
-                id="inputJson"
-                name="inputJson"
-                rows={4}
-                className="w-full p-2 border rounded outline-none border-none bg-[rgba(61,73,71,0.50)]"
-                value={inputJson}
-                onChange={(e) => setInputJson(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="bg-[#093E49] text-white py-2 px-4 rounded">
-              Get Result
-            </button>
-          </form>
+          </div>
         </div>
-        <div className='flex-1 place-content-center ml-32 pt-3 h-fit w-full flex flex-col first-letter'>
-                <h1 className=' text-lg font-semibold mb-16'>Output</h1>
-                <div className='flex flex-col'>
-                    <p className='text-sm text-[#B9B9B9] mb-4'>Result</p>
-                    <div className=' px-2 w-60 rounded bg-[rgba(61,73,71,0.50)] mb-8'>name</div>
-                </div>
-                <div className='flex flex-col'>
-                    <p className='text-sm text-[#B9B9B9] mb-4'>State</p>
-                    <div className='px-2 rounded bg-[rgba(61,73,71,0.50)] w-60 min-h-[53px] h-fit overflow-scroll pb-8 mb-8'>
-                        Json dataaslkdjasijdoaskdaskdaskdopkasopkdaskdpok
-                    </div>
-                </div>
-        </div>
-        </div>
+      </div>
     </div>
   )
 }

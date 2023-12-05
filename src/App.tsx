@@ -8,6 +8,7 @@ import GlobalCloud from './pages/GlobalCloud';
 import Sidebar from './components/Sidebar';
 import Code from './pages/Code';
 import Test from './pages/Test';
+import JsonArgs from './components/jsonArgs';
 
 function App() {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
@@ -18,6 +19,9 @@ function App() {
 
   if (open == "editor") {
     return <CodeEditor setShowSidebar={setShowSidebar} contractName={contractName} type={type} />
+  }
+  if (open == "jsonArgs") {
+    return <JsonArgs setShowSidebar={setShowSidebar} />
   }
 
   return (
