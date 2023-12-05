@@ -6,7 +6,7 @@ import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Router>
-    <main className="bg-[#0A1917] text-white h-[100vh] w-[100vw] ">
+    <main className="bg-[#0A1917] text-white h-[100vh] w-full ">
       <ArweaveWalletKit>
         <App />
       </ArweaveWalletKit>
