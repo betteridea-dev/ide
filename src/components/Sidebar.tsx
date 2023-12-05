@@ -1,29 +1,33 @@
-import {useState} from 'react'
-import { deploy, globalCloud, personalCloud, code } from '../assets'
+import { useState } from 'react'
+import { deploy, globalCloud, personalCloud, code, home } from '../assets'
 import { Link } from 'react-router-dom'
 
 // links for sidebar naviagtion
-export const navlinks=[
+export const navlinks = [
     {
-        name:code,
-        link:"/code"
+        name: home,
+        link: "/"
     },
     {
-        name:deploy,
-        link:"/deploy"
+        name: code,
+        link: "/code"
     },
     {
-        name:personalCloud,
-        link:"/personal-cloud"
+        name: deploy,
+        link: "/deploy"
     },
     {
-        name:globalCloud,
-        link:"/global-cloud"
+        name: personalCloud,
+        link: "/personal-cloud"
+    },
+    {
+        name: globalCloud,
+        link: "/global-cloud"
     }
 ]
 const Sidebar = () => {
-    const [active,setActive]=useState("");
-    const handleSelect=(name:string)=>{
+    const [active, setActive] = useState("");
+    const handleSelect = (name: string) => {
         setActive(name);
     }
   return (
@@ -37,7 +41,7 @@ const Sidebar = () => {
                 </Link>);
             })}
 
-            {/* <Link to="/deploy">
+                {/* <Link to="/deploy">
                 <div className='flex flex-col justify-center items-center hover:bg-[#24312F] hover:rounded duration-300 p-1'>
                 <img src={deploy} alt="test" className='w-12 h-12'/>
                 </div>
@@ -52,9 +56,9 @@ const Sidebar = () => {
             <img src={globalCloud} alt="global cloud" className='w-12 h-12'/>
             </div>
             </Link> */}
+            </div>
         </div>
-    </div>
-  )
+    )
 }
 
 export default Sidebar

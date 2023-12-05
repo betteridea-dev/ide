@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Deploy from './pages/Deploy';
@@ -8,15 +9,16 @@ import Sidebar from './components/Sidebar';
 import Code from './pages/Code';
 
 function App() {
+  const [showSidebar, setShowSidebar] = useState<boolean>(true);
 
   return (
     <>
       <div className='flex w-full'>
-        <Sidebar />
+        {showSidebar && <Sidebar />}
         <div className='w-full'>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/editor" element={<CodeEditor />}></Route>
+            <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/code" element={<Code />}></Route>
             <Route path="/deploy" element={<Deploy />}></Route>
             <Route path="/personal-cloud" element={<PersonalCloud />}></Route>
