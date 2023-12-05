@@ -27,7 +27,7 @@ const Sidebar = () => {
         setActive(name);
     }
   return (
-    <div className='pt-10'>
+    <div className='pt-10 pr-10'>
         <div className='flex px-2 flex-col gap-5 justify-center items-center'>
             {navlinks.map((link)=>{
                 return (<Link to={link.link}>
