@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { contractSrc, stateSrc } from '../templates/hello';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
