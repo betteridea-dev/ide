@@ -16,20 +16,24 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
         setAddModal(true);
     }
     useEffect(() => {
-        const c = localStorage.getItem("contracts")
-        if (c) {
-            const parsed = JSON.parse(c)
-            setContracts(parsed)
-        } else {
-            const c = {
-                hello: {
-                    "contract.js": contractSrc,
-                    "state.json": stateSrc,
-                },
+        function getLocalContracts() {
+            const c = localStorage.getItem("contracts")
+            if (c) {
+                const parsed = JSON.parse(c)
+                setContracts(parsed)
+            } else {
+                const c = {
+                    hello: {
+                        "contract.js": contractSrc,
+                        "state.json": stateSrc,
+                    },
+                }
+                localStorage.setItem("contracts", JSON.stringify(c))
+                setContracts(c)
             }
-            localStorage.setItem("contracts", JSON.stringify(c))
-            setContracts(c)
         }
+        getLocalContracts()
+        window.addEventListener("contractsUpdated", getLocalContracts)
     }, [])
 
     const TabElement = ({ name }: { name: string }) => {
@@ -60,11 +64,11 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
 
     if (addModal) {
         return (
-          <>
-          <AddModal
-            setAddModal={setAddModal}
-            />
-          </>  
+            <>
+                <AddModal
+                    setAddModal={setAddModal}
+                />
+            </>
         )
     }
     return (
