@@ -62,7 +62,10 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
     {
         return (
           <>
-          <AddModal/>
+          <AddModal
+            setAddModal={setAddModal}
+            setContracts={setContracts}
+            />
           </>  
         )
     }
