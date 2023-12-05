@@ -51,7 +51,7 @@ const Templates = () => {
         }
     ]
   return (
-    <div className="overflow-x-auto flex gap-8 ma w-full">
+    <div className="overflow-x-auto flex gap-8 max-w-[90%]">
         {
             templates.map((template)=>{
                 return <TemplateTab
