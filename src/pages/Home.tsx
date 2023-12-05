@@ -2,7 +2,9 @@ import { nextArrow } from "../assets"
 import Templates from "../components/Templates"
 import { Tour } from "../components/Tour"
 
-const Home = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Home = ({ setShowSidebar }: { setShowSidebar: any }) => {
+  setShowSidebar(true)
   return (
     <div className=" pl-14 pt-9 cursor-pointer">
       <div className="w-full">
