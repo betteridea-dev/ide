@@ -1,28 +1,33 @@
 import { useState } from 'react'
-import { deploy, globalCloud, personalCloud, code, home } from '../assets'
+import { test, deploy, code, home, browse } from '../assets'
 import { Link } from 'react-router-dom'
 
 // links for sidebar naviagtion
 export const navlinks = [
     {
+        iconName:"Home",
         name: home,
         link: "/"
     },
     {
+        iconName:"My Projects",
         name: code,
         link: "/code"
     },
     {
+        iconName:"Deploy",
         name: deploy,
         link: "/deploy"
     },
     {
-        name: personalCloud,
-        link: "/personal-cloud"
+        iconName:"Test",
+        name: test,
+        link: "/test"
     },
     {
-        name: globalCloud,
-        link: "/global-cloud"
+        iconName:"Browse",
+        name: browse,
+        link: "/browse"
     }
 ]
 const Sidebar = () => {
@@ -31,12 +36,15 @@ const Sidebar = () => {
         setActive(name);
     }
   return (
-    <div className='pt-10'>
-        <div className='flex px-2 flex-col gap-5 justify-center items-center'>
+    <div className='pt-2'>
+        <div className='flex px-2 flex-col items-start w-full gap-5 min-w-[200px]'>
             {navlinks.map((link)=>{
-                return (<Link to={link.link}>
-                    <div onClick={()=>handleSelect(link.name)} className={`flex flex-col justify-center rounded-[5px] items-center ${active===link.name&&'bg-[#24312F]'} hover:bg-[#24312F] hover:rounded duration-300 p-1`}>
-                    <img src={link.name} alt="deploy" className='w-12 max-w-xs h-12'/>
+                return (<Link to={link.link} className='w-full'>
+                    <div onClick={()=>handleSelect(link.name)} className={`flex flex-col justify-start rounded-[5px] items-start w-full ${active===link.name&&'bg-[#24312F]'} hover:bg-[#24312F] hover:rounded duration-300 p-1`}>
+                    <div className='flex items-center justify-start'>
+                        <img src={link.name} alt="deploy" className='w-12 max-w-xs h-12'/>
+                        <p className=' text-sm '>{link.iconName}</p>
+                    </div>
                     </div>          
                 </Link>);
             })}

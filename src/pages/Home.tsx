@@ -6,7 +6,7 @@ import { Tour } from "../components/Tour"
 const Home = ({ setShowSidebar }: { setShowSidebar: any }) => {
   setShowSidebar(true)
   return (
-    <div className=" pl-14 pt-9 cursor-pointer">
+    <div className="  pt-9 cursor-pointer">
       <div className="w-full">
       <div className="flex p-2.5 w-fit text-left justify-center items-center gap-1.5 border-t border-white">
       <p>Start with a project template</p>

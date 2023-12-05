@@ -1,4 +1,4 @@
-import { nextArrow } from "../assets"
+import { nextArrow, horizontal } from "../assets"
 
 const TemplateTab=({name,description}:{name:string,description:string})=>{
     return (
@@ -53,7 +53,7 @@ const Templates = () => {
         }
     ]
   return (
-    <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[90%]">
+    <div className="overflow-x-auto  pb-10 p-2 flex gap-8 max-w-[90%]">
         {
             templates.map((template)=>{
                 return <TemplateTab
@@ -62,6 +62,7 @@ const Templates = () => {
                     description={template.description}/>
             })
         }
+        <img className="absolute mt-16 mr-5 bg-invert w-10 right-0 " src={horizontal} alt="Scroll" />
     </div>
   )
 }
