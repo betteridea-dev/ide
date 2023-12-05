@@ -57,7 +57,7 @@ const Deploy = ({ setShowSidebar }: { setShowSidebar: any }) => {
 
   async function deploy() {
     if (!walletUploaded && !useWallet) return alert("please upload a wallet")
-    if (deployTarget == "local") {
+    if (deployEnv == "local") {
       console.log("deploying to localhost")
       console.log(src)
       console.log(state)
@@ -80,7 +80,7 @@ const Deploy = ({ setShowSidebar }: { setShowSidebar: any }) => {
           setContractTxID(contract.contractTxId)
           const deployments = sessionStorage.getItem("deployments")
           if (!deployments) {
-            sessionStorage.setItem("deployments", JSON.stringify({ [contractTarget]: { id: contract.contractTxId, env: deployTarget, functions: extractFunctions(src) } }))
+            sessionStorage.setItem("deployments", JSON.stringify({ [contractTarget]: { id: contract.contractTxId, env: deployEnv, functions: extractFunctions(src) } }))
           }
           else {
             const parsed = JSON.parse(deployments)

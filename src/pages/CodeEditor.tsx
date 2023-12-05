@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import theme from "../themes/merbivore-modified.json"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function CodeEditor({ setShowSidebar }: { setShowSidebar: any }) {
+export default function CodeEditor({ setShowSidebar, contractName, type }: { setShowSidebar: any, contractName: string, type: string }) {
     setShowSidebar(false)
     const [value, setValue] = useState<string>("");
     const monaco = useMonaco();
     monaco?.editor.defineTheme("custom", theme as editor.IStandaloneThemeData)
     const urlparams = new URLSearchParams(window.location.search);
-    const contractName = urlparams.get("contract"); // contract name
-    const type = urlparams.get("type"); // js or json
+
 
     useEffect(() => {
         if (contractName && type) {

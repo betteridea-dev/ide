@@ -11,6 +11,14 @@ import Test from './pages/Test';
 
 function App() {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
+  const urlparams = new URLSearchParams(window.location.search);
+  const open = urlparams.get("open");
+  const contractName = urlparams.get("contract"); // contract name
+  const type = urlparams.get("type"); // js or json
+  console.log(open)
+  if (open == "editor") {
+    return <CodeEditor setShowSidebar={setShowSidebar} contractName={contractName} type={type} />
+  }
 
   return (
     <>
@@ -19,7 +27,7 @@ function App() {
         <div className='w-full'>
           <Routes>
             <Route path="/" element={<Home setShowSidebar={setShowSidebar} />} />
-            <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route>
+            {/* <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route> */}
             <Route path="/code" element={<Code setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/deploy" element={<Deploy setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/personal-cloud" element={<PersonalCloud setShowSidebar={setShowSidebar} />}></Route>
