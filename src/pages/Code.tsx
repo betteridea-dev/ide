@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Tabs from "../components/Tabs";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Code = () => {
   const [activeContract, setActiveContract] = useState<string>("");
   const [activeFile, setActiveFile] = useState<string>("");
@@ -11,19 +12,18 @@ const Code = () => {
       <div className="flex flex-col w-full bg-white/10">
         {activeContract ? <> <div className="flex gap-1">
           <div className="cursor-pointer" onClick={() => setActiveFile("contract.js")}>
-            <div className={`flex p-2.5 justify-center items-center gap-1.5 ${activeFile == "contract.js" && " border-t border-white"}`}>
+            <div className={`flex p-2.5 justify-center items-center gap-1.5 ${activeFile == "contract.js" && " border-t-4 border-white"}`}>
               <p>contract.js</p>
             </div>
           </div>
           <div className="cursor-pointer" onClick={() => setActiveFile("state.json")}>
-            <div className={`flex p-2.5 justify-center items-center gap-1.5 ${activeFile == "state.json" && "border-t border-white"}`}>
+            <div className={`flex p-2.5 justify-center items-center gap-1.5 ${activeFile == "state.json" && "border-t-4 border-white"}`}>
               <p>state.json</p>
             </div>
           </div>
         </div>
-          <div>
-            // code editor here
-            <iframe src={`/editor?contract=${activeContract}&type=${activeFile == "contract.js" ? "javascript" : "json"}`} className="w-full h-[calc(100vh-4rem)]"></iframe>
+          <div className="w-full h-full">
+            <iframe src={`/editor?contract=${activeContract}&type=${activeFile == "contract.js" ? "javascript" : "json"}`} className="w-full h-full"></iframe>
           </div></> : <div className="text-center p-5">
           Select a contract from the list or create a new one
         </div>
