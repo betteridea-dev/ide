@@ -34,5 +34,10 @@
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
     "vite": "^5.0.0"
+  },
+  "eslintConfig": {
+    "rules": {
+      "no-unused-vars": "warn"
+    }
   }
 }
