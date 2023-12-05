@@ -26,7 +26,7 @@ function App() {
         <div className='w-full'>
           <Routes>
             <Route path="/" element={<Home setShowSidebar={setShowSidebar} />} />
-            <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route>
+            {/* <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route> */}
             <Route path="/code" element={<Code setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/deploy" element={<Deploy setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/personal-cloud" element={<PersonalCloud setShowSidebar={setShowSidebar} />}></Route>
