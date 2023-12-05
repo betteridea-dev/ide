@@ -46,7 +46,7 @@ export default function CodeEditor({ setShowSidebar }: { setShowSidebar: any }) 
             value={value}
             theme="custom"
             defaultValue={value}
-            onChange={codeChanged}
+            onChange={(e) => codeChanged(e as string)}
         />
     </div>
 
