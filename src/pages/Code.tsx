@@ -24,7 +24,7 @@ const Code = ({ setShowSidebar }: { setShowSidebar: any }) => {
           </div>
         </div>
           <div className="w-full h-full">
-            <iframe src={`/betterIDE/editor?contract=${activeContract}&type=${activeFile == "contract.js" ? "javascript" : "json"}`} className="w-full h-full"></iframe>
+            <iframe src={`/betterIDE/?open=editor&contract=${activeContract}&type=${activeFile == "contract.js" ? "javascript" : "json"}`} className="w-full h-full"></iframe>
           </div></> : <div className="text-center p-5">
           Select a contract from the list or create a new one
         </div>
