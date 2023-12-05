@@ -17,3 +17,12 @@
 *::-webkit-scrollbar {
     display: none;
 }
+                    
+/* In your CSS file or style tag */
+.custom-width {
+    width: 120px;
+    transition: width 0.3s ease-in-out;
+}
+  
+
+  

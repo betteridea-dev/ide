@@ -7,6 +7,7 @@ import PersonalCloud from './pages/PersonalCloud';
 import GlobalCloud from './pages/GlobalCloud';
 import Sidebar from './components/Sidebar';
 import Code from './pages/Code';
+import Test from './pages/Test';
 
 function App() {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
@@ -23,6 +24,7 @@ function App() {
             <Route path="/deploy" element={<Deploy setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/personal-cloud" element={<PersonalCloud setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/global-cloud" element={<GlobalCloud setShowSidebar={setShowSidebar} />}></Route>
+            <Route path="/test" element={<Test setShowSidebar={setShowSidebar} />}></Route>
           </Routes>
         </div>
       </div>

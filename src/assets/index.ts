@@ -7,4 +7,5 @@ import nextArrow from "./next-arrow.svg";
 import dropRight from "./drop-right.svg";
 import tutorial from "./tutorial.png";
 import home from "./home.svg";
-export { code, deploy, globalCloud, personalCloud, dropDown,dropRight, nextArrow, tutorial, home};
+import close from "./close.svg";
+export { code, deploy, globalCloud, personalCloud, dropDown,dropRight, nextArrow, tutorial, home, close};

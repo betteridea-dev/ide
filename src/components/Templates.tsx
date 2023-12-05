@@ -14,7 +14,7 @@ const TemplateTab=({name,description}:{name:string,description:string})=>{
 
 
 function Button(){
-    return (<button className="bg-[#093E49]  flex rounded-[3px] px-2 py-1">
+    return (<button className="bg-[#093E49] custom-width  flex rounded-[3px] px-2 py-1 hover:w-60 transition-all duration-300 hover:justify-between">
         <p>Get Started</p>
         <img src={nextArrow} alt="next arrow"/>
     </button>);
