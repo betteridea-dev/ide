@@ -17,12 +17,26 @@
 *::-webkit-scrollbar {
     display: none;
 }
-                    
+
 /* In your CSS file or style tag */
 .custom-width {
     width: 120px;
     transition: width 0.3s ease-in-out;
 }
-  
 
-  
+select {
+    color: #B4FFA1;
+    padding: 5px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: rgba(269, 269, 269, 0.5);
+}
+
+select:focus {
+    outline: none;
+}
+
+option {
+    color: black;
+    background-color: whitesmoke;
+}

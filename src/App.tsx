@@ -15,7 +15,7 @@ function App() {
   const open = urlparams.get("open");
   const contractName = urlparams.get("contract"); // contract name
   const type = urlparams.get("type"); // js or json
-  console.log(open)
+
   if (open == "editor") {
     return <CodeEditor setShowSidebar={setShowSidebar} contractName={contractName} type={type} />
   }

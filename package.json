@@ -13,11 +13,13 @@
     "arweave-wallet-connector": "^1.0.2",
     "arweave-wallet-kit": "^1.0.3",
     "arweavekit": "^1.5.1",
+    "dropzone": "^6.0.0-beta.2",
     "eslint": "^8.55.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.20.1",
     "uuid": "^9.0.1"
   },

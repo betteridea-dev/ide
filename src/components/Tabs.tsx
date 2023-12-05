@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { dropDown, dropRight } from "../assets";
 import { contractSrc, stateSrc } from "../templates/hello";
 import AddModal from "./Modal";
+import { Link } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: { activeContract: string, setActiveContract: any, activeFile: string, setActiveFile: any }) => {
@@ -80,9 +81,9 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
             {/* <div className={`p-2 rounded-[5px]  ${activeContract ? "bg-black hover:scale-105  transition-all duration-300" : "opacity-60 cursor-default"} text-white`} to={activeContract ? `/deploy?contract=${activeContract}` : "#"}> */}
             <div className="relative">
                 <button className={`p-2 rounded-[5px] bg-black transition-all duration-300 ${activeContract ? " hover:scale-105" : "opacity-40 cursor-default"} text-white`} onClick={() => activeContract && setShowDeployDropdown(!showDeployDropdown)}>Deploy On</button>
-                {(showDeployDropdown) && <div className="absolute right-0">
-                    <div className=" bg-blue-300 p-2 rounded">Local</div>
-                    <div className=" bg-blue-300 p-2 rounded">Mainnet</div>
+                {(showDeployDropdown) && <div className="absolute w-full right-0 bg-white rounded-b flex flex-col">
+                    <Link to={`/deploy?conName=${activeContract}&depEnv=local`} className="p-2 text-black hover:bg-black/10">Local</Link>
+                    <Link to={`/deploy?conName=${activeContract}&depEnv=mainnet`} className="p-2 text-black hover:bg-black/10">Mainnet</Link>
                 </div>}
             </div>
             <div className="flex flex-col gap-1 overflow-scroll items-end w-full px-2">
