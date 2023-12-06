@@ -175,7 +175,7 @@ const PeronalProjects = ({ setShowSidebar }: { setShowSidebar: any }) => {
             placeholder="Search"
           />
         </div>
-        <button onClick={auth}>{connected ? `Cloud for ${activeAddress}` : "connect"}</button>
+        <button onClick={auth}>{activeAddress ? `Cloud for ${activeAddress}` : "connect"}</button>
         <div>
           {/* button */}
           {/* <div className="inline-flex items-center gap-2.5 bg-cyan-950 rounded px-3 py-[6px]">
