@@ -33,13 +33,13 @@ const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
       </div>
       <div>
         {/* button */}
-        <div className="inline-flex items-center gap-2.5 bg-cyan-950 rounded px-3 py-[6px]">
+        {/* <div className="inline-flex items-center gap-2.5 bg-cyan-950 rounded px-3 py-[6px]">
           <button className="text-white text-sm font-normal font-inter">+ new project</button>
-        </div>
+        </div> */}
       </div>
       </div>
-            {/* projects section */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* main section */}
+      <div className="grid grid-cols-4 gap-4 w-[817px] mx-auto">
       <div className="col-span-2 flex flex-col gap-8">
         <h1 className="text-[rgba(185,185,185,0.60)] text-sm">Projects</h1>
         {/* showing projects */}
@@ -71,7 +71,7 @@ const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
         }  
       </div>
       {/* stamp it section */}
-      <div className="col-span-1 flex flex-col gap-8">
+      <div className="col-span-1 flex flex-col gap-8 items-end justify-center">
       <h1 className="text-[rgba(185,185,185,0.60)] text-sm">Stamps</h1>
         {/* showing stamps */}
         {
