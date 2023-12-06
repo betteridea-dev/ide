@@ -28,7 +28,7 @@ function App() {
     <>
       <div className='flex max-w-screen'>
         {showSidebar && <Sidebar />}
-        <div className='w-full'>
+        <div className='w-full '>
           <Routes>
             <Route path="/" element={<Home setShowSidebar={setShowSidebar} />} />
             {/* <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route> */}

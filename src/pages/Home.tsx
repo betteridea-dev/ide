@@ -23,7 +23,7 @@ const Home = ({ setShowSidebar }: { setShowSidebar: any }) => {
         <p>Confused? Take a tour</p>
         <img className="pt-1" src={nextArrow} alt="more templates" />
       </div>
-      <div className="mb-10 w-[80%]">
+      <div className=" w-full pt-4 p-10 absolute left-0">
         <img src={tutorialFlow} alt="Tutorial" />
       </div>
     </div>
