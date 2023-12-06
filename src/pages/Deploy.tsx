@@ -74,27 +74,27 @@ const Deploy = ({ setShowSidebar }: { setShowSidebar: any }) => {
     if (!contracts) return
     const parsed = JSON.parse(contracts)
     const contract = parsed[contractTarget]
+    console.log(contract)
     if (!contract) return
-    const sr = contract["contract.js"]
-    const st = contract["state.json"]
-    if (!sr || !st) return
-    setSrc(sr)
-    setState(st)
+    setSrc(contract["contract.js"])
+    setState(contract["state.json"])
+    console.log(contract["contract.js"])
+    console.log(contract["state.json"])
   }, [contractTarget])
 
   async function deploy() {
-    if (!walletUploaded && !useWallet) return alert("please upload a wallet")
+    // if (!walletUploaded && !useWallet) return alert("please upload a wallet")
+    console.log(src)
+    console.log(state)
     if (deployEnv == "local") {
       console.log("deploying to localhost")
-      console.log(src)
-      console.log(state)
       try {
         const contract = await createContract({
-          wallet: useWallet ? "use_wallet" : walletJWK!,
-          contractSource: src!,
-          initialState: state!,
+          wallet: walletJWK,
+          contractSource: src,
+          initialState: state,
           environment: "local",
-          strategy: "both",
+          strategy: "arweave",
           tags: [
             { name: "App-Name", value: "AR-Contractor" },
             { name: "App-Version", value: "0.1.0" },
@@ -157,6 +157,7 @@ const Deploy = ({ setShowSidebar }: { setShowSidebar: any }) => {
             <select className="px-5 rounded" value={deployEnv} defaultValue={deployEnv} onChange={(e) => setDeployEnv(e.target.value)}>
               <option value="" disabled>Select an environment</option>
               <option value="local">Local (npx arlocal)</option>
+              <option value="testnet">testnet</option>
               <option value="mainnet">Mainnet</option>
             </select>
           </div>

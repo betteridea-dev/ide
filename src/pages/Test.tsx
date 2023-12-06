@@ -4,12 +4,11 @@ import { viewContractState, writeContract } from 'arweavekit'
 type deployments = {
   [key: string]: {
     id: string,
-    env: "local" | "mainnet",
+    env: "local" | "mainnet" | "testnet",
     functions: string[]
   }
 }
 
-const sampleInput = '{ "name": "ankushKun" }'
 const Test = ({ setShowSidebar }: { setShowSidebar: any }) => {
   // to show the side bar
   setShowSidebar(true);
@@ -36,19 +35,29 @@ const Test = ({ setShowSidebar }: { setShowSidebar: any }) => {
     if (conName) setSelectedContract(conName)
   }, [])
 
+  useEffect(() => {
+    console.log(functionType)
+  }, [functionType])
+
   async function interact() {
-    if (!selectedContract) setResult("please select a contract")
-    else if (functionType == "") setResult("please select a function type")
-    else if (!functionName) setResult("please enter a function name")
+    if (!selectedContract) { setResult("please select a contract"); return }
+    else if (functionType == "") { setResult("please select a function type"); return }
+    else if (!functionName) { setResult("please enter a function name"); return }
+
+    const functionArgs = JSON.parse(localStorage.getItem("jsonArgs"))
+    console.log(functionType, functionArgs)
+
 
     if (functionType == "read") {
+      const options = {
+        function: functionName,
+        ...functionArgs
+      }
+      console.log(options)
       const res = await viewContractState({
         environment: deployments[selectedContract].env,
         contractTxId: deployments[selectedContract].id,
-        options: {
-          function: functionName,
-          ...JSON.parse(sessionStorage.getItem("jsonArgs") || sampleInput)
-        },
+        options,
         strategy: "arweave"
       })
       console.log(res)
@@ -65,16 +74,21 @@ const Test = ({ setShowSidebar }: { setShowSidebar: any }) => {
       setState(JSON.stringify(res.viewContract.state, null, 2))
     }
     else if (functionType == "write") {
+      const options = {
+        function: functionName,
+        ...functionArgs
+      }
+      console.log(options)
       try {
         const res = await writeContract({
           wallet: "use_wallet",
           environment: deployments[selectedContract].env,
           contractTxId: deployments[selectedContract].id,
-          options: {
-            function: functionName,
-            ...JSON.parse(sessionStorage.getItem("jsonArgs") || sampleInput)
-          },
-          strategy: "arweave"
+          options,
+          strategy: "arweave",
+          cacheOptions: {
+            inMemory: true
+          }
         })
         console.log(res)
         if (res.result.status == 200) {
@@ -97,23 +111,12 @@ ${res.writeContract.errorMessage}`)
     }
   }
 
-  function goDownOnJSON(e) {
-    console.log(e)
-    if (e.keyCode == 9) {
-      e.preventDefault()
-      var v = e.target.value, s = e.target.selectionStart, e = e.target.selectionEnd;
-      e.target.value = v.substring(0, s) + '\t' + v.substring(e);
-      e.target.selectionStart = e.target.selectionEnd = s + 1;
-      return false;
-    }
-  }
-
   return (
     <div className='flex flex-col gap-10 justify-center items-center min-h-screen'>
       <div>
         <div>Select contract to test</div>
         <select className="border border-gray-500 rounded" value={selectedContract} onChange={(e) => setSelectedContract(e.target.value)}>
-          <option value="">Select Contract</option>
+          <option value="" disabled>Select Contract</option>
           {
             Object.keys(deployments).map((key) => {
               return <option value={key}>{key} ({deployments[key].id})</option>
@@ -126,11 +129,11 @@ ${res.writeContract.errorMessage}`)
           <div className='font-bold text-xl'>Call a function</div>
           <div className='flex gap-5 font-light'>type of action:
             <span className='flex gap-1'>
-              <input type="radio" id='read' checked={functionType == "read"} onClick={() => setFunctionType("read")} />
+              <input type="radio" id='read' checked={functionType == "read"} onChange={(e) => e.target.checked && setFunctionType("read")} />
               <label htmlFor="read">read</label>
             </span>
             <span className='flex gap-1'>
-              <input type="radio" id='write' checked={functionType == "write"} onClick={() => setFunctionType("write")} />
+              <input type="radio" id='write' checked={functionType == "write"} onChange={(e) => e.target.checked && setFunctionType("write")} />
               <label htmlFor="write">write</label>
             </span>
           </div>
@@ -149,18 +152,18 @@ ${res.writeContract.errorMessage}`)
             <div className='font-light'>Input JSON</div>
             <iframe src="/betterIDE/?open=jsonArgs" className="w-full h-64 ring-1 rounded ring-white/30"></iframe>
           </div>
-          <button className='bg-[#093E49] w-fit rounded p-2 px-6' onClick={interact}>Get Results</button>
+          <button className='bg-[#093E49] w-fit rounded p-2 px-6' onClick={() => interact()}>Get Results</button>
         </div>
         <div>
           <div className='text-2xl font-bold'>Output</div>
           <div>
             <div className='my-5'>
               <div>Result</div>
-              <pre className={`p-2 rounded bg-white/10 ${success ? "text-green-400" : "text-red-400"}`}>{result}</pre>
+              <pre className={`p-2 rounded bg-white/10 overflow-scroll ${success ? "text-green-400" : "text-red-400"}`}>{result as string || "..."}</pre>
             </div>
             <div className='my-5'>
               <div>State</div>
-              <pre className="p-2 rounded bg-white/10">{state}</pre>
+              <pre className="p-2 rounded bg-white/10 overflow-scroll">{state as string || "..."}</pre>
             </div>
           </div>
         </div>

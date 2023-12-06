@@ -3,12 +3,13 @@ import { contractSrc, stateSrc } from '../templates/hello';
 import { close } from '../assets';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AddModal = ({ setAddModal }: { setAddModal: any }) => {
+const AddModal = ({ setAddModal, setActiveContract }: { setAddModal: any, setActiveContract: any }) => {
     const [contractname, setNewContractName] = useState("");
     // to handle change in the input field
     const handleChange = (e) => {
         const { value } = e.target;
         setNewContractName(value);
+
     }
     // to handle submit of the contract 
     const handleSubmit = () => {
@@ -29,7 +30,7 @@ const AddModal = ({ setAddModal }: { setAddModal: any }) => {
         };
         localStorage.setItem("contracts", JSON.stringify(parsed));
         dispatchEvent(new Event("contractsUpdated"));
-
+        setActiveContract(contractname);
         setAddModal(false);
     }
     // to handle the close button
@@ -41,7 +42,7 @@ const AddModal = ({ setAddModal }: { setAddModal: any }) => {
             <div className=' bg-[#24312F] p-3 rounded-[10px] relative'>
                 <h1 className='font-bold text-xl bold text-center py-1 pb-4 mb-3'>Add Contract</h1>
                 <div className=' rounded-full cursor-pointer hover:bg-gray-500 w-fit p-2 transition-all duration-300 absolute right-0 top-0 mt-2 mr-2' onClick={handleClose}>
-                <img src={close} alt="close" width={24}/>
+                    <img src={close} alt="close" width={24} />
                 </div>
                 <form className='flex flex-col' onSubmit={handleSubmit}>
                     <label className='flex gap-2 font-semibold'>
