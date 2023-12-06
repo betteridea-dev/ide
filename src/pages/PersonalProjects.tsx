@@ -15,7 +15,7 @@ type cdata = {
 const prodPland = "xTX-43_CthP27lagLSQh-dKRznufGrsyBerwvU3BaRc";
 
 // keep updating after deployment
-const plandAddress = "dlRq8Tlmt5NnfjwEApwDRfJYz0OKcIbQF8O_UifHHYs";
+const plandAddress = "AcZhkY5B45zSc-iWUR-SHpKyojYBo4ILDUtp55POYJI";
 
 import { search } from "../assets"
 

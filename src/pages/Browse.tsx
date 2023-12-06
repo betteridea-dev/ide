@@ -3,7 +3,7 @@ import { search } from "../assets";
 import { viewContractState } from "arweavekit";
 
 const prodPland = "xTX-43_CthP27lagLSQh-dKRznufGrsyBerwvU3BaRc";
-const plandAddress = "dlRq8Tlmt5NnfjwEApwDRfJYz0OKcIbQF8O_UifHHYs";
+const plandAddress = "AcZhkY5B45zSc-iWUR-SHpKyojYBo4ILDUtp55POYJI";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
