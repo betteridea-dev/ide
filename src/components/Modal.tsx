@@ -31,6 +31,20 @@ const AddModal = ({ setAddModal, setActiveContract }: { setAddModal: any, setAct
         localStorage.setItem("contracts", JSON.stringify(parsed));
         dispatchEvent(new Event("contractsUpdated"));
         setActiveContract(contractname);
+        const recents = localStorage.getItem("recents")
+        if (recents) {
+            const parsed = JSON.parse(recents)
+            if (parsed.includes(contractname)) {
+                parsed.splice(parsed.indexOf(contractname), 1)
+                parsed.unshift(contractname)
+                localStorage.setItem("recents", JSON.stringify(parsed))
+            } else {
+                parsed.unshift(contractname)
+                localStorage.setItem("recents", JSON.stringify(parsed))
+            }
+        } else {
+            localStorage.setItem("recents", JSON.stringify([contractname]))
+        }
         setAddModal(false);
     }
     // to handle the close button

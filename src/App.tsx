@@ -26,7 +26,7 @@ function App() {
 
   return (
     <>
-      <div className='flex w-full'>
+      <div className='flex max-w-screen'>
         {showSidebar && <Sidebar />}
         <div className='w-full'>
           <Routes>

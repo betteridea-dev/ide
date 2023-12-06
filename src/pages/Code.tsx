@@ -9,6 +9,22 @@ const Code = ({ setShowSidebar }: { setShowSidebar: any }) => {
   const [value, setValue] = useState<string>("");
   setShowSidebar(true)
 
+  useEffect(() => {
+    const recents = localStorage.getItem("recents")
+    if (recents) {
+      const parsed = JSON.parse(recents)
+      if (parsed.includes(activeContract)) {
+        parsed.splice(parsed.indexOf(activeContract), 1)
+        parsed.unshift(activeContract)
+        localStorage.setItem("recents", JSON.stringify(parsed))
+      } else {
+        parsed.unshift(activeContract)
+        localStorage.setItem("recents", JSON.stringify(parsed))
+      }
+    } else {
+      localStorage.setItem("recents", JSON.stringify([activeContract]))
+    }
+  }, [activeContract])
 
   return (
     <div className="flex w-full ">
