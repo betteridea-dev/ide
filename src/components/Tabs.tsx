@@ -17,7 +17,7 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
     const conName = urlParams.get("conName")
     if (conName) {
         setActiveContract(conName)
-        setActiveFile("contract.js")
+        // setActiveFile("contract.js")
     }
 
     // for the create Contract modal
