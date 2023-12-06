@@ -83,7 +83,7 @@ const Templates = () => {
         },
         {
             name: "U-Token",
-            description: "Universal token for Arweave"
+            description: "Universal token for Arweave <br/> <br/><br/>"
         },
     ]
     return (
@@ -96,7 +96,7 @@ const Templates = () => {
                         description={template.description} />
                 })
             }
-            <img className="absolute mt-16 mr-5 bg-invert right-0 " src={horizontal} alt="Scroll" />
+            <img className="absolute mt-16 mr-5 bg-invert right-0 bg-black/30 rounded-full" src={horizontal} alt="Scroll" />
         </div>
     )
 }

@@ -83,7 +83,7 @@ const Recents = () => {
                         name={template} />
                 }) : <div>No recently opened contracts... Maybe start working on one from templates? ^_^</div>
             }
-            <img className="absolute mt-16 mr-5 bg-invert right-0 " src={horizontal} alt="Scroll" />
+            <img className="absolute mt-16 mr-5 bg-invert right-0 bg-black/30 rounded-full" src={horizontal} alt="Scroll" />
         </div>
     )
 }
