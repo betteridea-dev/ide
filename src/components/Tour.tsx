@@ -1,9 +1,9 @@
 
-import { tutorial } from "../assets"
+import { tutorialFlow } from "../assets"
 export const Tour = () => {
   return (
-    <div className="pt-2">
-        <img src={tutorial} alt="Tutorial" />
+    <div className="pt-2 w-[1250px]">
+        <img src={tutorialFlow} alt="Tutorial" />
     </div>
   )
 }
