@@ -1,13 +1,13 @@
 import { nextArrow } from "../assets"
 import Templates from "../components/Templates"
-import { Tour } from "../components/Tour"
 import Recents from "../components/Recents"
+import { tutorialFlow } from "../assets"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Home = ({ setShowSidebar }: { setShowSidebar: any }) => {
   setShowSidebar(true)
   return (
-    <div className="  pt-9 cursor-pointer w-full">
+    <div className="pt-9 cursor-pointer w-full">
       <div className="flex p-2.5 w-fit text-left justify-center items-center gap-1.5 border-t border-white">
         <p>Resume working on a contract</p>
         <img className="pt-1" src={nextArrow} alt="more templates" />
@@ -23,7 +23,9 @@ const Home = ({ setShowSidebar }: { setShowSidebar: any }) => {
         <p>Confused? Take a tour</p>
         <img className="pt-1" src={nextArrow} alt="more templates" />
       </div>
-      <Tour />
+      <div className="mb-10 w-[80%]">
+        <img src={tutorialFlow} alt="Tutorial" />
+      </div>
     </div>
   )
 }

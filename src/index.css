@@ -18,6 +18,11 @@
     display: none;
 }
 
+html,
+body {
+    background-color: #0A1917;
+}
+
 /* In your CSS file or style tag */
 .custom-width {
     width: 120px;
