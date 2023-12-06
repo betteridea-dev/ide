@@ -10,4 +10,7 @@ import close from "./close.svg";
 import horizontal from "./horizontal-scroll.svg";
 import deploy from "./deploy.svg"
 import browse from "./browse.svg";
-export { code, test, browse, personalCloud, dropDown, dropRight, nextArrow, tutorial, home, close, horizontal, deploy};
+import search from "./search.svg";
+import stamp from "./stamp.svg";
+import personalProjects from "./code.svg";
+export { code, test, browse, personalCloud, dropDown, dropRight, nextArrow, tutorial, home, close, horizontal, deploy, search, stamp, personalProjects};
