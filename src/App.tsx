@@ -3,12 +3,12 @@ import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Deploy from './pages/Deploy';
 import CodeEditor from './pages/CodeEditor';
-import PersonalCloud from './pages/PersonalCloud';
-import GlobalCloud from './pages/GlobalCloud';
+import Browse from './pages/Browse';
 import Sidebar from './components/Sidebar';
 import Code from './pages/Code';
 import Test from './pages/Test';
 import JsonArgs from './components/jsonArgs';
+import PeronalProjects from './pages/PersonalProjects';
 
 function App() {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
@@ -34,9 +34,10 @@ function App() {
             {/* <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route> */}
             <Route path="/code" element={<Code setShowSidebar={setShowSidebar} />}></Route>
             <Route path="/deploy" element={<Deploy setShowSidebar={setShowSidebar} />}></Route>
-            <Route path="/browse" element={<GlobalCloud setShowSidebar={setShowSidebar} />}></Route>
+            <Route path="/browse" element={<Browse setShowSidebar={setShowSidebar} />}></Route>
             {/* <Route path="/global-cloud" element={<GlobalCloud setShowSidebar={setShowSidebar} />}></Route> */}
             <Route path="/test" element={<Test setShowSidebar={setShowSidebar} />}></Route>
+            <Route path='/my-projects' element={<PeronalProjects setShowSidebar={setShowSidebar} />}></Route>
           </Routes>
         </div>
       </div>

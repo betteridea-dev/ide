@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { test, deploy, code, home, browse } from '../assets'
+import { test, deploy, code, home, browse, personalProjects } from '../assets'
 import { Link } from 'react-router-dom'
 
 // links for sidebar naviagtion
@@ -10,7 +10,7 @@ export const navlinks = [
         link: "/"
     },
     {
-        iconName:"My Projects",
+        iconName:"Contracts",
         name: code,
         link: "/code"
     },
@@ -23,6 +23,12 @@ export const navlinks = [
         iconName:"Test",
         name: test,
         link: "/test"
+    },
+    ,
+    {
+        iconName:"Personal Contracts",
+        name: test,
+        link: "/my-projects"
     },
     {
         iconName:"Browse",
