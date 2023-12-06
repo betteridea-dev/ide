@@ -75,13 +75,13 @@ const Recents = () => {
     }, [])
 
     return (
-        <div className="overflow-x-auto  pb-10 p-2 flex gap-8 max-w-[81%] ">
+        <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[81%] ">
             {
                 (recents.filter((e) => e != "").length > 0) ? recents.map((template) => {
                     if (template) return <TemplateTab key={template} name={template} />
                 }) : <div>No recently opened contracts... Maybe start working on one from templates? ^_^</div>
             }
-            <img className="absolute mt-16 mr-5 bg-invert right-0 bg-black/30 rounded-full" src={horizontal} alt="Scroll" />
+            <img className="absolute mt-6 mr-5 bg-invert right-0 bg-black/30 rounded-full" src={horizontal} alt="Scroll" />
         </div>
     )
 }

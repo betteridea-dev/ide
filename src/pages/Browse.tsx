@@ -1,88 +1,80 @@
+import { useEffect, useState } from "react";
 import { search, stamp } from "../assets";
+import { viewContractState } from "arweavekit";
+
+const prodPland = "xTX-43_CthP27lagLSQh-dKRznufGrsyBerwvU3BaRc";
+const plandAddress = "dlRq8Tlmt5NnfjwEApwDRfJYz0OKcIbQF8O_UifHHYs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
   setShowSidebar(true)
-  const Projects=[
-    {
-      name:"Project 1",
-      address:"0x1234567890"
-    },
-    {
-      name:"Project 2",
-      address:"0x1234567890"
-    },
-    {
-      name:"Project 3",
-      address:"0x1234567890"
+  const [repositories, setRepositories] = useState<object>({})
+
+  useEffect(() => {
+    async function getStateAndReadAllRepos() {
+      const txn = await viewContractState({
+        environment: "local",
+        contractTxId: plandAddress,
+        strategy: "arweave",
+        options: {
+          function: "getRepositoriesByOwner",
+          payload: {
+            "owner": "XDOqw28LKTa2wSechfMUmBU7PfLl1Q3C3RyZ_bNogWE"
+          }
+        }
+      })
+      if (txn.result.status == 200) {
+        console.log("repos", txn.viewContract.state.repos)
+        setRepositories(txn.viewContract.state.repos)
+      }
     }
-  ]
+    getStateAndReadAllRepos()
+  }, [])
+
   return (
     <>
-    <div className="flex flex-col items-center gap-5  justify-center w-full mt-3 mb-7">
-      {/* search bar */}
-      <div className="relative">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-2">
-        <img src={search} alt="search" />
-      </div>
-      <input
-        type="text"
-        className="pl-10  w-[817px] bg-transparent pr-4 py-2 border border-gray-300 rounded-full outline-none"
-        placeholder="Search"
-      />
-      </div>
-      <div>
-        {/* button */}
-        {/* <div className="inline-flex items-center gap-2.5 bg-cyan-950 rounded px-3 py-[6px]">
-          <button className="text-white text-sm font-normal font-inter">+ new project</button>
-        </div> */}
-      </div>
+      <div className="flex flex-col items-center gap-5  justify-center w-full mt-3 mb-7">
+        {/* search bar */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-2">
+            <img src={search} alt="search" />
+          </div>
+          <input
+            type="text"
+            className="pl-10  w-[817px] bg-transparent pr-4 py-2 border border-gray-300 rounded-full outline-none"
+            placeholder="Search"
+          />
+        </div>
+        <div>
+        </div>
       </div>
       {/* main section */}
-      <div className="grid grid-cols-4 gap-4 w-[817px] mx-auto">
-      <div className="col-span-2 flex flex-col gap-8">
-        <h1 className="text-[rgba(185,185,185,0.60)] text-sm">Projects</h1>
-        {/* showing projects */}
+      <div className="grid grid-cols-3 mr-5 gap-2">
         {
-        Projects.map((project)=>{
-          return (
-            <div className="flex gap-5">
-            <span>{project.name}</span>
-            <button className="bg-[#46A5FD] rounded-md px-2">View</button>
-            <button className="bg-[#DB8E7D] rounded-md px-2">Import</button>
-          </div>
-          )
-        })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Object.keys(repositories).map((repo: any, i) => {
+            return (
+              <div className="ring-1 ring-white rounded p-1 px-2">
+                <div className="flex items-center col-span-3">
+                  <div className="items-center gap-2.5">
+                    <p className="text-xl font-semibold">{repositories[repo].name}</p>
+                    <p className="text-md text-white/60 font-medium">{repositories[repo].description}</p>
+                    <p className="text-xs text-white/60 font-medium overflow-clip my-2">by {(repositories[repo].owner as string).substring(0, 5)}...{(repositories[repo].owner as string).substring((repositories[repo].owner as string).length - 5, (repositories[repo].owner as string).length)}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-lg">{repositories[repo].contract}</div>
+                <div className="text-lg">
+                  <div className="inline-flex items-center gap-4  rounded px-3 py-[6px]">
+                    <button className="text-black text-sm font-normal font-inter bg-[#46A5FD] p-1 px-2 rounded">preview</button>
+                    <button className="text-black text-sm font-normal font-inter bg-[#46fd68] p-1 px-2 rounded" >import</button>
+                  </div>
+                </div>
+              </div>
+            )
+          })
         }
-
       </div>
-      {/* Projects by section */}
-      <div className="col-span-1 flex flex-col gap-8">
-      <h1 className="text-[rgba(185,185,185,0.60)] text-sm">Projects</h1>
-        {/* showing address */}
-        {
-        Projects.map((project)=>{
-          return (
-            <div className="flex gap-5">
-            <span>{project.address}</span>
-          </div>
-          )
-        })
-        }  
-      </div>
-      {/* stamp it section */}
-      <div className="col-span-1 flex flex-col gap-8 items-end justify-center">
-      <h1 className="text-[rgba(185,185,185,0.60)] text-sm">Stamps</h1>
-        {/* showing stamps */}
-        {
-        Projects .map(()=>{
-          return (
-            <img className="mx-2" width={`15px`} height={`20px`} src={stamp} alt="stamp icon" />
-          )
-        })
-        }  
-      </div>
-    </div>
     </>
   )
 }
