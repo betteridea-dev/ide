@@ -33,6 +33,7 @@ const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
 
   return (
     <>
+      <div className="text-center text-3xl my-5">Explore other developers contracts</div>
       <div className="flex flex-col items-center gap-5  justify-center w-full mt-3 mb-7">
         {/* search bar */}
         <div className="relative">
