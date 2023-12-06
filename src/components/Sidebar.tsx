@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { test, deploy, code, home, browse, personalProjects } from '../assets'
+import { test, deploy, code, home, browse, personalProjects, activehome, activeCode, activeDeploy, activeTest, activeBrowse } from '../assets'
 import { Link } from 'react-router-dom'
 
 // links for sidebar naviagtion
 export const navlinks = [
     {
         iconName:"Home",
-        name: home,
+        name: {home},
         link: "/"
     },
     {
@@ -37,39 +37,63 @@ export const navlinks = [
     }
 ]
 const Sidebar = () => {
+    const [hoveredLink,setHoveredLink]= useState("");
     const [active, setActive] = useState("");
     const handleSelect = (name: string) => {
         setActive(name);
     }
+    const navlinks = [
+    {
+        iconName:"Home",
+        name: home,
+        activeName: activehome,
+        link: "/"
+    },
+    {
+        iconName:"Contracts",
+        name: code,
+        activeName: activeCode,
+        link: "/code"
+    },
+    {
+        iconName:"Deploy",
+        name: deploy,
+        activeName: activeDeploy,
+        link: "/deploy"
+    },
+    {
+        iconName:"Test",
+        name: test,
+        activeName: activeTest,
+        link: "/test"
+    },
+    ,
+    {
+        iconName:"Personal Contracts",
+        name: test,
+        activeName: activeTest,
+        link: "/my-projects"
+    },
+    {
+        iconName:"Browse",
+        name: browse,
+        activeName: activeBrowse,
+        link: "/browse"
+    }
+]
   return (
     <div className='pt-2'>
         <div className='flex px-2 flex-col items-start w-full gap-5 min-w-[200px]'>
             {navlinks.map((link)=>{
                 return (<Link to={link.link} className='w-full'>
-                    <div onClick={()=>handleSelect(link.name)} className={`flex flex-col justify-start rounded-[5px] items-start w-full ${active===link.name&&'bg-[#24312F]'} hover:bg-[#24312F] hover:rounded duration-300 p-1`}>
+                    <div onMouseEnter={()=>setHoveredLink(link.iconName)} onClick={()=>handleSelect(link.iconName)} className={`flex group flex-col justify-start rounded-[5px] items-start w-full text-[] ${active===link.iconName&&'bg-[#093E494D]'} hover:bg-[#093E494D] hover:rounded duration-300 p-1 transition-all `}>
                     <div className='flex items-center justify-start'>
-                        <img src={link.name} alt="deploy" className='w-12 max-w-xs h-12'/>
-                        <p className=' text-sm '>{link.iconName}</p>
+                        <img src={(active===link.iconName||hoveredLink===link.iconName)?link.activeName:link.name} alt="deploy" className='w-12 max-w-xs h-12 hover:opacity-80'/>
+                        <p className={` text-sm group-hover:text-[#81A5A0] ${active===link.name&&'text-[#81A5A0]'}`}>{link.iconName}</p>
                     </div>
                     </div>          
                 </Link>);
             })}
-
-                {/* <Link to="/deploy">
-                <div className='flex flex-col justify-center items-center hover:bg-[#24312F] hover:rounded duration-300 p-1'>
-                <img src={deploy} alt="test" className='w-12 h-12'/>
-                </div>
-            </Link>
-            <Link to="/personal-cloud">
-            <div className='flex flex-col justify-center items-center hover:bg-[#24312F] hover:rounded duration-300 p-1'>
-            <img src={personalCloud} alt="personal cloud" className='w-12 h-12'/>
-            </div>
-            </Link>
-            <Link to="/global-cloud">
-            <div className='flex flex-col justify-center items-center hover:bg-[#24312F] hover:rounded duration-300 p-1'>
-            <img src={globalCloud} alt="global cloud" className='w-12 h-12'/>
-            </div>
-            </Link> */}
             </div>
         </div>
     )
