@@ -6,6 +6,7 @@ import theme from "../themes/merbivore-modified.json"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function CodeEditor({ setShowSidebar, contractName, type }: { setShowSidebar: any, contractName: string, type: string }) {
     setShowSidebar(false)
+
     const [value, setValue] = useState<string>("");
     const monaco = useMonaco();
     monaco?.editor.defineTheme("custom", theme as editor.IStandaloneThemeData)
