@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { search, stamp } from "../assets";
+import { search } from "../assets";
 import { viewContractState } from "arweavekit";
 
 const prodPland = "xTX-43_CthP27lagLSQh-dKRznufGrsyBerwvU3BaRc";
@@ -67,7 +67,10 @@ const GlobalCloud = ({ setShowSidebar }: { setShowSidebar: any }) => {
                 <div className="text-lg">
                   <div className="inline-flex items-center gap-4  rounded px-3 py-[6px]">
                     <button className="text-black text-sm font-normal font-inter bg-[#46A5FD] p-1 px-2 rounded">preview</button>
-                    <button className="text-black text-sm font-normal font-inter bg-[#46fd68] p-1 px-2 rounded" >import</button>
+                    <button className="text-black text-sm font-normal font-inter bg-[#46fd68] p-1 px-2 rounded" onClick={(e) => {
+                      e.preventDefault()
+
+                    }}>import</button>
                   </div>
                 </div>
               </div>
