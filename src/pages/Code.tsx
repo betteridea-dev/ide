@@ -1,11 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Tabs from "../components/Tabs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Code = ({ setShowSidebar }: { setShowSidebar: any }) => {
+  const [contracts, setContracts] = useState<any>({})
   const [activeContract, setActiveContract] = useState<string>("");
   const [activeFile, setActiveFile] = useState<string>("");
+  const [value, setValue] = useState<string>("");
   setShowSidebar(true)
+
+  useEffect(() => {
+    const recents = localStorage.getItem("recents")
+    if (recents) {
+      const parsed = JSON.parse(recents)
+      if (parsed.includes(activeContract)) {
+        parsed.splice(parsed.indexOf(activeContract), 1)
+        parsed.unshift(activeContract)
+        localStorage.setItem("recents", JSON.stringify(parsed))
+      } else {
+        parsed.unshift(activeContract)
+        localStorage.setItem("recents", JSON.stringify(parsed))
+      }
+    } else {
+      localStorage.setItem("recents", JSON.stringify([activeContract]))
+    }
+  }, [activeContract])
 
   return (
     <div className="flex w-full ">

@@ -1,37 +1,38 @@
 import { useState } from 'react'
 import { test, deploy, code, home, browse, personalProjects, activehome, activeCode, activeDeploy, activeTest, activeBrowse } from '../assets'
 import { Link } from 'react-router-dom'
+import cloud from '../assets/cloud.svg'
 
 // links for sidebar naviagtion
 export const navlinks = [
     {
-        iconName:"Home",
-        name: {home},
+        iconName: "Home",
+        name: home,
         link: "/"
     },
     {
-        iconName:"Contracts",
+        iconName: "Contracts",
         name: code,
         link: "/code"
     },
     {
-        iconName:"Deploy",
+        iconName: "Deploy",
         name: deploy,
         link: "/deploy"
     },
     {
-        iconName:"Test",
+        iconName: "Test",
         name: test,
         link: "/test"
     },
     ,
     {
-        iconName:"Personal Contracts",
-        name: test,
+        iconName: "My Cloud",
+        name: cloud,
         link: "/my-projects"
     },
     {
-        iconName:"Browse",
+        iconName: "Browse",
         name: browse,
         link: "/browse"
     }

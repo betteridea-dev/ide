@@ -3,12 +3,22 @@ import { dropDown, dropRight } from "../assets";
 import { contractSrc, stateSrc } from "../templates/hello";
 import AddModal from "./Modal";
 import { Link } from "react-router-dom";
+import JSZip from "jszip";
+import saveAs from "file-saver";
+import del from "../assets/delete.svg";
+import dload from "../assets/dload.svg";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: { activeContract: string, setActiveContract: any, activeFile: string, setActiveFile: any }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [contracts, setContracts] = useState<any>({})
     const [showDeployDropdown, setShowDeployDropdown] = useState<boolean>(false);
+    const urlParams = new URLSearchParams(window.location.search)
+    const conName = urlParams.get("conName")
+    if (conName) {
+        setActiveContract(conName)
+        setActiveFile("contract.js")
+    }
 
     // for the create Contract modal
     const [addModal, setAddModal] = useState(false);
@@ -40,8 +50,24 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
     const TabElement = ({ name }: { name: string }) => {
         const active = (activeContract === name)
 
-        return (<div className="w-full cursor-pointer">
-            <div className='flex w-full items-center gap-2' onClick={() => { setActiveContract(active ? "" : name); setActiveFile("contract.js") }}>
+        return (<div className="w-full cursor-pointer relative">
+            <div className='flex w-full items-center gap-2' onClick={() => {
+                setActiveContract(active ? "" : name); setActiveFile("contract.js")
+                const recents = localStorage.getItem("recents")
+                if (recents) {
+                    const parsed = JSON.parse(recents)
+                    if (parsed.includes(name)) {
+                        parsed.splice(parsed.indexOf(name), 1)
+                        parsed.unshift(name)
+                        localStorage.setItem("recents", JSON.stringify(parsed))
+                    } else {
+                        parsed.unshift(name)
+                        localStorage.setItem("recents", JSON.stringify(parsed))
+                    }
+                } else {
+                    localStorage.setItem("recents", JSON.stringify([name]))
+                }
+            }}>
                 <img src={active ? dropRight : dropDown} alt="open" />
                 <span className={` pb-0.5 ${active && "text-[#B4FFA1]"}`}>{name}</span>
             </div>
@@ -59,6 +85,24 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
                     </div>
                 </div>
             }
+            <div className="absolute top-0 right-0 flex gap-1 items-center">
+                <img src={del} width={16} className="" onClick={(e) => {
+                    e.stopPropagation()
+                    const c = { ...contracts }
+                    delete c[name]
+                    setContracts(c)
+                    localStorage.setItem("contracts", JSON.stringify(c))
+                }} />
+                <img src={dload} width={22} className="pb-1" onClick={(e) => {
+                    e.stopPropagation()
+                    const zip = new JSZip()
+                    zip.file("contract.js", contracts[name]["contract.js"])
+                    zip.file("state.json", contracts[name]["state.json"])
+                    zip.generateAsync({ type: "blob" }).then(async function (content) {
+                        saveAs(content, `${name}.zip`)
+                    })
+                }} />
+            </div>
             <hr className="border-t border-white/50 my-4" />
         </div>);
     }
@@ -68,12 +112,13 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
             <>
                 <AddModal
                     setAddModal={setAddModal}
+                    setActiveContract={setActiveContract}
                 />
             </>
         )
     }
     return (
-        <div className='min-w-[169px] bg-[#3d494780] h-[100vh] flex flex-col gap-5 items-center'>
+        <div className='min-w-[220px] bg-[#3d494780] h-[100vh] flex flex-col gap-5 items-center'>
             <div className="py-3 p-2 text-center bg-[#3D494780] w-full">Your Projects</div>
             <button onClick={handleCreateContract} className=" p-2 rounded-[5px] bg-black  hover:scale-105  transition-all duration-300 text-white">
                 + New Contract

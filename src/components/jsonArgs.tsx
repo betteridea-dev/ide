@@ -7,6 +7,7 @@ export default function JsonArgs({ setShowSidebar }: { setShowSidebar: any }) {
     const monaco = useMonaco();
     monaco?.editor.defineTheme('custom', theem as editor.IStandaloneThemeData);
 
+    localStorage.setItem("jsonArgs", `{ "name": "ankushKun" }`)
     return <Editor
         defaultLanguage="json"
         defaultValue={`{ "name": "ankushKun" }`}
@@ -15,6 +16,6 @@ export default function JsonArgs({ setShowSidebar }: { setShowSidebar: any }) {
             minimap: { enabled: false },
             scrollbar: { vertical: "hidden" }
         }}
-        onChange={(e) => sessionStorage.setItem("jsonArgs", e as string)}
+        onChange={(e) => localStorage.setItem("jsonArgs", e as string)}
     />
 }
