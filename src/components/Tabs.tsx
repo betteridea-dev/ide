@@ -7,18 +7,29 @@ import JSZip from "jszip";
 import saveAs from "file-saver";
 import del from "../assets/delete.svg";
 import dload from "../assets/dload.svg";
+import { useSearchParams } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: { activeContract: string, setActiveContract: any, activeFile: string, setActiveFile: any }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [contracts, setContracts] = useState<any>({})
     const [showDeployDropdown, setShowDeployDropdown] = useState<boolean>(false);
-    const urlParams = new URLSearchParams(window.location.search)
-    const conName = urlParams.get("conName")
-    if (conName) {
-        setActiveContract(conName)
+    // const urlParams = new URLSearchParams(window.location.search)
+    // const conName = urlParams.get("conName")
+    // if (conName) {
+    //     setActiveContract(conName)
+    //     // urlParams.delete("conName", conName)
+    //     // setActiveFile("contract.js")
+    // }
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    if (searchParams.has("conName")) {
+        setActiveContract(searchParams.get("conName") || "")
         // setActiveFile("contract.js")
+        searchParams.delete("conName")
+        setSearchParams(searchParams)
     }
+
 
     // for the create Contract modal
     const [addModal, setAddModal] = useState(false);
@@ -52,6 +63,9 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
 
         return (<div className="w-full cursor-pointer relative">
             <div className='flex w-full items-center gap-2' onClick={() => {
+                //remove all url parameters
+                const urlParams = new URLSearchParams(window.location.search)
+
                 setActiveContract(active ? "" : name); setActiveFile("contract.js")
                 const recents = localStorage.getItem("recents")
                 if (recents) {

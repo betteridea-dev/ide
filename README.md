@@ -1,30 +1,52 @@
-# React + TypeScript + Vite
+# BetterIDEa - A better IDE for Arweave smartcontracts
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Try it [here](https://ankushKun.github.io/betterIDE/)
 
-Currently, two official plugins are available:
+<details>
+<summary>View screenshots</summary>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![codearea](images/codearea.png)
 
-## Expanding the ESLint configuration
+![deploy](images/deploy.png)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+![cloud](images/cloud.png)
 
-- Configure the top-level `parserOptions` property like this:
+</details>
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+## Features
+
+- Code Editor and IDE Features such as syntax highlighting, code completion, etc.
+- JS Contract deployment and testing (using [Arweavekit](https://www.arweavekit.com/) to deploy and interact)
+- Universal Data Licensing of your code through Arweaves [UDL](https://arwiki.wiki/#/en/Universal-Data-License-How-to-use-it) implementation
+- Cloud based storage and sharing through Arweave [Protocol Land](https://protocol.land)
+
+## Tech Stack
+
+- Vite, React, Typescript, TailwindCSS
+- Monaco for React
+- Arweavekit
+- ArConnect
+- Arlocal
+
+## Run it yourseld
+
+### Prerequisites
+
+- Node.js LTS & npm
+- Arweave Wallet (ArConnect)
+
+### Fork, Clone, Install and Run
+
+```bash
+git clone git@github.com:<YOUR_USERNAME>/betterIDE.git
+cd betterIDE
+npm install
+npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Open [http://localhost:5173/betterIDE/](http://localhost:5173/betterIDE/) as simple as that!
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
