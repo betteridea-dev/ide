@@ -140,7 +140,7 @@ const Tabs = ({ activeContract, setActiveContract, activeFile, setActiveFile }: 
             {/* <div className={`p-2 rounded-[5px]  ${activeContract ? "bg-black hover:scale-105  transition-all duration-300" : "opacity-60 cursor-default"} text-white`} to={activeContract ? `/deploy?contract=${activeContract}` : "#"}> */}
             <div className="relative">
                 <button className={`p-2 rounded-[5px] bg-black transition-all duration-300 ${activeContract ? " hover:scale-105" : "opacity-40 cursor-default"} text-white`} onClick={() => activeContract && setShowDeployDropdown(!showDeployDropdown)}>Deploy On</button>
-                {(showDeployDropdown) && <div className="absolute w-full right-0 bg-white rounded-b flex flex-col">
+                {(showDeployDropdown) && <div className="absolute w-full right-0 bg-white rounded-b flex flex-col z-10">
                     <Link to={`/deploy?conName=${activeContract}&depEnv=local`} className="p-2 text-black hover:bg-black/10">Local</Link>
                     <Link to={`/deploy?conName=${activeContract}&depEnv=mainnet`} className="p-2 text-black hover:bg-black/10">Mainnet</Link>
                 </div>}
