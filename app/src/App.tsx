@@ -11,12 +11,13 @@ export default function Layout() {
   const [activeMenuItem, setActiveMenuItem] = useState("")
   const [showFileList, setShowFileList] = useState(true)
   const [activeContract, setActiveContract] = useState("")
+  const [activeFile, setActiveFile] = useState("")
 
   const menuItems: MenuItemObj[] = [
     {
       text: "Home",
       icon: menuicons.home,
-      onClick: () => { setActiveMenuItem("Home") }
+      onClick: () => { setActiveMenuItem("Home"); setActiveFile("") }
     },
     {
       text: "Contracts",
@@ -26,22 +27,22 @@ export default function Layout() {
     {
       text: "Deploy",
       icon: menuicons.deploy,
-      onClick: () => { setActiveMenuItem("Deploy") }
+      onClick: () => { setActiveMenuItem("Deploy"); setActiveFile("") }
     },
     {
       text: "Test",
       icon: menuicons.test,
-      onClick: () => { setActiveMenuItem("Test") }
+      onClick: () => { setActiveMenuItem("Test"); setActiveFile("") }
     },
     {
       text: "My Cloud",
       icon: menuicons.cloud,
-      onClick: () => { setActiveMenuItem("My Cloud") }
+      onClick: () => { setActiveMenuItem("My Cloud"); setActiveFile("") }
     },
     {
       text: "Showcase",
       icon: menuicons.marketplace,
-      onClick: () => { setActiveMenuItem("Showcase") }
+      onClick: () => { setActiveMenuItem("Showcase"); setActiveFile("") }
     }
 
   ]
@@ -49,16 +50,19 @@ export default function Layout() {
 
   function FileTab({ filename }: { filename: string }) {
     // at the top bar
-    return <div className="h-full w-fit px-2 items-center justify-center flex border-r border-white/30">
+    return <div className={`h-full w-fit px-2 cursor-pointer items-center justify-center flex border-r border-white/30 ${activeFile == filename && "bg-white/10"}`}
+      onClick={() => { setActiveFile(filename); setActiveMenuItem("Contracts") }}
+    >
       {filename}
     </div>
   }
 
   function MenuItem({ text, icon, onClick }: { text: string, icon: string, onClick?: () => void }) {
+    const active = activeMenuItem == text
     // on the left sidebar
-    return <div className={`w-full p-3 px-2 items-center justify-start flex cursor-pointer ${activeMenuItem == text && "bg-white/10"}`} onClick={onClick}>
-      <img src={icon} className="w-8 h-8" />
-      <div className="ml-2">{text}</div>
+    return <div className={`w-full p-3 px-2 items-center justify-start flex gap-2 cursor-pointer ${active && "bg-white/10"}`} onClick={onClick}>
+      <img src={icon} className="w-8 h-8 " />
+      <div className={`${active && "text-[#81A5A0]"}`}>{text}</div>
     </div>
   }
 
@@ -66,13 +70,17 @@ export default function Layout() {
     // right of the left sidebar
     const active = activeContract == contractname
 
-    return <div className={`w-full ${activeContract == contractname && "bg-white/10"}`}>
-      <div className="w-full p-1 font-bold" onClick={() => setActiveContract(active ? "" : contractname)}>{contractname}</div>
+    function Fileitm({ name }: { name: string }) {
+      return <div className={`p-1 pl-5 cursor-pointer ${activeFile == name && "font-bold bg-white/10"}`} onClick={() => setActiveFile(name)}>{name}</div>
+    }
+
+    return <div className={`w-full cursor-pointer ${activeContract == contractname && "bg-white/10"}`}>
+      <div className="w-full p-2 font-bold" onClick={() => { setActiveContract(active ? "" : contractname); setActiveFile("README.md"); setActiveMenuItem("Contracts") }}>{contractname}</div>
       {
-        active && <div className="w-full flex flex-col pl-4">
-          <div className="p-1 ">README.md</div>
-          <div className="p-1 ">contract.js</div>
-          <div className="p-1 ">state.json</div>
+        active && <div className="w-full flex flex-col">
+          <Fileitm name="README.md" />
+          <Fileitm name="contract.js" />
+          <Fileitm name="state.json" />
         </div>
       }
     </div>
