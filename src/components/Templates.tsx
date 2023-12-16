@@ -1,10 +1,11 @@
-import { nextArrow, horizontal } from "../assets"
+import { nextArrow, horizontal, activeHorizontal } from "../assets"
 import { contractSrc as src1, stateSrc as sta1 } from "../templates/hello"
 import { contractSrc as src2, stateSrc as sta2 } from "../templates/db"
 import { contractSrc as src3, stateSrc as sta3 } from "../templates/vote"
 import { contractSrc as src4, stateSrc as sta4 } from "../templates/event"
 import { contractSrc as src5, stateSrc as sta5 } from "../templates/utoken"
 import { Link } from "react-router-dom"
+import { useRef, useState } from "react"
 
 const TemplateTab = ({ name, description }: { name: string, description: string }) => {
     return (
@@ -64,6 +65,16 @@ const TemplateTab = ({ name, description }: { name: string, description: string 
 }
 
 const Templates = () => {
+    const [active, setActive] = useState(false);
+    // for scroll click
+    const scrollContainerRef = useRef(null);
+
+    const handleScrollClick = () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollLeft += 250;
+      }
+    };
+
     const templates = [
         {
             name: "HelloWorld",
@@ -87,17 +98,23 @@ const Templates = () => {
         },
     ]
     return (
-        <div className="overflow-x-auto  pb-10 p-2 flex gap-8 max-w-[81%] ">
-            {
-                templates.map((template) => {
-                    return <TemplateTab
-                        key={template.name}
-                        name={template.name}
-                        description={template.description} />
-                })
-            }
-            <img className="absolute mt-16 mr-5 bg-invert right-0 bg-black/30 rounded-full" src={horizontal} alt="Scroll" />
-        </div>
+        <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[81%]" ref={scrollContainerRef}>
+        {templates.map((template) => (
+          <TemplateTab
+            key={template.name}
+            name={template.name}
+            description={template.description}
+          />
+        ))}
+        <img
+          className="absolute mt-16 mr-5 bg-invert right-0 bg-black/30 rounded-full cursor-pointer"
+          src={active?activeHorizontal:horizontal}
+          alt="Scroll"
+          onClick={handleScrollClick}
+          onMouseEnter={()=>setActive(true)}
+          onMouseLeave={()=>setActive(false)}
+        />
+      </div>
     )
 }
 

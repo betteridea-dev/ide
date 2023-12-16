@@ -50,7 +50,7 @@ const Sidebar = () => {
         }
     ]
     return (
-        <div className='pt-2'>
+        <div className='pt-10'>
             <div className='flex px-2 flex-col items-start w-full gap-5 min-w-[200px]'>
                 {navlinks.map((link) => {
                     return (<Link to={link.link} className='w-full'>

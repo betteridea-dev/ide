@@ -19,4 +19,6 @@ import activeCode from "./activeFolders/code.svg";
 import activeDeploy from "./activeFolders/deploy.svg";
 import activeBrowse from "./activeFolders/browse.svg";
 import tutorialFlow from "./tutorialFlow.png";
-export { code, test, browse, personalCloud, dropDown, dropRight, nextArrow, tutorial, home, close, horizontal, deploy, search, stamp, personalProjects, activehome, activeTest, activeCode, activeDeploy, activeBrowse, tutorialFlow};
+import activeHorizontal from "./activeFolders/horizontal.svg";
+
+export { code, test, browse, personalCloud, dropDown, dropRight, nextArrow, tutorial, home, close, horizontal, activeHorizontal, deploy, search, stamp, personalProjects, activehome, activeTest, activeCode, activeDeploy, activeBrowse, tutorialFlow};
