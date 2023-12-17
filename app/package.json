@@ -11,9 +11,13 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "arweavekit": "^1.5.1",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "monaco-editor": "^0.45.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

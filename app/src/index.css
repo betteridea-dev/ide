@@ -23,3 +23,20 @@ body {
   width: 100%;
   background-color: #0A1917;
 }
+
+select {
+  background-color: whitesmoke;
+  color: #0A1917;
+  border: none;
+  outline: none;
+}
+
+select:focus {
+  border: none;
+  outline: none;
+}
+
+select:active {
+  border: none;
+  outline: none;
+}
