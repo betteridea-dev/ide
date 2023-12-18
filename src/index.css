@@ -29,6 +29,11 @@ body {
     transition: width 0.3s ease-in-out;
 }
 
+.custom-width--recent{
+    width: 140px;
+    transition: width 0.3s ease-in-out;
+}
+
 select {
     color: #B4FFA1;
     padding: 5px;
@@ -44,4 +49,10 @@ select:focus {
 option {
     color: black;
     background-color: whitesmoke;
+}
+
+.background--recent{
+  background-size: cover;
+  background-repeat: no-repeat; 
+  background-position: center center; 
 }

@@ -8,11 +8,15 @@ import { Link } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
 
 const TemplateTab = ({ name }: { name: string }) => {
+    // for testing purpose
+    const today = new Date();
+    const today_date = today.toLocaleDateString('en-GB');
     return (
-        <div className="bg-white p-4 hover:scale-105 transition-all duration-300 rounded-[5px] group">
+        <div className="bg-white p-4 hover:scale-105 w-[18%] transition-all duration-300 rounded-[5px] group background--recent" style={{ backgroundImage: 'url(https://s3-alpha-sig.figma.com/img/accc/8cf3/e471ab771c8b887927a198b8f9bc4c03?Expires=1703462400&Signature=VtW0ffPic95HbgfpJxGpmTBymri8ohgEPaDVULD8nDQgkR3u8f5BWrafzO4Mqeiec5GMDtHma0U6POP1BvPcifj56uYGQl3j676oWnO0GiOW6L6n5eqmLgv0TCt9ZTW~Jl0LHdNM6kRaq2T3BGC21Wb2XdKBB28VbwiPOv83l~l7QlgfdLOwp5Oy1hCUTDF5a33m6BCtGM5vZ6PeZ13hzsAxjStTrT6UGVPN33FFRVzUrSYmcs~ozLUVLdaDSnRe3eE1aTo5O0T1D1NF6-X3CAp7LzaZFpqcmzyNdWdDBCRB-95UEkuEF8QnjfMRH3co6ya4QHSisxlr4AEGd6LrOQ__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4)' }}>
+            <p className=" text-sm text-[#A4A4A4] pb-2">Last opened: {today_date}</p>
             <h1 className=" text-[#616161] pb-4 font-bold ">{name}</h1>
             <div className="">
-                <Link to={`/code?conName=${name}`} className="bg-[#093E49] custom-width  flex rounded-[3px] px-2 py-1  hover:w-36 transition-all duration-100 justify-between"
+                <Link to={`/code?conName=${name}`} className="bg-[#093E49] custom-width--recent  flex rounded-[3px] px-2 py-1  hover:w-40 transition-all duration-100 justify-between"
                     onClick={() => {
                         let contracts = localStorage.getItem("contracts");
                         if (!contracts) contracts = "{}";
@@ -54,7 +58,7 @@ const TemplateTab = ({ name }: { name: string }) => {
                         localStorage.setItem("contracts", JSON.stringify(parsed));
                     }}
                 >
-                    <div className="min-w-fit">Open</div>
+                    <div className="min-w-fit">Open in editor</div>
                     <img src={nextArrow} alt="next arrow" />
                 </Link>
             </div>
@@ -66,13 +70,6 @@ const Recents = () => {
     const [active,setActive]=useState(false);
     const [recents, setRecents] = useState([])
 
-    useEffect(() => {
-        const recents = localStorage.getItem("recents")
-        if (recents) {
-            const parsed = JSON.parse(recents)
-            setRecents(parsed)
-        }
-    }, [])
     // to handle the scroll click
     const scrollContainerRef = useRef(null);
     const handleScrollClick=()=>{
@@ -80,6 +77,13 @@ const Recents = () => {
             scrollContainerRef.current.scrollLeft += 150;
         }
     }
+    useEffect(() => {
+        const recents = localStorage.getItem("recents")
+        if (recents) {
+            const parsed = JSON.parse(recents);
+            setRecents(parsed)
+        }
+    }, [])
     return (
         <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[81%] ">
             {

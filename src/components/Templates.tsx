@@ -98,7 +98,7 @@ const Templates = () => {
         },
     ]
     return (
-        <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[81%]" ref={scrollContainerRef}>
+        <div className="overflow-x-auto pb-10 p-2 flex gap-8 max-w-[81%] " ref={scrollContainerRef}>
         {templates.map((template) => (
           <TemplateTab
             key={template.name}
