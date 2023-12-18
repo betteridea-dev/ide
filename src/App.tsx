@@ -26,9 +26,9 @@ function App() {
 
   return (
     <>
-      <div className='flex w-full'>
+      <div className='flex w-screen overflow-hidden'>
         {showSidebar && <Sidebar />}
-        <div className='w-full '>
+        <div className='w-full'>
           <Routes>
             <Route path="/" element={<Home setShowSidebar={setShowSidebar} />} />
             {/* <Route path="/editor" element={<CodeEditor setShowSidebar={setShowSidebar} />}></Route> */}
