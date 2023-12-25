@@ -45,7 +45,8 @@ interface DeployState {
     walletJWK: object | undefined,
     contractTxID: string,
     derivation: string,
-    commercialUse: string
+    commercialUse: string,
+    isError: boolean
 }
 
 const istate: DeployState = {
@@ -57,7 +58,8 @@ const istate: DeployState = {
     fileName: "",
     contractTxID: "",
     derivation: "",
-    commercialUse: ""
+    commercialUse: "",
+    isError: false
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,6 +101,8 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                 return { ...state, derivation: action.payload }
             case "set_commercial_use":
                 return { ...state, commercialUse: action.payload }
+            case "is_error":
+                return { ...state, isError: action.payload }
             case "deploy_another":
                 return { ...state, deploySuccess: false, contractName: "", contractTxID: "", derivation: "", commercialUse: "" }
         }
@@ -120,29 +124,37 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
         if (state.derivation) tags.push({ name: "Derivation", value: state.derivation })
         if (state.commercialUse) tags.push({ name: "Commercial-Use", value: state.commercialUse })
 
-        const contract = await createContract({
-            wallet: state.walletJWK,
-            contractSource: csource,
-            initialState: cstate,
-            environment: state.deployEnv,
-            strategy: "arweave",
-            tags,
-        })
-
-        console.log(contract)
-        if (contract.result.status == 200) {
-            dispatch({ type: "set_contract_id", payload: contract.contractTxId })
+        try {
+            const contract = await createContract({
+                wallet: state.walletJWK,
+                contractSource: csource,
+                initialState: cstate,
+                environment: state.deployEnv,
+                strategy: "arweave",
+                tags,
+            })
+            console.log(contract)
             dispatch({ type: "set_deploy_success", payload: true })
+            dispatch({ type: "set_contract_id", payload: contract.contractTxId })
+            dispatch({ type: "set_result", payload: "Deployed successfully!\nID: " + contract.contractTxId })
             newDeployment(state.contractName, contract.contractTxId, state.deployEnv)
+            dispatch({ type: "is_error", payload: false })
+        } catch (e) {
+            console.log(e)
+            dispatch({ type: "is_error", payload: true })
+            dispatch({ type: "set_result", payload: e.toString() })
+            dispatch({ type: "set_deploy_success", payload: false })
+            dispatch({ type: "set_contract_id", payload: "" })
         }
 
     }
 
     if (!state) return <></>
-    return <div>
+    return <div className="h-full flex flex-col items-center justify-evenly w-full">
         {
-            !state.deploySuccess ? <div className="flex flex-col gap-5">
-                <div className="flex gap-10 justify-center">
+            !state.deploySuccess ? <div className="flex flex-col justify-center overflow-scroll grow gap-5 w-full">
+                <div className="grow"></div>
+                <div className="flex gap-10 justify-center items-center">
                     <div>
                         <div>Select Contract</div>
                         <select className="p-1 rounded " value={state.contractName} defaultValue={state.contractName} onChange={(e) => dispatch({ type: "set_contract_name", payload: e.target.value })}>
@@ -185,6 +197,11 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                     </div>
                 </div>
                 <button className="bg-[#093E49] p-2 px-4 rounded w-fit mx-auto" onClick={() => deploy()}>Deploy! 🚀</button>
+                <div className="grow"></div>
+                {state.result && <pre className={`bg-black/20 border-t border-white/20 p-2 ${!state.isError ? "text-green-300" : "text-red-300"}`}>
+                    [ Result ]<br /><br />
+                    {state.result}
+                </pre>}
             </div>
                 :
                 <div className="text-center flex flex-col gap-4 justify-center items-center min-h-[80vh]">

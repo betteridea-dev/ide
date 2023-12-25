@@ -37,7 +37,9 @@ export default function IDE() {
         {
             text: "Contracts",
             icon: menuicons.files,
-            onClick: () => { setShowFileList(!showFileList); setActiveMenuItem("Contracts") }
+            onClick: () => {
+                setShowFileList(!showFileList);
+            }
         },
         {
             text: "Deploy",
@@ -65,7 +67,7 @@ export default function IDE() {
     function FileTab({ filename }: { filename: string }) {
         // at the top bar
         return <div className={`h-full w-fit px-2 cursor-pointer items-center justify-center flex border-r border-white/30 ${activeFile == filename && "bg-white/10"}`}
-            onClick={() => { setActiveFile(filename); setActiveMenuItem("Contracts") }}
+            onClick={() => { setActiveFile(filename); setActiveMenuItem("Contracts"); }}
         >
             {filename}
         </div>
@@ -85,7 +87,7 @@ export default function IDE() {
         const active = activeContract == contractname
 
         function Fileitm({ name }: { name: string }) {
-            return <div className={`p-1 pl-5 cursor-pointer ${activeFile == name && "font-bold bg-white/10"}`} onClick={() => setActiveFile(name)}>{name}</div>
+            return <div className={`p-1 pl-5 cursor-pointer ${activeFile == name && "font-bold bg-white/10"}`} onClick={() => { setActiveFile(name); setActiveMenuItem("Contracts") }}>{name}</div>
         }
 
         return <div className={`w-full max-w-[150px] overflow-scroll cursor-pointer ${activeContract == contractname && "bg-white/10"}`}>
