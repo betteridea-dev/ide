@@ -173,7 +173,7 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                     </div>
                 </div>
 
-                <label htmlFor="wallet" className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit mx-auto">{!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName} ✅`}</label>
+                <label htmlFor="wallet" className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit mx-auto hover:scale-105 active:scale-95">{!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName} ✅`}</label>
                 <input type="file" accept="application/JSON" id="wallet" className="hidden" onChange={(e) => dispatch({ type: "set_file", payload: e.target.files[0] })} />
 
                 <div className="flex flex-col gap-3 justify-center items-center">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-type deployment = {
+export type deployment = {
     "txid": string,
     "env": string
 }
@@ -10,48 +10,30 @@ export type deploymentType = {
 }
 
 export default function useDeployments() {
-    const [localDeployments, setLocalDeployments] = useState<deploymentType>(JSON.parse(sessionStorage.getItem("localDeployments")!) || {})
-    const [netDeployments, setNetDeployments] = useState<deploymentType>(JSON.parse(localStorage.getItem("deployments")!) || {})
-
+    const [deployments, setDeployments] = useState<deploymentType>(JSON.parse(localStorage.getItem("deployments")!) || {})
 
     useEffect(() => {
-        if (localDeployments) sessionStorage.setItem("localDeployments", JSON.stringify(localDeployments))
-        if (netDeployments) localStorage.setItem("deployments", JSON.stringify(netDeployments))
-    }, [localDeployments, netDeployments])
+        if (deployments) localStorage.setItem("deployments", JSON.stringify(deployments))
+    }, [deployments])
 
     function newDeployment(name: string, txid: string, env: string) {
-        if (env == "local") {
-            const nc = {
-                ...localDeployments,
-                [name]: {
-                    "txid": txid,
-                    "env": env
-                }
+        console.log("newDeployment", name, txid, env)
+        const nc = {
+            ...deployments,
+            [name]: {
+                "txid": txid,
+                "env": env
             }
-            setLocalDeployments(nc)
-        } else {
-            const nc = {
-                ...netDeployments,
-                [name]: {
-                    "txid": txid,
-                    "env": env
-                }
-            }
-            setNetDeployments(nc)
         }
+        setDeployments(nc)
+
     }
 
-    function removeDeployment(name: string, env: string) {
-        if (env == "local") {
-            const nc = { ...localDeployments }
-            delete nc[name]
-            setLocalDeployments(nc)
-        } else {
-            const nc = { ...netDeployments }
-            delete nc[name]
-            setNetDeployments(nc)
-        }
+    function removeDeployment(name: string) {
+        const nc = { ...deployments }
+        delete nc[name]
+        setDeployments(nc)
     }
 
-    return { localDeployments, netDeployments, newDeployment, removeDeployment }
+    return { deployments, newDeployment, removeDeployment }
 }

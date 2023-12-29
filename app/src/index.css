@@ -9,12 +9,21 @@
   scroll-behavior: smooth !important;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  font-family: monospace;
+  /* font-family: monospace; */
   color: whitesmoke;
+  transition: all 150ms ease;
 }
 
 *::-webkit-scrollbar {
   display: none;
+}
+
+button:hover{
+  transform: scale(1.05);
+}
+
+button:active{
+  transform: scale(0.95);
 }
 
 html,
@@ -39,4 +48,9 @@ select:focus {
 select:active {
   border: none;
   outline: none;
+}
+
+select option {
+  background-color: whitesmoke;
+  color: black;
 }
