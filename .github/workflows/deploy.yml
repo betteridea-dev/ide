@@ -20,6 +20,10 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: app
+
 jobs:
   # Single deploy job since we're just deploying
   deploy:
@@ -30,8 +34,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Switch to app folder
-        run: cd app
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
