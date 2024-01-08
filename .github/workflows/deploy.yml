@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      - run: cd ./app
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
@@ -38,8 +38,8 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies and build
-        working-directory: ./app
-        run: |
+        run:
+          cd ./app
           npm install
           npm run build
 
