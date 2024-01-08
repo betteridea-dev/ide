@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import useDeployments, { deployment } from "../hooks/useDeployments"
 import useContracts from "../hooks/useContracts"
+import { viewContractState, writeContract } from "arweavekit/contract"
 
 export default function Test({ target }: { target: string }) {
     const [activeDeployment, setActiveDeployment] = useState<string>()
@@ -8,6 +9,9 @@ export default function Test({ target }: { target: string }) {
     const [functionName, setFunctionName] = useState<string>("")
     const { deployments, removeDeployment } = useDeployments()
     const { contracts, setContracts } = useContracts()
+    const [success, setSuccess] = useState<boolean>(false)
+    const [latestState, setLatestState] = useState<string>("")
+    const [result, setResult] = useState<string>("")
 
     useEffect(() => {
         setContracts({
@@ -21,6 +25,89 @@ export default function Test({ target }: { target: string }) {
         if (!target) return
         setActiveDeployment(target)
     }, [])
+
+    useEffect(() => {
+        setFunctionName("")
+        setCallType("read")
+    }, [activeDeployment])
+
+    useEffect(() => {
+        if (!activeDeployment) return
+        if (functionName.toLowerCase().startsWith("get"))
+            setCallType("read")
+        else if (functionName.toLowerCase().startsWith("set"))
+            setCallType("write")
+    }, [functionName, activeDeployment])
+
+    async function run() {
+        if (!activeDeployment) return
+        if (!functionName) return
+        if (!callType) return
+        if (!contracts) return
+        const contract = contracts[activeDeployment]
+        if (!contract) return
+        const input = JSON.parse(contracts["input"]["state.json"])
+        if (!input) return
+
+        if (callType == "read") {
+            try {
+                const res = await viewContractState({
+                    contractTxId: deployments[activeDeployment].txid,
+                    environment: deployments[activeDeployment].env,
+                    strategy: "arweave",
+                    options: {
+                        function: functionName,
+                        ...input
+                    }
+                })
+                console.log(res)
+                if (res.result.status == 200) {
+                    setSuccess(true)
+                    setResult(JSON.stringify({ result: res.viewContract.result }, null, 2))
+                    setLatestState(JSON.stringify(res.viewContract.state, null, 2))
+
+                } else {
+                    setResult(`error: ${res.result.status}
+${res.result.statusText}
+
+${res.viewContract.errorMessage}`)
+                }
+            } catch (e) {
+                console.log(e)
+                setResult(`error: ${e}`)
+            }
+        } else if (callType == "write") {
+            try {
+                const res = await writeContract({
+                    contractTxId: deployments[activeDeployment].txid,
+                    environment: deployments[activeDeployment].env,
+                    wallet: "use_wallet",
+                    strategy: "arweave",
+                    options: {
+                        function: functionName,
+                        ...input
+                    },
+                    cacheOptions: {
+                        inMemory: true
+                    }
+                })
+                console.log(res)
+                if (res.result.status == 200) {
+                    setSuccess(true)
+                    setResult(`TXID: ${res.writeContract.originalTxId}`)
+                    setLatestState(JSON.stringify(res.state, null, 2))
+                } else {
+                    setResult(`error: ${res.result.status}
+${res.result.statusText}
+
+${res.writeContract.errorMessage}`)
+                }
+            } catch (e) {
+                console.log(e)
+                setResult(`error: ${e}`)
+            }
+        }
+    }
 
     return <div className="flex flex-col justify-center items-center h-full gap-5">
         <div className="w-fit">
@@ -50,20 +137,19 @@ export default function Test({ target }: { target: string }) {
                 <div className="text-lg mt-5">Function Name</div>
                 <select className="bg-white rounded-md px-2 py-1 w-fit mb-2" defaultValue="none" onChange={(e) => setFunctionName(e.target.value)}>
                     <option value="none" disabled>Select a function</option>
-                    <option value="test">test</option>
-
+                    {activeDeployment && deployments[activeDeployment].functionNames.map((func) => <option key={func} value={func}>{func}</option>)}
                 </select>
                 {/* input json */}
-                <div className="ring-1 ring-white/20 rounded overflow-clip p-0.5 h-full"><iframe className="rounded" src={`/betterIDE?editor&language=json&file=input/state.json`} className="w-full h-full" /></div>
+                <div className="ring-1 ring-white/20 rounded overflow-clip p-0.5 h-full w-full"><iframe className="rounded h-full w-full" src={`/betterIDE?editor&language=json&file=input/state.json`} /></div>
                 {/* call button */}
-                <button className="bg-green-500 my-5 text-black rounded-md px-4 p-1 w-fit active:scale-95 hover:scale-105">RUN</button>
+                <button className="bg-green-500 my-5 text-black rounded-md px-4 p-1 w-fit active:scale-95 hover:scale-105" onClick={run}>RUN</button>
             </div>
             <div className="flex flex-col gap-1">
                 <div className="text-2xl">Output</div>
                 <div>Result</div>
-                <pre className="bg-white/10 p-1 rounded">...</pre>
+                <pre className={`bg-white/10 p-1 rounded overflow-scroll ${success ? "text-green-400" : "text-red-400"}`}>{result || "..."}</pre>
                 <div>Latest State</div>
-                <pre className="bg-white/10 p-1 rounded">...</pre>
+                <pre className="bg-white/10 p-1 rounded overflow-scroll">{latestState || "..."}</pre>
             </div>
         </div>
     </div>

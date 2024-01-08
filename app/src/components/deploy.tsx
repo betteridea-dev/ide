@@ -20,18 +20,18 @@ const commercialUses = [
     "Allowed-With-Credit"
 ]
 
-// function extractFunctionsFromSwitchCase(src: string) {
-//     // const functionRegex = /function\s+([^\s(]+)\s*\(([^)]*)\)\s*{([^}]*)}/g;
-//     const functionRegex = /case\s+"([^"]+)"/g;
-//     const matches = src.matchAll(functionRegex);
-//     const functions = [];
+function extractFunctionsFromSwitchCase(src: string) {
+    // const functionRegex = /function\s+([^\s(]+)\s*\(([^)]*)\)\s*{([^}]*)}/g;
+    const functionRegex = /case\s+"([^"]+)"/g;
+    const matches = src.matchAll(functionRegex);
+    const functions = [];
 
-//     for (const match of matches) {
-//         if (match[1] == "handle") continue
-//         functions.push(match[1])
-//     }
-//     return functions
-// }
+    for (const match of matches) {
+        if (match[1] == "handle") continue
+        functions.push(match[1])
+    }
+    return functions
+}
 
 
 interface DeployState {
@@ -137,7 +137,7 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
             dispatch({ type: "set_deploy_success", payload: true })
             dispatch({ type: "set_contract_id", payload: contract.contractTxId })
             dispatch({ type: "set_result", payload: "Deployed successfully!\nID: " + contract.contractTxId })
-            newDeployment(state.contractName, contract.contractTxId, state.deployEnv)
+            newDeployment(state.contractName, contract.contractTxId, state.deployEnv, extractFunctionsFromSwitchCase(contracts[state.contractName]["contract.js"]))
             dispatch({ type: "is_error", payload: false })
         } catch (e) {
             console.log(e)

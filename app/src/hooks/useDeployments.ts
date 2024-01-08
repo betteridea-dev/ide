@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 
 export type deployment = {
     "txid": string,
-    "env": string
+    "env": "local" | "mainnet" | "testnet",
+    "functionNames": string[]
 }
 
 export type deploymentType = {
@@ -16,13 +17,14 @@ export default function useDeployments() {
         if (deployments) localStorage.setItem("deployments", JSON.stringify(deployments))
     }, [deployments])
 
-    function newDeployment(name: string, txid: string, env: string) {
+    function newDeployment(name: string, txid: string, env: string, functionNames: string[]) {
         console.log("newDeployment", name, txid, env)
         const nc = {
             ...deployments,
             [name]: {
                 "txid": txid,
-                "env": env
+                "env": env as "local" | "mainnet" | "testnet",
+                "functionNames": functionNames
             }
         }
         setDeployments(nc)

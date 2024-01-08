@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import JSZip from "jszip";
 import saveAs from "file-saver";
 import logo from "./assets/logo.svg"
@@ -61,8 +61,11 @@ export default function IDE() {
             icon: menuicons.marketplace,
             onClick: () => { setActiveMenuItem("Showcase"); setActiveFile("") }
         }
-
     ]
+
+    useEffect(() => {
+        // const recents = JSON.parse
+    }, [activeContract])
 
     function FileTab({ filename }: { filename: string }) {
         // at the top bar
