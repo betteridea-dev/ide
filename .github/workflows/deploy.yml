@@ -20,13 +20,12 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: app
-
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    defaults:
+      run:
+        working-directory: ./app
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
