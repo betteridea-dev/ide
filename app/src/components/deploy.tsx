@@ -159,7 +159,10 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                         <div>Select Contract</div>
                         <select className="p-1 rounded " value={state.contractName} defaultValue={state.contractName} onChange={(e) => dispatch({ type: "set_contract_name", payload: e.target.value })}>
                             <option value="" disabled>Select a contract</option>
-                            {Object.keys(contracts).map((c) => <option value={c}>{c}</option>)}
+                            {Object.keys(contracts).map((c) => {
+                                if (c == "input") return
+                                return <option value={c}>{c}</option>
+                            })}
                         </select>
                     </div>
                     <div>

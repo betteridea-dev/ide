@@ -13,6 +13,7 @@ import _delete from "./assets/delete.svg"
 import download from "./assets/download.svg"
 import deploy from "./assets/deploy.svg"
 import useContracts from "./hooks/useContracts";
+import AONotebook from "./components/ao notebook";
 
 type MenuItemObj = {
     text: string,
@@ -60,6 +61,11 @@ export default function IDE() {
             text: "Showcase",
             icon: menuicons.marketplace,
             onClick: () => { setActiveMenuItem("Showcase"); setActiveFile("") }
+        },
+        {
+            text: "AO",
+            icon: menuicons.arglyph,
+            onClick: () => { setActiveMenuItem("AO"); setActiveContract(""); setActiveFile(""); setShowFileList(false) }
         }
     ]
 
@@ -145,8 +151,10 @@ export default function IDE() {
                 return <Showcase />
             case "Settings":
                 return <Settings />
+            case "AO":
+                return <AONotebook />
             default:
-                return <div className="w-full h-full bg-white/10">Ok</div>
+                return <div className="w-full h-full bg-white/5">Ok</div>
         }
     }
 
@@ -175,6 +183,7 @@ export default function IDE() {
             {showFileList && <div className="min-w-[150px] border-r border-white/30">
                 {
                     contracts && Object.keys(contracts).map((contractname, i) => {
+                        if (contractname == "input") return
                         return <FileListItem key={i} contractname={contractname} />
                     })
                 }
