@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: cd ./app
+
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
