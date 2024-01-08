@@ -158,7 +158,7 @@ export default function IDE() {
         }
     }
 
-    return <div className="flex flex-col min-h-screen">
+    return <div className="flex flex-col min-h-screen h-screen max-h-screen">
         <div className="flex border-b border-white/30">
             <div className="min-w-[300px] p-2 flex justify-center items-center gap-2 border-r border-white/30">
                 <img src={logo} className="h-6 w-6" />
