@@ -28,6 +28,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - run: ls -la
       - name: Checkout
         uses: actions/checkout@v4
 
