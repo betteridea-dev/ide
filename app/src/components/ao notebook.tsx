@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import runIcon from "../assets/run.svg"
 import { v4 } from "uuid"
 import { connect, createDataItemSigner } from '@permaweb/ao-sdk'
+import runningIcon from "../assets/running.webp"
 
 interface celldata {
     [key: string]: {
@@ -62,12 +63,21 @@ export default function AONotebook() {
     function Cell({ cellId }: { cellId: string }) {
         const [code, setCode] = useState(cellData[cellId]?.code || "1+1")
         const [result, setResult] = useState(cellData[cellId]?.result || "...")
+        const [running, setRunning] = useState(false)
 
         async function run() {
+            setRunning(true)
             console.log("sending message", code)
-            const r = await sendMessage({ data: code })
-            console.log(r)
-            setResult(r)
+            try {
+                const r = await sendMessage({ data: code })
+                console.log(r)
+                setResult(r)
+            }
+            catch (e) {
+                console.log(e.message)
+                setResult(e.message)
+            }
+            setRunning(false)
         }
 
         useEffect(() => {
@@ -77,10 +87,11 @@ export default function AONotebook() {
         }, [code, result])
 
         return <div className="w-full flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3">
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center gap-1">
                 <button className="text-xl" onClick={run}>
                     <img src={runIcon} className="w-8 h-8" />
                 </button>
+                {running && <img src={runningIcon} className="w-5 h-5 block" />}
             </div>
             <div className="flex flex-col text-left grow gap-2">
                 <Editor
@@ -110,7 +121,7 @@ export default function AONotebook() {
     }
 
 
-    return <div className="h-[94vh] p-2 overflow-y-scroll flex flex-col">
+    return <div className="h-[94vh] p-2 overflow-y-scroll w-full flex flex-col">
         <div className="text-xl text-center">Welcome to AO Playground!</div>
         {spawning && <div className="text-center">Spawning process...</div>}
         {!spawning && <>{aosProcess ? <div className="text-center">Process ID: {aosProcess}</div> : <button onClick={spawnProcess}>spawn process</button>}</>}
