@@ -3,7 +3,7 @@ import theme from "../themes/merbivore-modified.json"
 import { useEffect, useState } from "react"
 import runIcon from "../assets/run.svg"
 import { v4 } from "uuid"
-import { connect, createDataItemSigner } from '@permaweb/ao-sdk'
+import { connect, createDataItemSigner, result as aoResult } from '@permaweb/ao-connect'
 import runningIcon from "../assets/running.webp"
 
 interface celldata {
@@ -71,7 +71,12 @@ export default function AONotebook() {
             try {
                 const r = await sendMessage({ data: code })
                 console.log(r)
-                setResult(r)
+                const res = await aoResult({
+                    message: r,
+                    process: aosProcess,
+                })
+                console.log(res)
+                setResult(`${JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output}`)
             }
             catch (e) {
                 console.log(e.message)
@@ -124,7 +129,7 @@ export default function AONotebook() {
     return <div className="h-[94vh] p-2 overflow-y-scroll w-full flex flex-col">
         <div className="text-xl text-center">Welcome to AO Playground!</div>
         {spawning && <div className="text-center">Spawning process...</div>}
-        {!spawning && <>{aosProcess ? <div className="text-center">Process ID: {aosProcess}</div> : <button onClick={spawnProcess}>spawn process</button>}</>}
+        {!spawning && <>{aosProcess ? <div className="text-center">Process ID: <pre className="inline">{aosProcess}</pre></div> : <button onClick={spawnProcess}>spawn process</button>}</>}
         {
             cellOrder.map((cellId) => {
                 return <Cell key={cellId} cellId={cellId} />
