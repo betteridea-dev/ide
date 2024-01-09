@@ -26,6 +26,8 @@ export default function AONotebook() {
 
 
     async function spawnProcess() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (window as any).arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"])
         if (aosProcess) return alert("already spawned")
         setSpawning(true)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
