@@ -1,6 +1,6 @@
 import { Editor, useMonaco, } from "@monaco-editor/react"
 import theme from "../themes/merbivore-modified.json"
-import { useEffect, useState, useReducer } from "react"
+import { useEffect, useState } from "react"
 import runIcon from "../assets/run.svg"
 import { v4 } from "uuid"
 import { connect, createDataItemSigner } from '@permaweb/ao-sdk'
@@ -27,7 +27,8 @@ export default function AONotebook() {
     async function spawnProcess() {
         if (aosProcess) return alert("already spawned")
         setSpawning(true)
-        const signer = createDataItemSigner(window.arweaveWallet)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const signer = createDataItemSigner((window as any).arweaveWallet)
         console.log(signer)
         const res = await connect().spawn({
             module: "MGUZ35GzZAlSFno6oeR0yb9Og1gPrSRDlp00G0wlXQE",
@@ -40,8 +41,9 @@ export default function AONotebook() {
         setSpawning(false)
     }
 
-    function sendMessage({ data }) {
-        const signer = createDataItemSigner(window.arweaveWallet)
+    function sendMessage({ data }: { data: string }) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const signer = createDataItemSigner((window as any).arweaveWallet)
         return connect().message({
             process: aosProcess,
             signer,
@@ -69,6 +71,8 @@ export default function AONotebook() {
         }
 
         useEffect(() => {
+            // NEED FIXING, HELP @PRATHAMESH
+            // setting code and result from here will result in an infinite render loop
             // setCellData({ ...cellData, [cellId]: { code, result } })
         }, [code, result])
 
