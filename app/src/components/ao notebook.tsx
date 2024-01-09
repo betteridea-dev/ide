@@ -71,18 +71,22 @@ export default function AONotebook() {
             try {
                 const r = await sendMessage({ data: code })
                 console.log(r)
-                const res = await aoResult({
+                // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const res: any = await aoResult({
                     message: r,
                     process: aosProcess,
                 })
+                setRunning(false)
                 console.log(res)
                 setResult(`${JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output}`)
             }
             catch (e) {
                 console.log(e.message)
                 setResult(e.message)
+                setRunning(false)
             }
-            setRunning(false)
+
         }
 
         useEffect(() => {
@@ -91,16 +95,16 @@ export default function AONotebook() {
             // setCellData({ ...cellData, [cellId]: { code, result } })
         }, [code, result])
 
-        return <div className="w-full flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3">
-            <div className="flex flex-col items-center gap-1">
-                <button className="text-xl" onClick={run}>
-                    <img src={runIcon} className="w-8 h-8" />
+        return <div className="flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3">
+            <div className="flex flex-col items-center gap-1 min-w-fit">
+                <button className="text-xl block" onClick={run}>
+                    <img src={runIcon} className="w-8 h-8 block" />
                 </button>
                 {running && <img src={runningIcon} className="w-5 h-5 block" />}
             </div>
-            <div className="flex flex-col text-left grow gap-2">
+            <div className="flex flex-col text-left w-[100%] gap-2">
                 <Editor
-                    className="w-full max-h-[380px]"
+                    className="w-full max-w-[85vw] max-h-[380px]"
                     language="lua"
                     theme="merbivore"
                     height={code.split("\n").length > 20 ? 20 * 19 : code.split("\n").length * 19}
@@ -118,7 +122,7 @@ export default function AONotebook() {
                         }
                     }
                 />
-                <pre className="p-0.5 ring-1 ring-white/5">
+                <pre className="p-0.5 ring-1 ring-white/5 overflow-scroll max-h-[40%] max-w-[99%]">
                     {result}
                 </pre>
             </div>
@@ -126,7 +130,7 @@ export default function AONotebook() {
     }
 
 
-    return <div className="h-[94vh] p-2 overflow-y-scroll w-full flex flex-col">
+    return <div className="h-[94vh] max-w-[90vw] p-2 overflow-scroll flex flex-col">
         <div className="text-xl text-center">Welcome to AO Playground!</div>
         {spawning && <div className="text-center">Spawning process...</div>}
         {!spawning && <>{aosProcess ? <div className="text-center">Process ID: <pre className="inline">{aosProcess}</pre></div> : <button onClick={spawnProcess}>spawn process</button>}</>}
