@@ -9,6 +9,7 @@ import {
   result as aoResult,
 } from "@permaweb/ao-connect";
 import runningIcon from "../assets/running.webp";
+import { Icons } from "./icons";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -25,6 +26,7 @@ function CodeCell({
   cellOutputItems,
   setCellCodeItems,
   setCellOutputItems,
+  deleteCell,
 }: {
   cellId: string;
   aosProcess: string;
@@ -32,6 +34,7 @@ function CodeCell({
   setCellCodeItems: React.Dispatch<React.SetStateAction<TCellCodeState>>;
   cellOutputItems: TCellOutputState;
   setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
+  deleteCell: (val: string) => void;
 }) {
   const [running, setRunning] = useState(false);
 
@@ -84,7 +87,7 @@ function CodeCell({
   }
 
   return (
-    <div className="flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3">
+    <div className="flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3 flex-row">
       <div className="flex flex-col items-center gap-1 min-w-fit">
         <button className="text-xl block" onClick={run}>
           <img src={runIcon} className="w-8 h-8 block" />
@@ -122,6 +125,13 @@ function CodeCell({
         <pre className="p-0.5 ring-1 ring-white/5 overflow-scroll max-h-[40%] max-w-[99%]">
           {cellOutputItems[cellId]}
         </pre>
+      </div>
+
+      <div>
+        <Icons.delete
+          className="cursor-pointer"
+          onClick={() => deleteCell(cellId)}
+        />
       </div>
     </div>
   );
@@ -169,6 +179,18 @@ export default function AONotebook() {
     setCellOutputItems((prev) => ({ ...prev, [id]: "..." }));
   }
 
+  function deleteCell(cellId: string) {
+    setCellOrder((prev) => prev.filter((id) => id !== cellId));
+    setCellCodeItems((prev) => {
+      delete prev[cellId];
+      return prev;
+    });
+    setCellOutputItems((prev) => {
+      delete prev[cellId];
+      return prev;
+    });
+  }
+
   return (
     <div className="h-[94vh] max-w-[90vw] p-2 overflow-scroll flex flex-col">
       <div className="text-xl text-center">Welcome to AO Playground!</div>
@@ -197,6 +219,7 @@ export default function AONotebook() {
             cellOutputItems={cellOutputItems}
             setCellCodeItems={setCellCodeItems}
             setCellOutputItems={setCellOutputItems}
+            deleteCell={deleteCell}
           />
         );
       })}
