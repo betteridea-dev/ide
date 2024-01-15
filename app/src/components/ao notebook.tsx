@@ -69,10 +69,9 @@ function CodeCell({
 
       console.log(res);
 
-      const formattedOutput = `${
-        JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-      }`;
+        }`;
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
     } catch (e) {
@@ -87,18 +86,13 @@ function CodeCell({
   }
 
   return (
-    <div className="flex bg-black/10 p-2 gap-2 ring-1 ring-white/5 my-3 flex-row">
-      <div className="flex flex-col items-center gap-1 min-w-fit">
-        <button className="text-xl block" onClick={run}>
-          <img src={runIcon} className="w-8 h-8 block" />
+    <div className="flex my-3 flex-col max-w-[99%] ring-1 ring-white/10">
+      <div className="flex min-h-[50px]">
+        <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]" onClick={run}>
+          <img src={runIcon} className="w-8 h-8" />
         </button>
-
-        {running && <img src={runningIcon} className="w-5 h-5 block" />}
-      </div>
-
-      <div className="flex flex-col text-left w-[100%] gap-2">
         <Editor
-          className="w-full max-w-[85vw] max-h-[380px]"
+          className="max-h-[380px] max-w-full min-h-[50px]"
           language="lua"
           theme="merbivore"
           height={
@@ -121,17 +115,20 @@ function CodeCell({
             renderLineHighlight: "none",
           }}
         />
-
-        <pre className="p-0.5 ring-1 ring-white/5 overflow-scroll max-h-[40%] max-w-[99%]">
+        <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center" onClick={() => deleteCell(cellId)}>
+          <Icons.delete size={20} />
+        </button>
+      </div>
+      <div className="flex min-h-[50px] bg-[#3D4947]/20">
+        <div className="min-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]">
+          <img src={runningIcon} className={`max-w-[20px] max-h-[20px] ${!running && "hidden"}`} />
+        </div>
+        <pre className="p-2 ring-white/5 overflow-scroll min-h-[50px] max-h-[300px] w-full">
           {cellOutputItems[cellId]}
         </pre>
-      </div>
+        <div className="min-w-[30px]">
 
-      <div>
-        <Icons.delete
-          className="cursor-pointer"
-          onClick={() => deleteCell(cellId)}
-        />
+        </div>
       </div>
     </div>
   );
