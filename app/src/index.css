@@ -11,18 +11,22 @@
   scrollbar-width: none;
   /* font-family: monospace; */
   color: whitesmoke;
-  transition: all 150ms ease;
+  /* transition: all 100ms; */
 }
 
 *::-webkit-scrollbar {
   display: none;
 }
 
-button:hover{
+button {
+  transition: all 100ms ease-in-out;
+}
+
+button:hover {
   transform: scale(1.05);
 }
 
-button:active{
+button:active {
   transform: scale(0.95);
 }
 

@@ -40,6 +40,7 @@ interface DeployState {
     // stateSrc: string,
     deployEnv: "local" | "testnet" | "mainnet",
     result: string,
+    usingWebWallet: boolean,
     deploySuccess: boolean,
     fileName: string,
     walletJWK: object | undefined,
@@ -53,6 +54,7 @@ const istate: DeployState = {
     contractName: "",
     deployEnv: "local",
     result: "",
+    usingWebWallet: false,
     deploySuccess: false,
     walletJWK: undefined,
     fileName: "",
@@ -81,6 +83,8 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                 return { ...state, deployEnv: action.payload }
             case "set_result":
                 return { ...state, result: action.payload }
+            case "set_web_wallet":
+                return { ...state, usingWebWallet: action.payload }
             case "set_deploy_success":
                 return { ...state, deploySuccess: action.payload }
             case "set_file": {
@@ -94,7 +98,7 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                 return { ...state, fileName: fileObj.name }
             }
             case "set_wallet_jwk":
-                return { ...state, walletJWK: action.payload }
+                return { ...state, walletJWK: action.payload, usingWebWallet: false }
             case "set_contract_id":
                 return { ...state, contractTxID: action.payload }
             case "set_derivation":
@@ -111,14 +115,14 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
     async function deploy() {
         if (!state.contractName) return alert("Please select a contract")
         if (!state.deployEnv) return alert("Please select a deployment environment")
-        if (!state.walletJWK) return alert("Please upload a wallet file")
+        if (!state.usingWebWallet && !state.walletJWK) return alert("Please upload a wallet file")
 
         const csource = contracts[state.contractName]["contract.js"]
         const cstate = contracts[state.contractName]["state.json"]
 
         const tags = [
-            { name: "App-Name", value: "AR-Contractor" },
-            { name: "App-Version", value: "0.1.0" },
+            { name: "App-Name", value: "Better-IDE" },
+            { name: "App-Version", value: "1.0.0" },
         ]
 
         if (state.derivation) tags.push({ name: "Derivation", value: state.derivation })
@@ -126,7 +130,7 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
 
         try {
             const contract = await createContract({
-                wallet: state.walletJWK,
+                wallet: state.usingWebWallet ? "web_wallet" : state.walletJWK,
                 contractSource: csource,
                 initialState: cstate,
                 environment: state.deployEnv,
@@ -176,8 +180,23 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                     </div>
                 </div>
 
-                <label htmlFor="wallet" className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit mx-auto hover:scale-105 active:scale-95">{!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName} ✅`}</label>
-                <input type="file" accept="application/JSON" id="wallet" className="hidden" onChange={(e) => dispatch({ type: "set_file", payload: e.target.files[0] })} />
+                <div className="flex gap-4 justify-center">
+                    <div className="hover:scale-105 active:scale-95 p-2 px-4">
+                        <label htmlFor="wallet" className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit">{!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName} ✅`}</label>
+                        <input type="file" accept="application/JSON" id="wallet" className="hidden" onChange={(e) => dispatch({ type: "set_file", payload: e.target.files[0] })} />
+                    </div>
+                    <button
+                        className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit"
+                        onClick={() => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (window as any).arweaveWallet.connect(['ACCESS_ADDRESS', 'SIGN_TRANSACTION', 'ACCESS_PUBLIC_KEY', 'SIGNATURE']).then(() => {
+                                dispatch({ type: "set_web_wallet", payload: true })
+                            }).catch(() => {
+                                dispatch({ type: "set_web_wallet", payload: false })
+                                alert("Error connecting to web wallet")
+                            })
+                        }}>Use Web Wallet {state.usingWebWallet && "✅"}</button>
+                </div>
 
                 <div className="flex flex-col gap-3 justify-center items-center">
                     <div className="text-center">

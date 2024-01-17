@@ -201,7 +201,7 @@ export default function AONotebook() {
               Process ID: <pre className="inline">{aosProcessId}</pre>
             </div>
           ) : (
-            <button onClick={spawnProcess}>spawn process</button>
+            <button className="bg-white text-black text-center px-3 text-lg mx-auto m-2" onClick={spawnProcess}>spawn process</button>
           )}
         </>
       )}
@@ -221,12 +221,12 @@ export default function AONotebook() {
         );
       })}
 
-      <button
+      {aosProcessId && <button
         onClick={addNewCell}
         className="bg-white text-black text-center px-3 font-bold text-xl mx-auto"
       >
         +
-      </button>
+      </button>}
     </div>
   );
 }
