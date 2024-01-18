@@ -232,7 +232,7 @@ export default function IDE() {
             <div className="ml-auto flex justify-center items-center px-3">
                 {aosView ? <button className="p-1 flex items-center gap-1" onClick={() => setAosView(false)}>
                     <img src={bideLogo} width={22} />
-                    Switch to Contracts
+                    Switch to Warp
                 </button> :
                     <button className="p-1 flex items-center gap-1" onClick={() => setAosView(true)}>
                         <img src={menuicons.arglyph} width={22} />
