@@ -190,8 +190,10 @@ export default function IDE() {
                     return <AosHome />
                 case "Notebook":
                     return <AONotebook />
+                case "Settings":
+                    return <Settings />
                 default:
-                    return <div className="w-full h-full bg-white/5">Ok</div>
+                    return <div className="w-full h-full bg-white/5"></div>
             }
         }
         else {
@@ -213,7 +215,7 @@ export default function IDE() {
                 case "AO":
                     return <AONotebook />
                 default:
-                    return <div className="w-full h-full bg-white/5">Ok</div>
+                    return <div className="w-full h-full bg-white/5"></div>
             }
         }
     }
