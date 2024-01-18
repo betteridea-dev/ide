@@ -86,7 +86,7 @@ function CodeCell({
   }
 
   return (
-    <div className="flex my-3 flex-col max-w-[99%] ring-1 ring-white/10">
+    <div className="flex my-3 flex-col w-full ring-1 ring-white/10">
       <div className="flex min-h-[50px]">
         <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]" onClick={run}>
           <img src={runIcon} className="w-8 h-8" />
@@ -188,9 +188,13 @@ export default function AONotebook() {
     });
   }
 
+  function fetchProcesses() {
+
+  }
+
   return (
-    <div className="h-[94vh] max-w-[90vw] p-2 overflow-scroll flex flex-col">
-      <div className="text-xl text-center">Welcome to AO Playground!</div>
+    <div className="h-[calc(100vh-40px)] w-full p-2 overflow-scroll flex flex-col">
+      <div className="text-xl text-center">Welcome to AO Notebook!</div>
 
       {isSpawning && <div className="text-center">Spawning process...</div>}
 
