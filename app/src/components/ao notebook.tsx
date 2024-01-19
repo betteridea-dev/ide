@@ -7,10 +7,11 @@ import {
   connect,
   createDataItemSigner,
   result as aoResult,
-} from "@permaweb/ao-connect";
+} from "@permaweb/aoconnect";
 import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
-import { request, gql, GraphQLClient } from "graphql-request"
+import { gql, GraphQLClient } from "graphql-request"
+import Ansi from "ansi-to-react";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -18,6 +19,17 @@ interface TCellCodeState {
 
 interface TCellOutputState {
   [key: string]: string;
+}
+
+function sendMessage({ data, processId }: { data: string, processId: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const signer = createDataItemSigner((window as any).arweaveWallet);
+  return connect().message({
+    process: processId,
+    signer,
+    tags: [{ name: "Action", value: "Eval" }],
+    data,
+  });
 }
 
 function CodeCell({
@@ -28,6 +40,7 @@ function CodeCell({
   setCellCodeItems,
   setCellOutputItems,
   deleteCell,
+  setActiveCell
 }: {
   cellId: string;
   aosProcess: string;
@@ -36,19 +49,9 @@ function CodeCell({
   cellOutputItems: TCellOutputState;
   setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
   deleteCell: (val: string) => void;
+  setActiveCell: (val: string) => void;
 }) {
   const [running, setRunning] = useState(false);
-
-  function sendMessage({ data }: { data: string }) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signer = createDataItemSigner((window as any).arweaveWallet);
-    return connect().message({
-      process: aosProcess,
-      signer,
-      tags: [{ name: "Action", value: "Eval" }],
-      data,
-    });
-  }
 
   async function run() {
     setRunning(true);
@@ -58,7 +61,7 @@ function CodeCell({
     console.log("sending message", codeToRun);
 
     try {
-      const r = await sendMessage({ data: codeToRun });
+      const r = await sendMessage({ data: codeToRun, processId: aosProcess });
       console.log(r);
 
       // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
@@ -73,13 +76,13 @@ function CodeCell({
       const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
         }`;
-
+      console.log(formattedOutput)
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
     } catch (e) {
-      console.log(e.message);
+      console.log(e);
       setCellOutputItems((prev) => ({
         ...prev,
-        [cellId]: e.message ?? "Error executing this snipper",
+        [cellId]: e.message ?? "Error executing this snippet",
       }));
     } finally {
       setRunning(false);
@@ -107,6 +110,7 @@ function CodeCell({
               ...prev,
               [cellId]: value,
             }));
+            setActiveCell(cellId);
           }}
           options={{
             minimap: { enabled: false },
@@ -125,7 +129,15 @@ function CodeCell({
           <img src={runningIcon} className={`max-w-[20px] max-h-[20px] ${!running && "hidden"}`} />
         </div>
         <pre className="p-2 ring-white/5 overflow-scroll min-h-[50px] max-h-[300px]">
-          {cellOutputItems[cellId]}
+          {
+            (() => {
+              try { return <Ansi>{`${JSON.parse(cellOutputItems[cellId])}`}</Ansi> }
+              catch (e) {
+                console.log(e.message)
+                return `${cellOutputItems[cellId]}`
+              }
+            })()
+          }
         </pre>
         <div className="min-w-[30px]">
 
@@ -139,15 +151,48 @@ export default function AONotebook() {
   const [isSpawning, setSpawning] = useState<boolean>(false);
   const [aosProcessId, setAOSProcess] = useState<string | null>(null);
 
+  const [activeCell, setActiveCell] = useState<string | null>(null);
   const [cellIds, setCellOrder] = useState<string[]>([]);
   const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({});
   const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({});
 
   const [myProcesses, setMyProcesses] = useState<string[]>([]);
 
+  function setRunning(cellId: string) {
+    setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
+  }
+
   const monaco = useMonaco();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   monaco?.editor.defineTheme("merbivore", theme as any);
+  monaco?.editor.addEditorAction({
+    id: "run",
+    label: "Run",
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 1.5,
+    run: async () => {
+      console.log("running", activeCell);
+      try {
+        setRunning(activeCell);
+        const r = await sendMessage({ data: cellCodeItems[activeCell], processId: aosProcessId });
+        // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res: any = await aoResult({
+          message: r,
+          process: aosProcessId,
+        });
+
+        console.log(res);
+
+        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output}`;
+        console.log(formattedOutput)
+        setCellOutputItems((prev) => ({ ...prev, [activeCell]: formattedOutput }));
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+  });
 
   useEffect(() => {
     const client = new GraphQLClient("https://arweave.net/graphql")
@@ -202,7 +247,7 @@ export default function AONotebook() {
     const signer = createDataItemSigner((window as any).arweaveWallet);
     console.log(signer);
     const res = await connect().spawn({
-      module: "MGUZ35GzZAlSFno6oeR0yb9Og1gPrSRDlp00G0wlXQE",
+      module: "Twp4qeQOQ6ht3nKaZu8RuHc8QpJRW95W8h0WqJ8qlgw",
       scheduler: "TZ7o7SIZ06ZEJ14lXwVtng1EtSx60QkPy-kh-kdAXog",
       signer,
       tags: [],
@@ -217,7 +262,7 @@ export default function AONotebook() {
 
     setCellOrder((prev) => [...prev, id]);
     setCellCodeItems((prev) => ({ ...prev, [id]: "1 + 41" }));
-    setCellOutputItems((prev) => ({ ...prev, [id]: "..." }));
+    setCellOutputItems((prev) => ({ ...prev, [id]: "" }));
   }
 
   function deleteCell(cellId: string) {
@@ -268,6 +313,7 @@ export default function AONotebook() {
             setCellCodeItems={setCellCodeItems}
             setCellOutputItems={setCellOutputItems}
             deleteCell={deleteCell}
+            setActiveCell={setActiveCell}
           />
         );
       })}
