@@ -1,6 +1,6 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
 import theme from "../themes/merbivore-modified.json";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import runIcon from "../assets/run.svg";
 import { v4 } from "uuid";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@permaweb/ao-connect";
 import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
+import { request, gql, GraphQLClient } from "graphql-request"
 
 interface TCellCodeState {
   [key: string]: string;
@@ -86,7 +87,7 @@ function CodeCell({
   }
 
   return (
-    <div className="flex my-3 flex-col w-full ring-1 ring-white/10">
+    <div className="flex my-3 flex-col w-full max-w-[calc(100vw-80px)] ring-1 ring-white/10">
       <div className="flex min-h-[50px]">
         <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]" onClick={run}>
           <img src={runIcon} className="w-8 h-8" />
@@ -123,7 +124,7 @@ function CodeCell({
         <div className="min-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]">
           <img src={runningIcon} className={`max-w-[20px] max-h-[20px] ${!running && "hidden"}`} />
         </div>
-        <pre className="p-2 ring-white/5 overflow-scroll min-h-[50px] max-h-[300px] w-full">
+        <pre className="p-2 ring-white/5 overflow-scroll min-h-[50px] max-h-[300px]">
           {cellOutputItems[cellId]}
         </pre>
         <div className="min-w-[30px]">
@@ -142,9 +143,52 @@ export default function AONotebook() {
   const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({});
   const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({});
 
+  const [myProcesses, setMyProcesses] = useState<string[]>([]);
+
   const monaco = useMonaco();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   monaco?.editor.defineTheme("merbivore", theme as any);
+
+  useEffect(() => {
+    const client = new GraphQLClient("https://arweave.net/graphql")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query = gql`
+  query($address: [String!]!) {
+    transactions(
+      owners: $address
+      tags: [
+        {
+          name: "Data-Protocol",
+          values: ["ao"]
+        },
+        {
+          name: "Type",
+          values: ["Process"]
+        }
+      ]
+    ) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+`
+    async function fetchProcesses() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const address = await (window as any).arweaveWallet.getActiveAddress()
+      const res = await client.request(query, { address })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setMyProcesses((res as any).transactions.edges.map((edge: any) => edge.node.id))
+    }
+    fetchProcesses()
+  }, [])
+
+  function processSelected(pid: string) {
+    console.log("using process", pid);
+    setAOSProcess(pid);
+  }
 
   async function spawnProcess() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -172,7 +216,7 @@ export default function AONotebook() {
     const id = v4();
 
     setCellOrder((prev) => [...prev, id]);
-    setCellCodeItems((prev) => ({ ...prev, [id]: "1+1" }));
+    setCellCodeItems((prev) => ({ ...prev, [id]: "1 + 41" }));
     setCellOutputItems((prev) => ({ ...prev, [id]: "..." }));
   }
 
@@ -188,12 +232,8 @@ export default function AONotebook() {
     });
   }
 
-  function fetchProcesses() {
-
-  }
-
   return (
-    <div className="h-[calc(100vh-40px)] w-full p-2 overflow-scroll flex flex-col">
+    <div className="h-[calc(100vh-40px)] w-full p-2 overflow-scroll flex flex-col items-center">
       <div className="text-xl text-center">Welcome to AO Notebook!</div>
 
       {isSpawning && <div className="text-center">Spawning process...</div>}
@@ -205,10 +245,17 @@ export default function AONotebook() {
               Process ID: <pre className="inline">{aosProcessId}</pre>
             </div>
           ) : (
-            <button className="bg-white text-black text-center px-3 text-lg mx-auto m-2" onClick={spawnProcess}>spawn process</button>
+            <button className="bg-white text-black text-center px-3 text-lg mx-auto m-2" onClick={spawnProcess}>spawn new process</button>
           )}
         </>
       )}
+
+      <select className="p-1 rounded" defaultValue={""} onChange={(e) => processSelected(e.target.value)}>
+        <option disabled value={""}>select a process</option>
+        {myProcesses.map((processId) => {
+          return <option key={processId} value={processId}>{processId}</option>
+        })}
+      </select>
 
       {cellIds.map((cellId) => {
         return (
@@ -229,7 +276,7 @@ export default function AONotebook() {
         onClick={addNewCell}
         className="bg-white text-black text-center px-3 font-bold text-xl mx-auto"
       >
-        +
+        + add cell
       </button>}
     </div>
   );

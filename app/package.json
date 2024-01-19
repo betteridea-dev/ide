@@ -19,6 +19,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "file-saver": "^2.0.5",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "hyper-async": "^1.1.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.309.0",

@@ -212,8 +212,6 @@ export default function IDE() {
                     return <Showcase />
                 case "Settings":
                     return <Settings />
-                case "AO":
-                    return <AONotebook />
                 default:
                     return <div className="w-full h-full bg-white/5"></div>
             }
