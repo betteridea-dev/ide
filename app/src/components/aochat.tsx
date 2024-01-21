@@ -1,5 +1,6 @@
 import { connect, createDataItemSigner, result } from "@permaweb/aoconnect";
 import { useEffect, useState } from "react"
+import { AOModule, AOScheduler, AOChatPID } from "../../config"
 
 interface message {
     from: string,
@@ -12,19 +13,17 @@ const d = new Date();
 
 function tsToDate(ts: number) {
     const d = new Date(ts)
-    return `${d.getMinutes()}:${d.getSeconds()}, ${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+    return `${d.toDateString()} ${d.toTimeString()}`
 }
-
-const chatProcess = "7rSbEX6WGCGW5FdAAqDux8ZO3B9taCN9-AB0N_ypnMI";
 
 export default function AOChat() {
     const [myProcess, setMyProcesses] = useState<string>("")
     const [spawning, setSpawning] = useState<boolean>(false);
     const [input, setInput] = useState<string>("")
-    const [loop, setLoop] = useState<boolean>(true)
+    const [loop, setLoop] = useState<NodeJS.Timeout>()
     const [messages, setMessages] = useState<message[]>([{
         from: "AO",
-        content: "To start chatting, send /register",
+        content: "To start chatting, send /join",
         timestamp: Date.now()
     }]);
 
@@ -40,8 +39,8 @@ export default function AOChat() {
         const signer = createDataItemSigner((window as any).arweaveWallet);
         console.log(signer);
         const res = await connect().spawn({
-            module: "Twp4qeQOQ6ht3nKaZu8RuHc8QpJRW95W8h0WqJ8qlgw",
-            scheduler: "TZ7o7SIZ06ZEJ14lXwVtng1EtSx60QkPy-kh-kdAXog",
+            module: AOModule,
+            scheduler: AOScheduler,
             signer,
             tags: [],
         });
@@ -74,7 +73,7 @@ export default function AOChat() {
     // }, [])
 
     useEffect(() => {
-        setLoop(true)
+        clearInterval(loop)
         async function getInbox() {
             if (!myProcess) return
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,14 +94,21 @@ export default function AOChat() {
                 process: myProcess,
                 message: res
             })
-            // const inbox = JSON.parse(resdata.Output.data.output)
-            // console.log(resdata.Output.data.output)
-            // setMessages(inbox)
-            // if (loop)
-            getInbox()
+            const inbox = resdata.Output.data.json
+            // console.log(inbox!)
+            const messages: message[] = []
+            for (const msg in inbox) {
+                // console.log(inbox[msg])
+                if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
+                    const m: message = JSON.parse(inbox[msg].Data)
+                    messages.push(m)
+                }
+            }
+            console.log(messages.length, "messages")
+            setMessages(messages)
         }
-        getInbox()
-        return () => setLoop(false)
+        setLoop(setInterval(() => getInbox(), 1000))
+        return () => clearInterval(loop)
     }, [myProcess])
 
     async function keyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -110,12 +116,12 @@ export default function AOChat() {
             if (!input) return;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const signer = createDataItemSigner((window as any).arweaveWallet);
-            if (input.startsWith("/register")) {
+            if (input.startsWith("/join")) {
                 const res = await connect().message({
                     process: myProcess,
                     signer,
                     tags: [{ name: "Action", value: "Eval" }],
-                    data: `ao.send({Target="${chatProcess}", Tags={Action="Register"}})`
+                    data: `ao.send({Target="${AOChatPID}", Tags={Action="Register"}})`
                 })
                 const resdata = await result({
                     process: myProcess,
@@ -136,7 +142,7 @@ export default function AOChat() {
                 console.log(resdata.Output.data.output)
             } else {
                 const msg: message = { from: myProcess, timestamp: Date.now(), content: input }
-                const d = `ao.send({Target="${chatProcess}", Tags={Action="Broadcast"}, Data="${JSON.stringify(msg).replace(/"/g, "'")}"})`
+                const d = `ao.send({Target="${AOChatPID}", Tags={Action="Broadcast"}, Data="${JSON.stringify(msg).replace(/"/g, '\\"')}"})`
                 console.log(d)
                 const res = await connect().message({
                     process: myProcess,
@@ -163,9 +169,10 @@ export default function AOChat() {
         <div className="w-full h-full bg-black/30 p-2 overflow-scroll">
             {
                 messages.map((message, index) => {
-                    return <div key={index} className="flex flex-col">
-                        <div className="text-md text-gray-500">{tsToDate(message.timestamp)} - {message.from}</div>
-                        <div className="text-lg">{message.content}</div>
+                    return <div key={index} className="flex flex-col my-4 font-mono">
+                        <div className="text-md opacity-70">{message.from}</div>
+                        <div className="text-xs opacity-50">{tsToDate(message.timestamp)}</div>
+                        <div className="text-lg">- {message.content}</div>
                     </div>
                 })
             }

@@ -12,6 +12,7 @@ import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
 import { gql, GraphQLClient } from "graphql-request"
 import Ansi from "ansi-to-react";
+import { AOModule, AOScheduler } from "../../config";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -247,8 +248,8 @@ export default function AONotebook() {
     const signer = createDataItemSigner((window as any).arweaveWallet);
     console.log(signer);
     const res = await connect().spawn({
-      module: "Twp4qeQOQ6ht3nKaZu8RuHc8QpJRW95W8h0WqJ8qlgw",
-      scheduler: "TZ7o7SIZ06ZEJ14lXwVtng1EtSx60QkPy-kh-kdAXog",
+      module: AOModule,
+      scheduler: AOScheduler,
       signer,
       tags: [],
     });
