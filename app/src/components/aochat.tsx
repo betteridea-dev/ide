@@ -108,7 +108,7 @@ export default function AOChat() {
                     // console.log(inbox[msg])
                     if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
                         const m: message = JSON.parse(inbox[msg].Data)
-                        console.log(m)
+                        // console.log(m)
                         messages.unshift(m)
                     }
                 }
