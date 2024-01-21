@@ -19,6 +19,7 @@ function tsToDate(ts: number) {
 export default function AOChat() {
     const [myProcess, setMyProcesses] = useState<string>("")
     const [spawning, setSpawning] = useState<boolean>(false);
+    const [sending, setSending] = useState<boolean>(false);
     const [input, setInput] = useState<string>("")
     const [loop, setLoop] = useState<NodeJS.Timeout>()
     const [messages, setMessages] = useState<message[]>([{
@@ -73,7 +74,8 @@ export default function AOChat() {
     // }, [])
 
     useEffect(() => {
-        clearInterval(loop)
+        clearTimeout(loop)
+        if (!myProcess) return
         async function getInbox() {
             if (!myProcess) return
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,31 +86,41 @@ export default function AOChat() {
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const signer = createDataItemSigner((window as any).arweaveWallet);
-            const res = await connect().message({
-                process: myProcess,
-                signer,
-                tags: [{ name: "Action", value: "Eval" }],
-                data: `Inbox`
-            })
-            const resdata = await result({
-                process: myProcess,
-                message: res
-            })
-            const inbox = resdata.Output.data.json
-            // console.log(inbox!)
-            const messages: message[] = []
-            for (const msg in inbox) {
-                // console.log(inbox[msg])
-                if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
-                    const m: message = JSON.parse(inbox[msg].Data)
-                    messages.push(m)
+            try {
+                const res = await connect().message({
+                    process: myProcess,
+                    signer,
+                    tags: [{ name: "Action", value: "Eval" }],
+                    data: `Inbox`
+                })
+                const resdata = await result({
+                    process: myProcess,
+                    message: res
+                })
+                console.log(resdata)
+                const inbox = resdata.Output.data.json
+                const messages: message[] = [{
+                    from: "AO",
+                    content: "To start chatting, send /join",
+                    timestamp: Date.now()
+                }]
+                for (const msg in inbox) {
+                    // console.log(inbox[msg])
+                    if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
+                        const m: message = JSON.parse(inbox[msg].Data)
+                        messages.push(m)
+                    }
                 }
+            }
+            catch (e) {
+                console.log(e.message)
             }
             console.log(messages.length, "messages")
             setMessages(messages)
+            setLoop(setTimeout(() => getInbox(), 2500))
         }
-        setLoop(setInterval(() => getInbox(), 1000))
-        return () => clearInterval(loop)
+        setLoop(setTimeout(() => getInbox(), 1000))
+        return () => clearTimeout(loop)
     }, [myProcess])
 
     async function keyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -116,7 +128,9 @@ export default function AOChat() {
             if (!input) return;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const signer = createDataItemSigner((window as any).arweaveWallet);
+            setSending(true)
             if (input.startsWith("/join")) {
+                console.log("joining")
                 const res = await connect().message({
                     process: myProcess,
                     signer,
@@ -156,6 +170,7 @@ export default function AOChat() {
                 })
                 console.log(resdata.Output.data.output)
             }
+            setSending(false)
             setInput("")
         }
     }
@@ -177,6 +192,6 @@ export default function AOChat() {
                 })
             }
         </div>
-        <input type="text" className="w-full bg-white/80 outline-none p-1 text-black" value={input} placeholder="Type message here" onKeyDown={(e) => keyDown(e)} onChange={(e) => setInput(e.target.value)} />
+        <input type="text" className="w-full bg-white/80 outline-none p-1 text-black" disabled={sending} value={input} placeholder="Type message here" onKeyDown={(e) => keyDown(e)} onChange={(e) => setInput(e.target.value)} />
     </div>
 }
