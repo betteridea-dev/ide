@@ -295,12 +295,12 @@ export default function AONotebook() {
         </>
       )}
 
-      <select className="p-1 rounded" defaultValue={""} onChange={(e) => processSelected(e.target.value)}>
+      {/* <select className="p-1 rounded" defaultValue={""} onChange={(e) => processSelected(e.target.value)}>
         <option disabled value={""}>select a process</option>
         {myProcesses.map((processId) => {
           return <option key={processId} value={processId}>{processId}</option>
         })}
-      </select>
+      </select> */}
 
       {cellIds.map((cellId) => {
         return (

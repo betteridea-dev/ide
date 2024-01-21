@@ -16,6 +16,7 @@ import deploy from "./assets/deploy.svg"
 import bideLogo from "./assets/logo.svg"
 import useContracts from "./hooks/useContracts";
 import AONotebook from "./components/ao notebook";
+import AOChat from "./components/aochat";
 
 type MenuItemObj = {
     text: string,
@@ -42,6 +43,11 @@ export default function IDE() {
             text: "Notebook",
             icon: menuicons.files,
             onClick: () => { setActiveMenuItem("Notebook") }
+        },
+        {
+            text: "AOChat",
+            icon: menuicons.arglyph,
+            onClick: () => { setActiveMenuItem("AOChat") }
         }
     ]
 
@@ -190,6 +196,8 @@ export default function IDE() {
                     return <AosHome />
                 case "Notebook":
                     return <AONotebook />
+                case "AOChat":
+                    return <AOChat />
                 case "Settings":
                     return <Settings />
                 default:
