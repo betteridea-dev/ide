@@ -108,16 +108,17 @@ export default function AOChat() {
                     // console.log(inbox[msg])
                     if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
                         const m: message = JSON.parse(inbox[msg].Data)
-                        messages.push(m)
+                        console.log(m)
+                        messages.unshift(m)
                     }
                 }
+                console.log(messages.length, "messages")
+                setMessages(messages)
+                setLoop(setTimeout(() => getInbox(), 2500))
             }
             catch (e) {
                 console.log(e.message)
             }
-            console.log(messages.length, "messages")
-            setMessages(messages)
-            setLoop(setTimeout(() => getInbox(), 2500))
         }
         setLoop(setTimeout(() => getInbox(), 1000))
         return () => clearTimeout(loop)
@@ -181,10 +182,10 @@ export default function AOChat() {
             <div>Here you can talk with other people through AO</div>
             <div>Your ID: <pre className="inline">{myProcess}</pre></div>
         </div>
-        <div className="w-full h-full bg-black/30 p-2 overflow-scroll">
+        <div className="w-full h-full bg-black/30 p-2 overflow-scroll flex flex-col-reverse gap-5">
             {
                 messages.map((message, index) => {
-                    return <div key={index} className="flex flex-col my-4 font-mono">
+                    return <div key={index} className="flex flex-col font-mono">
                         <div className="text-md opacity-70">{message.from}</div>
                         <div className="text-xs opacity-50">{tsToDate(message.timestamp)}</div>
                         <div className="text-lg">- {message.content}</div>
