@@ -118,6 +118,8 @@ export default function AOChat() {
             }
             catch (e) {
                 console.log(e.message)
+                setLoop(setTimeout(() => getInbox(), 10000))
+                return
             }
         }
         setLoop(setTimeout(() => getInbox(), 1000))
