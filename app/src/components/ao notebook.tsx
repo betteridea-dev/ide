@@ -10,9 +10,10 @@ import {
 } from "@permaweb/aoconnect";
 import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
-import { gql, GraphQLClient } from "graphql-request"
+import { gql, GraphQLClient } from "graphql-request";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../config";
+import { Button } from "./ui/button";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -22,7 +23,7 @@ interface TCellOutputState {
   [key: string]: string;
 }
 
-function sendMessage({ data, processId }: { data: string, processId: string }) {
+function sendMessage({ data, processId }: { data: string; processId: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const signer = createDataItemSigner((window as any).arweaveWallet);
   return connect().message({
@@ -41,7 +42,7 @@ function CodeCell({
   setCellCodeItems,
   setCellOutputItems,
   deleteCell,
-  setActiveCell
+  setActiveCell,
 }: {
   cellId: string;
   aosProcess: string;
@@ -52,10 +53,12 @@ function CodeCell({
   deleteCell: (val: string) => void;
   setActiveCell: (val: string) => void;
 }) {
-  const [running, setRunning] = useState(false);
+  const [codeStatus, setCodeStatus] = useState<
+    "success" | "error" | "running" | "default"
+  >("default");
 
-  async function run() {
-    setRunning(true);
+  async function executeCode() {
+    setCodeStatus("running");
 
     // const codeToRun = editorRef.current.getValue();
     const codeToRun = cellCodeItems[cellId];
@@ -63,7 +66,6 @@ function CodeCell({
 
     try {
       const r = await sendMessage({ data: codeToRun, processId: aosProcess });
-      console.log(r);
 
       // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,77 +74,83 @@ function CodeCell({
         process: aosProcess,
       });
 
-      console.log(res);
-
-      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${
+        JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-        }`;
-      console.log(formattedOutput)
+      }`;
+
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
+      setCodeStatus("success");
     } catch (e) {
       console.log(e);
       setCellOutputItems((prev) => ({
         ...prev,
         [cellId]: e.message ?? "Error executing this snippet",
       }));
-    } finally {
-      setRunning(false);
+
+      setCodeStatus("error");
     }
   }
 
   return (
-    <div className="flex my-3 flex-col w-full max-w-[calc(100vw-80px)] ring-1 ring-white/10">
-      <div className="flex min-h-[50px]">
-        <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]" onClick={run}>
-          <img src={runIcon} className="w-8 h-8" />
-        </button>
-        <Editor
-          className="max-h-[380px] max-w-full min-h-[50px]"
-          language="lua"
-          theme="merbivore"
-          height={
-            (cellCodeItems[cellId].split("\n").length > 20
-              ? 20
-              : cellCodeItems[cellId].split("\n").length) * 19
-          }
-          defaultValue={cellCodeItems[cellId]}
-          onChange={(value) => {
-            setCellCodeItems((prev) => ({
-              ...prev,
-              [cellId]: value,
-            }));
-            setActiveCell(cellId);
-          }}
-          options={{
-            minimap: { enabled: false },
-            // lineNumbers: "off",
-            lineNumbersMinChars: 2,
-            scrollBeyondLastLine: false,
-            renderLineHighlight: "none",
-          }}
-        />
-        <button className="min-h-[50px] max-h-[50px] min-w-[30px] flex justify-center items-center" onClick={() => deleteCell(cellId)}>
-          <Icons.delete size={20} />
-        </button>
-      </div>
-      <div className="flex min-h-[50px] bg-[#3D4947]/20">
-        <div className="min-h-[50px] min-w-[30px] flex justify-center items-center pl-[5px]">
-          <img src={runningIcon} className={`max-w-[20px] max-h-[20px] ${!running && "hidden"}`} />
-        </div>
-        <pre className="p-2 ring-white/5 overflow-scroll min-h-[50px] max-h-[300px]">
-          {
-            (() => {
-              try { return <Ansi>{`${JSON.parse(cellOutputItems[cellId])}`}</Ansi> }
-              catch (e) {
-                console.log(e.message)
-                return `${cellOutputItems[cellId]}`
-              }
-            })()
-          }
-        </pre>
-        <div className="min-w-[30px]">
+    <div className="flex flex-col w-full justify-center max-w-[calc(90vw-12rem)] overflow-x-clip rounded-lg">
+      <div className="flex flex-row gap-4 bg-[#093E49] px-4 py-6">
+        <Button variant="ghost" size="icon" onClick={executeCode}>
+          <Icons.executeCode className="h-6 w-6" />
+        </Button>
 
+        <div className="flex-grow min-h-[52px] rounded-sm overflow-clip">
+          <Editor
+            className="max-h-[380px] min-h-[52px]"
+            language="lua"
+            theme="merbivore"
+            height={
+              (cellCodeItems[cellId].split("\n").length > 20
+                ? 20
+                : cellCodeItems[cellId].split("\n").length) * 19
+            }
+            defaultValue={cellCodeItems[cellId]}
+            onChange={(value) => {
+              setCellCodeItems((prev) => ({
+                ...prev,
+                [cellId]: value,
+              }));
+              setActiveCell(cellId);
+            }}
+            options={{
+              minimap: { enabled: false },
+              // lineNumbers: "off",
+              lineNumbersMinChars: 2,
+              scrollBeyondLastLine: false,
+              renderLineHighlight: "none",
+            }}
+          />
         </div>
+
+        <Button variant="ghost" size="icon" onClick={() => deleteCell(cellId)}>
+          <Icons.delete className="h-6 w-6" />
+        </Button>
+      </div>
+
+      <div className="flex flex-row gap-4 min-h-[32px] bg-[#093E49]/40 px-4 py-3">
+        <div className="min-h-[32px] min-w-[30px] flex justify-center items-center">
+          {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4" />}
+          {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
+          {codeStatus == "error" && <Icons.codeError className="h-4 w-4" />}
+        </div>
+
+        <pre className="p-2 ring-white/5 overflow-scroll min-h-[32px] max-h-[300px] flex-grow mx-2">
+          {(() => {
+            try {
+              return <Ansi>{`${JSON.parse(cellOutputItems[cellId])}`}</Ansi>;
+            } catch (e) {
+              console.log(e.message);
+              return `${cellOutputItems[cellId]}`;
+            }
+          })()}
+        </pre>
+
+        <div className="min-w-[30px]"></div>
       </div>
     </div>
   );
@@ -176,7 +184,10 @@ export default function AONotebook() {
       console.log("running", activeCell);
       try {
         setRunning(activeCell);
-        const r = await sendMessage({ data: cellCodeItems[activeCell], processId: aosProcessId });
+        const r = await sendMessage({
+          data: cellCodeItems[activeCell],
+          processId: aosProcessId,
+        });
         // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any = await aoResult({
@@ -186,9 +197,15 @@ export default function AONotebook() {
 
         console.log(res);
 
-        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output}`;
-        console.log(formattedOutput)
-        setCellOutputItems((prev) => ({ ...prev, [activeCell]: formattedOutput }));
+        const formattedOutput = `${
+          JSON.stringify(res.Output.data.output, null, 2) ||
+          res.Output.data.output
+        }`;
+        console.log(formattedOutput);
+        setCellOutputItems((prev) => ({
+          ...prev,
+          [activeCell]: formattedOutput,
+        }));
       } catch (e) {
         console.log(e.message);
       }
@@ -196,40 +213,36 @@ export default function AONotebook() {
   });
 
   useEffect(() => {
-    const client = new GraphQLClient("https://arweave.net/graphql")
+    const client = new GraphQLClient("https://arweave.net/graphql");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query = gql`
-  query($address: [String!]!) {
-    transactions(
-      owners: $address
-      tags: [
-        {
-          name: "Data-Protocol",
-          values: ["ao"]
-        },
-        {
-          name: "Type",
-          values: ["Process"]
-        }
-      ]
-    ) {
-      edges {
-        node {
-          id
+      query ($address: [String!]!) {
+        transactions(
+          owners: $address
+          tags: [
+            { name: "Data-Protocol", values: ["ao"] }
+            { name: "Type", values: ["Process"] }
+          ]
+        ) {
+          edges {
+            node {
+              id
+            }
+          }
         }
       }
-    }
-  }
-`
+    `;
     async function fetchProcesses() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const address = await (window as any).arweaveWallet.getActiveAddress()
-      const res = await client.request(query, { address })
+      const address = await (window as any).arweaveWallet.getActiveAddress();
+      const res = await client.request(query, { address });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setMyProcesses((res as any).transactions.edges.map((edge: any) => edge.node.id))
+      setMyProcesses(
+        (res as any).transactions.edges.map((edge: any) => edge.node.id)
+      );
     }
-    fetchProcesses()
-  }, [])
+    fetchProcesses();
+  }, []);
 
   function processSelected(pid: string) {
     console.log("using process", pid);
@@ -279,9 +292,7 @@ export default function AONotebook() {
   }
 
   return (
-    <div className="h-[calc(100vh-40px)] w-full p-2 overflow-scroll flex flex-col items-center">
-      <div className="text-xl text-center">Welcome to AO Notebook!</div>
-
+    <div className="h-full w-full overflow-scroll flex flex-col gap-4 items-center p-4">
       {isSpawning && <div className="text-center">Spawning process...</div>}
 
       {!isSpawning && (
@@ -291,7 +302,7 @@ export default function AONotebook() {
               Process ID: <pre className="inline">{aosProcessId}</pre>
             </div>
           ) : (
-            <button className="bg-white text-black text-center px-3 text-lg mx-auto m-2" onClick={spawnProcess}>spawn new process</button>
+            <Button onClick={spawnProcess}>spawn new process</Button>
           )}
         </>
       )}
@@ -319,12 +330,11 @@ export default function AONotebook() {
         );
       })}
 
-      {aosProcessId && <button
-        onClick={addNewCell}
-        className="bg-white text-black text-center px-3 font-bold text-xl mx-auto"
-      >
-        + add cell
-      </button>}
+      {aosProcessId && (
+        <Button onClick={addNewCell}>
+          <Icons.add className="text-black" /> add new cell
+        </Button>
+      )}
     </div>
   );
 }

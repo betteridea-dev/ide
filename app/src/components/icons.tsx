@@ -26,6 +26,9 @@ import {
   Trash2,
   PlusIcon,
   PlusCircle,
+  CheckCircle2Icon,
+  XCircle,
+  Loader,
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
@@ -57,4 +60,7 @@ export const Icons = {
   delete: Trash2,
   add: PlusIcon,
   addCircle: PlusCircle,
+  codeSuccess: CheckCircle2Icon,
+  codeError: XCircle,
+  codeRunning: Loader,
 };
