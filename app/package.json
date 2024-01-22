@@ -16,6 +16,7 @@
     "@permaweb/aoconnect": "^0.0.33",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
     "ansi-to-react": "^6.1.6",
     "arweave": "^1.14.4",
     "arweavekit": "^1.5.1",

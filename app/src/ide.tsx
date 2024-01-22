@@ -3,7 +3,7 @@ import JSZip from "jszip";
 import saveAs from "file-saver";
 import logo from "./assets/logo.svg";
 import * as menuicons from "./assets/icons/menu";
-import Home from "./components/home";
+import Home from "@/components/home";
 import AosHome from "./components/aosHome";
 import Deploy from "./components/deploy";
 import Test from "./components/test";
@@ -18,6 +18,8 @@ import useContracts from "./hooks/useContracts";
 import AONotebook from "./components/ao notebook";
 import AOChat from "./components/aochat";
 import { ModeToggle } from "./components/mode-toggle";
+import { Switch } from "./components/ui/switch";
+import { Button } from "@/components/ui/button";
 
 type MenuItemObj = {
   text: string;
@@ -332,10 +334,13 @@ export default function IDE() {
   return (
     <div className="flex flex-col min-h-screen h-screen max-h-screen">
       {/* Navbar */}
-      <div className="flex border-b border-white/30 h-10">
-        <div className="min-w-[300px] p-2 flex justify-center items-center gap-2 border-r border-white/30">
+      <div className="flex h-20 px-6">
+        <div className="flex justify-center items-center gap-2">
           <img src={logo} className="h-6 w-6" />
-          <div>Better IDE</div>
+
+          <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+            Better IDE
+          </h1>
         </div>
 
         {activeContract && (
@@ -347,27 +352,21 @@ export default function IDE() {
         )}
 
         <div className="ml-auto flex justify-center items-center px-3">
-          <>
-            {aosView ? (
-              <button
-                className="p-1 flex items-center gap-1"
-                onClick={() => setAosView(false)}
-              >
-                <img src={bideLogo} width={22} />
-                Switch to Warp
-              </button>
-            ) : (
-              <button
-                className="p-1 flex items-center gap-1"
-                onClick={() => setAosView(true)}
-              >
-                <img src={menuicons.arglyph} width={22} />
-                Switch to AOS
-              </button>
-            )}
+          {aosView ? (
+            <Button onClick={() => setAosView(false)}>
+              <img src={bideLogo} width={22} />
+              Switch to Warp
+            </Button>
+          ) : (
+            <Button onClick={() => setAosView(true)}>
+              <img src={menuicons.arglyph} width={22} />
+              Switch to AOS
+            </Button>
+          )}
 
-            <ModeToggle />
-          </>
+          {/* <Switch checked={true} onCheckedChange={(_) => console.log} /> */}
+
+          <ModeToggle />
         </div>
       </div>
 
