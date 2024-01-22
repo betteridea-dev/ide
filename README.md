@@ -40,8 +40,8 @@ Try it [here](https://ankushKun.github.io/betterIDE/)
 ```bash
 git clone git@github.com:<YOUR_USERNAME>/betterIDE.git
 cd betterIDE
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Open [http://localhost:5173/betterIDE/](http://localhost:5173/betterIDE/) as simple as that!
