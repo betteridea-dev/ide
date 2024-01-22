@@ -1,0 +1,78 @@
+{
+    "created": [
+        {
+            "type": "file",
+            "entityName": "DriveManifest.json",
+            "entityId": "71a2afaa-28f3-461f-867c-a981b1e847b7",
+            "dataTxId": "S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8",
+            "metadataTxId": "3v6Zk8c5n2uyA4x4poHVdPaFpVyS3DcHVq6Aov0l6f0",
+            "bundledIn": "V1kNk6tj0LRDZSh48MTUnUGPTOIppW6Zk7-Aaz4mwlg"
+        },
+        {
+            "type": "bundle",
+            "bundleTxId": "V1kNk6tj0LRDZSh48MTUnUGPTOIppW6Zk7-Aaz4mwlg"
+        }
+    ],
+    "tips": [
+        {
+            "recipient": "oeQc64JkVpmTX9XkI8Da63QyyoCnfOlEWFjaSA6_zkY",
+            "txId": "V1kNk6tj0LRDZSh48MTUnUGPTOIppW6Zk7-Aaz4mwlg",
+            "winston": "31802676"
+        }
+    ],
+    "fees": {
+        "V1kNk6tj0LRDZSh48MTUnUGPTOIppW6Zk7-Aaz4mwlg": "212017846"
+    },
+    "manifest": {
+        "manifest": "arweave/paths",
+        "version": "0.1.0",
+        "index": {
+            "path": "./.nojekyll"
+        },
+        "paths": {
+            "./.nojekyll": {
+                "id": "p7Rn2BB3sSXhHEvviaQ9WOzrDpQydF2h-6pT7WGpqGI"
+            },
+            "./assets/ecosystem-Pm6wgfuC.svg": {
+                "id": "ou6TXVIJ40sgut7lKYKEi2po6K_agt8speZz6DYqd24"
+            },
+            "./assets/index-dEDg7rkU.css": {
+                "id": "W6EfzS_QMkHdzmZUzm8efmqfMzYBr3rbWIUUkj2-UO4"
+            },
+            "./assets/index-M0j_puN3.js": {
+                "id": "NrpWmpniXsE7FPfM2wbD1cpbvDyUyrfVkA56tAhe4eo"
+            },
+            "./assets/index-qwsrEpw3.js": {
+                "id": "5Hj57AehcAji4APOZE0pkCKCeC3XJ9KrCVvdDSSaymw"
+            },
+            "./assets/running-5ZWEBWR2.webp": {
+                "id": "8H3BVd2mdyHHQ6SE3zy5vqbf55y011bmWsesrHBPH8Y"
+            },
+            "./assets/web.bundle.min-o_8LNKIc.js": {
+                "id": "q0KQx5LMI1GEp5YieFWUXKxwLpfO2BAN6kuF9GRtGyM"
+            },
+            "./assets/web.bundle.min-UIrkjpjC.js": {
+                "id": "skp7nkwD8xiPQq9l20xI2dDGPpSvg6tGMNgwA4iR_2Y"
+            },
+            "./index.html": {
+                "id": "EtpRVQPWdi_Ocbb65FzDo2bGl3IONRB1sZU_owpz7NM"
+            },
+            "./logo.svg": {
+                "id": "kBx5sj4MQGig5hnbq9n-rCDsoxbAmeGKIZBrKTpx9xs"
+            }
+        }
+    },
+    "links": [
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./.nojekyll",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/ecosystem-Pm6wgfuC.svg",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/index-dEDg7rkU.css",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/index-M0j_puN3.js",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/index-qwsrEpw3.js",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/running-5ZWEBWR2.webp",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/web.bundle.min-o_8LNKIc.js",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./assets/web.bundle.min-UIrkjpjC.js",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./index.html",
+        "https://arweave.net/S8J5DIFFXvdl2I2SO_Bmk-pEeYTejEXAtd-lbpaGUy8/./logo.svg"
+    ]
+}

@@ -1,0 +1,27 @@
+{
+    "created": [
+        {
+            "type": "file",
+            "entityName": "manifest.json",
+            "entityId": "f00ef8bb-1e6c-45bd-8444-eb4a1ae37809",
+            "dataTxId": "adasIU4gr0hKxqRWRCFPY8mmEpmX8eY5PS61XWLo3Rg",
+            "metadataTxId": "_NMTz8SVoOOitiTOfqouIGhJfG8jmAmCH2F-_493BwY",
+            "bundledIn": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A",
+            "sourceUri": "file:///home/ankush/Developer/ARWEAVE/betterIDE/app/dist/manifest.json"
+        },
+        {
+            "type": "bundle",
+            "bundleTxId": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A"
+        }
+    ],
+    "tips": [
+        {
+            "recipient": "Zznp65qgTIm2QBMjjoEaHKOmQrpTu0tfOcdbkm_qoL4",
+            "txId": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A",
+            "winston": "31802676"
+        }
+    ],
+    "fees": {
+        "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A": "212017846"
+    }
+}
