@@ -20,10 +20,13 @@ import AOChat from "./components/aochat";
 import { ModeToggle } from "./components/mode-toggle";
 import { Switch } from "./components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { cn } from "./lib/utils";
+import { Icons } from "./components/icons";
+import { LucideIcon } from "lucide-react";
 
 type MenuItemObj = {
   text: string;
-  icon: string;
+  icon: LucideIcon;
   onClick?: () => void;
 };
 
@@ -39,21 +42,21 @@ export default function IDE() {
   const aosMenuItems: MenuItemObj[] = [
     {
       text: "Home",
-      icon: menuicons.home,
+      icon: Icons.home,
       onClick: () => {
         setActiveMenuItem("Home");
       },
     },
     {
       text: "Notebook",
-      icon: menuicons.files,
+      icon: Icons.projects,
       onClick: () => {
         setActiveMenuItem("Notebook");
       },
     },
     {
       text: "AOChat",
-      icon: menuicons.arglyph,
+      icon: Icons.chat,
       onClick: () => {
         setActiveMenuItem("AOChat");
       },
@@ -63,7 +66,7 @@ export default function IDE() {
   const menuItems: MenuItemObj[] = [
     {
       text: "Home",
-      icon: menuicons.home,
+      icon: Icons.home,
       onClick: () => {
         setActiveMenuItem("Home");
         setActiveFile("");
@@ -71,14 +74,14 @@ export default function IDE() {
     },
     {
       text: "Contracts",
-      icon: menuicons.files,
+      icon: Icons.projects,
       onClick: () => {
         setShowFileList(!showFileList);
       },
     },
     {
       text: "Deploy",
-      icon: menuicons.deploy,
+      icon: Icons.deploy,
       onClick: () => {
         setActiveMenuItem("Deploy");
         setActiveFile("");
@@ -86,7 +89,7 @@ export default function IDE() {
     },
     {
       text: "Test",
-      icon: menuicons.test,
+      icon: Icons.test,
       onClick: () => {
         setActiveMenuItem("Test");
         setActiveFile("");
@@ -94,7 +97,7 @@ export default function IDE() {
     },
     {
       text: "Cloud",
-      icon: menuicons.cloud,
+      icon: Icons.executeCode,
       onClick: () => {
         setActiveMenuItem("Cloud");
         setActiveFile("");
@@ -102,7 +105,7 @@ export default function IDE() {
     },
     {
       text: "Showcase",
-      icon: menuicons.marketplace,
+      icon: Icons.plugins,
       onClick: () => {
         setActiveMenuItem("Showcase");
         setActiveFile("");
@@ -137,6 +140,31 @@ export default function IDE() {
     setActiveMenuItem("Home");
   }, [aosView]);
 
+  function SideMenuItem({
+    text,
+    Icon,
+    onClick,
+  }: {
+    text: string;
+    Icon: LucideIcon;
+    onClick?: () => void;
+  }) {
+    const active = activeMenuItem == text;
+
+    return (
+      <div
+        onClick={onClick}
+        className={cn(
+          "flex gap-1 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer",
+          active ? "bg-accent" : "transparent"
+        )}
+      >
+        <Icon className="mr-2 h-4 w-4" />
+        <span>{text}</span>
+      </div>
+    );
+  }
+
   function FileTab({ filename }: { filename: string }) {
     // at the top bar
     return (
@@ -150,42 +178,6 @@ export default function IDE() {
         }}
       >
         {filename}
-      </div>
-    );
-  }
-
-  function MenuItem({
-    text,
-    icon,
-    onClick,
-  }: {
-    text: string;
-    icon: string;
-    onClick?: () => void;
-  }) {
-    const active = activeMenuItem == text;
-    // const [hover, setHover] = useState(false)
-    // const [mpos, setMpos] = useState({ x: 0, y: 0 })
-
-    // function mouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    //     setHover(true)
-    //     setMpos({ x: e.pageX, y: e.pageY })
-    // }
-
-    // on the left sidebar
-    return (
-      <div
-        className={`w-full p-3 px-2 items-center justify-start flex gap-2 cursor-pointer ${
-          active && "bg-white/10"
-        }`}
-        onClick={onClick}
-        // onMouseEnter={() => setHover(true)}
-        // onMouseLeave={() => setHover(false)}
-        // onMouseMove={mouseMove}
-      >
-        <img src={icon} className="w-8 h-8 " />
-        <div className={`${active && "text-[#81A5A0]"} break-keep`}>{text}</div>
-        {/* {hover && <div className={`absolute bg-white/20 p-0.5 px-2 font-semibold ${active && "text-[#81A5A0]"}`} style={{ left: mpos.x + 10, top: mpos.y - 25 }}>{text}</div>} */}
       </div>
     );
   }
@@ -371,30 +363,29 @@ export default function IDE() {
       </div>
 
       <div className="grow flex">
-        <div className="w-[50px]"></div>
-
         {/* Left Bar */}
-        <div className="absolute z-50 bg-[#0A1917] h-[calc(100vh-40px)] w-[50px] hover:w-[150px] transition-all duration-200 overflow-clip flex flex-col border-r border-white/30">
+        <div className="flex flex-col gap-4 px-4 w-48 pb-2">
           {(aosView ? aosMenuItems : menuItems).map((item, i) => {
             return (
-              <MenuItem
+              <SideMenuItem
                 key={i}
                 text={item.text}
-                icon={item.icon}
+                Icon={item.icon}
                 onClick={item.onClick}
               />
             );
           })}
 
-          <div className="grow"></div>
+          <div className="flex-grow"></div>
 
-          <MenuItem
+          <SideMenuItem
             text="Settings"
-            icon={menuicons.settings}
+            Icon={Icons.settings}
             onClick={() => setActiveMenuItem("Settings")}
           />
         </div>
 
+        {/* File List */}
         {!aosView && showFileList && (
           <div className="min-w-[150px] border-r border-white/30">
             {contracts &&
@@ -411,6 +402,7 @@ export default function IDE() {
           </div>
         )}
 
+        {/* Main Screen */}
         <div className="grow">{TabSwitcher()}</div>
       </div>
     </div>

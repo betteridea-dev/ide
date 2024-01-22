@@ -3,6 +3,8 @@ import CEditor from "./editor";
 import { useSearchParams } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 
+import "@/styles/globals.css";
+
 export default function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
