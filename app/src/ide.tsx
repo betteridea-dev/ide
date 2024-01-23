@@ -331,7 +331,7 @@ export default function IDE() {
           <img src={logo} className="h-6 w-6" />
 
           <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
-            Better IDE
+            {aosView ? "AOS Notebook" : "Better IDE"}
           </h1>
         </div>
 
@@ -344,7 +344,7 @@ export default function IDE() {
         )}
 
         <div className="ml-auto flex justify-center items-center px-3">
-          {aosView ? (
+          {/* {aosView ? (
             <Button onClick={() => setAosView(false)}>
               <img src={bideLogo} width={22} />
               Switch to Warp
@@ -354,11 +354,16 @@ export default function IDE() {
               <img src={menuicons.arglyph} width={22} />
               Switch to AOS
             </Button>
-          )}
+          )} */}
 
-          {/* <Switch checked={true} onCheckedChange={(_) => console.log} /> */}
+          <Switch
+            checked={aosView}
+            onCheckedChange={(val) => {
+              setAosView(val);
+            }}
+          />
 
-          <ModeToggle />
+          {/* <ModeToggle /> */}
         </div>
       </div>
 
