@@ -1,6 +1,9 @@
+import { Button } from "./ui/button";
+import { Combobox } from "./ui/combo-box";
+
 export default function AosHome() {
   return (
-    <div className="h-full flex flex-col gap-2 items-center justify-center">
+    <div className="h-full flex flex-col gap-2 items-center justify-evenly">
       <h1 className="text-2xl tracking-tight">
         <span className="italic font-light mr-1">
           Unlock Infinite Creativity with{" "}
@@ -10,9 +13,27 @@ export default function AosHome() {
         </span>
       </h1>
 
-      <div>
-        <h3>Recent processes</h3>
+      <div className="w-full max-w-xl flex flex-col gap-8">
+        <h3 className="text-xl font-bold italic">Recent processes</h3>
+
+        <div>
+          <p className="font-normal mb-2">Select a process</p>
+
+          <Combobox />
+        </div>
       </div>
+
+      <div className="w-full max-w-xl flex flex-col gap-8">
+        <h3 className="text-xl font-bold italic">Explore templates</h3>
+
+        <div className="grid grid-cols-3 gap-2">
+          {["Chatroom", "Token", "Ping Pong"].map((label, i) => (
+            <Button>{label}</Button>
+          ))}
+        </div>
+      </div>
+
+      <Button variant="secondary">Start new process</Button>
     </div>
   );
 }
