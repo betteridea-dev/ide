@@ -4,24 +4,24 @@
             "type": "file",
             "entityName": "manifest.json",
             "entityId": "f00ef8bb-1e6c-45bd-8444-eb4a1ae37809",
-            "dataTxId": "adasIU4gr0hKxqRWRCFPY8mmEpmX8eY5PS61XWLo3Rg",
-            "metadataTxId": "_NMTz8SVoOOitiTOfqouIGhJfG8jmAmCH2F-_493BwY",
-            "bundledIn": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A",
+            "dataTxId": "Am-SEQr_W9IiMu5b3_fVyXgIf6zmzFnCMRxaF2CAp6Q",
+            "metadataTxId": "9sU439-vR87xmv2uSHTKGYoD1eezZvw25v18eyk-UO4",
+            "bundledIn": "c-osl-Y54aH71xytI3cIcPo7tolUed58nF5CIk5ERUI",
             "sourceUri": "file:///home/ankush/Developer/ARWEAVE/betterIDE/app/dist/manifest.json"
         },
         {
             "type": "bundle",
-            "bundleTxId": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A"
+            "bundleTxId": "c-osl-Y54aH71xytI3cIcPo7tolUed58nF5CIk5ERUI"
         }
     ],
     "tips": [
         {
             "recipient": "Zznp65qgTIm2QBMjjoEaHKOmQrpTu0tfOcdbkm_qoL4",
-            "txId": "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A",
+            "txId": "c-osl-Y54aH71xytI3cIcPo7tolUed58nF5CIk5ERUI",
             "winston": "31802676"
         }
     ],
     "fees": {
-        "6JHw_9APMRxRdZJQE8LOeMjRyX-Fr3s-bDxRG7HNk5A": "212017846"
+        "c-osl-Y54aH71xytI3cIcPo7tolUed58nF5CIk5ERUI": "212017846"
     }
 }

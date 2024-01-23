@@ -2,20 +2,20 @@
 import fs from 'fs'
 import dotenv from 'dotenv'
 import { execSync } from 'child_process';
-// import { WarpFactory, defaultCacheOptions } from "warp-contracts";
-// import Arweave from "arweave";
+import { WarpFactory, defaultCacheOptions } from "warp-contracts";
+import Arweave from "arweave";
 
 dotenv.config()
 
-// const ANT = "aXJmbLDKLMTnmjyhvEcpML0nI1GZaNQVIGahTWX5mLw"
-// const SUBDOMAIN = "gitar"
+const ANT = "aXJmbLDKLMTnmjyhvEcpML0nI1GZaNQVIGahTWX5mLw"
+// const SUBDOMAIN = "betteridea"
 
-// const jwk = JSON.parse(Buffer.from(process.env.WALLET64, "base64").toString("utf-8"));
-// // console.log(jwk)
-// const arweave = Arweave.init({ host: "arweave.net", port: 443, protocol: "https" });
-// const warp = WarpFactory.custom(arweave, defaultCacheOptions, "mainnet").useArweaveGateway().build();
+const jwk = JSON.parse(Buffer.from(process.env.WALLET64, "base64").toString("utf-8"));
+// console.log(jwk)
+const arweave = Arweave.init({ host: "arweave.net", port: 443, protocol: "https" });
+const warp = WarpFactory.custom(arweave, defaultCacheOptions, "mainnet").useArweaveGateway().build();
 
-// const contract = warp.contract(ANT).connect(jwk);
+const contract = warp.contract(ANT).connect(jwk);
 
 
 const _ = (err, stdout, stderr) => {
@@ -60,14 +60,14 @@ const dataTxnId = out.created[0].dataTxId
 console.log("deployed at https://arweave.net/" + dataTxnId)
 
 
-// console.log("Updating ANT token...")
-// contract.writeInteraction({
-//     function: "setRecord",
-//     subDomain: SUBDOMAIN,
-//     transactionId: dataTxnId,
-//     ttlSeconds: 3600
-// }).then((tx) => {
-//     console.log(tx.originalTxId)
-// }).catch((err) => {
-//     console.log(err)
-// })
+console.log("Updating ANT token...")
+contract.writeInteraction({
+    function: "setRecord",
+    subDomain: "@",
+    transactionId: dataTxnId,
+    ttlSeconds: 3600
+}).then((tx) => {
+    console.log(tx.originalTxId)
+}).catch((err) => {
+    console.log(err)
+})
