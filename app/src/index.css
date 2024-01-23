@@ -2,59 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-
 * {
   padding: 0px;
   margin: 0px;
   scroll-behavior: smooth !important;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  /* font-family: monospace; */
   color: whitesmoke;
-  /* transition: all 100ms; */
 }
 
 *::-webkit-scrollbar {
   display: none;
-}
-
-button {
-  transition: all 100ms ease-in-out;
-}
-
-button:hover {
-  transform: scale(1.05);
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-html,
-body {
-  min-height: 100vh;
-  width: 100%;
-  background-color: #0A1917;
-}
-
-select {
-  background-color: whitesmoke;
-  color: #0A1917;
-  border: none;
-  outline: none;
-}
-
-select:focus {
-  border: none;
-  outline: none;
-}
-
-select:active {
-  border: none;
-  outline: none;
-}
-
-select option {
-  background-color: whitesmoke;
-  color: black;
 }

@@ -156,7 +156,7 @@ export default function IDE() {
         onClick={onClick}
         className={cn(
           "flex gap-1 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer",
-          active ? "bg-accent" : "transparent"
+          active ? "bg-[#006F86]" : "transparent"
         )}
       >
         <Icon className="mr-2 h-4 w-4" />
@@ -326,7 +326,7 @@ export default function IDE() {
   return (
     <div className="flex flex-col min-h-screen h-screen max-h-screen">
       {/* Navbar */}
-      <div className="flex h-20 px-6">
+      <div className="flex h-20 px-6 bg-[#111111]">
         <div className="flex justify-center items-center gap-2">
           <img src={logo} className="h-6 w-6" />
 
@@ -364,7 +364,7 @@ export default function IDE() {
 
       <div className="grow flex">
         {/* Left Bar */}
-        <div className="flex flex-col gap-4 px-4 w-48 pb-2">
+        <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717]">
           {(aosView ? aosMenuItems : menuItems).map((item, i) => {
             return (
               <SideMenuItem
@@ -403,7 +403,7 @@ export default function IDE() {
         )}
 
         {/* Main Screen */}
-        <div className="grow">{TabSwitcher()}</div>
+        <div className="grow bg-[#1d1d1d]">{TabSwitcher()}</div>
       </div>
     </div>
   );
