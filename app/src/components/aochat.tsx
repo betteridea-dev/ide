@@ -187,8 +187,8 @@ export default function AOChat() {
   }
 
   return (
-    <div className="p-2 h-full flex flex-col">
-      <div className="flex justify-between">
+    <div className="p-2 h-full max-h-[calc(100vh-5rem)] flex flex-col">
+      <div className="flex flex-row gap-2 justify-between">
         <div>Welcome to AO chatroom!</div>
         <div>Here you can talk with other people through AO</div>
         <div>
@@ -196,7 +196,7 @@ export default function AOChat() {
         </div>
       </div>
 
-      <div className="w-full h-full bg-black/30 p-2 overflow-scroll flex flex-col-reverse gap-5">
+      <div className="w-full h-full max-h-full flex-grow overflow-scroll bg-black/30 p-2 flex flex-col-reverse gap-5">
         {messages.map((message, index) => {
           return (
             <div key={index} className="flex flex-col font-mono">
