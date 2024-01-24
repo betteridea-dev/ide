@@ -269,6 +269,7 @@ export default function AONotebook() {
     console.log(res);
     setAOSProcess(res);
     setSpawning(false);
+    addNewCell();
   }
 
   function addNewCell() {

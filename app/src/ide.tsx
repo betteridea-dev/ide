@@ -331,7 +331,8 @@ export default function IDE() {
           <img src={logo} className="h-6 w-6" />
 
           <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
-            {aosView ? "AOS Notebook" : "Better IDE"}
+            BetterIDEa 
+            {/* | {aosView ? "AO Mode" : "Warp Mode"} */}
           </h1>
         </div>
 
@@ -343,7 +344,7 @@ export default function IDE() {
           </div>
         )}
 
-        <div className="ml-auto flex justify-center items-center px-3">
+        <div className="ml-auto flex justify-center items-center px-3 gap-2">
           {/* {aosView ? (
             <Button onClick={() => setAosView(false)}>
               <img src={bideLogo} width={22} />
@@ -356,6 +357,7 @@ export default function IDE() {
             </Button>
           )} */}
 
+          {aosView ? "AO Mode" : "Warp Mode"}
           <Switch
             checked={aosView}
             onCheckedChange={(val) => {

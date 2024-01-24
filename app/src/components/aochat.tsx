@@ -110,9 +110,14 @@ export default function AOChat() {
         for (const msg in inbox) {
           // console.log(inbox[msg])
           if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
-            const m: message = JSON.parse(inbox[msg].Data);
-            // console.log(m)
-            messages.unshift(m);
+            try {
+              const m: message = JSON.parse(inbox[msg].Data);
+              // console.log(m)
+              messages.unshift(m);
+            } catch (e) {
+              console.log(e.message)
+              continue
+            }
           }
         }
         console.log(messages.length, "messages");
@@ -190,7 +195,7 @@ export default function AOChat() {
     <div className="p-2 h-full max-h-[calc(100vh-5rem)] flex flex-col">
       <div className="flex flex-row gap-2 justify-between">
         <div>Welcome to AO chatroom!</div>
-        <div>Here you can talk with other people through AO</div>
+        {/* <div>Here you can talk with other people through AO</div> */}
         <div>
           Your ID: <pre className="inline">{myProcess}</pre>
         </div>
