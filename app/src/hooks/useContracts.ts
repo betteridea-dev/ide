@@ -27,8 +27,9 @@ export default function useContracts() {
         localStorage.setItem("contracts", JSON.stringify(contracts))
     }, [contracts])
 
-    function newContract(src?: string, state?: string) {
+    function newContract(src?: string, state?: string): string | void {
         const name = prompt("Enter contract name")
+        if (!name) return
         if (name in contracts) return alert("Contract with same name already exists")
         const nc = {
             ...contracts,
@@ -39,6 +40,7 @@ export default function useContracts() {
             }
         }
         setContracts(nc)
+        return name
     }
 
     function deleteContract(name: string) {
@@ -48,4 +50,11 @@ export default function useContracts() {
     }
 
     return { contracts, setContracts, newContract, deleteContract }
+}
+
+export interface ContractsType {
+    contracts: contractsType;
+    setContracts: React.Dispatch<React.SetStateAction<contractsType>>;
+    newContract: (src?: string, state?: string) => string | void;
+    deleteContract: (name: string) => void;
 }

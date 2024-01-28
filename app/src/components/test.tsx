@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react"
 import useDeployments, { deployment } from "../hooks/useDeployments"
-import useContracts from "../hooks/useContracts"
+import { ContractsType } from "../hooks/useContracts"
 import { viewContractState, writeContract } from "arweavekit/contract"
 
-export default function Test({ target }: { target: string }) {
+export default function Test({ contracts, target }: { contracts: ContractsType, target: string }) {
     const [activeDeployment, setActiveDeployment] = useState<string>()
     const [callType, setCallType] = useState<"read" | "write">("read")
     const [functionName, setFunctionName] = useState<string>("")
     const { deployments, removeDeployment } = useDeployments()
-    const { contracts, setContracts } = useContracts()
+
     const [success, setSuccess] = useState<boolean>(false)
     const [latestState, setLatestState] = useState<string>("")
     const [result, setResult] = useState<string>("")
 
     useEffect(() => {
-        setContracts({
-            ...contracts,
+        contracts.setContracts({
+            ...contracts.contracts,
             "input": {
                 "README.md": "This is not a contract. The state.json is used to send arguments to the contract for testing.",
                 "state.json": JSON.stringify({ name: "ankushKun" }),

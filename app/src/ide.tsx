@@ -15,8 +15,8 @@ import download from "./assets/download.svg";
 import deploy from "./assets/deploy.svg";
 import bideLogo from "./assets/logo.svg";
 import useContracts from "./hooks/useContracts";
-import AONotebook from "./components/ao notebook";
-import AOChat from "./components/aochat";
+import AONotebook from "./components/aoNotebook";
+import AOChat from "./components/aoChat";
 import { ModeToggle } from "./components/mode-toggle";
 import { Switch } from "./components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ type MenuItemObj = {
 };
 
 export default function IDE() {
-  const { contracts, newContract, deleteContract } = useContracts();
+  const contracts = useContracts();
   const [activeMenuItem, setActiveMenuItem] = useState("");
   const [showFileList, setShowFileList] = useState(true);
   const [activeContract, setActiveContract] = useState("");
@@ -211,6 +211,20 @@ export default function IDE() {
             setActiveContract(contractname);
             setActiveFile("README.md");
             setActiveMenuItem("Contracts");
+            const recents = localStorage.getItem("recents");
+            if (recents) {
+              const recentsJson: string[] = JSON.parse(recents);
+              if (recentsJson.includes(contractname)) {
+                recentsJson.splice(recentsJson.indexOf(contractname), 1);
+              }
+              else if (recentsJson.length > 4) {
+                recentsJson.pop();
+              }
+              recentsJson.unshift(contractname);
+              localStorage.setItem("recents", JSON.stringify(recentsJson));
+            } else {
+              localStorage.setItem("recents", JSON.stringify([contractname]));
+            }
           }}
         >
           {contractname}
@@ -251,7 +265,12 @@ export default function IDE() {
               <button
                 className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
-                  deleteContract(contractname);
+                  contracts.deleteContract(contractname);
+                  const recents = JSON.parse(localStorage.getItem("recents")!) || [];
+                  if (recents.includes(contractname)) {
+                    recents.splice(recents.indexOf(contractname), 1);
+                    localStorage.setItem("recents", JSON.stringify(recents));
+                  }
                 }}
               >
                 <img src={_delete} width={17} />
@@ -293,7 +312,7 @@ export default function IDE() {
         case "Deploy":
           return (
             <Deploy
-              contracts={contracts!}
+              contracts={contracts.contracts!}
               target={activeContract}
               test={(c: string) => {
                 setActiveMenuItem("Test");
@@ -302,7 +321,7 @@ export default function IDE() {
             />
           );
         case "Test":
-          return <Test target={testTarget} />;
+          return <Test contracts={contracts} target={testTarget} />;
         case "Cloud":
           return <Cloud />;
         case "Showcase":
@@ -310,7 +329,7 @@ export default function IDE() {
         case "Settings":
           return <Settings />;
         default:
-          return <Home />;
+          return <Home contracts={contracts} setActiveContract={setActiveContract} setActiveFile={setActiveFile} setActiveMenuItem={setActiveMenuItem} />;
       }
     }
   }
@@ -387,14 +406,14 @@ export default function IDE() {
         {/* File List */}
         {!aosView && showFileList && (
           <div className="min-w-[150px] border-r border-white/30 bg-[#171717]">
-            {contracts &&
-              Object.keys(contracts).map((contractname, i) => {
+            {contracts.contracts &&
+              Object.keys(contracts.contracts).map((contractname, i) => {
                 if (contractname == "input") return;
                 return <FileListItem key={i} contractname={contractname} />;
               })}
             <div
               className="p-2 cursor-pointer hover:bg-[#2f2f2f]"
-              onClick={newContract}
+              onClick={() => contracts.newContract()}
             >
               + new
             </div>

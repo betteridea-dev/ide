@@ -3,7 +3,7 @@ import { editor } from "monaco-editor";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom"
 import theme from "./themes/code.json"
-import useContracts from "./hooks/useContracts";
+import useContracts, { contractsType } from "./hooks/useContracts";
 
 export default function CEditor() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -21,7 +21,9 @@ export default function CEditor() {
     useEffect(() => {
         if (!contracts) return
         // console.log(contracts, contractName, contractFile)
-        const src = contracts[contractName][contractFile]
+        const c: contractsType = JSON.parse(localStorage.getItem("contracts")! || "{}")
+        const src = c[contractName][contractFile]
+        setContracts(c)
         setValue(src)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
