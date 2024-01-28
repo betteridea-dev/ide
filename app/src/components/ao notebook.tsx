@@ -1,14 +1,12 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
 import theme from "../themes/merbivore-modified.json";
 import { useEffect, useState } from "react";
-import runIcon from "../assets/run.svg";
 import { v4 } from "uuid";
 import {
   connect,
   createDataItemSigner,
   result as aoResult,
 } from "@permaweb/aoconnect";
-import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../config";
@@ -73,9 +71,10 @@ function CodeCell({
         process: aosProcess,
       });
 
-      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${
+        JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-        }`;
+      }`;
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
@@ -168,7 +167,7 @@ export default function AONotebook() {
     if (activeProcess) {
       setAOSProcess(activeProcess);
     }
-  }, [])
+  }, []);
 
   function setRunning(cellId: string) {
     setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
@@ -200,9 +199,10 @@ export default function AONotebook() {
 
         console.log(res);
 
-        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
+        const formattedOutput = `${
+          JSON.stringify(res.Output.data.output, null, 2) ||
           res.Output.data.output
-          }`;
+        }`;
         console.log(formattedOutput);
         setCellOutputItems((prev) => ({
           ...prev,

@@ -4,14 +4,25 @@ import { Combobox } from "./ui/combo-box";
 import { gql, GraphQLClient } from "graphql-request";
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { AOModule, AOScheduler } from "../../config";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val: string) => void }) {
+export default function AosHome({
+  setActiveMenuItem,
+}: {
+  setActiveMenuItem: (val: string) => void;
+}) {
   const [myProcesses, setMyProcesses] = useState<string[]>([]);
   const [spawning, setSpawning] = useState(false);
 
-
   useEffect(() => {
     const client = new GraphQLClient("https://arweave.net/graphql");
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query = gql`
       query ($address: [String!]!) {
@@ -30,15 +41,18 @@ export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val
         }
       }
     `;
+
     async function fetchProcesses() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const address = await (window as any).arweaveWallet.getActiveAddress();
       const res = await client.request(query, { address });
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setMyProcesses(
         (res as any).transactions.edges.map((edge: any) => edge.node.id)
       );
     }
+
     fetchProcesses();
   }, []);
 
@@ -79,14 +93,29 @@ export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val
       <div className="w-full max-w-xl flex flex-col gap-8">
         <h3 className="text-xl font-bold">Your Processes</h3>
 
-        <div className="flex gap-3 items-center">
-          <Combobox options={myProcesses} onChange={(e) => {
-            localStorage.setItem("activeProcess", e);
-            console.log(e)
-            setActiveMenuItem("Notebook")
-          }} />
-          <span>or</span>
-          <Button disabled={spawning} onClick={spawnProcess}>Create new process</Button>
+        <div className="flex flex-row gap-3 items-center">
+          <Select
+            onValueChange={(val) => {
+              localStorage.setItem("activeProcess", val);
+              setActiveMenuItem("Notebook");
+            }}
+          >
+            <SelectTrigger className="flex-grow max-w-full">
+              <SelectValue placeholder="Process ID" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {myProcesses.map((process) => (
+                <SelectItem value={process}>{process}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div>OR</div>
+
+          <Button disabled={spawning} onClick={spawnProcess}>
+            Create New Process
+          </Button>
         </div>
       </div>
 
