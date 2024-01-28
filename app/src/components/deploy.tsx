@@ -181,12 +181,12 @@ export default function Deploy({ contracts, target, test }: { contracts: contrac
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                    <div className="hover:scale-105 active:scale-95 p-2 px-4">
+                    <div className="hover:scale-105 active:scale-95 transition-all duration-200 p-2 px-4">
                         <label htmlFor="wallet" className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit">{!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName} ✅`}</label>
                         <input type="file" accept="application/JSON" id="wallet" className="hidden" onChange={(e) => dispatch({ type: "set_file", payload: e.target.files[0] })} />
                     </div>
                     <button
-                        className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit"
+                        className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit hover:scale-105 active:scale-95"
                         onClick={() => {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (window as any).arweaveWallet.connect(['ACCESS_ADDRESS', 'SIGN_TRANSACTION', 'ACCESS_PUBLIC_KEY', 'SIGNATURE']).then(() => {

@@ -1,4 +1,4 @@
-import { connect, createDataItemSigner, result } from "@permaweb/aoconnect";
+import { connect, createDataItemSigner, result, } from "@permaweb/aoconnect";
 import { useEffect, useState } from "react";
 import { AOModule, AOScheduler, AOChatPID } from "../../config";
 

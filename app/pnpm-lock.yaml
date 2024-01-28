@@ -9,8 +9,8 @@ dependencies:
     specifier: ^4.6.0
     version: 4.6.0(monaco-editor@0.45.0)(react-dom@18.2.0)(react@18.2.0)
   '@permaweb/aoconnect':
-    specifier: ^0.0.33
-    version: 0.0.33
+    specifier: ^0.0.37
+    version: 0.0.37
   '@radix-ui/react-dialog':
     specifier: ^1.0.5
     version: 1.0.5(@types/react-dom@18.2.17)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -1575,19 +1575,19 @@ packages:
     dev: false
     optional: true
 
-  /@permaweb/ao-scheduler-utils@0.0.7:
-    resolution: {integrity: sha512-N3pAin4FC+p9WF8WwSR4K6uSyEXTVMFuFiijscwf70MlY03egxeVy91FdXqF4kGOtx1matcXEzseOUjqypkXlQ==}
+  /@permaweb/ao-scheduler-utils@0.0.8:
+    resolution: {integrity: sha512-RD0cxai/O4dV/tXmaL/98UsltxHjGENlr7g1QooEWzxwaWsX+BrTPZr7o4btdleimi9N79CWSH3nqo2f3fhaAQ==}
     engines: {node: '>=18'}
     dependencies:
-      lru-cache: 10.1.0
+      lru-cache: 10.2.0
       ramda: 0.29.1
     dev: false
 
-  /@permaweb/aoconnect@0.0.33:
-    resolution: {integrity: sha512-b1NZ9q1Fvmq2ukgwgadv4CU2G7INpx5lj+GygeaYE+GHlgpUw3IgIlJshPTj3GtCqWpIIYpvekT+D7HsLe0dng==}
+  /@permaweb/aoconnect@0.0.37:
+    resolution: {integrity: sha512-71fs9gIdqg3q1wSbkvJoHayPwA5MIJOLBB3RYJ/03JgQPE8qxc9s23BfJi+fubMPEflBa0e6rBtk9mp/Ww50kw==}
     engines: {node: '>=18'}
     dependencies:
-      '@permaweb/ao-scheduler-utils': 0.0.7
+      '@permaweb/ao-scheduler-utils': 0.0.8
       buffer: 6.0.3
       debug: 4.3.4(supports-color@8.1.1)
       hyper-async: 1.1.2
@@ -6438,8 +6438,8 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /lru-cache@10.1.0:
-    resolution: {integrity: sha512-/1clY/ui8CzjKFyjdvwPWJUYKiFVXG2I2cY0ssG7h4+hwk+XOIX7ZSG9Q7TW8TW3Kp3BUSqgFWBLgL4PJ+Blag==}
+  /lru-cache@10.2.0:
+    resolution: {integrity: sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==}
     engines: {node: 14 || >=16.14}
     dev: false
 

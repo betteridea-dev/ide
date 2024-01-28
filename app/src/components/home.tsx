@@ -1,8 +1,19 @@
+import useContracts from "@/hooks/useContracts"
+import { contractSrc as voteSrc, stateSrc as voteState } from "@/templates/warp/vote"
+import { contractSrc as utokenSrc, stateSrc as utokenState } from "@/templates/warp/utoken"
+import { contractSrc as dbSrc, stateSrc as dbState } from "@/templates/warp/db"
+
 export default function Home() {
-    function ContractCard(){
+    const { newContract } = useContracts()
+
+    function ContractCard({ name, src, state }: { name: string, src?: string, state?: string }) {
         return <div className="ring-1 rounded ring-white/50 p-2 px-3 flex flex-col gap-2 hover:bg-white/5">
-            <div className="text-lg">Contract name</div>
-            <button className="relative bg-green-700/40 hover:bg-green-700/80 px-2 rounded hover:w-24 w-14 text-left transition-all duration-300">
+            <div className="text-lg">{name}</div>
+            <button className="relative bg-[#2c3b50] hover:bg-[#395d8b] px-2 rounded hover:w-24 w-14 text-left transition-all duration-300"
+                onClick={() => {
+                    newContract(src, state)
+                }}
+            >
                 open
                 <div className="absolute right-2 w-full text-right text-transparent hover:text-white top-0">-&gt;</div>
             </button>
@@ -17,19 +28,18 @@ export default function Home() {
             <div>
                 <div className="text-xl my-1">Recently opened contracts</div>
                 <div className="flex gap-3">
-                    <ContractCard/>
-                    <ContractCard/>
-                    <ContractCard/>
-                    <ContractCard/>
+                    <ContractCard />
+                    <ContractCard />
+                    <ContractCard />
+                    <ContractCard />
                 </div>
             </div>
             <div>
                 <div className="text-xl my-1">Explore contract templates</div>
                 <div className="flex gap-3">
-                    <ContractCard/>
-                    <ContractCard/>
-                    <ContractCard/>
-                    <ContractCard/>
+                    <ContractCard name="Vote" src={voteSrc} state={voteState} />
+                    <ContractCard name="Database" src={dbSrc} state={dbState} />
+                    <ContractCard name="U-Token" src={utokenSrc} state={utokenState} />
                 </div>
 
             </div>

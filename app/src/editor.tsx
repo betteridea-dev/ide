@@ -2,7 +2,7 @@ import { Editor, useMonaco } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom"
-import theme from "./themes/merbivore-modified.json"
+import theme from "./themes/code.json"
 import useContracts from "./hooks/useContracts";
 
 export default function CEditor() {
@@ -11,7 +11,7 @@ export default function CEditor() {
     const { contracts, setContracts } = useContracts()
     const [value, setValue] = useState("")
     const monaco = useMonaco()
-    monaco?.editor.defineTheme("merbivore", theme as editor.IStandaloneThemeData)
+    monaco?.editor.defineTheme("code", theme as editor.IStandaloneThemeData)
 
 
     const file = searchParams.get("file")!.split("/")
@@ -37,7 +37,7 @@ export default function CEditor() {
     return <Editor
         height="100vh"
         language={searchParams.get("language")!}
-        theme="merbivore"
+        theme="code"
         defaultValue={value}
         onChange={(value) => { setValue(value) }}
     />

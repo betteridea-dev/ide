@@ -14,3 +14,32 @@
 *::-webkit-scrollbar {
   display: none;
 }
+
+select {
+  background-color: #1f2937;
+  color: whitesmoke;
+  border: 1px solid #1f2937;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+}
+
+button {
+  transform: scale(1);
+  transition: all 200ms ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+  transition: all 200ms ease-in-out;
+}
+
+button:active {
+  transform: scale(0.95);
+  transition: all 200ms ease-in-out;
+}
+
+html,
+body {
+  background-color: black;
+}

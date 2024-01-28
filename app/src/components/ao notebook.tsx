@@ -10,7 +10,6 @@ import {
 } from "@permaweb/aoconnect";
 import runningIcon from "../assets/running.webp";
 import { Icons } from "./icons";
-import { gql, GraphQLClient } from "graphql-request";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../config";
 import { Button } from "./ui/button";
@@ -74,10 +73,9 @@ function CodeCell({
         process: aosProcess,
       });
 
-      const formattedOutput = `${
-        JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-      }`;
+        }`;
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
@@ -165,7 +163,12 @@ export default function AONotebook() {
   const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({});
   const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({});
 
-  const [myProcesses, setMyProcesses] = useState<string[]>([]);
+  useEffect(() => {
+    const activeProcess = localStorage.getItem("activeProcess");
+    if (activeProcess) {
+      setAOSProcess(activeProcess);
+    }
+  }, [])
 
   function setRunning(cellId: string) {
     setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
@@ -197,10 +200,9 @@ export default function AONotebook() {
 
         console.log(res);
 
-        const formattedOutput = `${
-          JSON.stringify(res.Output.data.output, null, 2) ||
+        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
           res.Output.data.output
-        }`;
+          }`;
         console.log(formattedOutput);
         setCellOutputItems((prev) => ({
           ...prev,
@@ -211,38 +213,6 @@ export default function AONotebook() {
       }
     },
   });
-
-  useEffect(() => {
-    const client = new GraphQLClient("https://arweave.net/graphql");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query = gql`
-      query ($address: [String!]!) {
-        transactions(
-          owners: $address
-          tags: [
-            { name: "Data-Protocol", values: ["ao"] }
-            { name: "Type", values: ["Process"] }
-          ]
-        ) {
-          edges {
-            node {
-              id
-            }
-          }
-        }
-      }
-    `;
-    async function fetchProcesses() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const address = await (window as any).arweaveWallet.getActiveAddress();
-      const res = await client.request(query, { address });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setMyProcesses(
-        (res as any).transactions.edges.map((edge: any) => edge.node.id)
-      );
-    }
-    fetchProcesses();
-  }, []);
 
   function processSelected(pid: string) {
     console.log("using process", pid);
@@ -293,7 +263,7 @@ export default function AONotebook() {
   }
 
   return (
-    <div className="h-full w-full overflow-scroll flex flex-col gap-4 items-center p-4">
+    <div className="h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
       {isSpawning && <div className="text-center">Spawning process...</div>}
 
       {!isSpawning && (
@@ -333,7 +303,7 @@ export default function AONotebook() {
 
       {aosProcessId && (
         <Button onClick={addNewCell}>
-          <Icons.add className="text-black" /> add new cell
+          <Icons.add className="text-black" color="#000000aa" /> add new cell
         </Button>
       )}
     </div>

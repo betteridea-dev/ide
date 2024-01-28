@@ -169,9 +169,8 @@ export default function IDE() {
     // at the top bar
     return (
       <div
-        className={`h-full w-fit px-2 cursor-pointer items-center justify-center flex border-r border-white/30 ${
-          activeFile == filename && "bg-white/10"
-        }`}
+        className={`h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10 ${activeFile == filename && "bg-white/10"
+          }`}
         onClick={() => {
           setActiveFile(filename);
           setActiveMenuItem("Contracts");
@@ -189,9 +188,8 @@ export default function IDE() {
     function Fileitm({ name }: { name: string }) {
       return (
         <div
-          className={`p-1 pl-5 cursor-pointer ${
-            activeFile == name && "font-bold bg-white/10"
-          }`}
+          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${activeFile == name && "font-bold bg-white/10"
+            }`}
           onClick={() => {
             setActiveFile(name);
             setActiveMenuItem("Contracts");
@@ -204,14 +202,13 @@ export default function IDE() {
 
     return (
       <div
-        className={`w-full max-w-[150px] overflow-scroll cursor-pointer ${
-          activeContract == contractname && "bg-white/10"
-        }`}
+        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${activeContract == contractname && "bg-white/10"
+          }`}
       >
         <div
           className="w-full p-2 font-bold"
           onClick={() => {
-            setActiveContract(active ? "" : contractname);
+            setActiveContract(contractname);
             setActiveFile("README.md");
             setActiveMenuItem("Contracts");
           }}
@@ -225,7 +222,7 @@ export default function IDE() {
             <Fileitm name="state.json" />
             <div className="flex flex-col justify-evenly">
               <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-green-300/50"
+                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
                   setActiveContract(contractname);
                   setActiveMenuItem("Deploy");
@@ -235,7 +232,7 @@ export default function IDE() {
                 deploy
               </button>
               <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-green-300/50"
+                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
                   const zip = new JSZip();
                   const contract = zip.folder(contractname);
@@ -252,7 +249,7 @@ export default function IDE() {
                 download zip
               </button>
               <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-green-300/50"
+                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
                   deleteContract(contractname);
                 }}
@@ -270,8 +267,6 @@ export default function IDE() {
   function TabSwitcher() {
     if (aosView) {
       switch (activeMenuItem) {
-        case "Home":
-          return <AosHome />;
         case "Notebook":
           return <AONotebook />;
         case "AOChat":
@@ -279,23 +274,20 @@ export default function IDE() {
         case "Settings":
           return <Settings />;
         default:
-          return <div className="w-full h-full bg-white/5"></div>;
+          return <AosHome setActiveMenuItem={setActiveMenuItem} />;
       }
     } else {
       switch (activeMenuItem) {
-        case "Home":
-          return <Home />;
         case "Contracts":
           return (
             <iframe
               className="w-full h-full"
-              src={`/betterIDE?editor&language=${
-                activeFile.endsWith(".js")
-                  ? "javascript"
-                  : activeFile.endsWith(".json")
+              src={`/betterIDE?editor&language=${activeFile.endsWith(".js")
+                ? "javascript"
+                : activeFile.endsWith(".json")
                   ? "json"
                   : "text"
-              }&file=${activeContract}/${activeFile}`}
+                }&file=${activeContract}/${activeFile}`}
             />
           );
         case "Deploy":
@@ -318,7 +310,7 @@ export default function IDE() {
         case "Settings":
           return <Settings />;
         default:
-          return <div className="w-full h-full bg-white/5"></div>;
+          return <Home />;
       }
     }
   }
@@ -326,18 +318,18 @@ export default function IDE() {
   return (
     <div className="flex flex-col min-h-screen h-screen max-h-screen">
       {/* Navbar */}
-      <div className="flex h-20 px-6 bg-[#111111]">
+      <div className="flex h-20 min-h-[5rem] px-6 bg-[#111111]">
         <div className="flex justify-center items-center gap-2">
           <img src={logo} className="h-6 w-6" />
 
           <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
-            BetterIDEa 
+            BetterIDEa
             {/* | {aosView ? "AO Mode" : "Warp Mode"} */}
           </h1>
         </div>
 
         {activeContract && (
-          <div className=" flex">
+          <div className="flex items-center rounded-lg gap-2 mx-4">
             <FileTab filename="README.md" />
             <FileTab filename="contract.js" />
             <FileTab filename="state.json" />
@@ -371,7 +363,7 @@ export default function IDE() {
 
       <div className="grow flex">
         {/* Left Bar */}
-        <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717]">
+        <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717] border-r border-white/30">
           {(aosView ? aosMenuItems : menuItems).map((item, i) => {
             return (
               <SideMenuItem
@@ -394,14 +386,14 @@ export default function IDE() {
 
         {/* File List */}
         {!aosView && showFileList && (
-          <div className="min-w-[150px] border-r border-white/30">
+          <div className="min-w-[150px] border-r border-white/30 bg-[#171717]">
             {contracts &&
               Object.keys(contracts).map((contractname, i) => {
                 if (contractname == "input") return;
                 return <FileListItem key={i} contractname={contractname} />;
               })}
             <div
-              className="p-2 cursor-pointer hover:bg-green-300/50"
+              className="p-2 cursor-pointer hover:bg-[#2f2f2f]"
               onClick={newContract}
             >
               + new

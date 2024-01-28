@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { contractSrc, stateSrc } from "../templates/hello"
+import { contractSrc, stateSrc } from "../templates/warp/hello"
 
 type contract = {
     "contract.js": string,
@@ -17,7 +17,6 @@ const freshStart: contractsType = {
         "state.json": stateSrc,
         "README.md": "# Hello"
     }
-
 }
 
 export default function useContracts() {
@@ -28,14 +27,14 @@ export default function useContracts() {
         localStorage.setItem("contracts", JSON.stringify(contracts))
     }, [contracts])
 
-    function newContract() {
+    function newContract(src?: string, state?: string) {
         const name = prompt("Enter contract name")
         if (name in contracts) return alert("Contract with same name already exists")
         const nc = {
             ...contracts,
             [name]: {
-                "contract.js": contractSrc,
-                "state.json": stateSrc,
+                "contract.js": src || contractSrc,
+                "state.json": state || stateSrc,
                 "README.md": "# " + name
             }
         }

@@ -112,7 +112,7 @@ ${res.writeContract.errorMessage}`)
     return <div className="flex flex-col justify-center items-center h-full gap-5">
         <div className="w-fit">
             <label className="block text-white">Select a deployment</label>
-            <select className="bg-white rounded-md px-2 py-1"
+            <select className=""
                 defaultValue={target || "none"} onChange={(e) => setActiveDeployment(e.target.value)}>
                 <option value="none" disabled>Select a deployment</option>
                 {Object.keys(deployments).map((key) => {
@@ -135,7 +135,7 @@ ${res.writeContract.errorMessage}`)
                     </div>
                 </div>
                 <div className="text-lg mt-5">Function Name</div>
-                <select className="bg-white rounded-md px-2 py-1 w-fit mb-2" defaultValue="none" onChange={(e) => setFunctionName(e.target.value)}>
+                <select className="" defaultValue="none" onChange={(e) => setFunctionName(e.target.value)}>
                     <option value="none" disabled>Select a function</option>
                     {activeDeployment && deployments[activeDeployment].functionNames.map((func) => <option key={func} value={func}>{func}</option>)}
                 </select>
