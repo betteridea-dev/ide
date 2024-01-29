@@ -71,10 +71,9 @@ function CodeCell({
         process: aosProcess,
       });
 
-      const formattedOutput = `${
-        JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-      }`;
+        }`;
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
@@ -141,7 +140,7 @@ function CodeCell({
             try {
               return <Ansi>{`${JSON.parse(cellOutputItems[cellId])}`}</Ansi>;
             } catch (e) {
-              console.log(e.message);
+              // console.log(e.message);
               return `${cellOutputItems[cellId]}`;
             }
           })()}
@@ -199,10 +198,9 @@ export default function AONotebook() {
 
         console.log(res);
 
-        const formattedOutput = `${
-          JSON.stringify(res.Output.data.output, null, 2) ||
+        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
           res.Output.data.output
-        }`;
+          }`;
         console.log(formattedOutput);
         setCellOutputItems((prev) => ({
           ...prev,
