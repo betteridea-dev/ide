@@ -174,7 +174,7 @@ export default function AONotebook() {
       const importProcess = searchParams.get("getcode")
       if (importProcess.length !== 43) return alert("Invalid process ID")
       setImportFromProcess(importProcess)
-      importCode()
+      importCode(importProcess)
     }
   }, []);
 
@@ -275,11 +275,39 @@ export default function AONotebook() {
       return cellCodeItems[cellId];
     })
     console.log("backing up", codeArray);
-    const codeToRun = `Betteridea = {
-      Code = {${JSON.stringify(codeArray, null, 2).slice(1, -1)}},
-      AccessedBy = {},
-      LastUpdated = os.time(os.date("!*t"))
-    }`
+    const codeToRun = `local json = require("json")
+
+if not Betteridea then
+    Betteridea = {
+        Code = {${JSON.stringify(codeArray, null, 2).slice(1, -1)}},
+        AccessedBy = {},
+        LastUpdated = os.time(os.date("!*t"))
+    }
+else
+    Betteridea.Code = {${JSON.stringify(codeArray, null, 2).slice(1, -1)}}
+    Betteridea.LastUpdated = os.time(os.date("!*t"))
+end
+
+Handlers.add(
+    "GetCode",
+    Handlers.utils.hasMatchingTag("Action","GetCode"),
+    function(msg)
+        accessed_by = Betteridea.AccessedBy[msg.From]
+        if not accessed_by then
+            Betteridea.AccessedBy[msg.From] = {
+                Count=1,
+                Latest=os.time(os.date("!*t"))
+            }
+        else
+            Betteridea.AccessedBy[msg.From] = {
+                Count = accessed_by.Count+1,
+                Latest=os.time(os.date("!*t"))
+            }
+        end
+        Handlers.utils.reply(json.encode(Betteridea.Code))(msg)
+    end
+)
+`
     console.log(codeToRun);
     try {
       const r = await sendMessage({ data: codeToRun, processId: aosProcessId });
@@ -298,8 +326,8 @@ export default function AONotebook() {
     }
   }
 
-  async function importCode() {
-    const id = importFromProcess || prompt("Enter the process ID or URL to import");
+  async function importCode(impfrom?: string) {
+    const id = impfrom || importFromProcess || prompt("Enter the process ID or URL to import");
     if (!id) return;
     const procId = id.includes("?getcode=") ? id.split("?getcode=")[1] : id;
     // console.log(procId);
@@ -316,6 +344,7 @@ export default function AONotebook() {
       message: r,
       process: procId,
     });
+    console.log(res)
     const codeData = JSON.parse(res.Messages[0].Data)
     console.log(codeData)
 
@@ -340,7 +369,7 @@ export default function AONotebook() {
   return (
     <div className="relative h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
       <div className="absolute right-2 top-2 h-7 flex gap-2" >
-        {aosProcessId && <Button className="h-7" onClick={importCode}>import</Button>}
+        {aosProcessId && <Button className="h-7" onClick={() => importCode()}>import</Button>}
         {cellIds.length > 0 && <Button className="h-7" onClick={shareCode}>share</Button>}
       </div>
 
