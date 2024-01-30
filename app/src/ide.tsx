@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "./lib/utils";
 import { Icons } from "./components/icons";
 import { LucideIcon } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 type MenuItemObj = {
   text: string;
@@ -38,6 +39,8 @@ export default function IDE() {
   const [activeFile, setActiveFile] = useState("");
   const [testTarget, setTestTarget] = useState("");
   const [aosView, setAosView] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [importNBfrom, setImportNBfrom] = useState("")
 
   const aosMenuItems: MenuItemObj[] = [
     {
@@ -118,9 +121,25 @@ export default function IDE() {
     // }
   ];
 
+
   useEffect(() => {
-    // const recents = JSON.parse
-  }, [activeContract]);
+    async function connectWallet() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (window as any).arweaveWallet.connect([
+        "ACCESS_ADDRESS",
+        "SIGN_TRANSACTION",
+      ]);
+
+      const importNotebook = searchParams.has("getcode")
+      if (importNotebook && aosView) {
+        const importProcess = searchParams.get("getcode")
+        console.log(importProcess)
+        if (importProcess.length !== 43) return alert("Invalid process ID")
+        setActiveMenuItem("Notebook")
+      }
+    }
+    connectWallet();
+  }, []);
 
   useEffect(() => {
     // if (aosView) {

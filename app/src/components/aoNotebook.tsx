@@ -6,11 +6,13 @@ import {
   connect,
   createDataItemSigner,
   result as aoResult,
+  results
 } from "@permaweb/aoconnect";
 import { Icons } from "./icons";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../config";
 import { Button } from "./ui/button";
+import { useSearchParams } from "react-router-dom";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -155,16 +157,24 @@ function CodeCell({
 export default function AONotebook() {
   const [isSpawning, setSpawning] = useState<boolean>(false);
   const [aosProcessId, setAOSProcess] = useState<string | null>(null);
-
   const [activeCell, setActiveCell] = useState<string | null>(null);
   const [cellIds, setCellOrder] = useState<string[]>([]);
   const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({});
   const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({});
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [importFromProcess, setImportFromProcess] = useState("")
 
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
     if (activeProcess) {
       setAOSProcess(activeProcess);
+    }
+    const importNotebook = searchParams.has("getcode")
+    if (importNotebook) {
+      const importProcess = searchParams.get("getcode")
+      if (importProcess.length !== 43) return alert("Invalid process ID")
+      setImportFromProcess(importProcess)
+      importCode()
     }
   }, []);
 
@@ -260,8 +270,80 @@ export default function AONotebook() {
     });
   }
 
+  async function shareCode() {
+    const codeArray = cellIds.map((cellId) => {
+      return cellCodeItems[cellId];
+    })
+    console.log("backing up", codeArray);
+    const codeToRun = `Betteridea = {
+      Code = {${JSON.stringify(codeArray, null, 2).slice(1, -1)}},
+      AccessedBy = {},
+      LastUpdated = os.time(os.date("!*t"))
+    }`
+    console.log(codeToRun);
+    try {
+      const r = await sendMessage({ data: codeToRun, processId: aosProcessId });
+
+      const res = await aoResult({
+        message: r,
+        process: aosProcessId,
+      });
+      console.log(res.Output)
+      await navigator.clipboard.writeText(`${window.location.origin}/?getcode=${aosProcessId}`);
+      alert("shared and url copied to clipboard")
+
+    }
+    catch (e) {
+      console.log(e.message)
+    }
+  }
+
+  async function importCode() {
+    const id = importFromProcess || prompt("Enter the process ID or URL to import");
+    if (!id) return;
+    const procId = id.includes("?getcode=") ? id.split("?getcode=")[1] : id;
+    // console.log(procId);
+    if (procId.length !== 43) return alert("invalid process ID");
+    console.log("importing", procId);
+    const signer = createDataItemSigner((window as any).arweaveWallet);
+    const r = await connect().message({
+      process: procId,
+      signer,
+      tags: [{ name: "Action", value: "GetCode" }],
+    });
+    console.log(r)
+    const res = await aoResult({
+      message: r,
+      process: procId,
+    });
+    const codeData = JSON.parse(res.Messages[0].Data)
+    console.log(codeData)
+
+    const cellCount = codeData.length;
+    const cellIds = [];
+    const cellCodeItems = {};
+    const cellOutputItems = {};
+    for (let i = 0; i < cellCount; i++) {
+      const id = v4();
+      cellIds.push(id);
+      cellCodeItems[id] = codeData[i];
+      cellOutputItems[id] = "";
+    }
+    setCellOrder(cellIds);
+    setCellCodeItems(cellCodeItems);
+    setCellOutputItems(cellOutputItems);
+    searchParams.delete("getcode")
+    setSearchParams(searchParams)
+    setImportFromProcess("")
+  }
+
   return (
-    <div className="h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
+    <div className="relative h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
+      <div className="absolute right-2 top-2 h-7 flex gap-2" >
+        {aosProcessId && <Button className="h-7" onClick={importCode}>import</Button>}
+        {cellIds.length > 0 && <Button className="h-7" onClick={shareCode}>share</Button>}
+      </div>
+
       {isSpawning && <div className="text-center">Spawning process...</div>}
 
       {!isSpawning && (

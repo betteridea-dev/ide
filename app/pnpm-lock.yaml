@@ -9,8 +9,8 @@ dependencies:
     specifier: ^4.6.0
     version: 4.6.0(monaco-editor@0.45.0)(react-dom@18.2.0)(react@18.2.0)
   '@permaweb/aoconnect':
-    specifier: ^0.0.37
-    version: 0.0.37
+    specifier: ^0.0.38
+    version: 0.0.38
   '@radix-ui/react-dialog':
     specifier: ^1.0.5
     version: 1.0.5(@types/react-dom@18.2.17)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -37,7 +37,7 @@ dependencies:
     version: 1.14.4
   arweavekit:
     specifier: ^1.5.1
-    version: 1.5.1(@solana/web3.js@1.87.6)(typescript@5.3.3)(warp-arbundles@1.0.4)
+    version: 1.5.1(@solana/web3.js@1.89.1)(typescript@5.3.3)(warp-arbundles@1.0.4)
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.0
@@ -494,6 +494,13 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+    dev: false
+
+  /@babel/runtime@7.23.9:
+    resolution: {integrity: sha512-0CX6F+BI2s9dkUqr08KFrAIZgNFj75rdBU/DjCyYLIaV/quFjkk6T+EJ2LkZHyZTbEV4L5p97mNkUsHl2wLFAw==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      regenerator-runtime: 0.14.1
     dev: false
 
   /@babel/template@7.22.15:
@@ -1523,6 +1530,12 @@ packages:
       '@noble/hashes': 1.3.2
     dev: false
 
+  /@noble/curves@1.3.0:
+    resolution: {integrity: sha512-t01iSXPuN+Eqzb4eBX0S5oubSqXbK/xXa1Ne18Hj8f9pStxztHCE2gfboSp/dZRLSqfuLpRK2nDXDK+W9puocA==}
+    dependencies:
+      '@noble/hashes': 1.3.3
+    dev: false
+
   /@noble/ed25519@1.7.3:
     resolution: {integrity: sha512-iR8GBkDt0Q3GyaVcIu7mSsVIqnFbkbRzGLWlvhwunacoLwt4J3swfKhfaM6rN6WY+TBGoYT1GtT1mIh2/jGbRQ==}
     dev: false
@@ -1537,6 +1550,11 @@ packages:
 
   /@noble/hashes@1.3.2:
     resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
+    engines: {node: '>= 16'}
+    dev: false
+
+  /@noble/hashes@1.3.3:
+    resolution: {integrity: sha512-V7/fPHgl+jsVPXqqeOzT8egNj2iBIVt+ECeMMG8TdcnTikP3oaBtUVqpT/gYCR68aEBJSF+XbYUxStjbFMqIIA==}
     engines: {node: '>= 16'}
     dev: false
 
@@ -1586,8 +1604,8 @@ packages:
       ramda: 0.29.1
     dev: false
 
-  /@permaweb/aoconnect@0.0.37:
-    resolution: {integrity: sha512-71fs9gIdqg3q1wSbkvJoHayPwA5MIJOLBB3RYJ/03JgQPE8qxc9s23BfJi+fubMPEflBa0e6rBtk9mp/Ww50kw==}
+  /@permaweb/aoconnect@0.0.38:
+    resolution: {integrity: sha512-kbrXKH6I6aSHprF46qaMZO5XCTLyX3ocmjM77lQDz1mpx6m2qd4WQoat1EeFDYpFBSunk/8aheHA+g/d1hlrVg==}
     engines: {node: '>=18'}
     dependencies:
       '@permaweb/ao-scheduler-utils': 0.0.8
@@ -2609,14 +2627,14 @@ packages:
       buffer: 6.0.3
     dev: false
 
-  /@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.87.6):
+  /@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.89.1):
     resolution: {integrity: sha512-apqMuYwFp1jFi55NxDfvXUX2x1T0Zh07MxhZ/nCCTGys5raSfYUh82zen2BLv8BSDj/JxZ2P/s7jrQZGrX8uAw==}
     engines: {node: '>=16'}
     peerDependencies:
       '@solana/web3.js': ^1.77.3
     dependencies:
       '@solana/wallet-standard-features': 1.1.0
-      '@solana/web3.js': 1.87.6
+      '@solana/web3.js': 1.89.1
       '@wallet-standard/base': 1.0.1
       '@wallet-standard/features': 1.0.3
       eventemitter3: 4.0.7
@@ -2647,6 +2665,30 @@ packages:
       jayson: 4.1.0
       node-fetch: 2.7.0
       rpc-websockets: 7.8.0
+      superstruct: 0.14.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+    dev: false
+
+  /@solana/web3.js@1.89.1:
+    resolution: {integrity: sha512-t9TTLtPQxtQB3SAf/5E8xPXfVDsC6WGOsgKY02l2cbe0HLymT7ynE8Hu48Lk5qynHCquj6nhISfEHcjMkYpu/A==}
+    dependencies:
+      '@babel/runtime': 7.23.9
+      '@noble/curves': 1.3.0
+      '@noble/hashes': 1.3.3
+      '@solana/buffer-layout': 4.0.1
+      agentkeepalive: 4.5.0
+      bigint-buffer: 1.1.5
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      bs58: 4.0.1
+      buffer: 6.0.3
+      fast-stable-stringify: 1.0.0
+      jayson: 4.1.0
+      node-fetch: 2.7.0
+      rpc-websockets: 7.9.0
       superstruct: 0.14.2
     transitivePeerDependencies:
       - bufferutil
@@ -3446,12 +3488,12 @@ packages:
       - utf-8-validate
     dev: false
 
-  /arbundles@0.6.23(@solana/web3.js@1.87.6):
+  /arbundles@0.6.23(@solana/web3.js@1.89.1):
     resolution: {integrity: sha512-+gr93F3fivN+6dhiImT6BQNaXz4oECPn2GYjCZjS2yEoq7hM78FRvVp6kQyjEdhnuBFQr/q4oS/nkjnQlHdj9Q==}
     dependencies:
       '@noble/ed25519': 1.7.3
       '@randlabs/myalgo-connect': 1.4.2
-      '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.87.6)
+      '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.89.1)
       algosdk: 1.24.1
       arweave: 1.14.4
       arweave-stream-tx: 1.2.2(arweave@1.14.4)
@@ -3584,14 +3626,14 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /arlocal@1.1.64(@solana/web3.js@1.87.6)(typescript@5.3.3):
+  /arlocal@1.1.64(@solana/web3.js@1.89.1)(typescript@5.3.3):
     resolution: {integrity: sha512-623LT99n+TVYYO7USXaETN+uTOcZOWxMbMtdnlQ6uGWiroGJzu13jSsB0w3Q0JHsaiOwIHG5tZFNVUpNCplrNQ==}
     engines: {node: '>=15.14.0'}
     hasBin: true
     dependencies:
       '@koa/cors': 3.4.3
       apollo-server-koa: 3.13.0(graphql@16.8.1)(koa@2.14.2)
-      arbundles: 0.6.23(@solana/web3.js@1.87.6)
+      arbundles: 0.6.23(@solana/web3.js@1.89.1)
       arweave-bundles: 1.0.3
       asn1.js: 5.4.1
       bignumber.js: 9.1.2
@@ -3729,7 +3771,7 @@ packages:
       bignumber.js: 9.1.2
     dev: false
 
-  /arweavekit@1.5.1(@solana/web3.js@1.87.6)(typescript@5.3.3)(warp-arbundles@1.0.4):
+  /arweavekit@1.5.1(@solana/web3.js@1.89.1)(typescript@5.3.3)(warp-arbundles@1.0.4):
     resolution: {integrity: sha512-JiZgznaxZMsja/x6Qho3LiU5GvcFXhdQNKqP7i0pOZGVZkHMa+LzIEEnHqyDKlsS96g79kRAn6CLYHLTpxWtUA==}
     dependencies:
       '@bundlr-network/client': 0.11.17
@@ -3740,7 +3782,7 @@ packages:
       graphql: 16.8.1
       othent: 1.0.638
       warp-contracts: 1.4.26
-      warp-contracts-plugin-deploy: 1.0.12(@solana/web3.js@1.87.6)(arweave@1.14.4)(typescript@5.3.3)(warp-arbundles@1.0.4)(warp-contracts@1.4.26)
+      warp-contracts-plugin-deploy: 1.0.12(@solana/web3.js@1.89.1)(arweave@1.14.4)(typescript@5.3.3)(warp-arbundles@1.0.4)(warp-contracts@1.4.26)
     transitivePeerDependencies:
       - '@solana/web3.js'
       - bluebird
@@ -7696,6 +7738,10 @@ packages:
     resolution: {integrity: sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==}
     dev: false
 
+  /regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
+    dev: false
+
   /require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
     engines: {node: '>=0.10.0'}
@@ -7797,6 +7843,18 @@ packages:
       eventemitter3: 4.0.7
       uuid: 8.3.2
       ws: 8.14.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      bufferutil: 4.0.8
+      utf-8-validate: 5.0.10
+    dev: false
+
+  /rpc-websockets@7.9.0:
+    resolution: {integrity: sha512-DwKewQz1IUA5wfLvgM8wDpPRcr+nWSxuFxx5CbrI2z/MyyZ4nXLM86TvIA+cI1ZAdqC8JIBR1mZR55dzaLU+Hw==}
+    dependencies:
+      '@babel/runtime': 7.23.9
+      eventemitter3: 4.0.7
+      uuid: 8.3.2
+      ws: 8.16.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     optionalDependencies:
       bufferutil: 4.0.8
       utf-8-validate: 5.0.10
@@ -8641,7 +8699,7 @@ packages:
       warp-isomorphic: 1.0.7
     dev: false
 
-  /warp-contracts-plugin-deploy@1.0.12(@solana/web3.js@1.87.6)(arweave@1.14.4)(typescript@5.3.3)(warp-arbundles@1.0.4)(warp-contracts@1.4.26):
+  /warp-contracts-plugin-deploy@1.0.12(@solana/web3.js@1.89.1)(arweave@1.14.4)(typescript@5.3.3)(warp-arbundles@1.0.4)(warp-contracts@1.4.26):
     resolution: {integrity: sha512-IHetl9Ly5CDZlMT2ccy+HBonBJjmd6rHBxxhycC0QI0yHv6QPIwR6faQKWdrY093Y2cYUE6/NZPirolPWXalnA==}
     engines: {node: '>=16.5'}
     peerDependencies:
@@ -8649,7 +8707,7 @@ packages:
       warp-contracts: ^1.4.5
     dependencies:
       arbundles: 0.10.0(arweave@1.14.4)
-      arlocal: 1.1.64(@solana/web3.js@1.87.6)(typescript@5.3.3)
+      arlocal: 1.1.64(@solana/web3.js@1.89.1)(typescript@5.3.3)
       node-stdlib-browser: 1.2.0
       warp-arbundles: 1.0.4
       warp-contracts: 1.4.26
@@ -8808,6 +8866,22 @@ packages:
 
   /ws@8.14.2(bufferutil@4.0.8)(utf-8-validate@5.0.10):
     resolution: {integrity: sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dependencies:
+      bufferutil: 4.0.8
+      utf-8-validate: 5.0.10
+    dev: false
+
+  /ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@5.0.10):
+    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
