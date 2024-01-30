@@ -40,7 +40,8 @@
     "react-router-dom": "^6.20.1",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vite-plugin-radar": "^0.9.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

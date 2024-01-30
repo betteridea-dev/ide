@@ -319,7 +319,6 @@ Handlers.add(
       console.log(res.Output)
       await navigator.clipboard.writeText(`${window.location.origin}/?getcode=${aosProcessId}`);
       alert("shared and url copied to clipboard")
-
     }
     catch (e) {
       console.log(e.message)
