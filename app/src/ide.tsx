@@ -320,11 +320,13 @@ export default function IDE() {
           return (
             <iframe
               className="w-full h-full"
-              src={`/betterIDE?editor&language=${activeFile.endsWith(".js")
+              src={`/?editor&language=${activeFile.endsWith(".js")
                 ? "javascript"
                 : activeFile.endsWith(".json")
                   ? "json"
-                  : "text"
+                  : activeFile.endsWith(".md")
+                    ? "markdown"
+                    : "text"
                 }&file=${activeContract}/${activeFile}`}
             />
           );

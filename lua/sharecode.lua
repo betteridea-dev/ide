@@ -1,16 +1,18 @@
+-- we are using json.encode to convert lua list to js list
 local json = require("json")
 
--- table to store info
+-- Initialise a table to store share data and analytics
 if not Betteridea then
     Betteridea = {
-        Code = {"1+41"},
+        Code = {},
         AccessedBy = {},
         LastUpdated = os.time(os.date("!*t"))
     }
 end
 
 
--- If someone wasnts to share their notebook code
+-- This handler checks for a message with the tag Action=GetCode
+-- and replies with the list of that was shared by the process owner
 Handlers.add(
     "GetCode",
     Handlers.utils.hasMatchingTag("Action","GetCode"),
@@ -31,9 +33,13 @@ Handlers.add(
     end
 )
 
+-- To check if the handler works
 -- message the process to get its shared code (only possible if the process has shared its code)
 -- an array of strings is send in the reply Data field
 ao.send({Target=ao.id, Tags={Action="GetCode"}})
+
+-- To check the code list returned by the handler
+Inbox[#Inbox].Data
 
 -- https://ide.betteridea.dev/?getcode=<PROCESS_ID>
 -- Share this url with them after clicking on the share button

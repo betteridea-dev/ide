@@ -1,5 +1,5 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
-import theme from "../themes/merbivore-modified.json";
+import theme from "../themes/notebook.json";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import {
