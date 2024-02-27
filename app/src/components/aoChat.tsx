@@ -1,4 +1,4 @@
-import { connect, createDataItemSigner, result, } from "@permaweb/aoconnect";
+import { connect, createDataItemSigner, result, results, } from "@permaweb/aoconnect";
 import { useEffect, useState } from "react";
 import { AOModule, AOScheduler, AOChatPID } from "../../config";
 
@@ -15,6 +15,17 @@ function tsToDate(ts: number) {
   return `${d.toDateString()} ${d.toTimeString()}`;
 }
 
+function sendMessage({ data, processId }: { data: string; processId: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const signer = createDataItemSigner((window as any).arweaveWallet);
+  return connect().message({
+    process: processId,
+    signer,
+    tags: [{ name: "Action", value: "Eval" }],
+    data,
+  });
+}
+
 export default function AOChat() {
   const [myProcess, setMyProcesses] = useState<string>("");
   const [spawning, setSpawning] = useState<boolean>(false);
@@ -24,7 +35,7 @@ export default function AOChat() {
   const [messages, setMessages] = useState<message[]>([
     {
       from: "AO",
-      content: "To start chatting, send /join",
+      content: "To start chatting, send /register",
       timestamp: Date.now(),
     },
   ]);
@@ -74,112 +85,137 @@ export default function AOChat() {
   //     monitor()
   // }, [])
 
-  useEffect(() => {
-    clearTimeout(loop);
-    if (!myProcess) return;
-    async function getInbox() {
-      if (!myProcess) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (window as any).arweaveWallet.connect([
-        "ACCESS_ADDRESS",
-        "SIGN_TRANSACTION",
-      ]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const signer = createDataItemSigner((window as any).arweaveWallet);
-      try {
-        const res = await connect().message({
-          process: myProcess,
-          signer,
-          tags: [{ name: "Action", value: "Eval" }],
-          data: `Inbox`,
-        });
-        const resdata = await result({
-          process: myProcess,
-          message: res,
-        });
-        console.log(resdata);
-        const inbox = resdata.Output.data.json;
-        const messages: message[] = [
-          {
-            from: "AO",
-            content: "To start chatting, send /join",
-            timestamp: Date.now(),
-          },
-        ];
-        for (const msg in inbox) {
-          // console.log(inbox[msg])
-          if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
-            try {
-              const m: message = JSON.parse(inbox[msg].Data);
-              // console.log(m)
-              messages.unshift(m);
-            } catch (e) {
-              console.log(e.message)
-              continue
-            }
-          }
-        }
-        console.log(messages.length, "messages");
-        setMessages(messages);
-        setLoop(setTimeout(() => getInbox(), 2500));
-      } catch (e) {
-        console.log(e.message);
-        setLoop(setTimeout(() => getInbox(), 10000));
-        return;
-      }
-    }
-    setLoop(setTimeout(() => getInbox(), 1000));
-    return () => clearTimeout(loop);
-  }, [myProcess]);
+  useEffect(() => {
+    (async () => {
+      clearTimeout(loop)
+      if (!myProcess) return
+      // const r = await sendMessage({ data: `Send({Target="${AOChatPID}", Action="Register"})`, processId: myProcess })
+      // console.log(r)
+      const r = await results({
+        process: myProcess,
+        limit: 1000,
+      })
+      console.log(r)
+      r.edges.forEach((msg: any) => {
+        const cursor = msg.cursor
+        console.log(cursor)
+        // console.log(msg.node.Output)
+      })
+    })()
+  }, [myProcess])
+
+  // useEffect(() => {
+  //   clearTimeout(loop);
+  //   if (!myProcess) return;
+  //   async function getInbox() {
+  //     if (!myProcess) return;
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     await (window as any).arweaveWallet.connect([
+  //       "ACCESS_ADDRESS",
+  //       "SIGN_TRANSACTION",
+  //     ]);
+
+  //     const res = await sendMessage({ data: `ao.send({Target="${AOChatPID}", Action="GetMessages"})`, processId: myProcess })
+  //     const resdata = await result({
+  //       process: myProcess,
+  //       message: res
+  //     })
+  //     console.log(resdata)
+
+  //     return
+
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     const signer = createDataItemSigner((window as any).arweaveWallet);
+  //     try {
+  //       const res = await connect().message({
+  //         process: myProcess,
+  //         signer,
+  //         tags: [{ name: "Action", value: "Eval" }],
+  //         data: `Inbox`,
+  //       });
+  //       const resdata = await result({
+  //         process: myProcess,
+  //         message: res,
+  //       });
+  //       console.log(resdata);
+  //       const inbox = resdata.Output.data.json;
+  //       const messages: message[] = [
+  //         {
+  //           from: "AO",
+  //           content: "To start chatting, send /join",
+  //           timestamp: Date.now(),
+  //         },
+  //       ];
+  //       for (const msg in inbox) {
+  //         // console.log(inbox[msg])
+  //         if (inbox[msg].Tags.Type == "Message" && inbox[msg].Data) {
+  //           try {
+  //             const m: message = JSON.parse(inbox[msg].Data);
+  //             // console.log(m)
+  //             messages.unshift(m);
+  //           } catch (e) {
+  //             console.log(e.message)
+  //             continue
+  //           }
+  //         }
+  //       }
+  //       console.log(messages.length, "messages");
+  //       setMessages(messages);
+  //       setLoop(setTimeout(() => getInbox(), 2500));
+  //     } catch (e) {
+  //       console.log(e.message);
+  //       setLoop(setTimeout(() => getInbox(), 10000));
+  //       return;
+  //     }
+  //   }
+  //   // setLoop(setTimeout(() => getInbox(), 1000));
+  //   return () => clearTimeout(loop);
+  // }, [myProcess]);
 
   async function keyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!myProcess) return
     if (e.key === "Enter") {
       if (!input) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const signer = createDataItemSigner((window as any).arweaveWallet);
+      // const signer = createDataItemSigner((window as any).arweaveWallet);
       setSending(true);
-      if (input.startsWith("/join")) {
-        console.log("joining");
-        const res = await connect().message({
-          process: myProcess,
-          signer,
-          tags: [{ name: "Action", value: "Eval" }],
-          data: `ao.send({Target="${AOChatPID}", Tags={Action="Register"}})`,
-        });
+      if (input.startsWith("/register")) {
+        console.log("registering");
+        // const res = await connect().message({
+        //   process: myProcess,
+        //   signer,
+        //   tags: [{ name: "Action", value: "Eval" }],
+        //   data: `ao.send({Target="${AOChatPID}", Action="Register"})`,
+        // });
+        const res = await sendMessage({ data: `ao.send({Target=${AOChatPID}, Action="Register"})`, processId: myProcess })
         const resdata = await result({
           process: myProcess,
           message: res,
         });
         console.log(resdata.Output.data.output);
       } else if (input == "Inbox") {
-        const res = await connect().message({
-          process: myProcess,
-          signer,
-          tags: [{ name: "Action", value: "Eval" }],
-          data: "Inbox",
-        });
-        const resdata = await result({
-          process: myProcess,
-          message: res,
-        });
-        console.log(resdata.Output.data.output);
+        // const res = await connect().message({
+        //   process: myProcess,
+        //   signer,
+        //   tags: [{ name: "Action", value: "Eval" }],
+        //   data: "Inbox",
+        // });
+        // const resdata = await result({
+        //   process: myProcess,
+        //   message: res,
+        // });
+        // console.log(resdata.Output.data.output);
       } else {
-        const msg: message = {
-          from: myProcess,
-          timestamp: Date.now(),
-          content: input,
-        };
-        const d = `ao.send({Target="${AOChatPID}", Tags={Action="Broadcast"}, Data="${JSON.stringify(
-          msg
-        ).replace(/"/g, '\\"')}"})`;
+        const d = `ao.send({Target="${AOChatPID}" , Data="${input.toString()}", Action="SendMessage"})`;
         console.log(d);
-        const res = await connect().message({
-          process: myProcess,
-          signer,
-          tags: [{ name: "Action", value: "Eval" }],
-          data: d,
-        });
+        // const res = await connect().message({
+        //   process: myProcess,
+        //   signer,
+        //   tags: [{ name: "Action", value: "Eval" }],
+        //   data: d,
+        // });
+        const res = await sendMessage({ data: d, processId: myProcess })
         const resdata = await result({
           process: myProcess,
           message: res,
