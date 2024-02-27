@@ -39,8 +39,8 @@ export default function IDE() {
   const [activeFile, setActiveFile] = useState("");
   const [testTarget, setTestTarget] = useState("");
   const [aosView, setAosView] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [importNBfrom, setImportNBfrom] = useState("")
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [importNBfrom, setImportNBfrom] = useState("");
 
   const aosMenuItems: MenuItemObj[] = [
     {
@@ -121,7 +121,6 @@ export default function IDE() {
     // }
   ];
 
-
   useEffect(() => {
     async function connectWallet() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,12 +129,12 @@ export default function IDE() {
         "SIGN_TRANSACTION",
       ]);
 
-      const importNotebook = searchParams.has("getcode")
+      const importNotebook = searchParams.has("getcode");
       if (importNotebook && aosView) {
-        const importProcess = searchParams.get("getcode")
-        console.log(importProcess)
-        if (importProcess.length !== 43) return alert("Invalid process ID")
-        setActiveMenuItem("Notebook")
+        const importProcess = searchParams.get("getcode");
+        console.log(importProcess);
+        if (importProcess.length !== 43) return alert("Invalid process ID");
+        setActiveMenuItem("Notebook");
       }
     }
     connectWallet();
@@ -188,8 +187,9 @@ export default function IDE() {
     // at the top bar
     return (
       <div
-        className={`h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10 ${activeFile == filename && "bg-white/10"
-          }`}
+        className={`h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10 ${
+          activeFile == filename && "bg-white/10"
+        }`}
         onClick={() => {
           setActiveFile(filename);
           setActiveMenuItem("Contracts");
@@ -207,8 +207,9 @@ export default function IDE() {
     function Fileitm({ name }: { name: string }) {
       return (
         <div
-          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${activeFile == name && "font-bold bg-white/10"
-            }`}
+          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
+            activeFile == name && "font-bold bg-white/10"
+          }`}
           onClick={() => {
             setActiveFile(name);
             setActiveMenuItem("Contracts");
@@ -221,8 +222,9 @@ export default function IDE() {
 
     return (
       <div
-        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${activeContract == contractname && "bg-white/10"
-          }`}
+        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${
+          activeContract == contractname && "bg-white/10"
+        }`}
       >
         <div
           className="w-full p-2 font-bold"
@@ -235,8 +237,7 @@ export default function IDE() {
               const recentsJson: string[] = JSON.parse(recents);
               if (recentsJson.includes(contractname)) {
                 recentsJson.splice(recentsJson.indexOf(contractname), 1);
-              }
-              else if (recentsJson.length > 4) {
+              } else if (recentsJson.length > 4) {
                 recentsJson.pop();
               }
               recentsJson.unshift(contractname);
@@ -285,7 +286,8 @@ export default function IDE() {
                 className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
                   contracts.deleteContract(contractname);
-                  const recents = JSON.parse(localStorage.getItem("recents")!) || [];
+                  const recents =
+                    JSON.parse(localStorage.getItem("recents")!) || [];
                   if (recents.includes(contractname)) {
                     recents.splice(recents.indexOf(contractname), 1);
                     localStorage.setItem("recents", JSON.stringify(recents));
@@ -320,14 +322,15 @@ export default function IDE() {
           return (
             <iframe
               className="w-full h-full"
-              src={`/?editor&language=${activeFile.endsWith(".js")
-                ? "javascript"
-                : activeFile.endsWith(".json")
+              src={`/?editor&language=${
+                activeFile.endsWith(".js")
+                  ? "javascript"
+                  : activeFile.endsWith(".json")
                   ? "json"
                   : activeFile.endsWith(".md")
-                    ? "markdown"
-                    : "text"
-                }&file=${activeContract}/${activeFile}`}
+                  ? "markdown"
+                  : "text"
+              }&file=${activeContract}/${activeFile}`}
             />
           );
         case "Deploy":
@@ -350,7 +353,14 @@ export default function IDE() {
         case "Settings":
           return <Settings />;
         default:
-          return <Home contracts={contracts} setActiveContract={setActiveContract} setActiveFile={setActiveFile} setActiveMenuItem={setActiveMenuItem} />;
+          return (
+            <Home
+              contracts={contracts}
+              setActiveContract={setActiveContract}
+              setActiveFile={setActiveFile}
+              setActiveMenuItem={setActiveMenuItem}
+            />
+          );
       }
     }
   }
@@ -360,7 +370,7 @@ export default function IDE() {
       {/* Navbar */}
       <div className="flex h-20 min-h-[5rem] px-6 bg-[#111111]">
         <div className="flex justify-center items-center gap-2">
-          <img src={logo} className="h-6 w-6" />
+          <img src="/logo-small.svg" className="h-6 w-6" />
 
           <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
             BetterIDEa
