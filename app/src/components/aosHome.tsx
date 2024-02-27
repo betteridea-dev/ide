@@ -45,8 +45,9 @@ export default function AosHome({
     async function fetchProcesses() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const address = await (window as any).arweaveWallet.getActiveAddress();
+      console.log(address)
       const res = await client.request(query, { address });
-
+      console.log(res)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setMyProcesses(
         (res as any).transactions.edges.map((edge: any) => edge.node.id)
