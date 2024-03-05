@@ -4,7 +4,7 @@ import saveAs from "file-saver";
 import logo from "./assets/logo.svg";
 import * as menuicons from "./assets/icons/menu";
 import Home from "@/components/home";
-import AosHome from "./components/aosHome";
+import AosHome from "./components/aoHome";
 import Deploy from "./components/deploy";
 import Test from "./components/test";
 import Cloud from "./components/cloud";
@@ -41,6 +41,7 @@ export default function IDE() {
   const [aosView, setAosView] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [importNBfrom, setImportNBfrom] = useState("");
+  const [connected, setConnected] = useState(false);
 
   const aosMenuItems: MenuItemObj[] = [
     {
@@ -122,12 +123,37 @@ export default function IDE() {
   ];
 
   useEffect(() => {
-    async function connectWallet() {
+    (async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (window as any).arweaveWallet.connect([
-        "ACCESS_ADDRESS",
-        "SIGN_TRANSACTION",
-      ]);
+      const wallet = (window as any).arweaveWallet;
+      if (wallet) {
+        if (await wallet.getActiveAddress()) {
+          setConnected(true);
+        } else {
+          await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
+          setConnected(true);
+        }
+      } else {
+        alert("Please install the ArConnect extension")
+      }
+    })();
+  }, [])
+
+  useEffect(() => {
+    async function connectWallet() {
+      if (!(window as any).arweaveWallet) return alert("Please install the ArConnect extension")
+      try {
+        await (window as any).arweaveWallet.getActiveAddress()
+        setConnected(true)
+      }
+      catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (window as any).arweaveWallet.connect([
+          "ACCESS_ADDRESS",
+          "SIGN_TRANSACTION",
+        ]);
+        setConnected(true);
+      }
 
       const importNotebook = searchParams.has("getcode");
       if (importNotebook && aosView) {
@@ -187,9 +213,8 @@ export default function IDE() {
     // at the top bar
     return (
       <div
-        className={`h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10 ${
-          activeFile == filename && "bg-white/10"
-        }`}
+        className={`h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10 ${activeFile == filename && "bg-white/10"
+          }`}
         onClick={() => {
           setActiveFile(filename);
           setActiveMenuItem("Contracts");
@@ -207,9 +232,8 @@ export default function IDE() {
     function Fileitm({ name }: { name: string }) {
       return (
         <div
-          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
-            activeFile == name && "font-bold bg-white/10"
-          }`}
+          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${activeFile == name && "font-bold bg-white/10"
+            }`}
           onClick={() => {
             setActiveFile(name);
             setActiveMenuItem("Contracts");
@@ -222,9 +246,8 @@ export default function IDE() {
 
     return (
       <div
-        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${
-          activeContract == contractname && "bg-white/10"
-        }`}
+        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${activeContract == contractname && "bg-white/10"
+          }`}
       >
         <div
           className="w-full p-2 font-bold"
@@ -322,15 +345,14 @@ export default function IDE() {
           return (
             <iframe
               className="w-full h-full"
-              src={`/?editor&language=${
-                activeFile.endsWith(".js")
-                  ? "javascript"
-                  : activeFile.endsWith(".json")
+              src={`/?editor&language=${activeFile.endsWith(".js")
+                ? "javascript"
+                : activeFile.endsWith(".json")
                   ? "json"
                   : activeFile.endsWith(".md")
-                  ? "markdown"
-                  : "text"
-              }&file=${activeContract}/${activeFile}`}
+                    ? "markdown"
+                    : "text"
+                }&file=${activeContract}/${activeFile}`}
             />
           );
         case "Deploy":

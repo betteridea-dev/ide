@@ -12,13 +12,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function AosHome({
-  setActiveMenuItem,
-}: {
-  setActiveMenuItem: (val: string) => void;
-}) {
+export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val: string) => void }) {
   const [myProcesses, setMyProcesses] = useState<string[]>([]);
   const [spawning, setSpawning] = useState(false);
+  // const [connected, setConnected] = useState(false);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     const wallet = (window as any).arweaveWallet;
+  //     if (wallet) {
+  //       if (await wallet.getActiveAddress()) {
+  //         setConnected(true);
+  //       } else {
+  //         // await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
+  //         // setConnected(true);
+  //         setConnected(false)
+  //       }
+  //     } else {
+  //       alert("Please install the ArConnect extension")
+  //     }
+  //   })();
+  // }, [])
 
   useEffect(() => {
     const client = new GraphQLClient("https://arweave.net/graphql");
@@ -59,10 +74,10 @@ export default function AosHome({
 
   async function spawnProcess() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (window as any).arweaveWallet.connect([
-      "ACCESS_ADDRESS",
-      "SIGN_TRANSACTION",
-    ]);
+    // await (window as any).arweaveWallet.connect([
+    //   "ACCESS_ADDRESS",
+    //   "SIGN_TRANSACTION",
+    // ]);
     setSpawning(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const signer = createDataItemSigner((window as any).arweaveWallet);
@@ -107,7 +122,7 @@ export default function AosHome({
 
             <SelectContent>
               {myProcesses.map((process) => (
-                <SelectItem value={process}>{process}</SelectItem>
+                <SelectItem value={process} key={process}>{process}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -125,7 +140,7 @@ export default function AosHome({
 
         <div className="grid grid-cols-3 gap-2">
           {["Chatroom", "Token", "Ping Pong"].map((label, i) => (
-            <Button>{label}</Button>
+            <Button key={i}>{label}</Button>
           ))}
         </div>
       </div>

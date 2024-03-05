@@ -158,11 +158,12 @@ export default function AONotebook() {
   const [isSpawning, setSpawning] = useState<boolean>(false);
   const [aosProcessId, setAOSProcess] = useState<string | null>(null);
   const [activeCell, setActiveCell] = useState<string | null>(null);
-  const [cellIds, setCellOrder] = useState<string[]>([]);
-  const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({});
-  const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({});
+  const [cellIds, setCellOrder] = useState<string[]>(["0"]);
+  const [cellCodeItems, setCellCodeItems] = useState<TCellCodeState>({ "0": "1 + 41" });
+  const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({ "0": "click the run button" });
   const [searchParams, setSearchParams] = useSearchParams()
   const [importFromProcess, setImportFromProcess] = useState("")
+  const [firstRun, setFirstRun] = useState(true)
 
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
@@ -177,6 +178,30 @@ export default function AONotebook() {
       importCode(importProcess)
     }
   }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem("notebookData") === null) {
+      localStorage.setItem("notebookData", "{}");
+    }
+    const d = JSON.parse(localStorage.getItem("notebookData")!);
+
+    if (aosProcessId && d) {
+      if (d[aosProcessId] && firstRun) {
+        setCellOrder(d[aosProcessId].cellIds);
+        setCellCodeItems(d[aosProcessId].cellCodeItems);
+        setCellOutputItems(d[aosProcessId].cellOutputItems);
+        setFirstRun(false)
+      } else {
+        d[aosProcessId] = {
+          cellIds,
+          cellCodeItems,
+          cellOutputItems,
+        }
+      }
+
+      localStorage.setItem("notebookData", JSON.stringify(d))
+    }
+  }, [aosProcessId, cellIds, cellCodeItems, cellOutputItems])
 
   function setRunning(cellId: string) {
     setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
@@ -229,10 +254,19 @@ export default function AONotebook() {
 
   async function spawnProcess() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (window as any).arweaveWallet.connect([
-      "ACCESS_ADDRESS",
-      "SIGN_TRANSACTION",
-    ]);
+    // await (window as any).arweaveWallet.connect([
+    //   "ACCESS_ADDRESS",
+    //   "SIGN_TRANSACTION",
+    // ]);
+    // const wallet = (window as any).arweaveWallet;
+    // if (!wallet) return alert("Please install the ArConnect extension");
+    // try {
+    //   await wallet.getActiveAddress()
+    // } catch (e) {
+    //   console.log(e.message)
+    //   await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
+    // }
+
     if (aosProcessId) return alert("already spawned");
     setSpawning(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

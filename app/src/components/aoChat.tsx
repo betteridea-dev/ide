@@ -31,7 +31,8 @@ export default function AOChat() {
   const [spawning, setSpawning] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
-  const [loop, setLoop] = useState<NodeJS.Timeout>();
+  // const [loop, setLoop] = useState<NodeJS.Timeout>();
+  const [cursor, setCursor] = useState("")
   const [messages, setMessages] = useState<message[]>([
     {
       from: "AO",
@@ -87,22 +88,30 @@ export default function AOChat() {
 
 
   useEffect(() => {
-    (async () => {
-      clearTimeout(loop)
+    clearInterval(parseInt(sessionStorage.getItem("interval") || "0"))
+    async function getInbox() {
       if (!myProcess) return
       // const r = await sendMessage({ data: `Send({Target="${AOChatPID}", Action="Register"})`, processId: myProcess })
       // console.log(r)
       const r = await results({
         process: myProcess,
         limit: 1000,
+        from: cursor
       })
       console.log(r)
+      let c = ""
       r.edges.forEach((msg: any) => {
-        const cursor = msg.cursor
-        console.log(cursor)
+        c = msg.cursor
+        // console.log(c)
         // console.log(msg.node.Output)
       })
-    })()
+      c && setCursor(c)
+
+      sessionStorage.setItem("interval", setTimeout(() => getInbox(), 1000).toString())
+    }
+
+    sessionStorage.setItem("interval", setTimeout(() => getInbox(), 1000).toString())
+    return () => clearTimeout(sessionStorage.getItem("interval"))
   }, [myProcess])
 
   // useEffect(() => {
@@ -188,7 +197,8 @@ export default function AOChat() {
         //   tags: [{ name: "Action", value: "Eval" }],
         //   data: `ao.send({Target="${AOChatPID}", Action="Register"})`,
         // });
-        const res = await sendMessage({ data: `ao.send({Target=${AOChatPID}, Action="Register"})`, processId: myProcess })
+        const data = `ao.send({Target=${AOChatPID}, Action="Register"})`
+        const res = await sendMessage({ data, processId: myProcess })
         const resdata = await result({
           process: myProcess,
           message: res,

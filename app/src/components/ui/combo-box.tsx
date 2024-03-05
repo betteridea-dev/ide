@@ -17,25 +17,6 @@ import {
 } from "@/components/ui/popover";
 import { useEffect } from "react";
 
-const frameworks = [
-  {
-    value: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPa",
-    label: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPa",
-  },
-  {
-    value: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPb",
-    label: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPb",
-  },
-  {
-    value: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPc",
-    label: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPc",
-  },
-  {
-    value: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPd",
-    label: "xk33-05v32vpkkhiSsfKu25b3436-00xk33-05v32vpPd",
-  },
-];
-
 export function Combobox({ options, onChange }: { options: string[], onChange: (val: string) => void }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
