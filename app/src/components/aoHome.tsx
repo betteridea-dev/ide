@@ -12,6 +12,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const templates = {
+  "chat": "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
+  "token": "/?getcode=Vx0OaXCQV8dd87CiZSxm2dbH8Sn66_bsCzj_1y1BAjo",
+  "voting": "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs"
+}
+
 export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val: string) => void }) {
   const [myProcesses, setMyProcesses] = useState<string[]>([]);
   const [spawning, setSpawning] = useState(false);
@@ -111,13 +117,14 @@ export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val
 
         <div className="flex flex-row gap-3 items-center">
           <Select
+            disabled={myProcesses.length === 0 || spawning}
             onValueChange={(val) => {
               localStorage.setItem("activeProcess", val);
               setActiveMenuItem("Notebook");
             }}
           >
             <SelectTrigger className="flex-grow max-w-full">
-              <SelectValue placeholder="Process ID" />
+              <SelectValue placeholder={spawning ? "Spawning..." : "Process ID"} />
             </SelectTrigger>
 
             <SelectContent>
@@ -130,7 +137,7 @@ export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val
           <div>OR</div>
 
           <Button disabled={spawning} onClick={spawnProcess}>
-            Create New Process
+            {spawning ? "spawning new process..." : "Create New Process"}
           </Button>
         </div>
       </div>
@@ -139,9 +146,14 @@ export default function AosHome({ setActiveMenuItem }: { setActiveMenuItem: (val
         <h3 className="text-xl font-bold">Explore templates</h3>
 
         <div className="grid grid-cols-3 gap-2">
-          {["Chatroom", "Token", "Ping Pong"].map((label, i) => (
+          {/* {["Chatroom", "Token", "Ping Pong"].map((label, i) => (
             <Button key={i}>{label}</Button>
-          ))}
+          ))} */}
+          {Object.keys(templates).map((label, i) => {
+            return <Button key={i} onClick={() => {
+              window.open(templates[label])
+            }}>{label}</Button>
+          })}
         </div>
       </div>
 
