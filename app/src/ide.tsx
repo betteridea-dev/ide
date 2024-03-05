@@ -58,13 +58,13 @@ export default function IDE() {
         setActiveMenuItem("Notebook");
       },
     },
-    {
-      text: "AOChat",
-      icon: Icons.chat,
-      onClick: () => {
-        setActiveMenuItem("AOChat");
-      },
-    },
+    // {
+    //   text: "AOChat",
+    //   icon: Icons.chat,
+    //   onClick: () => {
+    //     setActiveMenuItem("AOChat");
+    //   },
+    // },
   ];
 
   const menuItems: MenuItemObj[] = [
