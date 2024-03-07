@@ -210,7 +210,7 @@ export default function AONotebook() {
             // })
             toast.custom(t => {
               return <div className={`${t.visible ? 'animate-enter' : 'animate-leave'}
-                max-w-md w-full bg-[#121212] ring-1 ring-white/30 opacity-70 relative right-[280px] hover:right-0 bottom-10 hover:opacity-100 transition-all duration-200 shadow-lg rounded-lg pointer-events-auto text-white flex p-2 `}
+                max-w-md w-full bg-[#121212] ring-1 ring-white/30 opacity-80 relative right-[280px] hover:right-0 bottom-10 hover:opacity-100 transition-all duration-200 shadow-lg rounded-lg pointer-events-auto text-white flex p-2 `}
                 onClick={() => toast.dismiss(t.id)}
               >
                 <Ansi>{node.Output.data}</Ansi>
