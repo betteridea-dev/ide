@@ -13,6 +13,7 @@ import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../config";
 import { Button } from "./ui/button";
 import { useSearchParams } from "react-router-dom";
+import { Toaster, toast } from "react-hot-toast"
 
 interface TCellCodeState {
   [key: string]: string;
@@ -170,6 +171,7 @@ export default function AONotebook() {
     if (activeProcess) {
       setAOSProcess(activeProcess);
     }
+    clearInterval(parseInt(sessionStorage.getItem("interval") || "0"))
     const importNotebook = searchParams.has("getcode")
     if (importNotebook) {
       const importProcess = searchParams.get("getcode")
@@ -178,6 +180,55 @@ export default function AONotebook() {
       importCode(importProcess)
     }
   }, []);
+
+  useEffect(() => {
+    async function fetchNewInbox() {
+      if (!aosProcessId) return
+      setFirstRun(false)
+      const r = await results({
+        process: aosProcessId,
+        limit: 1000,
+        from: sessionStorage.getItem("cursor") || "",
+      })
+      // console.log(r)
+      if (r.edges.length > 0) {
+        r.edges.forEach((msg: any) => {
+          // console.log(msg)
+          // setCursor(msg.cursor)
+          sessionStorage.setItem("cursor", msg.cursor)
+          const node = msg.node
+          if (node.Output.print) {
+            console.log(node.Output.data)
+            // toast(node.Output.data, {
+            //   icon: "📥️",
+            //   style: {
+            //     borderRadius: "10px",
+            //     background: "#333",
+            //     color: "#fff",
+            //   },
+
+            // })
+            toast.custom(t => {
+              return <div className={`${t.visible ? 'animate-enter' : 'animate-leave'}
+                max-w-md w-full bg-[#121212] ring-1 ring-white/30 opacity-70 relative right-[280px] hover:right-0 bottom-10 hover:opacity-100 transition-all duration-200 shadow-lg rounded-lg pointer-events-auto text-white flex p-2 `}
+                onClick={() => toast.dismiss(t.id)}
+              >
+                <Ansi>{node.Output.data}</Ansi>
+              </div>
+            }, { duration: 10000 })
+          }
+        })
+      }
+      // fetchNewInbox()
+    }
+    // fetchNewInbox()
+
+    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 1000).toString())
+
+    return () => {
+      clearInterval(parseInt(sessionStorage.getItem("interval") || "0"))
+    }
+  }, [aosProcessId])
 
   useEffect(() => {
     if (localStorage.getItem("notebookData") === null) {
@@ -401,6 +452,7 @@ Handlers.add(
 
   return (
     <div className="relative h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
+      <Toaster position="bottom-left" />
       <div className="absolute right-2 top-2 h-7 flex gap-2" >
         {aosProcessId && <Button className="h-7" onClick={() => importCode()}>import</Button>}
         {cellIds.length > 0 && <Button className="h-7" onClick={shareCode}>share</Button>}
