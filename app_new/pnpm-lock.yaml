@@ -3026,6 +3026,16 @@ packages:
       - debug
     dev: false
 
+  /arweave@1.13.7:
+    resolution: {integrity: sha512-Hv+x2bSI6UyBHpuVbUDMMpMje1ETfpJWj52kKfz44O0IqDRi/LukOkkDUptup1p6OT6KP1/DdpnUnsNHoskFeA==}
+    engines: {node: '>=16.15.0'}
+    dependencies:
+      arconnect: 0.4.2
+      asn1.js: 5.4.1
+      base64-js: 1.5.1
+      bignumber.js: 9.1.2
+    dev: false
+
   /arweave@1.14.4:
     resolution: {integrity: sha512-tmqU9fug8XAmFETYwgUhLaD3WKav5DaM4p1vgJpEj/Px2ORPPMikwnSySlFymmL2qgRh2ZBcZsg11+RXPPGLsA==}
     engines: {node: '>=16.15.0'}
@@ -3046,8 +3056,8 @@ packages:
       ethers: 6.11.1
       graphql: 16.8.1
       othent: 1.0.638
-      warp-contracts: 1.4.37
-      warp-contracts-plugin-deploy: 1.0.13(arweave@1.14.4)(warp-arbundles@1.0.4)(warp-contracts@1.4.37)
+      warp-contracts: 1.4.26
+      warp-contracts-plugin-deploy: 1.0.13(arweave@1.14.4)(warp-arbundles@1.0.4)(warp-contracts@1.4.26)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -6961,7 +6971,7 @@ packages:
       warp-isomorphic: 1.0.7
     dev: false
 
-  /warp-contracts-plugin-deploy@1.0.13(arweave@1.14.4)(warp-arbundles@1.0.4)(warp-contracts@1.4.37):
+  /warp-contracts-plugin-deploy@1.0.13(arweave@1.14.4)(warp-arbundles@1.0.4)(warp-contracts@1.4.26):
     resolution: {integrity: sha512-rpr44xQGnQ6Wjc52R/6Ma3aGCS87QNnJGchhCzQQzIlxmLHycSpjdDiNyFSMUIO5zggSntnEwrWADN0wpOcehg==}
     engines: {node: '>=16.5'}
     peerDependencies:
@@ -6972,7 +6982,7 @@ packages:
       node-pre-gyp: 0.17.0
       node-stdlib-browser: 1.2.0
       warp-arbundles: 1.0.4
-      warp-contracts: 1.4.37
+      warp-contracts: 1.4.26
     transitivePeerDependencies:
       - arweave
       - bufferutil
@@ -6982,12 +6992,12 @@ packages:
       - utf-8-validate
     dev: false
 
-  /warp-contracts@1.4.37:
-    resolution: {integrity: sha512-jDQQF4FqRCy6OAnsb87d9LMzVp18eRTFyDQp9QirLD2C7IwBAH2DVrfpVcyPeZuxw4bNz3CSVemdMS+oFJIldQ==}
+  /warp-contracts@1.4.26:
+    resolution: {integrity: sha512-m+e5TggjxUF1TtcuKlcAyuVvkTXUi1W0W788iFzfhr7x2hnnfbGkBTiGBxhLu6VVKfxxegMMukn5ztRDmaK34w==}
     engines: {node: '>=16.8'}
     dependencies:
       archiver: 5.3.2
-      arweave: 1.14.4
+      arweave: 1.13.7
       async-mutex: 0.4.1
       bignumber.js: 9.1.1
       events: 3.3.0
