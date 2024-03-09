@@ -1,7 +1,7 @@
-import { Icons } from "@/components/icons";
+import { Icon } from "@/components/icons";
 
 type TSideNavItem = {
   text: string;
-  icon: keyof typeof Icons;
+  icon: Icon;
   onClick?: () => void;
 };
