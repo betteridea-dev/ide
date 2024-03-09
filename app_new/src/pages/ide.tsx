@@ -7,26 +7,22 @@ import MainNavBar, { MainNavFileTab } from "@/components/main-nav";
 import { TSideNavItem } from "types";
 import SideNav from "@/components/side-nav";
 
+import { cn } from "@/lib/utils";
 import useContracts from "../../hooks/useContracts";
 import { Icons } from "@/components/icons";
-
-import Home from "@/_components/home";
-import AosHome from "@/_components/aoHome";
-import Deploy from "@/_components/deploy";
-import Test from "@/_components/test";
-import Cloud from "@/_components/cloud";
-import Showcase from "@/_components/showcase";
-import Settings from "@/_components/settings";
-import AONotebook from "@/_components/aoNotebook";
-import AOChat from "@/_components/aoChat";
-
-import _delete from "@/_assets/delete.svg";
-import download from "@/_assets/download.svg";
-import deploy from "@/_assets/deploy.svg";
+import { AOHome, AONotebook, AOChat } from "@/components/ao";
+import {
+  WrapCloud,
+  WrapDeploy,
+  WrapHome,
+  WrapSettings,
+  WrapShowcase,
+  WrapTest,
+} from "@/components/warp";
 
 export default function IDE() {
   const contracts = useContracts();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const [aosView, setAosView] = useState(true);
   const [activeMenuItem, setActiveMenuItem] = useState("");
@@ -37,7 +33,7 @@ export default function IDE() {
 
   const [testTarget, setTestTarget] = useState("");
   const [importNBfrom, setImportNBfrom] = useState("");
-  const [connected, setConnected] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   const aosMenuItems: TSideNavItem[] = [
     {
@@ -124,10 +120,10 @@ export default function IDE() {
       const wallet = (window as any).arweaveWallet;
       if (wallet) {
         if (await wallet.getActiveAddress()) {
-          setConnected(true);
+          setIsWalletConnected(true);
         } else {
           await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
-          setConnected(true);
+          setIsWalletConnected(true);
         }
       } else {
         alert("Please install the ArConnect extension");
@@ -141,14 +137,14 @@ export default function IDE() {
         return alert("Please install the ArConnect extension");
       try {
         await (window as any).arweaveWallet.getActiveAddress();
-        setConnected(true);
+        setIsWalletConnected(true);
       } catch (e) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (window as any).arweaveWallet.connect([
           "ACCESS_ADDRESS",
           "SIGN_TRANSACTION",
         ]);
-        setConnected(true);
+        setIsWalletConnected(true);
       }
 
       const importNotebook = searchParams.has("getcode");
@@ -171,11 +167,16 @@ export default function IDE() {
     // setShowFileList(!aosView);
   }, [aosView]);
 
-  function FileListItem({ contractname }: { contractname: string }) {
-    // right of the left sidebar
-    const active = activeContract == contractname;
+  // TODO: Refactor this into a separate component
+  // Need centralized state management to absteract this
+  function ContractListItem({
+    contractName: contractName,
+  }: {
+    contractName: string;
+  }) {
+    const active = activeContract == contractName;
 
-    function Fileitm({ name }: { name: string }) {
+    function ContractFileItem({ name }: { name: string }) {
       return (
         <div
           className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
@@ -193,79 +194,92 @@ export default function IDE() {
 
     return (
       <div
-        className={`w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f] ${
-          activeContract == contractname && "bg-white/10"
-        }`}
+        className={cn(
+          "w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f]",
+          activeContract == contractName && "bg-white/10"
+        )}
       >
         <div
           className="w-full p-2 font-bold"
           onClick={() => {
-            setActiveContract(contractname);
+            setActiveContract(contractName);
             setActiveFile("README.md");
             setActiveMenuItem("Contracts");
+
             const recents = localStorage.getItem("recents");
+
             if (recents) {
               const recentsJson: string[] = JSON.parse(recents);
-              if (recentsJson.includes(contractname)) {
-                recentsJson.splice(recentsJson.indexOf(contractname), 1);
+
+              if (recentsJson.includes(contractName)) {
+                recentsJson.splice(recentsJson.indexOf(contractName), 1);
               } else if (recentsJson.length > 4) {
                 recentsJson.pop();
               }
-              recentsJson.unshift(contractname);
+
+              recentsJson.unshift(contractName);
               localStorage.setItem("recents", JSON.stringify(recentsJson));
             } else {
-              localStorage.setItem("recents", JSON.stringify([contractname]));
+              localStorage.setItem("recents", JSON.stringify([contractName]));
             }
           }}
         >
-          {contractname}
+          {contractName}
         </div>
+
         {active && (
           <div className="w-full flex flex-col">
-            <Fileitm name="README.md" />
-            <Fileitm name="contract.js" />
-            <Fileitm name="state.json" />
+            <ContractFileItem name="README.md" />
+            <ContractFileItem name="contract.js" />
+            <ContractFileItem name="state.json" />
+
             <div className="flex flex-col justify-evenly">
               <button
                 className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
-                  setActiveContract(contractname);
+                  setActiveContract(contractName);
                   setActiveMenuItem("Deploy");
                 }}
               >
-                <img src={deploy} width={20} />
+                <Icons.deploy height={16} width={16} />
                 deploy
               </button>
+
               <button
                 className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
                   const zip = new JSZip();
-                  const contract = zip.folder(contractname);
-                  const files = contracts[contractname];
+                  const contract = zip.folder(contractName);
+                  const files = contracts.contracts[contractName];
+
                   Object.keys(files).forEach((filename) => {
-                    contract.file(filename, files[filename]);
+                    contract?.file(filename, files[filename]);
                   });
+
                   zip.generateAsync({ type: "blob" }).then(function (content) {
-                    saveAs(content, contractname + ".zip");
+                    saveAs(content, contractName + ".zip");
                   });
                 }}
               >
-                <img src={download} width={20} />
+                <Icons.download height={16} width={16} />
                 download zip
               </button>
+
               <button
                 className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
                 onClick={() => {
-                  contracts.deleteContract(contractname);
+                  contracts.deleteContract(contractName);
+
                   const recents =
                     JSON.parse(localStorage.getItem("recents")!) || [];
-                  if (recents.includes(contractname)) {
-                    recents.splice(recents.indexOf(contractname), 1);
+
+                  if (recents.includes(contractName)) {
+                    recents.splice(recents.indexOf(contractName), 1);
                     localStorage.setItem("recents", JSON.stringify(recents));
                   }
                 }}
               >
-                <img src={_delete} width={17} />
+                <Icons.delete height={16} width={16} />
                 delete
               </button>
             </div>
@@ -283,9 +297,9 @@ export default function IDE() {
         case "AOChat":
           return <AOChat />;
         case "Settings":
-          return <Settings />;
+          return <WrapSettings />;
         default:
-          return <AosHome setActiveMenuItem={setActiveMenuItem} />;
+          return <AOHome setActiveMenuItem={setActiveMenuItem} />;
       }
     } else {
       switch (activeMenuItem) {
@@ -306,7 +320,7 @@ export default function IDE() {
           );
         case "Deploy":
           return (
-            <Deploy
+            <WrapDeploy
               contracts={contracts.contracts!}
               target={activeContract}
               test={(c: string) => {
@@ -316,16 +330,16 @@ export default function IDE() {
             />
           );
         case "Test":
-          return <Test contracts={contracts} target={testTarget} />;
+          return <WrapTest contracts={contracts} target={testTarget} />;
         case "Cloud":
-          return <Cloud />;
+          return <WrapCloud />;
         case "Showcase":
-          return <Showcase />;
+          return <WrapShowcase />;
         case "Settings":
-          return <Settings />;
+          return <WrapSettings />;
         default:
           return (
-            <Home
+            <WrapHome
               contracts={contracts}
               setActiveContract={setActiveContract}
               setActiveFile={setActiveFile}
@@ -381,7 +395,7 @@ export default function IDE() {
               Object.keys(contracts.contracts).map((contractname, i) => {
                 if (contractname == "input") return;
 
-                return <FileListItem key={i} contractname={contractname} />;
+                return <ContractListItem key={i} contractName={contractname} />;
               })}
 
             <div

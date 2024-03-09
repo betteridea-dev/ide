@@ -1,5 +1,5 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
-import theme from "../../themes/notebook.json";
+import theme from "../../../themes/notebook.json";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@permaweb/aoconnect";
 import { Icons } from "@/components/icons";
 import Ansi from "ansi-to-react";
-import { AOModule, AOScheduler } from "../../config";
+import { AOModule, AOScheduler } from "../../../config";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 

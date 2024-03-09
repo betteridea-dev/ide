@@ -5,7 +5,7 @@ import {
   result,
   results,
 } from "@permaweb/aoconnect";
-import { AOModule, AOScheduler, AOChatPID } from "../../config";
+import { AOModule, AOScheduler, AOChatPID } from "../../../config";
 
 interface message {
   from: string;

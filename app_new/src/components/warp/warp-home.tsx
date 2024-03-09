@@ -1,16 +1,16 @@
-import { ContractsType } from "~/hooks/useContracts";
+import { ContractsType } from "../../../hooks/useContracts";
 import {
   contractSrc as voteSrc,
   stateSrc as voteState,
-} from "../../templates/warp/vote";
+} from "../../../templates/warp/vote";
 import {
   contractSrc as utokenSrc,
   stateSrc as utokenState,
-} from "../../templates/warp/utoken";
+} from "../../../templates/warp/utoken";
 import {
   contractSrc as dbSrc,
   stateSrc as dbState,
-} from "../../templates/warp/db";
+} from "../../../templates/warp/db";
 import { useState } from "react";
 
 export default function Home({

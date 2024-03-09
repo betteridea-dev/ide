@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { gql, GraphQLClient } from "graphql-request";
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
-import { AOModule, AOScheduler } from "../../config";
+import { AOModule, AOScheduler } from "../../../config";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ const templates = {
   voting: "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
 };
 
-export default function AosHome({
+export default function AOHome({
   setActiveMenuItem,
 }: {
   setActiveMenuItem: (val: string) => void;

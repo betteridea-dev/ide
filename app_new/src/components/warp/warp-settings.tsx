@@ -1,9 +1,12 @@
-import areco from "../_assets/arweave/ecosystem.svg";
-
-export default function Settings() {
+export default function WarpSettings() {
   return (
     <div className="h-full flex flex-col gap-5 items-center justify-center">
-      <img src={areco} className="w-[269px]" draggable={false} />
+      <img
+        src="/images/arweave/ecosystem.svg"
+        className="w-[269px]"
+        draggable={false}
+      />
+
       <a href="https://github.com/ankushKun/betterIDE" target="_blank">
         <div className="flex items-center gap-3 font-semibold text-2xl tracking-widest ring-1 rounded-lg ring-white/20 p-2 hover:bg-white/5">
           <img
@@ -11,6 +14,7 @@ export default function Settings() {
             className="w-[60px] rounded-full"
             draggable={false}
           />
+
           <div>
             View source
             <br /> on Github

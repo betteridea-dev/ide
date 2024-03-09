@@ -1,10 +1,8 @@
 import { createContract } from "arweavekit/contract";
-// import { useEffect, useState } from "react";
-import { contractsType } from "../../hooks/useContracts";
-import useDeployments from "../../hooks/useDeployments";
+import { contractsType } from "../../../hooks/useContracts";
+import useDeployments from "../../../hooks/useDeployments";
 import { useReducer } from "react";
-import copy from "../_assets/copy.svg";
-import tick from "../_assets/tick.svg";
+import { Icons } from "@/components/icons";
 
 const derivations = [
   "not allowed",
@@ -60,7 +58,7 @@ const istate: DeployState = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Deploy({
+export default function WarpDeploy({
   contracts,
   target,
   test,
@@ -338,15 +336,15 @@ export default function Deploy({
       ) : (
         <div className="text-center flex flex-col gap-4 justify-center items-center min-h-[80vh]">
           <div className="text-3xl font-bold flex gap-1">
-            <img src={tick} width={22} /> Your contract has been successfully
-            deployed!
+            <Icons.tick height={18} width={18} />
+            Your contract has been successfully deployed!
           </div>
           <div className="flex gap-1 mx-auto">
             Txn ID: {state.contractTxID}{" "}
-            <img
-              src={copy}
+            <Icons.copy
+              height={18}
+              width={18}
               className="cursor-pointer"
-              width={22}
               onClick={() => {
                 navigator.clipboard.writeText(state.contractTxID);
                 alert("Copied to clipboard");

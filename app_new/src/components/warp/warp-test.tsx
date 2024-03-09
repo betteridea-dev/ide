@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import useDeployments, { deployment } from "../../hooks/useDeployments";
-import { ContractsType } from "../../hooks/useContracts";
+import useDeployments from "../../../hooks/useDeployments";
+import { ContractsType } from "../../../hooks/useContracts";
 import { viewContractState, writeContract } from "arweavekit/contract";
 
-export default function Test({
+export default function WarpTest({
   contracts,
   target,
 }: {
