@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import JSZip from "jszip";
 import saveAs from "file-saver";
-import { LucideIcon } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+
+import MainNavBar, { MainNavFileTab } from "@/components/main-nav";
+import { TSideNavItem } from "types";
+import SideNav from "@/components/side-nav";
+
+import useContracts from "../../hooks/useContracts";
+import { Icons } from "@/components/icons";
 
 import Home from "@/_components/home";
 import AosHome from "@/_components/aoHome";
@@ -14,158 +20,9 @@ import Settings from "@/_components/settings";
 import AONotebook from "@/_components/aoNotebook";
 import AOChat from "@/_components/aoChat";
 
-import useContracts from "../../hooks/useContracts";
-
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
-
 import _delete from "@/_assets/delete.svg";
 import download from "@/_assets/download.svg";
 import deploy from "@/_assets/deploy.svg";
-
-type MenuItemObj = {
-  text: string;
-  icon: LucideIcon;
-  onClick?: () => void;
-};
-
-function MainNavBar({
-  aosView,
-  setAosView,
-  children,
-}: {
-  aosView: boolean;
-  setAosView: (b: boolean) => void;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className="flex h-20 min-h-[5rem] px-6 bg-[#111111]">
-      <div className="flex justify-center items-center gap-2">
-        <img src="/logo-small.svg" className="h-6 w-6" />
-
-        <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
-          BetterIDEa
-          {/* | {aosView ? "AO Mode" : "Warp Mode"} */}
-        </h1>
-      </div>
-
-      {children}
-
-      {/* {activeContract && (
-        <div className="flex items-center rounded-lg gap-2 mx-4">
-          <FileTab filename="README.md" />
-          <FileTab filename="contract.js" />
-          <FileTab filename="state.json" />
-        </div>
-      )} */}
-
-      <div className="ml-auto flex justify-center items-center px-3 gap-2">
-        {aosView ? "AO Mode" : "Warp Mode"}
-
-        <Switch
-          checked={aosView}
-          onCheckedChange={(val) => {
-            setAosView(val);
-          }}
-        />
-
-        {/* <ModeToggle /> */}
-      </div>
-    </div>
-  );
-}
-
-/* 
-This goes on in between Main Nav Bar
-In warp mode, it shows the list of files in the contract
-*/
-function MainNavFileTab({
-  filename,
-  activeFile,
-  setActiveFile,
-  setActiveMenuItem,
-}: {
-  filename: string;
-  activeFile: string;
-  setActiveFile: (s: string) => void;
-  setActiveMenuItem: (s: string) => void;
-}) {
-  return (
-    <div
-      className={cn(
-        "h-fit w-fit p-1 px-2 cursor-pointer items-center justify-center flex border rounded-lg border-white/10",
-        activeFile == filename && "bg-white/10"
-      )}
-      onClick={() => {
-        setActiveFile(filename);
-        setActiveMenuItem("Contracts");
-      }}
-    >
-      {filename}
-    </div>
-  );
-}
-
-function SideMenuItem({
-  text,
-  Icon,
-  active,
-  onClick,
-}: {
-  text: string;
-  Icon: LucideIcon;
-  active: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      className={cn(
-        "flex gap-1 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer",
-        active ? "bg-[#006F86]" : "transparent"
-      )}
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function SideMenu({
-  items,
-  activeMenuItem,
-  setActiveMenuItem,
-}: {
-  items: MenuItemObj[];
-  activeMenuItem: string;
-  setActiveMenuItem: (s: string) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717] border-r border-white/30">
-      {items.map((item, i) => {
-        return (
-          <SideMenuItem
-            key={i}
-            text={item.text}
-            Icon={item.icon}
-            onClick={item.onClick}
-            active={activeMenuItem == item.text}
-          />
-        );
-      })}
-
-      <div className="flex-grow"></div>
-
-      <SideMenuItem
-        text="Settings"
-        Icon={Icons.settings}
-        onClick={() => setActiveMenuItem("Settings")}
-        active={activeMenuItem == "Settings"}
-      />
-    </div>
-  );
-}
 
 export default function IDE() {
   const contracts = useContracts();
@@ -182,7 +39,7 @@ export default function IDE() {
   const [importNBfrom, setImportNBfrom] = useState("");
   const [connected, setConnected] = useState(false);
 
-  const aosMenuItems: MenuItemObj[] = [
+  const aosMenuItems: TSideNavItem[] = [
     {
       text: "Home",
       icon: Icons.home,
@@ -206,7 +63,7 @@ export default function IDE() {
     // },
   ];
 
-  const menuItems: MenuItemObj[] = [
+  const menuItems: TSideNavItem[] = [
     {
       text: "Home",
       icon: Icons.home,
@@ -511,7 +368,7 @@ export default function IDE() {
 
       <div className="grow flex">
         {/* Left Bar */}
-        <SideMenu
+        <SideNav
           items={aosView ? aosMenuItems : menuItems}
           activeMenuItem={activeMenuItem}
           setActiveMenuItem={setActiveMenuItem}
