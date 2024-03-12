@@ -12,21 +12,31 @@ import {
   stateSrc as dbState,
 } from "../../../templates/warp/db";
 import { useState } from "react";
-
-export default function Home({
-  contracts,
-  setActiveMenuItem,
+import { useAppDispatch } from "../../../hooks/store";
+import {
   setActiveContract,
   setActiveFile,
-}: {
-  contracts: ContractsType;
-  setActiveMenuItem: (val: string) => void;
-  setActiveContract: (val: string) => void;
-  setActiveFile: (val: string) => void;
-}) {
+  setActiveSideNavItem,
+} from "@/store/app-store";
+
+export default function Home({ contracts }: { contracts: ContractsType }) {
+  const dispatch = useAppDispatch();
+
   const [recents] = useState<string[]>(
     JSON.parse(localStorage.getItem("recents")) || []
   );
+
+  function _setActiveFile(s: string) {
+    dispatch(setActiveFile(s));
+  }
+
+  function setActiveMenuItem(s: string) {
+    dispatch(setActiveSideNavItem(s));
+  }
+
+  function _setActiveContract(s: string) {
+    setActiveContract(s);
+  }
 
   function ContractCard({
     name,
@@ -48,8 +58,8 @@ export default function Home({
               const n = contracts.newContract(src, state);
               if (n) {
                 setTimeout(() => {
-                  setActiveContract(n);
-                  setActiveFile("README.md");
+                  _setActiveContract(n);
+                  _setActiveFile("README.md");
                   setActiveMenuItem("Contracts");
                 }, 400);
 
@@ -60,8 +70,8 @@ export default function Home({
                 localStorage.setItem("recents", JSON.stringify(r));
               }
             } else {
-              setActiveContract(name);
-              setActiveFile("README.md");
+              _setActiveContract(name);
+              _setActiveFile("README.md");
               setActiveMenuItem("Contracts");
               if (r.includes(name)) {
                 r.splice(r.indexOf(name), 1);

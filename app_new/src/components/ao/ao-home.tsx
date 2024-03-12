@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppDispatch } from "../../../hooks/store";
+import { setActiveSideNavItem } from "@/store/app-store";
 
 const templates = {
   chat: "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
@@ -17,32 +19,10 @@ const templates = {
   voting: "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
 };
 
-export default function AOHome({
-  setActiveMenuItem,
-}: {
-  setActiveMenuItem: (val: string) => void;
-}) {
+export default function AOHome() {
+  const dispatch = useAppDispatch();
   const [myProcesses, setMyProcesses] = useState<string[]>([]);
   const [spawning, setSpawning] = useState(false);
-  // const [connected, setConnected] = useState(false);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     const wallet = (window as any).arweaveWallet;
-  //     if (wallet) {
-  //       if (await wallet.getActiveAddress()) {
-  //         setConnected(true);
-  //       } else {
-  //         // await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
-  //         // setConnected(true);
-  //         setConnected(false)
-  //       }
-  //     } else {
-  //       alert("Please install the ArConnect extension")
-  //     }
-  //   })();
-  // }, [])
 
   useEffect(() => {
     const client = new GraphQLClient("https://arweave.net/graphql");
@@ -100,7 +80,9 @@ export default function AOHome({
     console.log(res);
     setMyProcesses((prev) => [res, ...prev]);
     localStorage.setItem("activeProcess", res);
-    setActiveMenuItem("Notebook");
+
+    dispatch(setActiveSideNavItem("Notebook"));
+
     setSpawning(false);
   }
 
@@ -123,7 +105,7 @@ export default function AOHome({
             disabled={myProcesses.length === 0 || spawning}
             onValueChange={(val) => {
               localStorage.setItem("activeProcess", val);
-              setActiveMenuItem("Notebook");
+              dispatch(setActiveSideNavItem("Notebook"));
             }}
           >
             <SelectTrigger className="flex-grow max-w-full">

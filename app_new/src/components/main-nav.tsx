@@ -1,7 +1,11 @@
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useAppSelector, useAppDispatch } from "../../hooks/store";
-import { setAppMode, setActiveSideNavItem } from "@/store/app-store";
+import {
+  setAppMode,
+  setActiveSideNavItem,
+  setActiveFile,
+} from "@/store/app-store";
 
 /* 
 This is the Main Navigation Bar
@@ -12,7 +16,7 @@ export default function MainNavBar({
 }: {
   children?: React.ReactNode;
 }) {
-  const { appMode, activeSideNavItem } = useAppSelector((state) => state.app);
+  const { appMode } = useAppSelector((state) => state.app);
   const dispatch = useAppDispatch();
 
   return (
@@ -47,17 +51,10 @@ export default function MainNavBar({
 This goes on in between Main Nav Bar
 In warp mode, it shows the list of files in the contract
 */
-export function MainNavFileTab({
-  filename,
-  activeFile,
-  setActiveFile,
-  setActiveMenuItem,
-}: {
-  filename: string;
-  activeFile: string;
-  setActiveFile: (s: string) => void;
-  setActiveMenuItem: (s: string) => void;
-}) {
+export function MainNavFileTab({ filename }: { filename: string }) {
+  const dispatch = useAppDispatch();
+  const { activeFile } = useAppSelector((state) => state.app);
+
   return (
     <div
       className={cn(
@@ -65,8 +62,8 @@ export function MainNavFileTab({
         activeFile == filename && "bg-white/10"
       )}
       onClick={() => {
-        setActiveFile(filename);
-        setActiveMenuItem("Contracts");
+        dispatch(setActiveFile(filename));
+        dispatch(setActiveSideNavItem("Contracts"));
       }}
     >
       {filename}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import JSZip from "jszip";
 import saveAs from "file-saver";
-import { useSearchParams } from "react-router-dom";
 
 import MainNavBar, { MainNavFileTab } from "@/components/main-nav";
 import { TSideNavItem } from "types";
@@ -10,7 +9,7 @@ import SideNav from "@/components/side-nav";
 import { cn } from "@/lib/utils";
 import useContracts from "../../hooks/useContracts";
 import { Icons } from "@/components/icons";
-import { AOHome, AONotebook, AOChat } from "@/components/ao";
+
 import {
   WrapCloud,
   WrapDeploy,
@@ -20,50 +19,29 @@ import {
   WrapTest,
 } from "@/components/warp";
 import { useAppSelector, useAppDispatch } from "../../hooks/store";
-import { setActiveSideNavItem } from "@/store/app-store";
+import {
+  setActiveSideNavItem,
+  setActiveFile,
+  setActiveContract,
+} from "@/store/app-store";
 
 export default function IDE() {
   const contracts = useContracts();
-  const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
 
-  const { appMode, activeSideNavItem } = useAppSelector((state) => state.app);
+  const { appMode, activeSideNavItem, activeFile, activeContract } =
+    useAppSelector((state) => state.app);
 
-  const [activeFile, setActiveFile] = useState("");
   const [showFileList, setShowFileList] = useState(true);
-  const [activeContract, setActiveContract] = useState("");
-
   const [testTarget, setTestTarget] = useState("");
-  const [importNBfrom, setImportNBfrom] = useState("");
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   function setActiveMenuItem(s: string) {
     dispatch(setActiveSideNavItem(s));
   }
 
-  const aosMenuItems: TSideNavItem[] = [
-    {
-      text: "Home",
-      icon: Icons.home,
-      onClick: () => {
-        setActiveMenuItem("Home");
-      },
-    },
-    {
-      text: "Notebook",
-      icon: Icons.projects,
-      onClick: () => {
-        setActiveMenuItem("Notebook");
-      },
-    },
-    // {
-    //   text: "AOChat",
-    //   icon: Icons.chat,
-    //   onClick: () => {
-    //     setActiveMenuItem("AOChat");
-    //   },
-    // },
-  ];
+  function _setActiveFile(s: string) {
+    dispatch(setActiveFile(s));
+  }
 
   const menuItems: TSideNavItem[] = [
     {
@@ -71,7 +49,7 @@ export default function IDE() {
       icon: Icons.home,
       onClick: () => {
         setActiveMenuItem("Home");
-        setActiveFile("");
+        _setActiveFile("");
       },
     },
     {
@@ -86,7 +64,7 @@ export default function IDE() {
       icon: Icons.deploy,
       onClick: () => {
         setActiveMenuItem("Deploy");
-        setActiveFile("");
+        _setActiveFile("");
       },
     },
     {
@@ -94,7 +72,7 @@ export default function IDE() {
       icon: Icons.test,
       onClick: () => {
         setActiveMenuItem("Test");
-        setActiveFile("");
+        _setActiveFile("");
       },
     },
     {
@@ -102,7 +80,7 @@ export default function IDE() {
       icon: Icons.executeCode,
       onClick: () => {
         setActiveMenuItem("Cloud");
-        setActiveFile("");
+        _setActiveFile("");
       },
     },
     {
@@ -110,249 +88,58 @@ export default function IDE() {
       icon: Icons.plugins,
       onClick: () => {
         setActiveMenuItem("Showcase");
-        setActiveFile("");
+        _setActiveFile("");
       },
     },
     // {
     //     text: "AO",
     //     icon: menuicons.arglyph,
-    //     onClick: () => { setActiveMenuItem("AO"); setActiveContract(""); setActiveFile(""); setShowFileList(false) }
+    //     onClick: () => { setActiveMenuItem("AO"); _setActiveContract(""); _setActiveFile(""); setShowFileList(false) }
     // }
   ];
 
   useEffect(() => {
-    (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const wallet = (window as any).arweaveWallet;
-      if (wallet) {
-        if (await wallet.getActiveAddress()) {
-          setIsWalletConnected(true);
-        } else {
-          await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
-          setIsWalletConnected(true);
-        }
-      } else {
-        alert("Please install the ArConnect extension");
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    async function connectWallet() {
-      if (!(window as any).arweaveWallet)
-        return alert("Please install the ArConnect extension");
-      try {
-        await (window as any).arweaveWallet.getActiveAddress();
-        setIsWalletConnected(true);
-      } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (window as any).arweaveWallet.connect([
-          "ACCESS_ADDRESS",
-          "SIGN_TRANSACTION",
-        ]);
-        setIsWalletConnected(true);
-      }
-
-      const importNotebook = searchParams.has("getcode");
-      if (importNotebook && appMode === "aos") {
-        const importProcess = searchParams.get("getcode");
-        console.log(importProcess);
-        if (importProcess.length !== 43) return alert("Invalid process ID");
-        setActiveMenuItem("Notebook");
-      }
-    }
-    connectWallet();
-  }, []);
-
-  useEffect(() => {
-    setActiveMenuItem("Home");
-    setActiveContract("");
-    setActiveFile("");
     setShowFileList(false);
-
-    // setShowFileList(appMode === "wrap");
   }, [appMode]);
 
-  // TODO: Refactor this into a separate component
-  // Need centralized state management to absteract this
-  function ContractListItem({
-    contractName: contractName,
-  }: {
-    contractName: string;
-  }) {
-    const active = activeContract == contractName;
-
-    function ContractFileItem({ name }: { name: string }) {
-      return (
-        <div
-          className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
-            activeFile == name && "font-bold bg-white/10"
-          }`}
-          onClick={() => {
-            setActiveFile(name);
-            setActiveMenuItem("Contracts");
-          }}
-        >
-          {name}
-        </div>
-      );
-    }
-
-    return (
-      <div
-        className={cn(
-          "w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f]",
-          activeContract == contractName && "bg-white/10"
-        )}
-      >
-        <div
-          className="w-full p-2 font-bold"
-          onClick={() => {
-            setActiveContract(contractName);
-            setActiveFile("README.md");
-            setActiveMenuItem("Contracts");
-
-            const recents = localStorage.getItem("recents");
-
-            if (recents) {
-              const recentsJson: string[] = JSON.parse(recents);
-
-              if (recentsJson.includes(contractName)) {
-                recentsJson.splice(recentsJson.indexOf(contractName), 1);
-              } else if (recentsJson.length > 4) {
-                recentsJson.pop();
-              }
-
-              recentsJson.unshift(contractName);
-              localStorage.setItem("recents", JSON.stringify(recentsJson));
-            } else {
-              localStorage.setItem("recents", JSON.stringify([contractName]));
-            }
-          }}
-        >
-          {contractName}
-        </div>
-
-        {active && (
-          <div className="w-full flex flex-col">
-            <ContractFileItem name="README.md" />
-            <ContractFileItem name="contract.js" />
-            <ContractFileItem name="state.json" />
-
-            <div className="flex flex-col justify-evenly">
-              <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
-                onClick={() => {
-                  setActiveContract(contractName);
-                  setActiveMenuItem("Deploy");
-                }}
-              >
-                <Icons.deploy height={16} width={16} />
-                deploy
-              </button>
-
-              <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
-                onClick={() => {
-                  const zip = new JSZip();
-                  const contract = zip.folder(contractName);
-                  const files = contracts.contracts[contractName];
-
-                  Object.keys(files).forEach((filename) => {
-                    contract?.file(filename, files[filename]);
-                  });
-
-                  zip.generateAsync({ type: "blob" }).then(function (content) {
-                    saveAs(content, contractName + ".zip");
-                  });
-                }}
-              >
-                <Icons.download height={16} width={16} />
-                download zip
-              </button>
-
-              <button
-                className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
-                onClick={() => {
-                  contracts.deleteContract(contractName);
-
-                  const recents =
-                    JSON.parse(localStorage.getItem("recents")!) || [];
-
-                  if (recents.includes(contractName)) {
-                    recents.splice(recents.indexOf(contractName), 1);
-                    localStorage.setItem("recents", JSON.stringify(recents));
-                  }
-                }}
-              >
-                <Icons.delete height={16} width={16} />
-                delete
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   function TabSwitcher() {
-    if (appMode === "aos") {
-      switch (activeSideNavItem) {
-        case "Notebook":
-          return <AONotebook />;
-        case "AOChat":
-          return <AOChat />;
-        case "Settings":
-          return <WrapSettings />;
-        default:
-          return <AOHome setActiveMenuItem={setActiveMenuItem} />;
-      }
-    } else {
-      switch (activeSideNavItem) {
-        case "Contracts":
-          return (
-            <iframe
-              className="w-full h-full"
-              src={`/?editor&language=${
-                activeFile.endsWith(".js")
-                  ? "javascript"
-                  : activeFile.endsWith(".json")
-                  ? "json"
-                  : activeFile.endsWith(".md")
-                  ? "markdown"
-                  : "text"
-              }&file=${activeContract}/${activeFile}`}
-            />
-          );
-        case "Deploy":
-          return (
-            <WrapDeploy
-              contracts={contracts.contracts!}
-              target={activeContract}
-              test={(c: string) => {
-                setActiveMenuItem("Test");
-                setTestTarget(c);
-              }}
-            />
-          );
-        case "Test":
-          return <WrapTest contracts={contracts} target={testTarget} />;
-        case "Cloud":
-          return <WrapCloud />;
-        case "Showcase":
-          return <WrapShowcase />;
-        case "Settings":
-          return <WrapSettings />;
-        default:
-          return (
-            <WrapHome
-              contracts={contracts}
-              setActiveContract={setActiveContract}
-              setActiveFile={setActiveFile}
-              setActiveMenuItem={setActiveMenuItem}
-            />
-          );
-      }
+    switch (activeSideNavItem) {
+      case "Contracts":
+        return (
+          <iframe
+            className="w-full h-full"
+            src={`/?editor&language=${
+              activeFile.endsWith(".js")
+                ? "javascript"
+                : activeFile.endsWith(".json")
+                ? "json"
+                : activeFile.endsWith(".md")
+                ? "markdown"
+                : "text"
+            }&file=${activeContract}/${activeFile}`}
+          />
+        );
+      case "Deploy":
+        return (
+          <WrapDeploy
+            contracts={contracts.contracts!}
+            target={activeContract}
+            test={(c: string) => {
+              setActiveMenuItem("Test");
+              setTestTarget(c);
+            }}
+          />
+        );
+      case "Test":
+        return <WrapTest contracts={contracts} target={testTarget} />;
+      case "Cloud":
+        return <WrapCloud />;
+      case "Showcase":
+        return <WrapShowcase />;
+      case "Settings":
+        return <WrapSettings />;
+      default:
+        return <WrapHome contracts={contracts} />;
     }
   }
 
@@ -362,40 +149,21 @@ export default function IDE() {
       <MainNavBar>
         {activeContract && (
           <div className="flex items-center rounded-lg gap-2 mx-4">
-            <MainNavFileTab
-              filename="README.md"
-              activeFile={activeFile}
-              setActiveFile={setActiveFile}
-              setActiveMenuItem={setActiveMenuItem}
-            />
+            <MainNavFileTab filename="README.md" />
 
-            <MainNavFileTab
-              filename="contract.js"
-              activeFile={activeFile}
-              setActiveFile={setActiveFile}
-              setActiveMenuItem={setActiveMenuItem}
-            />
+            <MainNavFileTab filename="contract.js" />
 
-            <MainNavFileTab
-              filename="state.json"
-              activeFile={activeFile}
-              setActiveFile={setActiveFile}
-              setActiveMenuItem={setActiveMenuItem}
-            />
+            <MainNavFileTab filename="state.json" />
           </div>
         )}
       </MainNavBar>
 
       <div className="grow flex">
         {/* Left Bar */}
-        <SideNav
-          items={appMode === "aos" ? aosMenuItems : menuItems}
-          activeMenuItem={activeSideNavItem}
-          setActiveMenuItem={setActiveMenuItem}
-        />
+        <SideNav items={menuItems} />
 
         {/* File List */}
-        {appMode === "wrap" && showFileList && (
+        {showFileList && (
           <div className="min-w-[150px] border-r border-white/30 bg-[#171717]">
             {contracts.contracts &&
               Object.keys(contracts.contracts).map((contractname, i) => {
@@ -416,6 +184,143 @@ export default function IDE() {
         {/* Main Content */}
         <div className="grow bg-[#1d1d1d]">{TabSwitcher()}</div>
       </div>
+    </div>
+  );
+}
+
+function ContractListItem({
+  contractName: contractName,
+}: {
+  contractName: string;
+}) {
+  const contracts = useContracts();
+  const dispatch = useAppDispatch();
+
+  const { activeFile, activeContract } = useAppSelector((state) => state.app);
+
+  function setActiveMenuItem(s: string) {
+    dispatch(setActiveSideNavItem(s));
+  }
+
+  function _setActiveFile(s: string) {
+    dispatch(setActiveFile(s));
+  }
+
+  function _setActiveContract(s: string) {
+    setActiveContract(s);
+  }
+
+  const active = activeContract == contractName;
+
+  function ContractFileItem({ name }: { name: string }) {
+    return (
+      <div
+        className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
+          activeFile == name && "font-bold bg-white/10"
+        }`}
+        onClick={() => {
+          _setActiveFile(name);
+          setActiveMenuItem("Contracts");
+        }}
+      >
+        {name}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f]",
+        activeContract == contractName && "bg-white/10"
+      )}
+    >
+      <div
+        className="w-full p-2 font-bold"
+        onClick={() => {
+          _setActiveContract(contractName);
+          _setActiveFile("README.md");
+          setActiveMenuItem("Contracts");
+
+          const recents = localStorage.getItem("recents");
+
+          if (recents) {
+            const recentsJson: string[] = JSON.parse(recents);
+
+            if (recentsJson.includes(contractName)) {
+              recentsJson.splice(recentsJson.indexOf(contractName), 1);
+            } else if (recentsJson.length > 4) {
+              recentsJson.pop();
+            }
+
+            recentsJson.unshift(contractName);
+            localStorage.setItem("recents", JSON.stringify(recentsJson));
+          } else {
+            localStorage.setItem("recents", JSON.stringify([contractName]));
+          }
+        }}
+      >
+        {contractName}
+      </div>
+
+      {active && (
+        <div className="w-full flex flex-col">
+          <ContractFileItem name="README.md" />
+          <ContractFileItem name="contract.js" />
+          <ContractFileItem name="state.json" />
+
+          <div className="flex flex-col justify-evenly">
+            <button
+              className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
+              onClick={() => {
+                _setActiveContract(contractName);
+                setActiveMenuItem("Deploy");
+              }}
+            >
+              <Icons.deploy height={16} width={16} />
+              deploy
+            </button>
+
+            <button
+              className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
+              onClick={() => {
+                const zip = new JSZip();
+                const contract = zip.folder(contractName);
+                const files = contracts.contracts[contractName];
+
+                Object.keys(files).forEach((filename) => {
+                  contract?.file(filename, files[filename]);
+                });
+
+                zip.generateAsync({ type: "blob" }).then(function (content) {
+                  saveAs(content, contractName + ".zip");
+                });
+              }}
+            >
+              <Icons.download height={16} width={16} />
+              download zip
+            </button>
+
+            <button
+              className="flex items-center justify-start gap-2 py-1 pl-2 hover:bg-zinc-300/50"
+              onClick={() => {
+                contracts.deleteContract(contractName);
+
+                const recents =
+                  JSON.parse(localStorage.getItem("recents")!) || [];
+
+                if (recents.includes(contractName)) {
+                  recents.splice(recents.indexOf(contractName), 1);
+                  localStorage.setItem("recents", JSON.stringify(recents));
+                }
+              }}
+            >
+              <Icons.delete height={16} width={16} />
+              delete
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

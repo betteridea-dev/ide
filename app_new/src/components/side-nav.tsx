@@ -2,20 +2,20 @@ import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { TSideNavItem } from "~/types";
 import { Icons } from "@/components/icons";
+import { useAppDispatch, useAppSelector } from "../../hooks/store";
+import { setActiveSideNavItem } from "@/store/app-store";
 
 /* 
 This is the side navigation bar on the left
 This is shared between AO, Wrap and Editor mode
 */
-export default function SideNav({
-  items,
-  activeMenuItem,
-  setActiveMenuItem,
-}: {
-  items: TSideNavItem[];
-  activeMenuItem: string;
-  setActiveMenuItem: (s: string) => void;
-}) {
+export default function SideNav({ items }: { items: TSideNavItem[] }) {
+  const dispatch = useAppDispatch();
+
+  const activeSideNavItem = useAppSelector(
+    (state) => state.app.activeSideNavItem
+  );
+
   return (
     <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717] border-r border-white/30">
       {items.map((item, i) => {
@@ -25,7 +25,7 @@ export default function SideNav({
             text={item.text}
             Icon={item.icon}
             onClick={item.onClick}
-            active={activeMenuItem == item.text}
+            active={activeSideNavItem == item.text}
           />
         );
       })}
@@ -35,8 +35,8 @@ export default function SideNav({
       <SideNavItem
         text="Settings"
         Icon={Icons.settings}
-        onClick={() => setActiveMenuItem("Settings")}
-        active={activeMenuItem == "Settings"}
+        onClick={() => dispatch(setActiveSideNavItem("Settings"))}
+        active={activeSideNavItem == "Settings"}
       />
     </div>
   );
