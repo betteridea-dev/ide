@@ -2,9 +2,10 @@ import {
   createBrowserRouter,
   RouterProvider,
   BrowserRouter,
+  useSearchParams,
 } from "react-router-dom";
 import IDE from "@/pages/ide";
-import CEditor from "@/pages/editor";
+import CodeEditor from "@/pages/editor";
 import AONotebookPage from "./pages/ao-notebook";
 import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/store";
@@ -21,13 +22,14 @@ const router = createBrowserRouter([
   },
   {
     path: "/editor",
-    element: <CEditor />,
+    element: <CodeEditor />,
   },
 ]);
 
 function App() {
   const dispatch = useAppDispatch();
   const { appMode } = useAppSelector((state) => state.app);
+  const [searchParams] = useSearchParams();
 
   const _setIsWalletConnected = useCallback(
     (val: boolean) => {
@@ -58,9 +60,13 @@ function App() {
     <>
       {/* <RouterProvider router={router} /> */}
 
-      <BrowserRouter>
-        {appMode === "aos" ? <AONotebookPage /> : <IDE />}
-      </BrowserRouter>
+      {searchParams.has("editor") ? (
+        <CodeEditor />
+      ) : appMode === "aos" ? (
+        <AONotebookPage />
+      ) : (
+        <IDE />
+      )}
     </>
   );
 }

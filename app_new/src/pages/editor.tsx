@@ -6,7 +6,7 @@ import { editor } from "monaco-editor";
 import theme from "../../themes/code.json";
 import useContracts, { contractsType } from "../../hooks/useContracts";
 
-export default function CEditor() {
+export default function CodeEditor() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams] = useSearchParams();
 

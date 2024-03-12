@@ -7,12 +7,15 @@ import { store } from "@/store";
 
 import "./index.css";
 import "./theme.css";
+import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
       <ThemeProvider defaultTheme="dark" storageKey="better-ide-theme">
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ThemeProvider>
     </Provider>
   </React.StrictMode>

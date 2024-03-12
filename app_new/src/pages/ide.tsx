@@ -207,7 +207,7 @@ function ContractListItem({
   }
 
   function _setActiveContract(s: string) {
-    setActiveContract(s);
+    dispatch(setActiveContract(s === activeContract ? "" : s));
   }
 
   const active = activeContract == contractName;
