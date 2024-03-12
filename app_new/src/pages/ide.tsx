@@ -19,13 +19,15 @@ import {
   WrapShowcase,
   WrapTest,
 } from "@/components/warp";
+import { useAppSelector, useAppDispatch } from "../../hooks/store";
+import { setActiveSideNavItem } from "@/store/app-store";
 
 export default function IDE() {
   const contracts = useContracts();
   const [searchParams] = useSearchParams();
+  const dispatch = useAppDispatch();
 
-  const [aosView, setAosView] = useState(true);
-  const [activeMenuItem, setActiveMenuItem] = useState("");
+  const { appMode, activeSideNavItem } = useAppSelector((state) => state.app);
 
   const [activeFile, setActiveFile] = useState("");
   const [showFileList, setShowFileList] = useState(true);
@@ -34,6 +36,10 @@ export default function IDE() {
   const [testTarget, setTestTarget] = useState("");
   const [importNBfrom, setImportNBfrom] = useState("");
   const [isWalletConnected, setIsWalletConnected] = useState(false);
+
+  function setActiveMenuItem(s: string) {
+    dispatch(setActiveSideNavItem(s));
+  }
 
   const aosMenuItems: TSideNavItem[] = [
     {
@@ -148,7 +154,7 @@ export default function IDE() {
       }
 
       const importNotebook = searchParams.has("getcode");
-      if (importNotebook && aosView) {
+      if (importNotebook && appMode === "aos") {
         const importProcess = searchParams.get("getcode");
         console.log(importProcess);
         if (importProcess.length !== 43) return alert("Invalid process ID");
@@ -164,8 +170,8 @@ export default function IDE() {
     setActiveFile("");
     setShowFileList(false);
 
-    // setShowFileList(!aosView);
-  }, [aosView]);
+    // setShowFileList(appMode === "wrap");
+  }, [appMode]);
 
   // TODO: Refactor this into a separate component
   // Need centralized state management to absteract this
@@ -290,8 +296,8 @@ export default function IDE() {
   }
 
   function TabSwitcher() {
-    if (aosView) {
-      switch (activeMenuItem) {
+    if (appMode === "aos") {
+      switch (activeSideNavItem) {
         case "Notebook":
           return <AONotebook />;
         case "AOChat":
@@ -302,7 +308,7 @@ export default function IDE() {
           return <AOHome setActiveMenuItem={setActiveMenuItem} />;
       }
     } else {
-      switch (activeMenuItem) {
+      switch (activeSideNavItem) {
         case "Contracts":
           return (
             <iframe
@@ -353,7 +359,7 @@ export default function IDE() {
   return (
     <div className="flex flex-col min-h-screen h-screen max-h-screen">
       {/* Main Navbar (Top) */}
-      <MainNavBar aosView={aosView} setAosView={setAosView}>
+      <MainNavBar>
         {activeContract && (
           <div className="flex items-center rounded-lg gap-2 mx-4">
             <MainNavFileTab
@@ -383,13 +389,13 @@ export default function IDE() {
       <div className="grow flex">
         {/* Left Bar */}
         <SideNav
-          items={aosView ? aosMenuItems : menuItems}
-          activeMenuItem={activeMenuItem}
+          items={appMode === "aos" ? aosMenuItems : menuItems}
+          activeMenuItem={activeSideNavItem}
           setActiveMenuItem={setActiveMenuItem}
         />
 
         {/* File List */}
-        {!aosView && showFileList && (
+        {appMode === "wrap" && showFileList && (
           <div className="min-w-[150px] border-r border-white/30 bg-[#171717]">
             {contracts.contracts &&
               Object.keys(contracts.contracts).map((contractname, i) => {

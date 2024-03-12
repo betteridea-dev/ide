@@ -1,19 +1,20 @@
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useAppSelector, useAppDispatch } from "../../hooks/store";
+import { setAppMode, setActiveSideNavItem } from "@/store/app-store";
 
 /* 
 This is the Main Navigation Bar
 This is shared between AO, Wrap and Editor mode
 */
 export default function MainNavBar({
-  aosView,
-  setAosView,
   children,
 }: {
-  aosView: boolean;
-  setAosView: (b: boolean) => void;
   children?: React.ReactNode;
 }) {
+  const { appMode, activeSideNavItem } = useAppSelector((state) => state.app);
+  const dispatch = useAppDispatch();
+
   return (
     <div className="flex h-20 min-h-[5rem] px-6 bg-[#111111]">
       <div className="flex justify-center items-center gap-2">
@@ -27,12 +28,12 @@ export default function MainNavBar({
       {children}
 
       <div className="ml-auto flex justify-center items-center px-3 gap-2">
-        {aosView ? "AO Mode" : "Warp Mode"}
+        {appMode === "aos" ? "AO Mode" : "Warp Mode"}
 
         <Switch
-          checked={aosView}
+          checked={appMode === "aos"}
           onCheckedChange={(val) => {
-            setAosView(val);
+            dispatch(setAppMode(val ? "aos" : "wrap"));
           }}
         />
 
