@@ -1,4 +1,8 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  BrowserRouter,
+} from "react-router-dom";
 import IDE from "@/pages/ide";
 import CEditor from "@/pages/editor";
 import AONotebookPage from "./pages/ao-notebook";
@@ -52,7 +56,11 @@ function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      {/* <RouterProvider router={router} /> */}
+
+      <BrowserRouter>
+        {appMode === "aos" ? <AONotebookPage /> : <IDE />}
+      </BrowserRouter>
     </>
   );
 }

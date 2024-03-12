@@ -6,6 +6,7 @@ import {
   setActiveSideNavItem,
   setActiveFile,
 } from "@/store/app-store";
+import { ModeToggle } from "./mode-toggle";
 
 /* 
 This is the Main Navigation Bar
