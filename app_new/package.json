@@ -1,8 +1,9 @@
 {
-  "name": "app_new",
+  "name": "better-ide",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://ankushKun.github.io/betterIDE",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
