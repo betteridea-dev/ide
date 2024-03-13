@@ -45,13 +45,15 @@ export default function WarpTest({
   }, [functionName, activeDeployment]);
 
   async function run() {
-    if (!activeDeployment) return;
-    if (!functionName) return;
-    if (!callType) return;
-    if (!contracts) return;
-    const contract = contracts[activeDeployment];
-    if (!contract) return;
-    const input = JSON.parse(contracts["input"]["state.json"]);
+    console.log("RRRR");
+    if (!activeDeployment) return alert("Select a deployment");
+    if (!functionName) return alert("Select a function");
+    if (!callType) return alert("Select a call type");
+    if (!contracts) return alert("No contracts found");
+    const contract = contracts.contracts[activeDeployment];
+    console.log(activeDeployment, contract, contracts);
+    if (!contract) return alert("No contract found");
+    const input = JSON.parse(contracts.contracts["input"]["state.json"]);
     if (!input) return;
 
     if (callType == "read") {
@@ -69,7 +71,7 @@ export default function WarpTest({
         if (res.result.status == 200) {
           setSuccess(true);
           setResult(
-            JSON.stringify({ result: res.viewContract.result }, null, 2)
+            JSON.stringify({ result: res.viewContract.result }, null, 2),
           );
           setLatestState(JSON.stringify(res.viewContract.state, null, 2));
         } else {
@@ -116,7 +118,7 @@ ${res.writeContract.errorMessage}`);
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-full gap-5">
+    <div className="flex h-full flex-col items-center justify-center gap-5">
       <div className="w-fit">
         <label className="block text-white">Select a deployment</label>
         <select
@@ -136,10 +138,10 @@ ${res.writeContract.errorMessage}`);
           })}
         </select>
       </div>
-      <div className="w-full grid grid-cols-2 p-5 gap-5">
+      <div className="grid w-full grid-cols-2 gap-5 p-5">
         <div className="flex flex-col gap-1">
           <div className="text-2xl">Call a Function</div>
-          <div className="flex gap-5 items-center">
+          <div className="flex items-center gap-5">
             <div>Type:</div>
             <div className="flex items-center gap-1">
               <input
@@ -164,7 +166,7 @@ ${res.writeContract.errorMessage}`);
               <label htmlFor="write">Write</label>
             </div>
           </div>
-          <div className="text-lg mt-5">Function Name</div>
+          <div className="mt-5 text-lg">Function Name</div>
           <select
             className=""
             defaultValue="none"
@@ -181,15 +183,15 @@ ${res.writeContract.errorMessage}`);
               ))}
           </select>
           {/* input json */}
-          <div className="ring-1 ring-white/20 rounded overflow-clip p-0.5 h-full w-full">
+          <div className="h-full w-full overflow-clip rounded p-0.5 ring-1 ring-white/20">
             <iframe
-              className="rounded h-full w-full"
+              className="h-full w-full rounded"
               src={`/betterIDE?editor&language=json&file=input/state.json`}
             />
           </div>
           {/* call button */}
           <button
-            className="bg-green-500 my-5 text-black rounded-md px-4 p-1 w-fit active:scale-95 hover:scale-105"
+            className="my-5 w-fit rounded-md bg-green-500 p-1 px-4 text-black hover:scale-105 active:scale-95"
             onClick={run}
           >
             RUN
@@ -199,14 +201,14 @@ ${res.writeContract.errorMessage}`);
           <div className="text-2xl">Output</div>
           <div>Result</div>
           <pre
-            className={`bg-white/10 p-1 rounded overflow-scroll ${
+            className={`overflow-scroll rounded bg-white/10 p-1 ${
               success ? "text-green-400" : "text-red-400"
             }`}
           >
             {result || "..."}
           </pre>
           <div>Latest State</div>
-          <pre className="bg-white/10 p-1 rounded overflow-scroll">
+          <pre className="overflow-scroll rounded bg-white/10 p-1">
             {latestState || "..."}
           </pre>
         </div>

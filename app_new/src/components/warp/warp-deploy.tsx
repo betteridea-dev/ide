@@ -118,6 +118,7 @@ export default function WarpDeploy({
           commercialUse: "",
         };
     }
+    return state;
   }
 
   async function deploy() {
@@ -161,8 +162,8 @@ export default function WarpDeploy({
         contract.contractTxId,
         state.deployEnv,
         extractFunctionsFromSwitchCase(
-          contracts[state.contractName]["contract.js"]
-        )
+          contracts[state.contractName]["contract.js"],
+        ),
       );
       dispatch({ type: "is_error", payload: false });
     } catch (e) {
@@ -176,15 +177,15 @@ export default function WarpDeploy({
 
   if (!state) return <></>;
   return (
-    <div className="h-full flex flex-col items-center justify-evenly w-full">
+    <div className="flex h-full w-full flex-col items-center justify-evenly">
       {!state.deploySuccess ? (
-        <div className="flex flex-col justify-center overflow-scroll grow gap-5 w-full">
+        <div className="flex w-full grow flex-col justify-center gap-5 overflow-scroll">
           <div className="grow"></div>
-          <div className="flex gap-10 justify-center items-center">
+          <div className="flex items-center justify-center gap-10">
             <div>
               <div>Select Contract</div>
               <select
-                className="p-1 rounded "
+                className="rounded p-1 "
                 value={state.contractName}
                 defaultValue={state.contractName}
                 onChange={(e) =>
@@ -206,7 +207,7 @@ export default function WarpDeploy({
             <div>
               <div>Select Environment</div>
               <select
-                className="p-1 rounded"
+                className="rounded p-1"
                 value={state.deployEnv}
                 defaultValue={state.deployEnv}
                 onChange={(e) =>
@@ -223,11 +224,11 @@ export default function WarpDeploy({
             </div>
           </div>
 
-          <div className="flex gap-4 justify-center">
-            <div className="hover:scale-105 active:scale-95 transition-all duration-200 p-2 px-4">
+          <div className="flex justify-center gap-4">
+            <div className="p-2 px-4 transition-all duration-200 hover:scale-105 active:scale-95">
               <label
                 htmlFor="wallet"
-                className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit"
+                className="w-fit cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center"
               >
                 {!state.walletJWK
                   ? "Import a wallet.json file"
@@ -239,12 +240,12 @@ export default function WarpDeploy({
                 id="wallet"
                 className="hidden"
                 onChange={(e) =>
-                  dispatch({ type: "set_file", payload: e.target.files[0] })
+                  dispatch({ type: "set_file", payload: e.target.files![0] })
                 }
               />
             </div>
             <button
-              className="p-2 px-4 cursor-pointer rounded bg-[#093E49] text-center w-fit hover:scale-105 active:scale-95"
+              className="w-fit cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center hover:scale-105 active:scale-95"
               onClick={() => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (window as any).arweaveWallet
@@ -267,9 +268,9 @@ export default function WarpDeploy({
             </button>
           </div>
 
-          <div className="flex flex-col gap-3 justify-center items-center">
+          <div className="flex flex-col items-center justify-center gap-3">
             <div className="text-center">
-              <span className="font-bold text-xl">
+              <span className="text-xl font-bold">
                 Universal Data Licensing
               </span>
               <br />
@@ -281,7 +282,7 @@ export default function WarpDeploy({
               <div>
                 <div>License your code</div>
                 <select
-                  className="p-1 rounded"
+                  className="rounded p-1"
                   defaultValue={derivations[0]}
                   onChange={(e) =>
                     dispatch({
@@ -298,7 +299,7 @@ export default function WarpDeploy({
               <div>
                 <div>Add a commercial license</div>
                 <select
-                  className="p-1 rounded"
+                  className="rounded p-1"
                   defaultValue={commercialUses[0]}
                   onChange={(e) =>
                     dispatch({
@@ -315,7 +316,7 @@ export default function WarpDeploy({
             </div>
           </div>
           <button
-            className="bg-[#093E49] p-2 px-4 rounded w-fit mx-auto"
+            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
             onClick={() => deploy()}
           >
             Deploy! 🚀
@@ -323,7 +324,7 @@ export default function WarpDeploy({
           <div className="grow"></div>
           {state.result && (
             <pre
-              className={`bg-black/20 border-t border-white/20 p-2 ${
+              className={`border-t border-white/20 bg-black/20 p-2 ${
                 !state.isError ? "text-green-300" : "text-red-300"
               }`}
             >
@@ -334,12 +335,12 @@ export default function WarpDeploy({
           )}
         </div>
       ) : (
-        <div className="text-center flex flex-col gap-4 justify-center items-center min-h-[80vh]">
-          <div className="text-3xl font-bold flex gap-1">
+        <div className="flex min-h-[80vh] flex-col items-center justify-center gap-4 text-center">
+          <div className="flex gap-1 text-3xl font-bold">
             <Icons.tick height={18} width={18} />
             Your contract has been successfully deployed!
           </div>
-          <div className="flex gap-1 mx-auto">
+          <div className="mx-auto flex gap-1">
             Txn ID: {state.contractTxID}{" "}
             <Icons.copy
               height={18}
@@ -352,13 +353,13 @@ export default function WarpDeploy({
             />
           </div>
           <button
-            className="bg-[#093E49] p-2 px-4 rounded w-fit mx-auto"
+            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
             onClick={() => dispatch({ type: "deploy_another" })}
           >
             Deploy Another
           </button>
           <button
-            className="bg-[#093E49] p-2 px-4 rounded w-fit mx-auto"
+            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
             onClick={() => test(state.contractName)}
           >
             Test this contract
