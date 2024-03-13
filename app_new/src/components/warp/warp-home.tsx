@@ -23,7 +23,7 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
   const dispatch = useAppDispatch();
 
   const [recents] = useState<string[]>(
-    JSON.parse(localStorage.getItem("recents")) || []
+    JSON.parse(localStorage.getItem("recents")) || [],
   );
 
   function _setActiveFile(s: string) {
@@ -48,10 +48,10 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
     state?: string;
   }) {
     return (
-      <div className="ring-1 rounded ring-white/50 p-2 px-3 flex flex-col gap-2 hover:bg-white/5 min-w-[150px]">
+      <div className="flex min-w-[150px] flex-col gap-2 rounded p-2 px-3 ring-1 ring-white/50 hover:bg-white/5">
         <div className="text-lg">{name}</div>
         <button
-          className="relative bg-[#2c3b50] hover:bg-[#395d8b] px-2 rounded hover:w-24 w-14 text-left transition-all duration-300"
+          className="relative w-14 rounded bg-[#2c3b50] px-2 text-left transition-all duration-300 hover:w-24 hover:bg-[#395d8b]"
           onClick={() => {
             const r = [...recents];
             if (src && state) {
@@ -82,7 +82,7 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
           }}
         >
           {src && state ? "edit" : "open"}
-          <div className="absolute right-2 w-full text-right text-transparent hover:text-white top-0">
+          <div className="absolute right-2 top-0 w-full text-right text-transparent hover:text-white">
             -&gt;
           </div>
         </button>
@@ -91,15 +91,15 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
   }
 
   return (
-    <div className=" h-full flex flex-col gap-1 items-center justify-center">
+    <div className=" flex h-full flex-col items-center justify-center gap-1">
       <div className="text-2xl">Welcome to BetterIDEa! 🚀</div>
       <div className="text-lg">
         Your one stop solution for developing smart contracts on Arweave
       </div>
 
-      <div className="flex flex-col gap-5 justify-start items-start w-full px-10">
+      <div className="flex w-full flex-col items-start justify-start gap-5 px-10">
         <div>
-          <div className="text-xl my-1">
+          <div className="my-1 text-xl">
             {recents.length == 0
               ? "No recently opened contracts"
               : "Recently opened contracts"}
@@ -111,7 +111,7 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
           </div>
         </div>
         <div>
-          <div className="text-xl my-1">Explore contract templates</div>
+          <div className="my-1 text-xl">Explore contract templates</div>
           <div className="flex gap-3">
             <ContractCard name="Vote" src={voteSrc} state={voteState} />
             <ContractCard name="Database" src={dbSrc} state={dbState} />

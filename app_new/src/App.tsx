@@ -10,6 +10,7 @@ import AONotebookPage from "./pages/ao-notebook";
 import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/store";
 import { setIsWalletConnected } from "./store/app-store";
+import { Toaster, toast } from "react-hot-toast";
 
 const router = createBrowserRouter([
   {
@@ -35,7 +36,7 @@ function App() {
     (val: boolean) => {
       dispatch(setIsWalletConnected(val));
     },
-    [dispatch]
+    [dispatch],
   );
 
   useEffect(() => {
@@ -43,7 +44,14 @@ function App() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const wallet = (window as any).arweaveWallet;
 
-      if (!wallet) return alert("Please install the ArConnect extension");
+      if (!wallet)
+        return toast.error(
+          "Unable to find ArConnect wallet extension. Please install it and refresh the page.",
+          {
+            duration: 10000,
+          },
+        );
+      // if (!wallet) return alert("Please install the ArConnect extension");
 
       try {
         await wallet.getActiveAddress();
@@ -58,6 +66,7 @@ function App() {
 
   return (
     <>
+      <Toaster />
       {/* <RouterProvider router={router} /> */}
 
       {searchParams.has("editor") ? (

@@ -54,7 +54,7 @@ export default function AOHome() {
       console.log(res);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setMyProcesses(
-        (res as any).transactions.edges.map((edge: any) => edge.node.id)
+        (res as any).transactions.edges.map((edge: any) => edge.node.id),
       );
     }
 
@@ -87,20 +87,20 @@ export default function AOHome() {
   }
 
   return (
-    <div className="h-full flex flex-col gap-24 items-center justify-center">
+    <div className="flex h-full flex-col items-center justify-center gap-24">
       <h1 className="text-3xl tracking-tight">
-        <span className="italic font-light mr-1">
+        <span className="mr-1 font-light italic">
           Unlock Infinite Creativity with{" "}
         </span>
-        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-transparent font-bold not-italic">
+        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text font-bold not-italic text-transparent">
           AO notebook&apos;s threaded computer
         </span>
       </h1>
 
-      <div className="w-full max-w-xl flex flex-col gap-3">
+      <div className="flex w-full max-w-xl flex-col gap-3">
         <h3 className="text-xl font-bold">Your Processes</h3>
 
-        <div className="flex flex-row gap-3 items-center">
+        <div className="flex flex-row items-center gap-3">
           <Select
             disabled={myProcesses.length === 0 || spawning}
             onValueChange={(val) => {
@@ -108,7 +108,7 @@ export default function AOHome() {
               dispatch(setActiveSideNavItem("Notebook"));
             }}
           >
-            <SelectTrigger className="flex-grow max-w-full">
+            <SelectTrigger className="max-w-full flex-grow">
               <SelectValue
                 placeholder={spawning ? "Spawning..." : "Process ID"}
               />
@@ -131,7 +131,7 @@ export default function AOHome() {
         </div>
       </div>
 
-      <div className="w-full max-w-xl flex flex-col gap-3">
+      <div className="flex w-full max-w-xl flex-col gap-3">
         <h3 className="text-xl font-bold">Explore templates</h3>
 
         <div className="grid grid-cols-3 gap-2">
