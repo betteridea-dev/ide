@@ -15,14 +15,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect } from "react";
 
-export function Combobox({
-  options,
-  onChange,
-}: {
-  options: string[];
-  onChange: (val: string) => void;
-}) {
+export function Combobox({ options, onChange }: { options: string[], onChange: (val: string) => void }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
