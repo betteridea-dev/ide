@@ -29,6 +29,8 @@ import {
   CheckCircle2Icon,
   XCircle,
   Loader,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
@@ -63,4 +65,6 @@ export const Icons = {
   codeSuccess: CheckCircle2Icon,
   codeError: XCircle,
   codeRunning: Loader,
+  copy: Copy,
+  tick: Check,
 };
