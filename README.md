@@ -1,21 +1,22 @@
 # BetterIDEa - A better IDE for Arweave smartcontracts
 
-Try it [here](https://ankushKun.github.io/betterIDE/)
+Try it [here](https://ide.betteridea.dev)
 
 <details>
 <summary>View screenshots</summary>
 
-![codearea](images/codearea.png)
+![ao-landing](images/ao-landing.png)
 
-![deploy](images/deploy.png)
+![ao-notebook](images/ao-notebook.png)
 
-![cloud](images/cloud.png)
+![warp-contract](images/warp-contract.png)
 
 </details>
 
 ## Features
 
 - Code Editor and IDE Features such as syntax highlighting, code completion, etc.
+- Web UI to run AO LUA code (using [aoconnect](https://www.npmjs.com/package/@permaweb/aoconnect))
 - JS Contract deployment and testing (using [Arweavekit](https://www.arweavekit.com/) to deploy and interact)
 - Universal Data Licensing of your code through Arweaves [UDL](https://arwiki.wiki/#/en/Universal-Data-License-How-to-use-it) implementation
 - Cloud based storage and sharing through Arweave [Protocol Land](https://protocol.land)
@@ -27,6 +28,7 @@ Try it [here](https://ankushKun.github.io/betterIDE/)
 - Arweavekit
 - ArConnect
 - Arlocal
+- AOConnect
 
 ## Run it yourseld
 
@@ -38,15 +40,14 @@ Try it [here](https://ankushKun.github.io/betterIDE/)
 ### Fork, Clone, Install and Run
 
 ```bash
-git clone git@github.com:<YOUR_USERNAME>/betterIDE.git
-cd betterIDE
+git clone git@github.com:<YOUR_USERNAME>/ide.git betteridea
+cd betteridea
 pnpm install
 pnpm run dev
 ```
 
-Open [http://localhost:5173/betterIDE/](http://localhost:5173/betterIDE/) as simple as that!
+Open [http://localhost:5173/](http://localhost:5173/) as simple as that!
 
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
-

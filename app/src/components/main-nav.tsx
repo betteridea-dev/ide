@@ -8,7 +8,7 @@ import {
 } from "@/store/app-store";
 import { ModeToggle } from "./mode-toggle";
 
-/* 
+/*
 This is the Main Navigation Bar
 This is shared between AO, Wrap and Editor mode
 */
@@ -25,7 +25,7 @@ export default function MainNavBar({
       <div className="flex justify-center items-center gap-2">
         <img src="/logo-small.svg" className="h-6 w-6" />
 
-        <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+        <h1 className="bg-gradient-to-r from-[#7c9a7d] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
           BetterIDEa
         </h1>
       </div>
@@ -48,7 +48,7 @@ export default function MainNavBar({
   );
 }
 
-/* 
+/*
 This goes on in between Main Nav Bar
 In warp mode, it shows the list of files in the contract
 */

@@ -83,7 +83,7 @@ function CodeCell({
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
-    } catch (e) {
+    } catch (e:any) {
       console.log(e);
       setCellOutputItems((prev) => ({
         ...prev,
@@ -95,13 +95,13 @@ function CodeCell({
   }
 
   return (
-    <div className="flex flex-col w-full justify-center max-w-[calc(90vw-12rem)] overflow-x-clip rounded-lg">
+    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg">
       <div className="flex flex-row gap-4 bg-[#093E49] px-4 py-6">
         <Button variant="ghost" size="icon" onClick={executeCode}>
           <Icons.executeCode className="h-6 w-6" />
         </Button>
 
-        <div className="flex-grow min-h-[52px] rounded-sm overflow-clip">
+        <div className="min-h-[52px] flex-grow overflow-clip rounded-sm">
           <Editor
             className="max-h-[380px] min-h-[52px]"
             language="lua"
@@ -134,14 +134,14 @@ function CodeCell({
         </Button>
       </div>
 
-      <div className="flex flex-row gap-4 min-h-[32px] bg-[#093E49]/40 px-4 py-3">
-        <div className="min-h-[32px] min-w-[30px] flex justify-center items-center">
+      <div className="flex min-h-[32px] flex-row gap-4 bg-[#093E49]/40 px-4 py-3">
+        <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
           {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4" />}
           {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
           {codeStatus == "error" && <Icons.codeError className="h-4 w-4" />}
         </div>
 
-        <pre className="p-2 ring-white/5 overflow-scroll min-h-[32px] max-h-[300px] flex-grow mx-2">
+        <pre className="mx-2 max-h-[300px] min-h-[32px] flex-grow overflow-scroll p-2 ring-white/5">
           {(() => {
             try {
               return <Ansi>{`${JSON.parse(cellOutputItems[cellId])}`}</Ansi>;
@@ -181,7 +181,7 @@ export default function AONotebook() {
     clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
     const importNotebook = searchParams.has("getcode");
     if (importNotebook) {
-      const importProcess = searchParams.get("getcode");
+      const importProcess = searchParams.get("getcode")!;
       if (importProcess.length !== 43) return alert("Invalid process ID");
       setImportFromProcess(importProcess);
       importCode(importProcess);
@@ -220,14 +220,14 @@ export default function AONotebook() {
                 return (
                   <div
                     className={`${t.visible ? "animate-enter" : "animate-leave"}
-                max-w-md w-full bg-[#121212] ring-1 ring-white/30 opacity-80 relative right-[280px] hover:right-0 bottom-10 hover:opacity-100 transition-all duration-200 shadow-lg rounded-lg pointer-events-auto text-white flex p-2 `}
+                pointer-events-auto relative bottom-10 right-[280px] flex w-full max-w-md rounded-lg bg-[#121212] p-2 text-white opacity-80 shadow-lg ring-1 ring-white/30 transition-all duration-200 hover:right-0 hover:opacity-100 `}
                     onClick={() => toast.dismiss(t.id)}
                   >
                     <Ansi>{node.Output.data}</Ansi>
                   </div>
                 );
               },
-              { duration: 10000 }
+              { duration: 10000 },
             );
           }
         });
@@ -238,7 +238,7 @@ export default function AONotebook() {
 
     sessionStorage.setItem(
       "interval",
-      setInterval(fetchNewInbox, 1000).toString()
+      setInterval(fetchNewInbox, 1000).toString(),
     );
 
     return () => {
@@ -286,16 +286,16 @@ export default function AONotebook() {
     run: async () => {
       console.log("running", activeCell);
       try {
-        setRunning(activeCell);
+        setRunning(activeCell!);
         const r = await sendMessage({
-          data: cellCodeItems[activeCell],
-          processId: aosProcessId,
+          data: cellCodeItems[activeCell!],
+          processId: aosProcessId!,
         });
         // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any = await aoResult({
           message: r,
-          process: aosProcessId,
+          process: aosProcessId!,
         });
 
         console.log(res);
@@ -307,18 +307,18 @@ export default function AONotebook() {
         console.log(formattedOutput);
         setCellOutputItems((prev) => ({
           ...prev,
-          [activeCell]: formattedOutput,
+          [activeCell!]: formattedOutput,
         }));
-      } catch (e) {
+      } catch (e:any) {
         console.log(e.message);
       }
     },
   });
 
-  function processSelected(pid: string) {
-    console.log("using process", pid);
-    setAOSProcess(pid);
-  }
+  // function processSelected(pid: string) {
+  //   console.log("using process", pid);
+  //   setAOSProcess(pid);
+  // }
 
   async function spawnProcess() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -412,18 +412,18 @@ Handlers.add(
 `;
     console.log(codeToRun);
     try {
-      const r = await sendMessage({ data: codeToRun, processId: aosProcessId });
+      const r = await sendMessage({ data: codeToRun, processId: aosProcessId! });
 
       const res = await aoResult({
         message: r,
-        process: aosProcessId,
+        process: aosProcessId!,
       });
       console.log(res.Output);
       await navigator.clipboard.writeText(
-        `${window.location.origin}/?getcode=${aosProcessId}`
+        `${window.location.origin}/?getcode=${aosProcessId}`,
       );
       alert("shared and url copied to clipboard");
-    } catch (e) {
+    } catch (e:any) {
       console.log(e.message);
     }
   }
@@ -458,7 +458,7 @@ Handlers.add(
     const cellCodeItems = {};
     const cellOutputItems = {};
     for (let i = 0; i < cellCount; i++) {
-      const id = v4();
+      const id:string = v4();
       cellIds.push(id);
       cellCodeItems[id] = codeData[i];
       cellOutputItems[id] = "";
@@ -472,9 +472,9 @@ Handlers.add(
   }
 
   return (
-    <div className="relative h-full w-full max-h-[calc(100vh-5rem)] overflow-scroll flex flex-col gap-4 items-center p-4">
+    <div className="relative flex h-full max-h-[calc(100vh-5rem)] w-full flex-col items-center gap-4 overflow-scroll p-4">
       <Toaster position="bottom-left" />
-      <div className="absolute right-2 top-2 h-7 flex gap-2">
+      <div className="absolute right-2 top-2 flex h-7 gap-2">
         {aosProcessId && (
           <Button className="h-7" onClick={() => importCode()}>
             import
@@ -513,7 +513,7 @@ Handlers.add(
           <CodeCell
             key={cellId}
             cellId={cellId}
-            aosProcess={aosProcessId}
+            aosProcess={aosProcessId!}
             cellCodeItems={cellCodeItems}
             cellOutputItems={cellOutputItems}
             setCellCodeItems={setCellCodeItems}

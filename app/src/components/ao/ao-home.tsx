@@ -13,10 +13,10 @@ import {
 import { useAppDispatch } from "../../../hooks/store";
 import { setActiveSideNavItem } from "@/store/app-store";
 
-const templates = {
-  chat: "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
-  token: "/?getcode=Vx0OaXCQV8dd87CiZSxm2dbH8Sn66_bsCzj_1y1BAjo",
-  voting: "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
+const templates: { [a: string]: string } = {
+  "chat": "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
+  "token": "/?getcode=Vx0OaXCQV8dd87CiZSxm2dbH8Sn66_bsCzj_1y1BAjo",
+  "voting": "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
 };
 
 export default function AOHome() {
@@ -92,7 +92,7 @@ export default function AOHome() {
         <span className="mr-1 font-light italic">
           Unlock Infinite Creativity with{" "}
         </span>
-        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text font-bold not-italic text-transparent">
+        <span className="bg-gradient-to-r from-[#7c9a7d] to-white bg-clip-text font-bold not-italic text-transparent">
           AO notebook&apos;s threaded computer
         </span>
       </h1>
@@ -108,7 +108,7 @@ export default function AOHome() {
               dispatch(setActiveSideNavItem("Notebook"));
             }}
           >
-            <SelectTrigger className="max-w-full flex-grow">
+            <SelectTrigger className="max-w-full flex-grow bg-[#2a3a2a]">
               <SelectValue
                 placeholder={spawning ? "Spawning..." : "Process ID"}
               />

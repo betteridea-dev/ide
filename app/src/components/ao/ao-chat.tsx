@@ -121,7 +121,7 @@ export default function AOChat() {
       "interval",
       setTimeout(() => getInbox(), 1000).toString()
     );
-    return () => clearTimeout(sessionStorage.getItem("interval"));
+    return () => clearTimeout(sessionStorage.getItem("interval")|| 0);
   }, [myProcess]);
 
   // useEffect(() => {
