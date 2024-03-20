@@ -92,7 +92,7 @@ export default function AOHome() {
         <span className="mr-1 font-light italic">
           Unlock Infinite Creativity with{" "}
         </span>
-        <span className="bg-gradient-to-r from-[#7c9a7d] to-white bg-clip-text font-bold not-italic text-transparent">
+        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text font-bold not-italic text-transparent">
           AO notebook&apos;s threaded computer
         </span>
       </h1>
@@ -108,7 +108,7 @@ export default function AOHome() {
               dispatch(setActiveSideNavItem("Notebook"));
             }}
           >
-            <SelectTrigger className="max-w-full flex-grow bg-[#2a3a2a]">
+            <SelectTrigger className="max-w-full flex-grow">
               <SelectValue
                 placeholder={spawning ? "Spawning..." : "Process ID"}
               />

@@ -76,14 +76,13 @@ function CodeCell({
         process: aosProcess,
       });
 
-      const formattedOutput = `${
-        JSON.stringify(res.Output.data.output, null, 2) ||
+      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
         res.Output.data.output
-      }`;
+        }`;
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e);
       setCellOutputItems((prev) => ({
         ...prev,
@@ -95,8 +94,8 @@ function CodeCell({
   }
 
   return (
-    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg">
-      <div className="flex flex-row gap-4 bg-[#093E49] px-4 py-6">
+    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip">
+      <div className="flex flex-row gap-4 bg-[#093E49] px-4 py-6 rounded-t-lg">
         <Button variant="ghost" size="icon" onClick={executeCode}>
           <Icons.executeCode className="h-6 w-6" />
         </Button>
@@ -134,7 +133,7 @@ function CodeCell({
         </Button>
       </div>
 
-      <div className="flex min-h-[32px] flex-row gap-4 bg-[#093E49]/40 px-4 py-3">
+      <div className="flex min-h-[32px] flex-row gap-4 bg-[#093E49]/40 px-4 py-3 rounded-b-lg">
         <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
           {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4" />}
           {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
@@ -300,16 +299,15 @@ export default function AONotebook() {
 
         console.log(res);
 
-        const formattedOutput = `${
-          JSON.stringify(res.Output.data.output, null, 2) ||
+        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
           res.Output.data.output
-        }`;
+          }`;
         console.log(formattedOutput);
         setCellOutputItems((prev) => ({
           ...prev,
           [activeCell!]: formattedOutput,
         }));
-      } catch (e:any) {
+      } catch (e: any) {
         console.log(e.message);
       }
     },
@@ -423,7 +421,7 @@ Handlers.add(
         `${window.location.origin}/?getcode=${aosProcessId}`,
       );
       alert("shared and url copied to clipboard");
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e.message);
     }
   }
@@ -458,7 +456,7 @@ Handlers.add(
     const cellCodeItems = {};
     const cellOutputItems = {};
     for (let i = 0; i < cellCount; i++) {
-      const id:string = v4();
+      const id: string = v4();
       cellIds.push(id);
       cellCodeItems[id] = codeData[i];
       cellOutputItems[id] = "";

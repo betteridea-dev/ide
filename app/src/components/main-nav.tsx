@@ -25,7 +25,7 @@ export default function MainNavBar({
       <div className="flex justify-center items-center gap-2">
         <img src="/logo-small.svg" className="h-6 w-6" />
 
-        <h1 className="bg-gradient-to-r from-[#7c9a7d] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+        <h1 className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text text-2xl font-bold tracking-tight text-transparent">
           BetterIDEa
         </h1>
       </div>
