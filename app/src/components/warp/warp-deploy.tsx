@@ -166,7 +166,7 @@ export default function WarpDeploy({
         ),
       );
       dispatch({ type: "is_error", payload: false });
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
       dispatch({ type: "is_error", payload: true });
       dispatch({ type: "set_result", payload: e.toString() });
@@ -324,9 +324,8 @@ export default function WarpDeploy({
           <div className="grow"></div>
           {state.result && (
             <pre
-              className={`border-t border-white/20 bg-black/20 p-2 ${
-                !state.isError ? "text-green-300" : "text-red-300"
-              }`}
+              className={`border-t border-white/20 bg-black/20 p-2 ${!state.isError ? "text-green-300" : "text-red-300"
+                }`}
             >
               [ Result ]<br />
               <br />

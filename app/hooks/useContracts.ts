@@ -5,6 +5,7 @@ type contract = {
   "contract.js": string;
   "state.json": string;
   "README.md": string;
+  [a: string]: string
 };
 
 export type contractsType = {

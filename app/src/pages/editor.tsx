@@ -17,8 +17,8 @@ export default function CodeEditor() {
   monaco?.editor.defineTheme("code", theme as editor.IStandaloneThemeData);
 
   const file = searchParams.get("file")!.split("/");
-  const contractName = file[0];
-  const contractFile = file[1];
+  const contractName: string = file[0];
+  const contractFile: string = file[1];
 
   useEffect(() => {
     if (!contracts) return;

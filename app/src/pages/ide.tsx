@@ -108,15 +108,14 @@ export default function IDE() {
         return (
           <iframe
             className="w-full h-full"
-            src={`/?editor&language=${
-              activeFile.endsWith(".js")
+            src={`/?editor&language=${activeFile.endsWith(".js")
                 ? "javascript"
                 : activeFile.endsWith(".json")
-                ? "json"
-                : activeFile.endsWith(".md")
-                ? "markdown"
-                : "text"
-            }&file=${activeContract}/${activeFile}`}
+                  ? "json"
+                  : activeFile.endsWith(".md")
+                    ? "markdown"
+                    : "text"
+              }&file=${activeContract}/${activeFile}`}
           />
         );
       case "Deploy":
@@ -215,9 +214,8 @@ function ContractListItem({
   function ContractFileItem({ name }: { name: string }) {
     return (
       <div
-        className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
-          activeFile == name && "font-bold bg-white/10"
-        }`}
+        className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${activeFile == name && "font-bold bg-white/10"
+          }`}
         onClick={() => {
           _setActiveFile(name);
           setActiveMenuItem("Contracts");

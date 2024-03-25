@@ -114,7 +114,7 @@ function CodeCell({
             onChange={(value) => {
               setCellCodeItems((prev) => ({
                 ...prev,
-                [cellId]: value,
+                [cellId]: value!,
               }));
               setActiveCell(cellId);
             }}
@@ -453,12 +453,12 @@ Handlers.add(
 
     const cellCount = codeData.length;
     const cellIds = [];
-    const cellCodeItems = {};
-    const cellOutputItems = {};
+    const cellCodeItems: TCellCodeState = {}; // Add index signature
+    const cellOutputItems: TCellOutputState = {}; // Add index signature
     for (let i = 0; i < cellCount; i++) {
       const id: string = v4();
       cellIds.push(id);
-      cellCodeItems[id] = codeData[i];
+      cellCodeItems[id] = codeData[i]; // Remove unnecessary ! operator
       cellOutputItems[id] = "";
     }
     setCellOrder(cellIds);

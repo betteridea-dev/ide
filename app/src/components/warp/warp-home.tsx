@@ -23,7 +23,7 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
   const dispatch = useAppDispatch();
 
   const [recents] = useState<string[]>(
-    JSON.parse(localStorage.getItem("recents")) || [],
+    JSON.parse(localStorage.getItem("recents")!) || [],
   );
 
   function _setActiveFile(s: string) {
