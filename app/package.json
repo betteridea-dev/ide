@@ -35,6 +35,7 @@
     "arweave": "^1.14.4",
     "arweavekit": "^1.5.1",
     "autoprefixer": "^10.4.18",
+    "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",

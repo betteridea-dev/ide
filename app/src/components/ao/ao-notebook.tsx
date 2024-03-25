@@ -13,6 +13,7 @@ import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../../config";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
+import { postToOrbit } from "@/lib/utils";
 
 // TODO: Replace with shadcn code
 import { Toaster, toast } from "react-hot-toast";
@@ -26,6 +27,7 @@ interface TCellOutputState {
 }
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
+  postToOrbit()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const signer = createDataItemSigner((window as any).arweaveWallet);
   return connect().message({
