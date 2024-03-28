@@ -66,7 +66,7 @@ function App() {
 
   return (
     <>
-      <Toaster />
+      <Toaster position="bottom-right" />
       {/* <RouterProvider router={router} /> */}
 
       {searchParams.has("editor") ? (

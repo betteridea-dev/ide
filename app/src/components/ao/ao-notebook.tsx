@@ -138,7 +138,7 @@ function CodeCell({
 
       <div className="flex min-h-[32px] flex-row gap-4 bg-[#050505]/40 px-4 py-3 rounded-b-lg">
         <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
-          {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4" />}
+          {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4  animate-spin" />}
           {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
           {codeStatus == "error" && <Icons.codeError className="h-4 w-4" />}
         </div>
@@ -223,8 +223,8 @@ export default function AONotebook() {
               (t) => {
                 return (
                   <div
-                    className={`${t.visible ? "animate-enter" : "animate-leave"}
-                pointer-events-auto relative bottom-10 right-[280px] flex w-full max-w-md rounded-lg bg-[#121212] p-2 text-white opacity-80 shadow-lg ring-1 ring-white/30 transition-all duration-200 hover:right-0 hover:opacity-100 `}
+                    className={`
+                pointer-events-auto flex w-full max-w-md rounded-lg bg-[#121212] p-2 text-white opacity-80 shadow-lg ring-1 ring-white/30 transition-all duration-200 hover:right-0 hover:opacity-100 `}
                     onClick={() => toast.dismiss(t.id)}
                   >
                     <Ansi>{node.Output.data}</Ansi>
@@ -483,17 +483,16 @@ Handlers.add(
 
   return (
     <div className="relative flex h-full max-h-[calc(100vh-5rem)] w-full flex-col items-center gap-4 overflow-scroll p-4">
-      <Toaster position="bottom-left" />
-      <div className="absolute right-2 top-2 flex h-7 gap-2">
+      {/* <div className="absolute right-2 top-2 flex h-7 gap-2">
 
-      </div>
+      </div> */}
 
       {isSpawning && <div className="text-center">Spawning process...</div>}
 
       {!isSpawning && (
         <>
           {aosProcessId ? (
-            <div className="w-full text-center flex flex-col gap-3 px-16">
+            <div className="w-full text-center flex flex-col gap-3 px-16 pl-24 ">
               <div>Process ID: <pre className="inline">{aosProcessId}</pre></div>
               <div className="flex gap-2 justify-between w-full">
                 <div>
@@ -531,7 +530,7 @@ Handlers.add(
         Inbox
 
       </> : <>
-        {cellIds.map((cellId) => {
+        {aosProcessId ? cellIds.map((cellId) => {
           return (
             <CodeCell
               key={cellId}
@@ -545,7 +544,7 @@ Handlers.add(
               setActiveCell={setActiveCell}
             />
           );
-        })}
+        }) : "Create a process to run code"}
         {aosProcessId && (
           <Button onClick={addNewCell}>
             <Icons.add className="text-black" color="#000000aa" /> add new cell
