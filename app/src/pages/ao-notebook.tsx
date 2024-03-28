@@ -83,7 +83,7 @@ export default function AONotebookPage() {
         <SideNav items={aosMenuItems} />
 
         {/* Main Content */}
-        <div className="grow bg-[#1d1d1d]">{TabSwitcher()}</div>
+        <div className="grow bg-[#1d1d1d] ml-12">{TabSwitcher()}</div>
       </div>
     </div>
   );

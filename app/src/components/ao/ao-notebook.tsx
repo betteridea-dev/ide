@@ -97,7 +97,7 @@ function CodeCell({
   }
 
   return (
-    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
+    <div className="flex w-full md:max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
       <div className="flex flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
         <Button variant="ghost" size="icon" onClick={executeCode}>
           <Icons.executeCode className="h-6 w-6" />
@@ -492,7 +492,7 @@ Handlers.add(
       {!isSpawning && (
         <>
           {aosProcessId ? (
-            <div className="w-full text-center flex flex-col gap-3 px-16 pl-24 ">
+            <div className="w-full text-center flex flex-col gap-3 md:px-16">
               <div>Process ID: <pre className="inline">{aosProcessId}</pre></div>
               <div className="flex gap-2 justify-between w-full">
                 <div>
@@ -528,6 +528,8 @@ Handlers.add(
 
       {showInbox ? <>
         Inbox
+
+        <div className="bg-black/30 p-2 px-4 rounded-lg border border-[#333333]">New message from zxchhif....asdkadadak: Hi</div>
 
       </> : <>
         {aosProcessId ? cellIds.map((cellId) => {
