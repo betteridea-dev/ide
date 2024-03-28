@@ -32,6 +32,9 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import ShareIcon from "@/assets/share.svg"
+import ImportIcon from "@/assets/import.svg"
+import InboxIcon from "@/assets/inbox.svg"
 
 export type Icon = typeof LucideIcon;
 
@@ -67,4 +70,7 @@ export const Icons = {
   codeRunning: Loader,
   copy: Copy,
   tick: Check,
+  share: ShareIcon,
+  import: ImportIcon,
+  inbox: InboxIcon
 };

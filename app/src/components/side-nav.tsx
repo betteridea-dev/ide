@@ -17,7 +17,7 @@ export default function SideNav({ items }: { items: TSideNavItem[] }) {
   );
 
   return (
-    <div className="flex flex-col gap-4 px-2.5 w-48 py-4 bg-[#171717] border-r border-white/30">
+    <div className="flex flex-col gap-4 px-2 w-12 hover:w-48 transition-all duration-200 py-4 bg-[#171717] border-r border-white/30 absolute h-[calc(100vh-82px)] z-40 overflow-clip">
       {items.map((item, i) => {
         return (
           <SideNavItem
@@ -60,11 +60,11 @@ export function SideNavItem({
     <div
       onClick={onClick}
       className={cn(
-        "flex gap-1 items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer",
+        "flex gap-1 items-center rounded-md px-2 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer",
         active ? "bg-[#006F86]" : "transparent"
       )}
     >
-      <Icon className="mr-2 h-4 w-4" />
+      <Icon className="mr-3 h-4 w-4 whitespace-nowrap min-w-4" />
       <span>{text}</span>
     </div>
   );

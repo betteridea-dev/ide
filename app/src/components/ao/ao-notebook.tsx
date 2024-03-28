@@ -84,6 +84,7 @@ function CodeCell({
 
       setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
       setCodeStatus("success");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.log(e);
       setCellOutputItems((prev) => ({
@@ -96,8 +97,8 @@ function CodeCell({
   }
 
   return (
-    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip">
-      <div className="flex flex-row gap-4 bg-[#093E49] px-4 py-6 rounded-t-lg">
+    <div className="flex w-full max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
+      <div className="flex flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
         <Button variant="ghost" size="icon" onClick={executeCode}>
           <Icons.executeCode className="h-6 w-6" />
         </Button>
@@ -135,7 +136,7 @@ function CodeCell({
         </Button>
       </div>
 
-      <div className="flex min-h-[32px] flex-row gap-4 bg-[#093E49]/40 px-4 py-3 rounded-b-lg">
+      <div className="flex min-h-[32px] flex-row gap-4 bg-[#050505]/40 px-4 py-3 rounded-b-lg">
         <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
           {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4" />}
           {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
@@ -173,6 +174,7 @@ export default function AONotebook() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [importFromProcess, setImportFromProcess] = useState("");
   const [firstRun, setFirstRun] = useState(true);
+  const [showInbox, setShowInbox] = useState(false);
 
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
@@ -200,6 +202,7 @@ export default function AONotebook() {
       });
       // console.log(r)
       if (r.edges.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         r.edges.forEach((msg: any) => {
           // console.log(msg)
           // setCursor(msg.cursor)
@@ -309,6 +312,7 @@ export default function AONotebook() {
           ...prev,
           [activeCell!]: formattedOutput,
         }));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         console.log(e.message);
       }
@@ -423,9 +427,14 @@ Handlers.add(
         `${window.location.origin}/?getcode=${aosProcessId}`,
       );
       alert("shared and url copied to clipboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.log(e.message);
     }
+  }
+
+  function toggleInbox() {
+    setShowInbox(!showInbox);
   }
 
   async function importCode(impfrom?: string) {
@@ -438,6 +447,7 @@ Handlers.add(
     // console.log(procId);
     if (procId.length !== 43) return alert("invalid process ID");
     console.log("importing", procId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const signer = createDataItemSigner((window as any).arweaveWallet);
     const r = await connect().message({
       process: procId,
@@ -475,16 +485,7 @@ Handlers.add(
     <div className="relative flex h-full max-h-[calc(100vh-5rem)] w-full flex-col items-center gap-4 overflow-scroll p-4">
       <Toaster position="bottom-left" />
       <div className="absolute right-2 top-2 flex h-7 gap-2">
-        {aosProcessId && (
-          <Button className="h-7" onClick={() => importCode()}>
-            import
-          </Button>
-        )}
-        {cellIds.length > 0 && (
-          <Button className="h-7" onClick={shareCode}>
-            share
-          </Button>
-        )}
+
       </div>
 
       {isSpawning && <div className="text-center">Spawning process...</div>}
@@ -492,8 +493,26 @@ Handlers.add(
       {!isSpawning && (
         <>
           {aosProcessId ? (
-            <div className="text-center">
-              Process ID: <pre className="inline">{aosProcessId}</pre>
+            <div className="w-full text-center flex flex-col gap-3 px-16">
+              <div>Process ID: <pre className="inline">{aosProcessId}</pre></div>
+              <div className="flex gap-2 justify-between w-full">
+                <div>
+                  <Button className={`h-7 px-3 border  ${showInbox ? "bg-white" : "bg-black"} border-[#252525] hover:bg-white/10`} onClick={() => toggleInbox()}>
+                    {showInbox ? <span className={`font-light ${showInbox ? " text-black" : "text-white"}`}>Process &lt;/&gt;</span> : <><span className="mr-2 font-light">Inbox</span> <img src={Icons.inbox} className="h-3 w-3" /></>}
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={() => importCode()}>
+                    <span className="mr-2 font-light">Import</span> <img src={Icons.import} className="h-3 w-3" />
+                  </Button>
+                  {cellIds.length > 0 && (
+                    <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={shareCode}>
+                      <span className="mr-2 font-light">Share</span> <img src={Icons.share} className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="-mx-4 border-b border-[#333333]" />
             </div>
           ) : (
             <Button onClick={spawnProcess}>spawn new process</Button>
@@ -508,27 +527,31 @@ Handlers.add(
         })}
       </select> */}
 
-      {cellIds.map((cellId) => {
-        return (
-          <CodeCell
-            key={cellId}
-            cellId={cellId}
-            aosProcess={aosProcessId!}
-            cellCodeItems={cellCodeItems}
-            cellOutputItems={cellOutputItems}
-            setCellCodeItems={setCellCodeItems}
-            setCellOutputItems={setCellOutputItems}
-            deleteCell={deleteCell}
-            setActiveCell={setActiveCell}
-          />
-        );
-      })}
+      {showInbox ? <>
+        Inbox
 
-      {aosProcessId && (
-        <Button onClick={addNewCell}>
-          <Icons.add className="text-black" color="#000000aa" /> add new cell
-        </Button>
-      )}
+      </> : <>
+        {cellIds.map((cellId) => {
+          return (
+            <CodeCell
+              key={cellId}
+              cellId={cellId}
+              aosProcess={aosProcessId!}
+              cellCodeItems={cellCodeItems}
+              cellOutputItems={cellOutputItems}
+              setCellCodeItems={setCellCodeItems}
+              setCellOutputItems={setCellOutputItems}
+              deleteCell={deleteCell}
+              setActiveCell={setActiveCell}
+            />
+          );
+        })}
+        {aosProcessId && (
+          <Button onClick={addNewCell}>
+            <Icons.add className="text-black" color="#000000aa" /> add new cell
+          </Button>
+        )}
+      </>}
     </div>
   );
 }
