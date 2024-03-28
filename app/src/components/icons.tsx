@@ -31,6 +31,7 @@ import {
   Loader,
   Copy,
   Check,
+  RefreshCwIcon,
 } from "lucide-react";
 import ShareIcon from "@/assets/share.svg"
 import ImportIcon from "@/assets/import.svg"
@@ -70,6 +71,7 @@ export const Icons = {
   codeRunning: Loader,
   copy: Copy,
   tick: Check,
+  refresh: RefreshCwIcon,
   share: ShareIcon,
   import: ImportIcon,
   inbox: InboxIcon

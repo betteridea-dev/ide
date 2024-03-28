@@ -21,5 +21,12 @@ export async function postToOrbit() {
     const sr = await axios.get(sheet_url)
     console.log(sr.data)
   }
+}
 
+// eslint-disable-next-line no-control-regex
+export const stripAnsiCodes = (str: string): string => str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
+
+export function tsToDate(ts: number) {
+  const d = new Date(ts);
+  return `${d.toDateString()} ${d.toTimeString()}`;
 }

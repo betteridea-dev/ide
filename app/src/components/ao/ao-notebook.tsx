@@ -13,10 +13,10 @@ import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "../../../config";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
-import { postToOrbit } from "@/lib/utils";
+import { postToOrbit, tsToDate } from "@/lib/utils";
 
 // TODO: Replace with shadcn code
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -24,6 +24,17 @@ interface TCellCodeState {
 
 interface TCellOutputState {
   [key: string]: string;
+}
+
+interface TInboxMessage {
+  Data: string,
+  "Block-Height": number,
+  From: string,
+  Id: string,
+  Nonce: number,
+  Owner: string,
+  Target: string,
+  Timestamp: number
 }
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
@@ -175,6 +186,8 @@ export default function AONotebook() {
   const [importFromProcess, setImportFromProcess] = useState("");
   const [firstRun, setFirstRun] = useState(true);
   const [showInbox, setShowInbox] = useState(false);
+  const [processInbox, setProcessInbox] = useState<TInboxMessage[]>([])
+  const [updatingInbox, setUpdatingInbox] = useState(false)
 
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
@@ -249,6 +262,29 @@ export default function AONotebook() {
       clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
     };
   }, [aosProcessId]);
+
+  async function getInbox() {
+    if (updatingInbox) return
+    setUpdatingInbox(true)
+    const r1 = await sendMessage({
+      data: `local json = require("json")
+return json.encode(Inbox)`, processId: aosProcessId!
+    })
+    const r2 = await aoResult({
+      message: r1,
+      process: aosProcessId!,
+    });
+    // console.log(r2)
+    const inbox: TInboxMessage[] = JSON.parse(r2.Output.data.output)
+    setProcessInbox(inbox.reverse())
+    console.log(inbox)
+    setUpdatingInbox(false)
+  }
+
+  useEffect(() => {
+    if (!showInbox) return
+    getInbox()
+  }, [aosProcessId, showInbox])
 
   useEffect(() => {
     if (localStorage.getItem("notebookData") === null) {
@@ -527,9 +563,25 @@ Handlers.add(
       </select> */}
 
       {showInbox ? <>
-        Inbox
+        <div className="text-xl tracking-wide">Inbox
 
-        <div className="bg-black/30 p-2 px-4 rounded-lg border border-[#333333]">New message from zxchhif....asdkadadak: Hi</div>
+          <Button variant="ghost" className="p-0 hover:bg-transparent" size="icon" onClick={getInbox}>
+            {updatingInbox ? <Icons.codeRunning className="h-3 w-3 p-0 animate-spin" /> : <Icons.refresh className="h-3 w-3 p-0" />}
+          </Button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {
+            processInbox.map((msg: TInboxMessage, _) =>
+              <div key={_} className="text-sm font-mono bg-black/30 p-2 px-4 rounded-lg border border-[#333333] max-w-[80vw] w-[80vw] text-white/50">
+                <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)}{" "}</span><br />
+                <span className="text-white/70">{msg.From}</span>:{" "}
+                <span className={msg.Data ? "text-green-300" : "text-white/30"}>
+                  {msg.Data ? msg.Data : "Message Without Data Field"}
+                </span>
+              </div>
+            )
+          }
+        </div>
 
       </> : <>
         {aosProcessId ? cellIds.map((cellId) => {
