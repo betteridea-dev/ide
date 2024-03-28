@@ -6,10 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function postToOrbit() {
+export async function postToOrbit(usedOrbit = false) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const r: string = await (window as any).arweaveWallet.getActiveAddress()
-  const sheet_url = `https://script.google.com/macros/s/AKfycbylqgHUcZ8RVeiQPAPv90ci3y4ind2IbklimMI3wAj38qbaAjwO8scB3fKkv2qjkBbTnQ/exec?path=Sheet1&action=write&Addresses=${r}`
+  const sheet_url = `https://script.google.com/macros/s/AKfycbylqgHUcZ8RVeiQPAPv90ci3y4ind2IbklimMI3wAj38qbaAjwO8scB3fKkv2qjkBbTnQ/exec?path=Sheet1&action=write&Addresses=${usedOrbit ? "1" : "0"},${r}`
 
   const addr = sessionStorage.getItem('activeAddressFor0rbit')
   if (addr && addr != r) {

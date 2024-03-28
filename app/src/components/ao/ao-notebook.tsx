@@ -10,7 +10,7 @@ import {
 } from "@permaweb/aoconnect";
 import { Icons } from "@/components/icons";
 import Ansi from "ansi-to-react";
-import { AOModule, AOScheduler } from "../../../config";
+import { AOModule, AOScheduler, _0RBT } from "../../../config";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 import { postToOrbit, tsToDate } from "@/lib/utils";
@@ -38,7 +38,6 @@ interface TInboxMessage {
 }
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
-  postToOrbit()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const signer = createDataItemSigner((window as any).arweaveWallet);
   return connect().message({
@@ -49,6 +48,65 @@ function sendMessage({ data, processId }: { data: string; processId: string }) {
   });
 }
 
+async function executeCode({
+  cellId,
+  aosProcess,
+  cellCodeItems,
+  // cellOutputItems,
+  setCellOutputItems,
+  setCodeStatus,
+}: {
+  cellId: string;
+  aosProcess: string;
+  cellCodeItems: TCellCodeState;
+  // cellOutputItems: TCellOutputState;
+  setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
+  setCodeStatus: React.Dispatch<
+    React.SetStateAction<"success" | "error" | "running" | "default">
+  >;
+}) {
+  setCodeStatus("running");
+
+  // const codeToRun = editorRef.current.getValue();
+  const codeToRun = cellCodeItems[cellId];
+  console.log("sending message", codeToRun);
+
+  try {
+    const r = await sendMessage({ data: codeToRun, processId: aosProcess });
+
+    // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = await aoResult({
+      message: r,
+      process: aosProcess,
+    });
+
+    if (res.Messages.length > 0 && res.Messages[0].Target) {
+      const target = res.Messages[0].Target
+      if (target == _0RBT) {
+        postToOrbit(true)
+        console.log("Orbit detected")
+      }
+    }
+
+    const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
+      res.Output.data.output
+      }`;
+
+    setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
+    setCodeStatus("success");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    console.log(e);
+    setCellOutputItems((prev) => ({
+      ...prev,
+      [cellId]: e.message ?? "Error executing this snippet",
+    }));
+
+    setCodeStatus("error");
+  }
+}
+
 function CodeCell({
   cellId,
   aosProcess,
@@ -56,6 +114,7 @@ function CodeCell({
   cellOutputItems,
   setCellCodeItems,
   setCellOutputItems,
+  activeCellId,
   deleteCell,
   setActiveCell,
 }: {
@@ -65,6 +124,7 @@ function CodeCell({
   setCellCodeItems: React.Dispatch<React.SetStateAction<TCellCodeState>>;
   cellOutputItems: TCellOutputState;
   setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
+  activeCellId?: string;
   deleteCell: (val: string) => void;
   setActiveCell: (val: string) => void;
 }) {
@@ -72,45 +132,44 @@ function CodeCell({
     "success" | "error" | "running" | "default"
   >("default");
 
-  async function executeCode() {
-    setCodeStatus("running");
+  const monaco = useMonaco();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  monaco?.editor.defineTheme("merbivore", theme as any);
+  monaco?.editor.addEditorAction({
+    id: "run",
+    label: "Run",
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 1.5,
+    run: async () => {
+      console.log("running from keybinding", activeCellId);
 
-    // const codeToRun = editorRef.current.getValue();
-    const codeToRun = cellCodeItems[cellId];
-    console.log("sending message", codeToRun);
+      executeCode({
+        cellId: activeCellId!,
+        aosProcess,
+        cellCodeItems,
+        setCellOutputItems,
+        setCodeStatus,
+      })
 
-    try {
-      const r = await sendMessage({ data: codeToRun, processId: aosProcess });
 
-      // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res: any = await aoResult({
-        message: r,
-        process: aosProcess,
-      });
+    },
+  });
 
-      const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
-        res.Output.data.output
-        }`;
 
-      setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
-      setCodeStatus("success");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.log(e);
-      setCellOutputItems((prev) => ({
-        ...prev,
-        [cellId]: e.message ?? "Error executing this snippet",
-      }));
-
-      setCodeStatus("error");
-    }
-  }
 
   return (
     <div className="flex w-full md:max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
       <div className="flex flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
-        <Button variant="ghost" size="icon" onClick={executeCode}>
+        <Button variant="ghost" size="icon" onClick={() => executeCode({
+          cellId,
+          aosProcess,
+          cellCodeItems,
+          // cellOutputItems,
+          setCellOutputItems,
+          setCodeStatus
+
+        })}>
           <Icons.executeCode className="h-6 w-6" />
         </Button>
 
@@ -310,50 +369,9 @@ return json.encode(Inbox)`, processId: aosProcessId!
     }
   }, [aosProcessId, cellIds, cellCodeItems, cellOutputItems]);
 
-  function setRunning(cellId: string) {
-    setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
-  }
-
-  const monaco = useMonaco();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  monaco?.editor.defineTheme("merbivore", theme as any);
-  monaco?.editor.addEditorAction({
-    id: "run",
-    label: "Run",
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-    contextMenuGroupId: "navigation",
-    contextMenuOrder: 1.5,
-    run: async () => {
-      console.log("running", activeCell);
-      try {
-        setRunning(activeCell!);
-        const r = await sendMessage({
-          data: cellCodeItems[activeCell!],
-          processId: aosProcessId!,
-        });
-        // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res: any = await aoResult({
-          message: r,
-          process: aosProcessId!,
-        });
-
-        console.log(res);
-
-        const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
-          res.Output.data.output
-          }`;
-        console.log(formattedOutput);
-        setCellOutputItems((prev) => ({
-          ...prev,
-          [activeCell!]: formattedOutput,
-        }));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (e: any) {
-        console.log(e.message);
-      }
-    },
-  });
+  // function setRunning(cellId: string) {
+  //   setCellOutputItems((prev) => ({ ...prev, [cellId]: "running..." }));
+  // }
 
   // function processSelected(pid: string) {
   //   console.log("using process", pid);
