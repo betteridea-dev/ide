@@ -81,12 +81,12 @@ async function executeCode({
       process: aosProcess,
     });
 
-    if (res.Messages.length > 0 && res.Messages[0].Target) {
-      const target = res.Messages[0].Target
-      if (target == _0RBT) {
-        postToOrbit(true)
-        console.log("Orbit detected")
-      }
+    if (res.Messages.length > 0 && res.Messages[0].Target && res.Messages[0].Target == _0RBT) {
+      postToOrbit(true)
+      console.log("0rbit detected")
+    } else {
+      postToOrbit(false)
+      console.log("no 0rbit")
     }
 
     const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) ||
