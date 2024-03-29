@@ -247,6 +247,7 @@ export default function AONotebook() {
   const [showInbox, setShowInbox] = useState(false);
   const [processInbox, setProcessInbox] = useState<TInboxMessage[]>([])
   const [updatingInbox, setUpdatingInbox] = useState(false)
+  const [toasts, setToasts] = useState<string[]>(["a", "b", "c"])
 
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
@@ -264,57 +265,69 @@ export default function AONotebook() {
   }, []);
 
   useEffect(() => {
+    function switchId() {
+      const r = toasts.shift()
+      toasts.push(r!)
+      setToasts(toasts)
+      return r
+    }
     async function fetchNewInbox() {
+      // console.log("ran")
       if (!aosProcessId) return;
-      setFirstRun(false);
       const r = await results({
         process: aosProcessId,
-        limit: 1000,
-        from: sessionStorage.getItem("cursor") || "",
+        limit: 50,
+        sort: "ASC",
+        from: localStorage.getItem("cursor") || "",
       });
       // console.log(r)
+      // console.log(r.edges)
       if (r.edges.length > 0) {
+        if (!localStorage.getItem("cursor")) {
+          const c = r.edges[r.edges.length - 1].cursor;
+          localStorage.setItem("cursor", c);
+          console.log("set cursor", c)
+
+          return
+        }
+        const c = r.edges[r.edges.length - 1].cursor;
+        console.log(c, localStorage.getItem("cursor"), c == localStorage.getItem("cursor"))
+        if (c == localStorage.getItem("cursor")) return
+        localStorage.setItem("cursor", c);
+        console.log("updated cursor", c)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         r.edges.forEach((msg: any) => {
           // console.log(msg)
           // setCursor(msg.cursor)
-          sessionStorage.setItem("cursor", msg.cursor);
+          // localStorage.setItem("cursor", msg.cursor);
           const node = msg.node;
           if (node.Output.print) {
             console.log(node.Output.data);
-            // toast(node.Output.data, {
-            //   icon: "📥️",
-            //   style: {
-            //     borderRadius: "10px",
-            //     background: "#333",
-            //     color: "#fff",
-            //   },
-
-            // })
             toast.custom(
               (t) => {
                 return (
                   <div
                     className={`
                 pointer-events-auto flex w-full max-w-md rounded-lg bg-[#121212] p-2 text-white opacity-80 shadow-lg ring-1 ring-white/30 transition-all duration-200 hover:right-0 hover:opacity-100 `}
-                    onClick={() => toast.dismiss(t.id)}
+                    onClick={() => toast.remove(t.id)}
                   >
                     <Ansi>{node.Output.data}</Ansi>
                   </div>
                 );
               },
-              { duration: 10000 },
+              { duration: 5000, id: switchId() },
             );
           }
         });
       }
+
       // fetchNewInbox()
     }
     // fetchNewInbox()
 
     sessionStorage.setItem(
       "interval",
-      setInterval(fetchNewInbox, 1000).toString(),
+      setInterval(fetchNewInbox, 2100).toString(),
     );
 
     return () => {
