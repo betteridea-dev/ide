@@ -614,7 +614,7 @@ Handlers.add(
               setCellOutputItems={setCellOutputItems}
               deleteCell={deleteCell}
               setActiveCell={setActiveCell}
-              activeCellId={activeCell}
+              activeCellId={activeCell!}
             />
           );
         }) : "Create a process to run code"}
