@@ -327,7 +327,7 @@ export default function AONotebook() {
 
     sessionStorage.setItem(
       "interval",
-      setInterval(fetchNewInbox, 2100).toString(),
+      setInterval(fetchNewInbox, 2500).toString(),
     );
 
     return () => {
