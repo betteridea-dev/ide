@@ -227,7 +227,7 @@ ${res.writeContract.errorMessage}`);
           <div className="h-full w-full overflow-clip rounded p-0.5 ring-1 ring-white/20">
             <iframe
               className="h-full w-full rounded"
-              src={`/betterIDE?editor&language=json&file=input/state.json`}
+              src={`/?editor&language=json&file=input/state.json`}
             />
           </div>
 
