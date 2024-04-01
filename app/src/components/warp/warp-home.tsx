@@ -18,12 +18,15 @@ import {
   setActiveFile,
   setActiveSideNavItem,
 } from "@/store/app-store";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Icons } from "../icons";
 
 export default function Home({ contracts }: { contracts: ContractsType }) {
   const dispatch = useAppDispatch();
 
   const [recents] = useState<string[]>(
-    JSON.parse(localStorage.getItem("recents")!) || [],
+    JSON.parse(localStorage.getItem("recents")!) || []
   );
 
   function _setActiveFile(s: string) {
@@ -48,14 +51,17 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
     state?: string;
   }) {
     return (
-      <div className="flex min-w-[150px] flex-col gap-2 rounded p-2 px-3 ring-1 ring-white/50 hover:bg-white/5">
+      <Card className="flex flex-col min-w-[160px] gap-3 p-3">
         <div className="text-lg">{name}</div>
-        <button
-          className="relative w-14 rounded bg-[#2c3b50] px-2 text-left transition-all duration-300 hover:w-24 hover:bg-[#395d8b]"
+
+        <Button
+          className="group transition-all duration-300 relative"
+          variant="secondary"
           onClick={() => {
             const r = [...recents];
             if (src && state) {
               const n = contracts.newContract(src, state);
+
               if (n) {
                 setTimeout(() => {
                   _setActiveContract(n);
@@ -73,45 +79,52 @@ export default function Home({ contracts }: { contracts: ContractsType }) {
               _setActiveContract(name);
               _setActiveFile("README.md");
               setActiveMenuItem("Contracts");
+
               if (r.includes(name)) {
                 r.splice(r.indexOf(name), 1);
               }
+
               r.unshift(name);
               localStorage.setItem("recents", JSON.stringify(r));
             }
           }}
         >
           {src && state ? "edit" : "open"}
-          <div className="absolute right-2 top-0 w-full text-right text-transparent hover:text-white">
-            -&gt;
-          </div>
-        </button>
-      </div>
+
+          <Icons.arrowRight className="absolute right-2 hidden group-hover:block" />
+        </Button>
+      </Card>
     );
   }
 
   return (
-    <div className=" flex h-full flex-col items-center justify-center gap-1">
+    <div className="flex h-full flex-col items-center justify-center gap-2">
       <div className="text-2xl">Welcome to BetterIDEa! 🚀</div>
+
       <div className="text-lg">
         Your one stop solution for developing smart contracts on Arweave
       </div>
 
+      <div className="h-12"></div>
+
       <div className="flex w-full flex-col items-start justify-start gap-5 px-10">
         <div>
-          <div className="my-1 text-xl">
+          <div className="my-3 text-xl">
             {recents.length == 0
               ? "No recently opened contracts"
               : "Recently opened contracts"}
           </div>
+
           <div className="flex gap-3">
             {recents.map((recent) => {
               return <ContractCard name={recent} />;
             })}
           </div>
         </div>
+
         <div>
-          <div className="my-1 text-xl">Explore contract templates</div>
+          <div className="my-3 text-xl">Explore contract templates</div>
+
           <div className="flex gap-3">
             <ContractCard name="Vote" src={voteSrc} state={voteState} />
             <ContractCard name="Database" src={dbSrc} state={dbState} />

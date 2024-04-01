@@ -2,6 +2,16 @@ import { useState, useEffect } from "react";
 import useDeployments from "../../../hooks/useDeployments";
 import { ContractsType } from "../../../hooks/useContracts";
 import { viewContractState, writeContract } from "arweavekit/contract";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function WarpTest({
   contracts,
@@ -71,7 +81,7 @@ export default function WarpTest({
         if (res.result.status == 200) {
           setSuccess(true);
           setResult(
-            JSON.stringify({ result: res.viewContract.result }, null, 2),
+            JSON.stringify({ result: res.viewContract.result }, null, 2)
           );
           setLatestState(JSON.stringify(res.viewContract.state, null, 2));
         } else {
@@ -119,87 +129,116 @@ ${res.writeContract.errorMessage}`);
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5">
-      <div className="w-fit">
-        <label className="block text-white">Select a deployment</label>
-        <select
-          className=""
-          defaultValue={target || "none"}
-          onChange={(e) => setActiveDeployment(e.target.value)}
+      <div className="w-[300px]">
+        <Label>Select a deployment</Label>
+
+        <Select
+          // disabled={}
+          defaultValue={target ?? "none"}
+          onValueChange={(val) => {
+            setActiveDeployment(val);
+          }}
         >
-          <option value="none" disabled>
-            Select a deployment
-          </option>
-          {Object.keys(deployments).map((key) => {
-            return (
-              <option key={key} value={key}>
-                {key} ({deployments[key].env}-{deployments[key].txid})
-              </option>
-            );
-          })}
-        </select>
+          <SelectTrigger className="max-w-full flex-grow">
+            <SelectValue placeholder="Deployment" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="none" disabled>
+              Select a deployment
+            </SelectItem>
+
+            {Object.keys(deployments).map((key) => {
+              return (
+                <SelectItem key={key} value={key}>
+                  {key} ({deployments[key].env}-{deployments[key].txid})
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       </div>
+
       <div className="grid w-full grid-cols-2 gap-5 p-5">
-        <div className="flex flex-col gap-1">
-          <div className="text-2xl">Call a Function</div>
-          <div className="flex items-center gap-5">
-            <div>Type:</div>
-            <div className="flex items-center gap-1">
-              <input
-                type="radio"
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <div className="text-2xl">Call a Function</div>
+
+            <div className="flex flex-row gap-4">
+              <Label>Type: </Label>
+
+              <RadioGroup
+                value={callType}
                 name="calltype"
-                id="read"
-                value="read"
-                checked={callType == "read"}
-                onClick={() => setCallType("read")}
-              />
-              <label htmlFor="read">Read</label>
-            </div>
-            <div className="flex items-center gap-1">
-              <input
-                type="radio"
-                name="calltype"
-                id="write"
-                value="write"
-                checked={callType == "write"}
-                onClick={() => setCallType("write")}
-              />
-              <label htmlFor="write">Write</label>
+                onValueChange={(val) => setCallType(val as "read" | "write")}
+                className="flex flex-row"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="read" id="read" />
+                  <Label htmlFor="read">Read</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="write" id="write" />
+                  <Label htmlFor="write">Write</Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
-          <div className="mt-5 text-lg">Function Name</div>
-          <select
-            className=""
-            defaultValue="none"
-            onChange={(e) => setFunctionName(e.target.value)}
-          >
-            <option value="none" disabled>
-              Select a function
-            </option>
-            {activeDeployment &&
-              deployments[activeDeployment].functionNames.map((func) => (
-                <option key={func} value={func}>
-                  {func}
-                </option>
-              ))}
-          </select>
-          {/* input json */}
+
+          <div className="">
+            <Label>Select a function</Label>
+
+            <Select
+              // disabled={}
+              defaultValue={"none"}
+              onValueChange={(val) => {
+                setFunctionName(val);
+              }}
+            >
+              <SelectTrigger className="max-w-full flex-grow">
+                <SelectValue placeholder="Function Name" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="none" disabled>
+                  Select a deployment
+                </SelectItem>
+
+                {activeDeployment &&
+                  deployments[activeDeployment].functionNames.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+
+                {Object.keys(deployments).map((key) => {
+                  return (
+                    <SelectItem key={key} value={key}>
+                      {key} ({deployments[key].env}-{deployments[key].txid})
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* JSON Input */}
           <div className="h-full w-full overflow-clip rounded p-0.5 ring-1 ring-white/20">
             <iframe
               className="h-full w-full rounded"
               src={`/betterIDE?editor&language=json&file=input/state.json`}
             />
           </div>
-          {/* call button */}
-          <button
-            className="my-5 w-fit rounded-md bg-green-500 p-1 px-4 text-black hover:scale-105 active:scale-95"
-            onClick={run}
-          >
+
+          <Button className="w-fit" variant="default" onClick={run}>
             RUN
-          </button>
+          </Button>
         </div>
-        <div className="flex flex-col gap-1">
-          <div className="text-2xl">Output</div>
-          <div>Result</div>
+
+        <div className="flex flex-col gap-2">
+          <h3 className="text-2xl">Output</h3>
+          <p>Result</p>
           <pre
             className={`overflow-scroll rounded bg-white/10 p-1 ${
               success ? "text-green-400" : "text-red-400"
@@ -207,7 +246,10 @@ ${res.writeContract.errorMessage}`);
           >
             {result || "..."}
           </pre>
-          <div>Latest State</div>
+
+          <div className="h-2"></div>
+
+          <p>Latest State</p>
           <pre className="overflow-scroll rounded bg-white/10 p-1">
             {latestState || "..."}
           </pre>
