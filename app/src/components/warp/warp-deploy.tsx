@@ -3,6 +3,16 @@ import { contractsType } from "../../../hooks/useContracts";
 import useDeployments from "../../../hooks/useDeployments";
 import { useReducer } from "react";
 import { Icons } from "@/components/icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const derivations = [
   "not allowed",
@@ -162,8 +172,8 @@ export default function WarpDeploy({
         contract.contractTxId,
         state.deployEnv,
         extractFunctionsFromSwitchCase(
-          contracts[state.contractName]["contract.js"],
-        ),
+          contracts[state.contractName]["contract.js"]
+        )
       );
       dispatch({ type: "is_error", payload: false });
     } catch (e: any) {
@@ -176,65 +186,78 @@ export default function WarpDeploy({
   }
 
   if (!state) return <></>;
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-evenly">
       {!state.deploySuccess ? (
-        <div className="flex w-full grow flex-col justify-center gap-5 overflow-scroll">
-          <div className="grow"></div>
-          <div className="flex items-center justify-center gap-10">
-            <div>
-              <div>Select Contract</div>
-              <select
-                className="rounded p-1 "
-                value={state.contractName}
+        <div className="flex flex-col justify-center items-center gap-5">
+          <div className="flex flex-row items-center justify-center gap-10">
+            <div className="w-[256px]">
+              <Label>Select Contract</Label>
+
+              <Select
+                // disabled={}
                 defaultValue={state.contractName}
-                onChange={(e) =>
+                onValueChange={(val) => {
                   dispatch({
                     type: "set_contract_name",
-                    payload: e.target.value,
-                  })
-                }
+                    payload: val,
+                  });
+                }}
               >
-                <option value="" disabled>
-                  Select a contract
-                </option>
-                {Object.keys(contracts).map((c) => {
-                  if (c == "input") return;
-                  return <option value={c}>{c}</option>;
-                })}
-              </select>
+                <SelectTrigger className="max-w-full flex-grow">
+                  <SelectValue placeholder="Contract" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {Object.keys(contracts).map((c) => {
+                    if (c == "input") return;
+
+                    return (
+                      <SelectItem value={c} key={c}>
+                        {c}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
-            <div>
-              <div>Select Environment</div>
-              <select
-                className="rounded p-1"
-                value={state.deployEnv}
+
+            <div className="w-[256px]">
+              <Label>Select Environment</Label>
+
+              <Select
+                // disabled={}
                 defaultValue={state.deployEnv}
-                onChange={(e) =>
-                  dispatch({ type: "set_env", payload: e.target.value })
-                }
+                onValueChange={(val) => {
+                  dispatch({ type: "set_env", payload: val });
+                }}
               >
-                <option value="" disabled>
-                  Select an environment
-                </option>
-                <option value="local">Local (npx arlocal)</option>
-                <option value="testnet">testnet</option>
-                <option value="mainnet">Mainnet</option>
-              </select>
+                <SelectTrigger className="max-w-full flex-grow">
+                  <SelectValue placeholder="Enviornment" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="local">Local (npx arlocal)</SelectItem>
+                  <SelectItem value="testnet">Testnet</SelectItem>
+                  <SelectItem value="mainnet">Mainnet</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-row justify-center gap-4">
             <div className="p-2 px-4 transition-all duration-200 hover:scale-105 active:scale-95">
-              <label
+              <Label
                 htmlFor="wallet"
-                className="w-fit cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center"
+                className="w-fit h-full cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center"
               >
                 {!state.walletJWK
                   ? "Import a wallet.json file"
-                  : `Imported: ${state.fileName} ✅`}
-              </label>
-              <input
+                  : `Imported: ${state.fileName}  ✅`}
+              </Label>
+
+              <Input
                 type="file"
                 accept="application/JSON"
                 id="wallet"
@@ -244,8 +267,10 @@ export default function WarpDeploy({
                 }
               />
             </div>
-            <button
-              className="w-fit cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center hover:scale-105 active:scale-95"
+
+            <Button
+              className="w-fit"
+              variant="secondary"
               onClick={() => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (window as any).arweaveWallet
@@ -265,63 +290,83 @@ export default function WarpDeploy({
               }}
             >
               Use Web Wallet {state.usingWebWallet && "✅"}
-            </button>
+            </Button>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-3">
-            <div className="text-center">
-              <span className="text-xl font-bold">
-                Universal Data Licensing
-              </span>
-              <br />
-              <span className="font-base">
-                Protect the ownership of your content
-              </span>
+          <div className="text-center my-8">
+            <h3 className="text-xl font-bold">Universal Data Licensing</h3>
+
+            <p className="font-base">Protect the ownership of your content</p>
+          </div>
+
+          <div className="flex flex-row gap-10">
+            <div className="w-[256px]">
+              <Label>License your code</Label>
+
+              <Select
+                // disabled={}
+                defaultValue={derivations[0]}
+                onValueChange={(val) => {
+                  dispatch({
+                    type: "set_derivation",
+                    payload: val,
+                  });
+                }}
+              >
+                <SelectTrigger className="max-w-full flex-grow">
+                  <SelectValue placeholder="License" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {derivations.map((c) => {
+                    return (
+                      <SelectItem value={c} key={c}>
+                        {c}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex gap-10">
-              <div>
-                <div>License your code</div>
-                <select
-                  className="rounded p-1"
-                  defaultValue={derivations[0]}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "set_derivation",
-                      payload: e.target.value,
-                    })
-                  }
-                >
-                  {derivations.map((c) => (
-                    <option value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <div>Add a commercial license</div>
-                <select
-                  className="rounded p-1"
-                  defaultValue={commercialUses[0]}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "set_commercial_use",
-                      payload: e.target.value,
-                    })
-                  }
-                >
-                  {commercialUses.map((c) => (
-                    <option value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
+
+            <div className="w-[256px]">
+              <Label>Add a commercial license</Label>
+
+              <Select
+                // disabled={}
+                defaultValue={commercialUses[0]}
+                onValueChange={(val) => {
+                  dispatch({
+                    type: "set_commercial_use",
+                    payload: val,
+                  });
+                }}
+              >
+                <SelectTrigger className="max-w-full flex-grow">
+                  <SelectValue placeholder="Commercial License" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {commercialUses.map((c) => {
+                    return (
+                      <SelectItem value={c} key={c}>
+                        {c}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <button
-            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
+
+          <Button
+            variant="secondary"
+            className="w-fit my-4"
             onClick={() => deploy()}
           >
             Deploy! 🚀
-          </button>
-          <div className="grow"></div>
+          </Button>
+
           {state.result && (
             <pre
               className={`border-t border-white/20 bg-black/20 p-2 ${!state.isError ? "text-green-300" : "text-red-300"
@@ -334,35 +379,42 @@ export default function WarpDeploy({
           )}
         </div>
       ) : (
-        <div className="flex min-h-[80vh] flex-col items-center justify-center gap-4 text-center">
-          <div className="flex gap-1 text-3xl font-bold">
-            <Icons.tick height={18} width={18} />
+        <div className="flex flex-col items-center justify-center gap-8 text-center">
+          <div className="flex gap-3 items-center text-3xl font-bold">
+            <Icons.tick height={32} width={32} />
             Your contract has been successfully deployed!
           </div>
-          <div className="mx-auto flex gap-1">
-            Txn ID: {state.contractTxID}{" "}
+
+          <div className="mx-auto flex gap-3 items-center text-xl">
+            Txn ID: {state.contractTxID}
             <Icons.copy
               height={18}
               width={18}
               className="cursor-pointer"
               onClick={() => {
                 navigator.clipboard.writeText(state.contractTxID);
+
+                // TODO: Replace Alert with Toast
                 alert("Copied to clipboard");
               }}
             />
           </div>
-          <button
-            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
-            onClick={() => dispatch({ type: "deploy_another" })}
-          >
-            Deploy Another
-          </button>
-          <button
-            className="mx-auto w-fit rounded bg-[#093E49] p-2 px-4"
-            onClick={() => test(state.contractName)}
-          >
-            Test this contract
-          </button>
+
+          <div className="flex flex-row gap-4">
+            <Button
+              variant="secondary"
+              onClick={() => dispatch({ type: "deploy_another" })}
+            >
+              Deploy Another
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => test(state.contractName)}
+            >
+              Test this contract
+            </Button>
+          </div>
         </div>
       )}
     </div>

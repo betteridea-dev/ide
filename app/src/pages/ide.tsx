@@ -108,14 +108,15 @@ export default function IDE() {
         return (
           <iframe
             className="w-full h-full"
-            src={`/?editor&language=${activeFile.endsWith(".js")
+            src={`/?editor&language=${
+              activeFile.endsWith(".js")
                 ? "javascript"
                 : activeFile.endsWith(".json")
-                  ? "json"
-                  : activeFile.endsWith(".md")
-                    ? "markdown"
-                    : "text"
-              }&file=${activeContract}/${activeFile}`}
+                ? "json"
+                : activeFile.endsWith(".md")
+                ? "markdown"
+                : "text"
+            }&file=${activeContract}/${activeFile}`}
           />
         );
       case "Deploy":
@@ -163,7 +164,7 @@ export default function IDE() {
 
         {/* File List */}
         {showFileList && (
-          <div className="min-w-[150px] border-r border-white/30 bg-[#171717]">
+          <div className="min-w-[220px] border-r border-white/30 bg-[#171717] pl-12">
             {contracts.contracts &&
               Object.keys(contracts.contracts).map((contractname, i) => {
                 if (contractname == "input") return;
@@ -181,7 +182,7 @@ export default function IDE() {
         )}
 
         {/* Main Content */}
-        <div className="grow bg-[#1d1d1d]">{TabSwitcher()}</div>
+        <div className="grow bg-[#1d1d1d] pl-12">{TabSwitcher()}</div>
       </div>
     </div>
   );
@@ -214,8 +215,9 @@ function ContractListItem({
   function ContractFileItem({ name }: { name: string }) {
     return (
       <div
-        className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${activeFile == name && "font-bold bg-white/10"
-          }`}
+        className={`p-1 pl-5 cursor-pointer hover:bg-white/10 ${
+          activeFile == name && "font-bold bg-white/10"
+        }`}
         onClick={() => {
           _setActiveFile(name);
           setActiveMenuItem("Contracts");
@@ -229,7 +231,7 @@ function ContractListItem({
   return (
     <div
       className={cn(
-        "w-full max-w-[150px] overflow-scroll cursor-pointer hover:bg-[#2f2f2f]",
+        "w-full max-w-full overflow-scroll cursor-pointer hover:bg-[#2f2f2f]",
         activeContract == contractName && "bg-white/10"
       )}
     >
