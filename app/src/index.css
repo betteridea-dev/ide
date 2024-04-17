@@ -11,6 +11,11 @@
   color: whitesmoke;
 }
 
+html,
+body {
+  background-color: transparent !important;
+}
+
 *::-webkit-scrollbar {
   display: none;
 }

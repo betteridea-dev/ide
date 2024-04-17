@@ -11,6 +11,7 @@ import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/store";
 import { setIsWalletConnected } from "./store/app-store";
 import { Toaster, toast } from "react-hot-toast";
+import CodeBlockExt from "@/components/ao/codeblock.ext";
 
 const router = createBrowserRouter([
   {
@@ -69,13 +70,19 @@ function App() {
       <Toaster position="bottom-right" />
       {/* <RouterProvider router={router} /> */}
 
-      {searchParams.has("editor") ? (
-        <CodeEditor />
-      ) : appMode === "aos" ? (
-        <AONotebookPage />
-      ) : (
-        <IDE />
-      )}
+      {
+        searchParams.has("codeblock") ? (<CodeBlockExt />) : <>
+
+          {searchParams.has("editor") ? (
+            <CodeEditor />
+          ) : appMode === "aos" ? (
+            <AONotebookPage />
+          ) : (
+            <IDE />
+          )}
+        </>
+      }
+
     </>
   );
 }
