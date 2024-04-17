@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler } from "@/../config";
+import { useSearchParams } from "react-router-dom";
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,7 +80,8 @@ async function executeCode({
 }
 
 function CodeCell({ aosProcess }: { aosProcess: string; }) {
-    const [code, setCode] = useState<string>("print('Hello, World!')");
+    const [searchParams] = useSearchParams();
+    const [code, setCode] = useState<string>(searchParams.get("codeblock") || "print('Hello, World!')");
     const [output, setOutput] = useState<string>("");
     const [codeStatus, setCodeStatus] = useState<
         "success" | "error" | "running" | "default"
