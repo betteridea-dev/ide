@@ -54,6 +54,7 @@ function App() {
         );
       // if (!wallet) return alert("Please install the ArConnect extension");
 
+      if(searchParams.has("codeblock"))return;
       try {
         await wallet.getActiveAddress();
         _setIsWalletConnected(true);

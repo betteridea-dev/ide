@@ -113,8 +113,8 @@ function CodeCell({ aosProcess }: { aosProcess: string; }) {
 
 
     return (
-        <div className="flex flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
-            <div className="flex flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
+        <div className="flex h-[100vh] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232] bg-[#1d1d1d]">
+            <div className="flex h-[100vh] flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
                 <Button variant="ghost" size="icon" onClick={() => executeCode({
                     aosProcess,
                     codeToRun: code,
@@ -127,14 +127,14 @@ function CodeCell({ aosProcess }: { aosProcess: string; }) {
 
                 <div className="min-h-[52px] flex-grow overflow-clip rounded-sm">
                     <Editor
-                        className="max-h-[380px] min-h-[52px]"
+                        className="min-h-[52px]"
                         language="lua"
                         theme="merbivore"
-                        height={
-                            (code.split("\n").length > 20
-                                ? 20
-                                : code.split("\n").length) * 19
-                        }
+                        // height={
+                        //     (code.split("\n").length > 10
+                        //         ? 10
+                        //         : code.split("\n").length) * 19
+                        // }
                         defaultValue={code}
                         onChange={(value) => setCode(value!)}
                         options={{
@@ -152,14 +152,14 @@ function CodeCell({ aosProcess }: { aosProcess: string; }) {
                 </Button> */}
             </div>
 
-            <div className="flex min-h-[32px] flex-row gap-4 bg-[#050505]/40 px-4 py-3 rounded-b-lg">
-                <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
+            <div className="flex min-h-[100px] flex-row gap-4 bg-[#050505]/40 px-4 py-3 rounded-b-lg">
+                <div className="flex min-h-[30px] min-w-[30px] items-center justify-center">
                     {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4  animate-spin" />}
                     {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
                     {codeStatus == "error" && <Icons.codeError className="h-4 w-4" />}
                 </div>
 
-                <pre className="mx-2 max-h-[300px] min-h-[32px] flex-grow overflow-scroll p-2 ring-white/5">
+                <pre className="mx-2  flex-grow overflow-scroll p-2 ring-white/5">
                     {(() => {
                         try {
                             return <Ansi>{`${JSON.parse(output)}`}</Ansi>;
