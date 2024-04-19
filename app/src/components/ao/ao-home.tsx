@@ -14,9 +14,9 @@ import { useAppDispatch } from "../../../hooks/store";
 import { setActiveSideNavItem } from "@/store/app-store";
 
 const templates: { [a: string]: string } = {
-  "chat": "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
-  "token": "/?getcode=Vx0OaXCQV8dd87CiZSxm2dbH8Sn66_bsCzj_1y1BAjo",
-  "voting": "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
+  chat: "/?getcode=tXTL4xmTgBWPhdcnG58zgxGdbLK1tCms_k5rrAHe1SE",
+  token: "/?getcode=Vx0OaXCQV8dd87CiZSxm2dbH8Sn66_bsCzj_1y1BAjo",
+  voting: "/?getcode=n8kHWl8s3n_6aQSUuURvUBUU16gEjYBU8_x4pANSbjs",
 };
 
 export default function AOHome() {
@@ -75,7 +75,12 @@ export default function AOHome() {
       module: AOModule,
       scheduler: AOScheduler,
       signer,
-      tags: [],
+      tags: [
+        {
+          name: "App-Name",
+          value: "BetterIDEa",
+        },
+      ],
     });
     console.log(res);
     setMyProcesses((prev) => [res, ...prev]);
