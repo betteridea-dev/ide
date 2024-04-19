@@ -90,7 +90,8 @@ function CodeCell({ aosProcess }: { aosProcess: string }) {
   });
 
   useEffect(() => {
-    const callback = (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callback = (e: any) => {
       if (e.origin == "http://localhost:5173") return;
       console.log(e);
       if (e.data.action == "run") {
