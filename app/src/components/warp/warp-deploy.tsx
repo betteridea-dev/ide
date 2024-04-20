@@ -3,13 +3,7 @@ import { contractsType } from "../../../hooks/useContracts";
 import useDeployments from "../../../hooks/useDeployments";
 import { useReducer } from "react";
 import { Icons } from "@/components/icons";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,16 +61,7 @@ const istate: DeployState = {
   isError: false,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function WarpDeploy({
-  contracts,
-  target,
-  test,
-}: {
-  contracts: contractsType;
-  target: string;
-  test: any;
-}) {
+export default function WarpDeploy({ contracts, target, test }: { contracts: contractsType; target: string; test: any }) {
   const { newDeployment } = useDeployments();
 
   function init(state: DeployState): DeployState {
@@ -85,7 +70,6 @@ export default function WarpDeploy({
 
   const [state, dispatch] = useReducer(reducer, istate, init);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function reducer(state: DeployState, action: any): DeployState {
     switch (action.type) {
       case "set_contract_name":
@@ -133,10 +117,8 @@ export default function WarpDeploy({
 
   async function deploy() {
     if (!state.contractName) return alert("Please select a contract");
-    if (!state.deployEnv)
-      return alert("Please select a deployment environment");
-    if (!state.usingWebWallet && !state.walletJWK)
-      return alert("Please upload a wallet file");
+    if (!state.deployEnv) return alert("Please select a deployment environment");
+    if (!state.usingWebWallet && !state.walletJWK) return alert("Please upload a wallet file");
 
     const csource = contracts[state.contractName]["contract.js"];
     const cstate = contracts[state.contractName]["state.json"];
@@ -146,10 +128,8 @@ export default function WarpDeploy({
       { name: "App-Version", value: "1.0.0" },
     ];
 
-    if (state.derivation)
-      tags.push({ name: "Derivation", value: state.derivation });
-    if (state.commercialUse)
-      tags.push({ name: "Commercial-Use", value: state.commercialUse });
+    if (state.derivation) tags.push({ name: "Derivation", value: state.derivation });
+    if (state.commercialUse) tags.push({ name: "Commercial-Use", value: state.commercialUse });
 
     try {
       const contract = await createContract({
@@ -167,14 +147,7 @@ export default function WarpDeploy({
         type: "set_result",
         payload: "Deployed successfully!\nID: " + contract.contractTxId,
       });
-      newDeployment(
-        state.contractName,
-        contract.contractTxId,
-        state.deployEnv,
-        extractFunctionsFromSwitchCase(
-          contracts[state.contractName]["contract.js"]
-        )
-      );
+      newDeployment(state.contractName, contract.contractTxId, state.deployEnv, extractFunctionsFromSwitchCase(contracts[state.contractName]["contract.js"]));
       dispatch({ type: "is_error", payload: false });
     } catch (e: any) {
       console.log(e);
@@ -248,38 +221,19 @@ export default function WarpDeploy({
 
           <div className="flex flex-row justify-center gap-4">
             <div className="p-2 px-4 transition-all duration-200 hover:scale-105 active:scale-95">
-              <Label
-                htmlFor="wallet"
-                className="w-fit h-full cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center"
-              >
-                {!state.walletJWK
-                  ? "Import a wallet.json file"
-                  : `Imported: ${state.fileName}  ✅`}
+              <Label htmlFor="wallet" className="w-fit h-full cursor-pointer rounded bg-[#093E49] p-2 px-4 text-center">
+                {!state.walletJWK ? "Import a wallet.json file" : `Imported: ${state.fileName}  ✅`}
               </Label>
 
-              <Input
-                type="file"
-                accept="application/JSON"
-                id="wallet"
-                className="hidden"
-                onChange={(e) =>
-                  dispatch({ type: "set_file", payload: e.target.files![0] })
-                }
-              />
+              <Input type="file" accept="application/JSON" id="wallet" className="hidden" onChange={(e) => dispatch({ type: "set_file", payload: e.target.files![0] })} />
             </div>
 
             <Button
               className="w-fit"
               variant="secondary"
               onClick={() => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window as any).arweaveWallet
-                  .connect([
-                    "ACCESS_ADDRESS",
-                    "SIGN_TRANSACTION",
-                    "ACCESS_PUBLIC_KEY",
-                    "SIGNATURE",
-                  ])
+                window.arweaveWallet
+                  .connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION", "ACCESS_PUBLIC_KEY", "SIGNATURE"])
                   .then(() => {
                     dispatch({ type: "set_web_wallet", payload: true });
                   })
@@ -359,19 +313,12 @@ export default function WarpDeploy({
             </div>
           </div>
 
-          <Button
-            variant="secondary"
-            className="w-fit my-4"
-            onClick={() => deploy()}
-          >
+          <Button variant="secondary" className="w-fit my-4" onClick={() => deploy()}>
             Deploy! 🚀
           </Button>
 
           {state.result && (
-            <pre
-              className={`border-t border-white/20 bg-black/20 p-2 ${!state.isError ? "text-green-300" : "text-red-300"
-                }`}
-            >
+            <pre className={`border-t border-white/20 bg-black/20 p-2 ${!state.isError ? "text-green-300" : "text-red-300"}`}>
               [ Result ]<br />
               <br />
               {state.result}
@@ -401,17 +348,11 @@ export default function WarpDeploy({
           </div>
 
           <div className="flex flex-row gap-4">
-            <Button
-              variant="secondary"
-              onClick={() => dispatch({ type: "deploy_another" })}
-            >
+            <Button variant="secondary" onClick={() => dispatch({ type: "deploy_another" })}>
               Deploy Another
             </Button>
 
-            <Button
-              variant="secondary"
-              onClick={() => test(state.contractName)}
-            >
+            <Button variant="secondary" onClick={() => test(state.contractName)}>
               Test this contract
             </Button>
           </div>

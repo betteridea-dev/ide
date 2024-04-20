@@ -1,9 +1,4 @@
-import {
-  createBrowserRouter,
-  RouterProvider,
-  BrowserRouter,
-  useSearchParams,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider, BrowserRouter, useSearchParams } from "react-router-dom";
 import IDE from "@/pages/ide";
 import CodeEditor from "@/pages/editor";
 import AONotebookPage from "./pages/ao-notebook";
@@ -42,24 +37,19 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const wallet = (window as any).arweaveWallet;
+      const wallet = window.arweaveWallet;
 
       if (!wallet)
-        return toast.error(
-          "Unable to find ArConnect wallet extension. Please install it and refresh the page.",
-          {
-            duration: 10000,
-          },
-        );
+        return toast.error("Unable to find ArConnect wallet extension. Please install it and refresh the page.", {
+          duration: 10000,
+        });
       // if (!wallet) return alert("Please install the ArConnect extension");
 
-      if(searchParams.has("codeblock"))return;
+      if (searchParams.has("codeblock")) return;
       try {
         await wallet.getActiveAddress();
         _setIsWalletConnected(true);
       } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
         _setIsWalletConnected(true);
       }
@@ -71,19 +61,7 @@ function App() {
       <Toaster position="bottom-right" />
       {/* <RouterProvider router={router} /> */}
 
-      {
-        searchParams.has("codeblock") ? (<CodeBlockExt />) : <>
-
-          {searchParams.has("editor") ? (
-            <CodeEditor />
-          ) : appMode === "aos" ? (
-            <AONotebookPage />
-          ) : (
-            <IDE />
-          )}
-        </>
-      }
-
+      {searchParams.has("codeblock") ? <CodeBlockExt /> : <>{searchParams.has("editor") ? <CodeEditor /> : appMode === "aos" ? <AONotebookPage /> : <IDE />}</>}
     </>
   );
 }

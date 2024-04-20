@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  connect,
-  createDataItemSigner,
-  result,
-  results,
-} from "@permaweb/aoconnect";
+import { connect, createDataItemSigner, result, results } from "@permaweb/aoconnect";
 import { AOModule, AOScheduler, AOChatPID } from "../../../config";
 
 interface message {
@@ -21,8 +16,7 @@ function tsToDate(ts: number) {
 }
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const signer = createDataItemSigner((window as any).arweaveWallet);
+  const signer = createDataItemSigner(window.arweaveWallet);
   return connect().message({
     process: processId,
     signer,
@@ -47,15 +41,10 @@ export default function AOChat() {
   ]);
 
   async function spawnProcess() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (window as any).arweaveWallet.connect([
-      "ACCESS_ADDRESS",
-      "SIGN_TRANSACTION",
-    ]);
+    await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
     if (myProcess) return alert("already spawned");
     setSpawning(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signer = createDataItemSigner((window as any).arweaveWallet);
+    const signer = createDataItemSigner(window.arweaveWallet);
     console.log(signer);
     const res = await connect().spawn({
       module: AOModule,
@@ -80,8 +69,7 @@ export default function AOChat() {
 
   // useEffect(() => {
   //     async function monitor() {
-  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //         const signer = createDataItemSigner((window as any).arweaveWallet);
+  //         const signer = createDataItemSigner(window.arweaveWallet);
   //         const res = await connect().monitor({
   //             process: myProcess,
   //             signer,
@@ -111,17 +99,11 @@ export default function AOChat() {
       });
       c && setCursor(c);
 
-      sessionStorage.setItem(
-        "interval",
-        setTimeout(() => getInbox(), 1000).toString()
-      );
+      sessionStorage.setItem("interval", setTimeout(() => getInbox(), 1000).toString());
     }
 
-    sessionStorage.setItem(
-      "interval",
-      setTimeout(() => getInbox(), 1000).toString()
-    );
-    return () => clearTimeout(sessionStorage.getItem("interval")|| 0);
+    sessionStorage.setItem("interval", setTimeout(() => getInbox(), 1000).toString());
+    return () => clearTimeout(sessionStorage.getItem("interval") || 0);
   }, [myProcess]);
 
   // useEffect(() => {
@@ -129,8 +111,7 @@ export default function AOChat() {
   //   if (!myProcess) return;
   //   async function getInbox() {
   //     if (!myProcess) return;
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     await (window as any).arweaveWallet.connect([
+  //     await window.arweaveWallet.connect([
   //       "ACCESS_ADDRESS",
   //       "SIGN_TRANSACTION",
   //     ]);
@@ -144,8 +125,7 @@ export default function AOChat() {
 
   //     return
 
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     const signer = createDataItemSigner((window as any).arweaveWallet);
+  //     const signer = createDataItemSigner(window.arweaveWallet);
   //     try {
   //       const res = await connect().message({
   //         process: myProcess,
@@ -196,8 +176,7 @@ export default function AOChat() {
     if (!myProcess) return;
     if (e.key === "Enter") {
       if (!input) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // const signer = createDataItemSigner((window as any).arweaveWallet);
+      // const signer = createDataItemSigner(window.arweaveWallet);
       setSending(true);
       if (input.startsWith("/register")) {
         console.log("registering");
@@ -262,24 +241,14 @@ export default function AOChat() {
           return (
             <div key={index} className="flex flex-col font-mono">
               <div className="text-md opacity-70">{message.from}</div>
-              <div className="text-xs opacity-50">
-                {tsToDate(message.timestamp)}
-              </div>
+              <div className="text-xs opacity-50">{tsToDate(message.timestamp)}</div>
               <div className="text-lg">- {message.content}</div>
             </div>
           );
         })}
       </div>
 
-      <input
-        type="text"
-        className="w-full bg-white/80 outline-none p-1 text-black"
-        disabled={sending}
-        value={input}
-        placeholder="Type message here"
-        onKeyDown={(e) => keyDown(e)}
-        onChange={(e) => setInput(e.target.value)}
-      />
+      <input type="text" className="w-full bg-white/80 outline-none p-1 text-black" disabled={sending} value={input} placeholder="Type message here" onKeyDown={(e) => keyDown(e)} onChange={(e) => setInput(e.target.value)} />
     </div>
   );
 }

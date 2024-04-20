@@ -9,8 +9,7 @@ import { AOModule, AOScheduler } from "@/../config";
 import { useSearchParams } from "react-router-dom";
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const signer = createDataItemSigner((window as any).arweaveWallet);
+  const signer = createDataItemSigner(window.arweaveWallet);
   return connect().message({
     process: processId,
     signer,
@@ -29,8 +28,7 @@ async function executeCode({ aosProcess, codeToRun, setOutput, setCodeStatus }: 
     const r = await sendMessage({ data: codeToRun, processId: aosProcess });
 
     // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: any = await aoResult({
+    const res = await aoResult({
       message: r,
       process: aosProcess,
     });
@@ -48,8 +46,7 @@ async function executeCode({ aosProcess, codeToRun, setOutput, setCodeStatus }: 
     // setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
     setOutput(formattedOutput);
     setCodeStatus("success");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
+  } catch (e) {
     console.log(e);
     // setCellOutputItems((prev) => ({
     //     ...prev,
@@ -69,8 +66,7 @@ function CodeCell({ aosProcess }: { aosProcess: string }) {
   const [timeoutId, setTimeoutId] = useState<any>(0);
 
   const monaco = useMonaco();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  monaco?.editor.defineTheme("merbivore", theme as any);
+  monaco?.editor.defineTheme("merbivore", theme);
   monaco?.editor.addEditorAction({
     id: "run",
     label: "Run",
@@ -90,8 +86,7 @@ function CodeCell({ aosProcess }: { aosProcess: string }) {
   });
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const callback = (e: any) => {
+    const callback = (e) => {
       if (e.origin == "http://localhost:5173") return;
       console.log(e);
       if (e.data.action == "run") {
@@ -210,12 +205,10 @@ export default function CodeBlockExt() {
               variant="outline"
               onClick={async () => {
                 try {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  const addr = await (window as any).arweaveWallet.getActiveAddress();
+                  const addr = await window.arweaveWallet.getActiveAddress();
                   setWalletAddr(addr);
                 } catch {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  await (window as any).arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
+                  await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
                 }
               }}
             >
@@ -234,8 +227,7 @@ export default function CodeBlockExt() {
                 const r = await connect().spawn({
                   module: AOModule,
                   scheduler: AOScheduler,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  signer: createDataItemSigner((window as any).arweaveWallet),
+                  signer: createDataItemSigner(window.arweaveWallet),
                   tags: [],
                   data: "",
                 });

@@ -9,6 +9,12 @@ import "./index.css";
 import "./theme.css";
 import { BrowserRouter } from "react-router-dom";
 
+declare global {
+  interface Window {
+    arweaveWallet: any;
+  }
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
@@ -18,5 +24,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </BrowserRouter>
       </ThemeProvider>
     </Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

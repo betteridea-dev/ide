@@ -2,12 +2,7 @@ import { Editor, useMonaco } from "@monaco-editor/react";
 import theme from "../../../themes/notebook.json";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
-import {
-  connect,
-  createDataItemSigner,
-  result as aoResult,
-  results,
-} from "@permaweb/aoconnect";
+import { connect, createDataItemSigner, result as aoResult, results } from "@permaweb/aoconnect";
 import { Icons } from "@/components/icons";
 import Ansi from "ansi-to-react";
 import { AOModule, AOScheduler, _0RBT } from "../../../config";
@@ -38,8 +33,7 @@ interface TInboxMessage {
 }
 
 function sendMessage({ data, processId }: { data: string; processId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const signer = createDataItemSigner((window as any).arweaveWallet);
+  const signer = createDataItemSigner(window.arweaveWallet);
   return connect().message({
     process: processId,
     signer,
@@ -61,9 +55,7 @@ async function executeCode({
   cellCodeItems: TCellCodeState;
   // cellOutputItems: TCellOutputState;
   setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
-  setCodeStatus: React.Dispatch<
-    React.SetStateAction<"success" | "error" | "running" | "default">
-  >;
+  setCodeStatus: React.Dispatch<React.SetStateAction<"success" | "error" | "running" | "default">>;
 }) {
   setCodeStatus("running");
 
@@ -75,17 +67,12 @@ async function executeCode({
     const r = await sendMessage({ data: codeToRun, processId: aosProcess });
 
     // REMOVE THE ANY LATER WHEN TYPES ARE FIXED ON AO-CONNECT
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: any = await aoResult({
+    const res = await aoResult({
       message: r,
       process: aosProcess,
     });
 
-    if (
-      res.Messages.length > 0 &&
-      res.Messages[0].Target &&
-      res.Messages[0].Target == _0RBT
-    ) {
+    if (res.Messages.length > 0 && res.Messages[0].Target && res.Messages[0].Target == _0RBT) {
       postToOrbit(true);
       console.log("0rbit detected");
     } else {
@@ -93,14 +80,11 @@ async function executeCode({
       console.log("no 0rbit");
     }
 
-    const formattedOutput = `${
-      JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output
-    }`;
+    const formattedOutput = `${JSON.stringify(res.Output.data.output, null, 2) || res.Output.data.output}`;
 
     setCellOutputItems((prev) => ({ ...prev, [cellId]: formattedOutput }));
     setCodeStatus("success");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
+  } catch (e) {
     console.log(e);
     setCellOutputItems((prev) => ({
       ...prev,
@@ -111,34 +95,11 @@ async function executeCode({
   }
 }
 
-function CodeCell({
-  cellId,
-  aosProcess,
-  cellCodeItems,
-  cellOutputItems,
-  setCellCodeItems,
-  setCellOutputItems,
-  activeCellId,
-  deleteCell,
-  setActiveCell,
-}: {
-  cellId: string;
-  aosProcess: string;
-  cellCodeItems: TCellCodeState;
-  setCellCodeItems: React.Dispatch<React.SetStateAction<TCellCodeState>>;
-  cellOutputItems: TCellOutputState;
-  setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
-  activeCellId?: string;
-  deleteCell: (val: string) => void;
-  setActiveCell: (val: string) => void;
-}) {
-  const [codeStatus, setCodeStatus] = useState<
-    "success" | "error" | "running" | "default"
-  >("default");
+function CodeCell({ cellId, aosProcess, cellCodeItems, cellOutputItems, setCellCodeItems, setCellOutputItems, activeCellId, deleteCell, setActiveCell }: { cellId: string; aosProcess: string; cellCodeItems: TCellCodeState; setCellCodeItems: React.Dispatch<React.SetStateAction<TCellCodeState>>; cellOutputItems: TCellOutputState; setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>; activeCellId?: string; deleteCell: (val: string) => void; setActiveCell: (val: string) => void }) {
+  const [codeStatus, setCodeStatus] = useState<"success" | "error" | "running" | "default">("default");
 
   const monaco = useMonaco();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  monaco?.editor.defineTheme("merbivore", theme as any);
+  monaco?.editor.defineTheme("merbivore", theme);
   monaco?.editor.addEditorAction({
     id: "run",
     label: "Run",
@@ -183,11 +144,7 @@ function CodeCell({
             className="max-h-[380px] min-h-[52px]"
             language="lua"
             theme="merbivore"
-            height={
-              (cellCodeItems[cellId].split("\n").length > 20
-                ? 20
-                : cellCodeItems[cellId].split("\n").length) * 19
-            }
+            height={(cellCodeItems[cellId].split("\n").length > 20 ? 20 : cellCodeItems[cellId].split("\n").length) * 19}
             defaultValue={cellCodeItems[cellId]}
             onChange={(value) => {
               setCellCodeItems((prev) => ({
@@ -213,9 +170,7 @@ function CodeCell({
 
       <div className="flex min-h-[32px] flex-row gap-4 bg-[#050505]/40 px-4 py-3 rounded-b-lg">
         <div className="flex min-h-[32px] min-w-[30px] items-center justify-center">
-          {codeStatus == "running" && (
-            <Icons.codeRunning className="h-4 w-4  animate-spin" />
-          )}
+          {codeStatus == "running" && <Icons.codeRunning className="h-4 w-4  animate-spin" />}
           {codeStatus == "success" && <Icons.codeSuccess className="h-4 w-4" />}
           {codeStatus == "error" && <Icons.codeError className="h-4 w-4" />}
         </div>
@@ -299,16 +254,11 @@ export default function AONotebook() {
           return;
         }
         const c = r.edges[r.edges.length - 1].cursor;
-        console.log(
-          c,
-          localStorage.getItem("cursor"),
-          c == localStorage.getItem("cursor")
-        );
+        console.log(c, localStorage.getItem("cursor"), c == localStorage.getItem("cursor"));
         if (c == localStorage.getItem("cursor")) return;
         localStorage.setItem("cursor", c);
         console.log("updated cursor", c);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        r.edges.forEach((msg: any) => {
+        r.edges.forEach((msg) => {
           // console.log(msg)
           // setCursor(msg.cursor)
           // localStorage.setItem("cursor", msg.cursor);
@@ -327,7 +277,7 @@ export default function AONotebook() {
                   </div>
                 );
               },
-              { duration: 5000, id: switchId() }
+              { duration: 5000, id: switchId() },
             );
           }
         });
@@ -337,10 +287,7 @@ export default function AONotebook() {
     }
     // fetchNewInbox()
 
-    sessionStorage.setItem(
-      "interval",
-      setInterval(fetchNewInbox, 2500).toString()
-    );
+    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 2500).toString());
 
     return () => {
       clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
@@ -405,8 +352,7 @@ return json.encode(Inbox)`,
   // }
 
   async function spawnProcess() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // await (window as any).arweaveWallet.connect([
+    // await window.arweaveWallet.connect([
     //   "ACCESS_ADDRESS",
     //   "SIGN_TRANSACTION",
     // ]);
@@ -421,8 +367,7 @@ return json.encode(Inbox)`,
 
     if (aosProcessId) return alert("already spawned");
     setSpawning(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signer = createDataItemSigner((window as any).arweaveWallet);
+    const signer = createDataItemSigner(window.arweaveWallet);
     console.log(signer);
     const res = await connect().spawn({
       module: AOModule,
@@ -506,12 +451,9 @@ Handlers.add(
         process: aosProcessId!,
       });
       console.log(res.Output);
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/?getcode=${aosProcessId}`
-      );
+      await navigator.clipboard.writeText(`${window.location.origin}/?getcode=${aosProcessId}`);
       alert("shared and url copied to clipboard");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e) {
       console.log(e.message);
     }
   }
@@ -521,17 +463,13 @@ Handlers.add(
   }
 
   async function importCode(impfrom?: string) {
-    const id =
-      impfrom ||
-      importFromProcess ||
-      prompt("Enter the process ID or URL to import");
+    const id = impfrom || importFromProcess || prompt("Enter the process ID or URL to import");
     if (!id) return;
     const procId = id.includes("?getcode=") ? id.split("?getcode=")[1] : id;
     // console.log(procId);
     if (procId.length !== 43) return alert("invalid process ID");
     console.log("importing", procId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signer = createDataItemSigner((window as any).arweaveWallet);
+    const signer = createDataItemSigner(window.arweaveWallet);
     const r = await connect().message({
       process: procId,
       signer,
@@ -581,43 +519,23 @@ Handlers.add(
               </div>
               <div className="flex gap-2 justify-between w-full">
                 <div>
-                  <Button
-                    className={`h-7 px-3 border  ${
-                      showInbox ? "bg-white" : "bg-black"
-                    } border-[#252525] hover:bg-white/10`}
-                    onClick={() => toggleInbox()}
-                  >
+                  <Button className={`h-7 px-3 border  ${showInbox ? "bg-white" : "bg-black"} border-[#252525] hover:bg-white/10`} onClick={() => toggleInbox()}>
                     {showInbox ? (
-                      <span
-                        className={`font-light ${
-                          showInbox ? " text-black" : "text-white"
-                        }`}
-                      >
-                        Process &lt;/&gt;
-                      </span>
+                      <span className={`font-light ${showInbox ? " text-black" : "text-white"}`}>Process &lt;/&gt;</span>
                     ) : (
                       <>
-                        <span className="mr-2 font-light">Inbox</span>{" "}
-                        <img src={Icons.inbox} className="h-3 w-3" />
+                        <span className="mr-2 font-light">Inbox</span> <img src={Icons.inbox} className="h-3 w-3" />
                       </>
                     )}
                   </Button>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10"
-                    onClick={() => importCode()}
-                  >
-                    <span className="mr-2 font-light">Import</span>{" "}
-                    <img src={Icons.import} className="h-3 w-3" />
+                  <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={() => importCode()}>
+                    <span className="mr-2 font-light">Import</span> <img src={Icons.import} className="h-3 w-3" />
                   </Button>
                   {cellIds.length > 0 && (
-                    <Button
-                      className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10"
-                      onClick={shareCode}
-                    >
-                      <span className="mr-2 font-light">Share</span>{" "}
-                      <img src={Icons.share} className="h-3 w-3" />
+                    <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={shareCode}>
+                      <span className="mr-2 font-light">Share</span> <img src={Icons.share} className="h-3 w-3" />
                     </Button>
                   )}
                 </div>
@@ -641,33 +559,16 @@ Handlers.add(
         <>
           <div className="text-xl tracking-wide">
             Inbox
-            <Button
-              variant="ghost"
-              className="p-0 hover:bg-transparent"
-              size="icon"
-              onClick={getInbox}
-            >
-              {updatingInbox ? (
-                <Icons.codeRunning className="h-3 w-3 p-0 animate-spin" />
-              ) : (
-                <Icons.refresh className="h-3 w-3 p-0" />
-              )}
+            <Button variant="ghost" className="p-0 hover:bg-transparent" size="icon" onClick={getInbox}>
+              {updatingInbox ? <Icons.codeRunning className="h-3 w-3 p-0 animate-spin" /> : <Icons.refresh className="h-3 w-3 p-0" />}
             </Button>
           </div>
           <div className="flex flex-col gap-2">
             {processInbox.map((msg: TInboxMessage, _) => (
-              <div
-                key={_}
-                className="text-sm font-mono bg-black/30 p-2 px-4 rounded-lg border border-[#333333] max-w-[80vw] w-[80vw] text-white/50"
-              >
-                <span className="text-red-300/50 text-xs">
-                  {tsToDate(msg.Timestamp)}{" "}
-                </span>
+              <div key={_} className="text-sm font-mono bg-black/30 p-2 px-4 rounded-lg border border-[#333333] max-w-[80vw] w-[80vw] text-white/50">
+                <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
                 <br />
-                <span className="text-white/70">{msg.From}</span>:{" "}
-                <span className={msg.Data ? "text-green-300" : "text-white/30"}>
-                  {msg.Data ? msg.Data : "Message Without Data Field"}
-                </span>
+                <span className="text-white/70">{msg.From}</span>: <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? msg.Data : "Message Without Data Field"}</span>
               </div>
             ))}
           </div>
@@ -676,26 +577,12 @@ Handlers.add(
         <>
           {aosProcessId
             ? cellIds.map((cellId) => {
-                return (
-                  <CodeCell
-                    key={cellId}
-                    cellId={cellId}
-                    aosProcess={aosProcessId!}
-                    cellCodeItems={cellCodeItems}
-                    cellOutputItems={cellOutputItems}
-                    setCellCodeItems={setCellCodeItems}
-                    setCellOutputItems={setCellOutputItems}
-                    deleteCell={deleteCell}
-                    setActiveCell={setActiveCell}
-                    activeCellId={activeCell!}
-                  />
-                );
+                return <CodeCell key={cellId} cellId={cellId} aosProcess={aosProcessId!} cellCodeItems={cellCodeItems} cellOutputItems={cellOutputItems} setCellCodeItems={setCellCodeItems} setCellOutputItems={setCellOutputItems} deleteCell={deleteCell} setActiveCell={setActiveCell} activeCellId={activeCell!} />;
               })
             : "Create a process to run code"}
           {aosProcessId && (
             <Button onClick={addNewCell}>
-              <Icons.add className="text-black" color="#000000aa" /> add new
-              cell
+              <Icons.add className="text-black" color="#000000aa" /> add new cell
             </Button>
           )}
         </>

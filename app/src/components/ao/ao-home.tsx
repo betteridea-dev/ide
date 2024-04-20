@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { gql, GraphQLClient } from "graphql-request";
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { AOModule, AOScheduler } from "../../../config";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppDispatch } from "../../../hooks/store";
 import { setActiveSideNavItem } from "@/store/app-store";
 
@@ -27,16 +21,9 @@ export default function AOHome() {
   useEffect(() => {
     const client = new GraphQLClient("https://arweave.net/graphql");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query = gql`
       query ($address: [String!]!) {
-        transactions(
-          owners: $address
-          tags: [
-            { name: "Data-Protocol", values: ["ao"] }
-            { name: "Type", values: ["Process"] }
-          ]
-        ) {
+        transactions(owners: $address, tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
           edges {
             node {
               id
@@ -47,29 +34,23 @@ export default function AOHome() {
     `;
 
     async function fetchProcesses() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const address = await (window as any).arweaveWallet.getActiveAddress();
+      const address = await window.arweaveWallet.getActiveAddress();
       console.log(address);
       const res = await client.request(query, { address });
       console.log(res);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setMyProcesses(
-        (res as any).transactions.edges.map((edge: any) => edge.node.id),
-      );
+      setMyProcesses(res.transactions.edges.map((edge: any) => edge.node.id));
     }
 
     fetchProcesses();
   }, []);
 
   async function spawnProcess() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // await (window as any).arweaveWallet.connect([
+    // await window.arweaveWallet.connect([
     //   "ACCESS_ADDRESS",
     //   "SIGN_TRANSACTION",
     // ]);
     setSpawning(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const signer = createDataItemSigner((window as any).arweaveWallet);
+    const signer = createDataItemSigner(window.arweaveWallet);
     console.log(signer);
     const res = await connect().spawn({
       module: AOModule,
@@ -94,12 +75,8 @@ export default function AOHome() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-24">
       <h1 className="text-3xl tracking-tight">
-        <span className="mr-1 font-light italic">
-          Unlock Infinite Creativity with{" "}
-        </span>
-        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text font-bold not-italic text-transparent">
-          AO notebook&apos;s threaded computer
-        </span>
+        <span className="mr-1 font-light italic">Unlock Infinite Creativity with </span>
+        <span className="bg-gradient-to-r from-[#006F86] to-white bg-clip-text font-bold not-italic text-transparent">AO notebook&apos;s threaded computer</span>
       </h1>
 
       <div className="flex w-full max-w-xl flex-col gap-3">
@@ -114,9 +91,7 @@ export default function AOHome() {
             }}
           >
             <SelectTrigger className="max-w-full flex-grow">
-              <SelectValue
-                placeholder={spawning ? "Spawning..." : "Process ID"}
-              />
+              <SelectValue placeholder={spawning ? "Spawning..." : "Process ID"} />
             </SelectTrigger>
 
             <SelectContent>
