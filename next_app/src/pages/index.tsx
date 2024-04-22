@@ -1,17 +1,16 @@
-import { useSearchParams } from "react-router-dom";
-import IDE from "@/pages/ide";
-import CodeEditor from "@/pages/editor";
-import AONotebookPage from "./pages/ao-notebook";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/store";
-import { setIsWalletConnected } from "./store/app-store";
-import { Toaster, toast } from "react-hot-toast";
-import CodeBlockExt from "@/components/ao/codeblock.ext";
+import { useAppDispatch, useAppSelector } from "@/hooks/store";
+import { setIsWalletConnected } from "@/store/app-store";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import AONotebookPage from "@/components/ao";
+import WarpPage from "@/components/warp";
 
 function App() {
   const dispatch = useAppDispatch();
   const { appMode } = useAppSelector((state) => state.app);
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
 
   const _setIsWalletConnected = useCallback(
     (val: boolean) => {
@@ -46,7 +45,7 @@ function App() {
       <Toaster position="bottom-right" />
       {/* <RouterProvider router={router} /> */}
 
-      {searchParams.has("codeblock") ? <CodeBlockExt /> : <>{searchParams.has("editor") ? <CodeEditor /> : appMode === "aos" ? <AONotebookPage /> : <IDE />}</>}
+      {appMode === "aos" ? <AONotebookPage /> : <WarpPage />}
     </>
   );
 }

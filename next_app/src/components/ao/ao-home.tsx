@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { gql, GraphQLClient } from "graphql-request";
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
-import { AOModule, AOScheduler } from "../../../config";
+import { AOModule, AOScheduler } from "@/config";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAppDispatch } from "../../../hooks/store";
+import { useAppDispatch } from "@/hooks/store";
 import { setActiveSideNavItem } from "@/store/app-store";
 
 const templates: { [a: string]: string } = {
@@ -36,7 +36,7 @@ export default function AOHome() {
     async function fetchProcesses() {
       const address = await window.arweaveWallet.getActiveAddress();
       console.log(address);
-      const res:any = await client.request(query, { address });
+      const res: any = await client.request(query, { address });
       console.log(res);
       setMyProcesses(res.transactions.edges.map((edge: any) => edge.node.id));
     }

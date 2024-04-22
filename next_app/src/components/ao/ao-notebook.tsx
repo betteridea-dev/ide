@@ -1,17 +1,19 @@
+"use client";
+
 import { Editor, useMonaco } from "@monaco-editor/react";
-import theme from "../../../themes/notebook.json";
+import { editor } from "monaco-editor";
+import theme from "@/themes/notebook.json";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import { connect, createDataItemSigner, result as aoResult, results } from "@permaweb/aoconnect";
 import { Icons } from "@/components/icons";
 import Ansi from "ansi-to-react";
-import { AOModule, AOScheduler, _0RBT } from "../../../config";
+import { AOModule, AOScheduler, _0RBT } from "@/config";
 import { Button } from "@/components/ui/button";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { postToOrbit, tsToDate } from "@/lib/utils";
-
-// TODO: Replace with shadcn code
-import { toast } from "react-hot-toast";
+import NoSSR from "react-no-ssr";
+import { toast } from "sonner";
 
 interface TCellCodeState {
   [key: string]: string;
@@ -57,6 +59,7 @@ async function executeCode({
   setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>;
   setCodeStatus: React.Dispatch<React.SetStateAction<"success" | "error" | "running" | "default">>;
 }) {
+  if (typeof window == "undefined") return;
   setCodeStatus("running");
 
   // const codeToRun = editorRef.current.getValue();
@@ -98,29 +101,31 @@ async function executeCode({
 function CodeCell({ cellId, aosProcess, cellCodeItems, cellOutputItems, setCellCodeItems, setCellOutputItems, activeCellId, deleteCell, setActiveCell }: { cellId: string; aosProcess: string; cellCodeItems: TCellCodeState; setCellCodeItems: React.Dispatch<React.SetStateAction<TCellCodeState>>; cellOutputItems: TCellOutputState; setCellOutputItems: React.Dispatch<React.SetStateAction<TCellOutputState>>; activeCellId?: string; deleteCell: (val: string) => void; setActiveCell: (val: string) => void }) {
   const [codeStatus, setCodeStatus] = useState<"success" | "error" | "running" | "default">("default");
 
-  const monaco = useMonaco();
-  monaco?.editor.defineTheme("notebook", theme);
-  monaco?.editor.addEditorAction({
-    id: "run",
-    label: "Run",
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-    contextMenuGroupId: "navigation",
-    contextMenuOrder: 1.5,
-    run: async () => {
-      console.log("running from keybinding", activeCellId);
+  // function handleEditorMount(editor, monaco) {
+  //   // monaco?.editor.defineTheme("merbivore", theme as editor.IStandaloneThemeData);
 
-      executeCode({
-        cellId: activeCellId!,
-        aosProcess,
-        cellCodeItems,
-        setCellOutputItems,
-        setCodeStatus,
-      });
-    },
-  });
+  //   monaco?.editor.addEditorAction({
+  //     id: "run",
+  //     label: "Run",
+  //     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+  //     contextMenuGroupId: "navigation",
+  //     contextMenuOrder: 1.5,
+  //     run: async () => {
+  //       console.log("running from keybinding", activeCellId);
+
+  //       executeCode({
+  //         cellId: activeCellId!,
+  //         aosProcess,
+  //         cellCodeItems,
+  //         setCellOutputItems,
+  //         setCodeStatus,
+  //       });
+  //     },
+  //   });
+  // }
 
   return (
-    <div className="flex w-full md:max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]">
+    <div className="flex w-full md:max-w-[calc(90vw-12rem)] flex-col justify-center overflow-x-clip rounded-lg border border-[#323232]" suppressHydrationWarning>
       <div className="flex flex-row gap-4 bg-black/70 border-b border-[#323232] px-4 py-6 rounded-t-lg">
         <Button
           variant="ghost"
@@ -143,7 +148,11 @@ function CodeCell({ cellId, aosProcess, cellCodeItems, cellOutputItems, setCellC
           <Editor
             className="max-h-[380px] min-h-[52px]"
             language="lua"
-            theme="notebook"
+            theme="merbivore"
+            beforeMount={(m) => {
+              m.editor.defineTheme("merbivore", theme as editor.IStandaloneThemeData);
+            }}
+            onMount={(e, m) => {}}
             height={(cellCodeItems[cellId].split("\n").length > 20 ? 20 : cellCodeItems[cellId].split("\n").length) * 19}
             defaultValue={cellCodeItems[cellId]}
             onChange={(value) => {
@@ -203,14 +212,15 @@ export default function AONotebook() {
   const [cellOutputItems, setCellOutputItems] = useState<TCellOutputState>({
     "0": "click the run button",
   });
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const [importFromProcess, setImportFromProcess] = useState("");
   const [firstRun, setFirstRun] = useState(true);
   const [showInbox, setShowInbox] = useState(false);
   const [processInbox, setProcessInbox] = useState<TInboxMessage[]>([]);
   const [updatingInbox, setUpdatingInbox] = useState(false);
   const [toasts, setToasts] = useState<string[]>(["a", "b", "c"]);
-
+  const router = useRouter();
+  const pathname = usePathname();
   useEffect(() => {
     const activeProcess = localStorage.getItem("activeProcess");
     if (activeProcess) {
@@ -243,7 +253,7 @@ export default function AONotebook() {
         sort: "ASC",
         from: localStorage.getItem("cursor") || "",
       });
-      // console.log(r)
+      console.log(r);
       // console.log(r.edges)
       if (r.edges.length > 0) {
         if (!localStorage.getItem("cursor")) {
@@ -271,7 +281,6 @@ export default function AONotebook() {
                   <div
                     className={`
                 pointer-events-auto flex w-full max-w-md rounded-lg bg-[#121212] p-2 text-white opacity-80 shadow-lg ring-1 ring-white/30 transition-all duration-200 hover:right-0 hover:opacity-100 `}
-                    onClick={() => toast.remove(t.id)}
                   >
                     <Ansi>{node.Output.data}</Ansi>
                   </div>
@@ -497,96 +506,100 @@ Handlers.add(
     setCellOrder(cellIds);
     setCellCodeItems(cellCodeItems);
     setCellOutputItems(cellOutputItems);
-    searchParams.delete("getcode");
-    setSearchParams(searchParams);
+    // searchParams.delete("getcode");
+    // setSearchParams(searchParams);
+    router.push(pathname);
+
     setImportFromProcess("");
   }
 
   return (
-    <div className="relative flex h-full max-h-[calc(100vh-5rem)] w-full flex-col items-center gap-4 overflow-scroll p-4">
-      {/* <div className="absolute right-2 top-2 flex h-7 gap-2">
+    <NoSSR>
+      <div className="relative flex h-full max-h-[calc(100vh-5rem)] w-full flex-col items-center gap-4 overflow-scroll p-4">
+        {/* <div className="absolute right-2 top-2 flex h-7 gap-2">
 
       </div> */}
 
-      {isSpawning && <div className="text-center">Spawning process...</div>}
+        {isSpawning && <div className="text-center">Spawning process...</div>}
 
-      {!isSpawning && (
-        <>
-          {aosProcessId ? (
-            <div className="w-full text-center flex flex-col gap-3 md:px-16">
-              <div>
-                Process ID: <pre className="inline">{aosProcessId}</pre>
-              </div>
-              <div className="flex gap-2 justify-between w-full">
+        {!isSpawning && (
+          <>
+            {aosProcessId ? (
+              <div className="w-full text-center flex flex-col gap-3 md:px-16">
                 <div>
-                  <Button className={`h-7 px-3 border  ${showInbox ? "bg-white" : "bg-black"} border-[#252525] hover:bg-white/10`} onClick={() => toggleInbox()}>
-                    {showInbox ? (
-                      <span className={`font-light ${showInbox ? " text-black" : "text-white"}`}>Process &lt;/&gt;</span>
-                    ) : (
-                      <>
-                        <span className="mr-2 font-light">Inbox</span> <img src={Icons.inbox} className="h-3 w-3" />
-                      </>
-                    )}
-                  </Button>
+                  Process ID: <pre className="inline">{aosProcessId}</pre>
                 </div>
-                <div className="flex gap-2">
-                  <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={() => importCode()}>
-                    <span className="mr-2 font-light">Import</span> <img src={Icons.import} className="h-3 w-3" />
-                  </Button>
-                  {cellIds.length > 0 && (
-                    <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={shareCode}>
-                      <span className="mr-2 font-light">Share</span> <img src={Icons.share} className="h-3 w-3" />
+                <div className="flex gap-2 justify-between w-full">
+                  <div>
+                    <Button className={`h-7 px-3 border  ${showInbox ? "bg-white" : "bg-black"} border-[#252525] hover:bg-white/10`} onClick={() => toggleInbox()}>
+                      {showInbox ? (
+                        <span className={`font-light ${showInbox ? " text-black" : "text-white"}`}>Process &lt;/&gt;</span>
+                      ) : (
+                        <>
+                          <span className="mr-2 font-light">Inbox</span> <img src={Icons.inbox} className="h-3 w-3" />
+                        </>
+                      )}
                     </Button>
-                  )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={() => importCode()}>
+                      <span className="mr-2 font-light">Import</span> <img src={Icons.import} className="h-3 w-3" />
+                    </Button>
+                    {cellIds.length > 0 && (
+                      <Button className="h-7 px-3 border bg-black text-white border-[#252525] hover:bg-white/10" onClick={shareCode}>
+                        <span className="mr-2 font-light">Share</span> <img src={Icons.share} className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
+                <div className="-mx-4 border-b border-[#333333]" />
               </div>
-              <div className="-mx-4 border-b border-[#333333]" />
-            </div>
-          ) : (
-            <Button onClick={spawnProcess}>spawn new process</Button>
-          )}
-        </>
-      )}
+            ) : (
+              <Button onClick={spawnProcess}>spawn new process</Button>
+            )}
+          </>
+        )}
 
-      {/* <select className="p-1 rounded" defaultValue={""} onChange={(e) => processSelected(e.target.value)}>
+        {/* <select className="p-1 rounded" defaultValue={""} onChange={(e) => processSelected(e.target.value)}>
         <option disabled value={""}>select a process</option>
         {myProcesses.map((processId) => {
           return <option key={processId} value={processId}>{processId}</option>
         })}
       </select> */}
 
-      {showInbox ? (
-        <>
-          <div className="text-xl tracking-wide">
-            Inbox
-            <Button variant="ghost" className="p-0 hover:bg-transparent" size="icon" onClick={getInbox}>
-              {updatingInbox ? <Icons.codeRunning className="h-3 w-3 p-0 animate-spin" /> : <Icons.refresh className="h-3 w-3 p-0" />}
-            </Button>
-          </div>
-          <div className="flex flex-col gap-2">
-            {processInbox.map((msg: TInboxMessage, _) => (
-              <div key={_} className="text-sm font-mono bg-black/30 p-2 px-4 rounded-lg border border-[#333333] max-w-[80vw] w-[80vw] text-white/50">
-                <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
-                <br />
-                <span className="text-white/70">{msg.From}</span>: <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? msg.Data : "Message Without Data Field"}</span>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          {aosProcessId
-            ? cellIds.map((cellId) => {
-                return <CodeCell key={cellId} cellId={cellId} aosProcess={aosProcessId!} cellCodeItems={cellCodeItems} cellOutputItems={cellOutputItems} setCellCodeItems={setCellCodeItems} setCellOutputItems={setCellOutputItems} deleteCell={deleteCell} setActiveCell={setActiveCell} activeCellId={activeCell!} />;
-              })
-            : "Create a process to run code"}
-          {aosProcessId && (
-            <Button onClick={addNewCell}>
-              <Icons.add className="text-black" color="#000000aa" /> add new cell
-            </Button>
-          )}
-        </>
-      )}
-    </div>
+        {showInbox ? (
+          <>
+            <div className="text-xl tracking-wide">
+              Inbox
+              <Button variant="ghost" className="p-0 hover:bg-transparent" size="icon" onClick={getInbox}>
+                {updatingInbox ? <Icons.codeRunning className="h-3 w-3 p-0 animate-spin" /> : <Icons.refresh className="h-3 w-3 p-0" />}
+              </Button>
+            </div>
+            <div className="flex flex-col gap-2">
+              {processInbox.map((msg: TInboxMessage, _) => (
+                <div key={_} className="text-sm font-mono bg-black/30 p-2 px-4 rounded-lg border border-[#333333] max-w-[80vw] w-[80vw] text-white/50">
+                  <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
+                  <br />
+                  <span className="text-white/70">{msg.From}</span>: <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? msg.Data : "Message Without Data Field"}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            {typeof window !== "undefined" && aosProcessId
+              ? cellIds.map((cellId) => {
+                  return <CodeCell key={cellId} cellId={cellId} aosProcess={aosProcessId!} cellCodeItems={cellCodeItems} cellOutputItems={cellOutputItems} setCellCodeItems={setCellCodeItems} setCellOutputItems={setCellOutputItems} deleteCell={deleteCell} setActiveCell={setActiveCell} activeCellId={activeCell!} />;
+                })
+              : "Create a process to run code"}
+            {aosProcessId && (
+              <Button onClick={addNewCell}>
+                <Icons.add className="text-black" color="#000000aa" /> add new cell
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    </NoSSR>
   );
 }
