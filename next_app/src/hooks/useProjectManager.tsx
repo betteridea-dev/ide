@@ -89,11 +89,17 @@ export class Project {
   readonly name: string;
   readonly mode: "AO" | "WARP";
   readonly files: { [name: string]: PFile };
+  process?: string;
 
   constructor({ name, mode, files }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile } }) {
     this.name = name;
     this.mode = mode;
     this.files = files || {};
+  }
+
+  setProcess(process: string) {
+    if (this.mode == "AO") this.process = process;
+    else throw new Error("Cannot set process on WARP project");
   }
 
   getFile(name: string) {

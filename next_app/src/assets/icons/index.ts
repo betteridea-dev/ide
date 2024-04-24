@@ -4,4 +4,5 @@ import sendSVG from "./send.svg";
 import folderSVG from "./folder.svg";
 import newProjectSVG from "./new-project.svg";
 
-export { downloadSVG, mailSVG, sendSVG, folderSVG, newProjectSVG };
+const Icons = { downloadSVG, mailSVG, sendSVG, folderSVG, newProjectSVG };
+export default Icons;
