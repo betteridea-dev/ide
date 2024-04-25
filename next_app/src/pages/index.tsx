@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -32,9 +33,27 @@ export default function Home() {
         <div className="flex flex-col gap-6 border rounded-xl p-4 px-6">
           <p className="text-lg">Recently opened projects</p>
 
-          <div className="flex flex-row gap-x-4 h-14">
-            <div className="h-full bg-primary border rounded-2xl w-12"></div>
-          </div>
+          <ScrollArea>
+            <div className="flex flex-row text-muted items-center gap-x-4 h-[152px] w-full">
+              <div className="h-full border rounded-2xl aspect-square flex items-center justify-center text-4xl">
+                +
+              </div>
+
+              <div className="h-full border rounded-2xl aspect-[1.5] flex items-center justify-center">
+                Project Name
+              </div>
+              <div className="h-full border rounded-2xl aspect-[1.5] flex items-center justify-center">
+                Project Name
+              </div>
+              <div className="h-full border rounded-2xl aspect-[1.5] flex items-center justify-center">
+                Project Name
+              </div>
+
+              <p className="px-8 underline">See all</p>
+            </div>
+
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -58,7 +77,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="flex flex-col mt-20 gap-8 items-center justify-center">
+      <section className="container p-20 text-center flex flex-col mt-20 gap-8 items-center justify-center">
         <h2 className="text-4xl">Feeling lost?</h2>
 
         <p>
