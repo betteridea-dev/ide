@@ -50,12 +50,12 @@ export class ProjectManager {
     this.saveProjects(this.projects);
   }
 
-  newProject({ name, mode }: { name: string; mode: "AO" | "WARP" }) {
+  newProject({ name, mode, defaultFiletype }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK" }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
     if (Object.keys(this.projects).includes(name)) return this.projects[name];
 
-    const proj = new Project({ name, mode });
+    const proj = new Project({ name, mode, defaultFiletype });
     this.projects[name] = proj;
     this.saveProjects(this.projects);
     return proj;
@@ -96,11 +96,13 @@ export class Project {
   readonly mode: "AO" | "WARP";
   readonly files: { [name: string]: PFile };
   process?: string;
+  defaultFiletype: "NORMAL" | "NOTEBOOK";
 
-  constructor({ name, mode, files }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile } }) {
+  constructor({ name, mode, files, defaultFiletype }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK" }) {
     this.name = name;
     this.mode = mode;
     this.files = files || {};
+    this.defaultFiletype = defaultFiletype || "NORMAL";
   }
 
   _setProcess(process: string) {
@@ -113,9 +115,9 @@ export class Project {
     return new PFile(this.files[name]);
   }
 
-  _newFile({ name, type, initialContent }: { name: string; type: "NORMAL" | "NOTEBOOK"; initialContent?: string }) {
+  _newFile({ name, type, initialContent }: { name: string; type?: "NORMAL" | "NOTEBOOK"; initialContent?: string }) {
     if (Object.keys(this.files).includes(name)) return;
-    const file: PFile = new PFile({ name, type, initialContent });
+    const file: PFile = new PFile({ name, type: type || this.defaultFiletype, initialContent });
     this.files[name] = file;
   }
 
