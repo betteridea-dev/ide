@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export function Combobox({ options, onChange }: { options: string[]; onChange: (val: string) => void }) {
+export function Combobox({
+  options,
+  onChange,
+}: {
+  options: string[];
+  onChange: (val: string) => void;
+}) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 

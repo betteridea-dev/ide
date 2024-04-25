@@ -131,7 +131,6 @@ export default function SideBar({ collapsed, manager, activeProject, setActivePr
                     className="flex gap-1 cursor-pointer"
                     onClick={() => {
                       setActiveProject(active ? "" : pname);
-                      setActiveFile("");
                     }}
                   >
                     <div data-active={active} className="data-[active=true]:rotate-90">
