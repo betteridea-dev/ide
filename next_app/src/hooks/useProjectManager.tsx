@@ -44,6 +44,12 @@ export class ProjectManager {
     return new Project(this.projects[name]);
   }
 
+  setProjectProcess(proj: Project, processId: string) {
+    proj._setProcess(processId);
+    this.projects[proj.name] = proj;
+    this.saveProjects(this.projects);
+  }
+
   newProject({ name, mode }: { name: string; mode: "AO" | "WARP" }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
@@ -52,7 +58,7 @@ export class ProjectManager {
     const proj = new Project({ name, mode });
     this.projects[name] = proj;
     this.saveProjects(this.projects);
-    return this.projects[name];
+    return proj;
   }
 
   deleteProject(name: string) {
@@ -97,7 +103,7 @@ export class Project {
     this.files = files || {};
   }
 
-  setProcess(process: string) {
+  _setProcess(process: string) {
     if (this.mode == "AO") this.process = process;
     else throw new Error("Cannot set process on WARP project");
   }
