@@ -19,9 +19,11 @@ import {
 export function Combobox({
   options,
   onChange,
+  className,
 }: {
   options: string[];
   onChange: (val: string) => void;
+  className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");

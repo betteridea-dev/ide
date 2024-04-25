@@ -2,14 +2,34 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import Icons from "@/assets/icons";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { Combobox } from "@/components/ui/combo-box";
 import { useState, useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
-export default function SideBar({ collapsed, manager, activeProject, setActiveProject }: { collapsed: boolean; manager: ProjectManager; activeProject: string; setActiveProject: Function }) {
+export default function SideBar({
+  collapsed,
+  manager,
+  activeProject,
+  setActiveProject,
+}: {
+  collapsed: boolean;
+  manager: ProjectManager;
+  activeProject: string;
+  setActiveProject: Function;
+}) {
   const [mounted, setMounted] = useState(false);
   const projects = Object.keys(manager.projects);
 
@@ -27,17 +47,57 @@ export default function SideBar({ collapsed, manager, activeProject, setActivePr
 
     return (
       <Dialog>
-        <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
-          <Image data-collapsed={collapsed} src={Icons.newProjectSVG} alt="New Project" width={25} height={25} />
+        <DialogTrigger
+          data-collapsed={collapsed}
+          className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
+        >
+          <Image
+            data-collapsed={collapsed}
+            src={Icons.newProjectSVG}
+            alt="New Project"
+            width={25}
+            height={25}
+          />
+
           {!collapsed && "New Project"}
         </DialogTrigger>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create a project</DialogTitle>
-            <DialogDescription>Add details of your project.</DialogDescription>
-            <Input type="text" placeholder="Project Name" />
-            <Combobox options={processes.map((l) => l.label)} onChange={(value) => console.log(value)} />
+            <DialogDescription>Add details of your project</DialogDescription>
           </DialogHeader>
+
+          <div className="flex flex-col gap-4 mb-2">
+            <Input type="text" placeholder="Project Name" />
+
+            <Combobox
+              options={processes.map((l) => l.label)}
+              onChange={(value) => console.log(value)}
+            />
+
+            <div className="flex flex-col gap-4">
+              <Label>Project Type</Label>
+
+              <RadioGroup defaultValue="regular">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="regular" id="regular" />
+                  <Label htmlFor="option-one">Regular</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="notebook" id="notebook" />
+                  <Label htmlFor="option-two">Notebook</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" className="w-full">
+              Create project
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -50,12 +110,33 @@ export default function SideBar({ collapsed, manager, activeProject, setActivePr
         projects.map((pname, _) => {
           const active = pname === activeProject;
           return (
-            <Button variant="ghost" data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 h-fit rounded-none flex gap-2 p-2 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
-              <Image data-collapsed={collapsed} data-active={active} src={Icons.folderSVG} alt={pname} width={25} height={25} className="data-[active=true]:invert" onClick={() => setActiveProject(active ? "" : pname)} />
+            <Button
+              variant="ghost"
+              data-active={active}
+              data-collapsed={collapsed}
+              className="text-btr-grey-1 h-fit rounded-none flex gap-2 p-2 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white "
+              key={_}
+            >
+              <Image
+                data-collapsed={collapsed}
+                data-active={active}
+                src={Icons.folderSVG}
+                alt={pname}
+                width={25}
+                height={25}
+                className="data-[active=true]:invert"
+                onClick={() => setActiveProject(active ? "" : pname)}
+              />
               {!collapsed && (
                 <div className="flex flex-col w-full">
-                  <div className="flex gap-1" onClick={() => setActiveProject(active ? "" : pname)}>
-                    <div data-active={active} className="data-[active=true]:rotate-90">
+                  <div
+                    className="flex gap-1"
+                    onClick={() => setActiveProject(active ? "" : pname)}
+                  >
+                    <div
+                      data-active={active}
+                      className="data-[active=true]:rotate-90"
+                    >
                       ▶
                     </div>
                     {pname}
