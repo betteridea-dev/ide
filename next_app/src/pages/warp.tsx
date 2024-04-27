@@ -1,3 +1,4 @@
+import Layout from "@/components/layout";
 export default function Warp() {
-  return <div>Warp</div>;
+  return <Layout />;
 }

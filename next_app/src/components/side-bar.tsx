@@ -10,10 +10,10 @@ import { Combobox } from "@/components/ui/combo-box";
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useOpenedFiles } from "@/states";
+import { useGlobalState } from "@/states";
 
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
-  const openedFiles = useOpenedFiles();
+  const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
   const projects = Object.keys(manager.projects);
 
@@ -37,9 +37,9 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
         manager.setProjectProcess(p, processUsed);
       }
       manager.newFile(p, { name: "main.lua", type: defaultFiletype, initialContent: "print('Hello AO!')" });
-      openedFiles.clearFiles();
-      openedFiles.setActiveProject(newProjName);
-      openedFiles.setActiveFile("main.lua");
+      globalState.clearFiles();
+      globalState.setActiveProject(newProjName);
+      globalState.setActiveFile("main.lua");
     }
 
     const processes = [{ label: "+ Create New", value: "NEW_PROCESS" }];
@@ -90,6 +90,11 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
   };
 
   // DIALOG
+  const NewWarpProject = () => {
+    return <>+warp</>;
+  };
+
+  // DIALOG
   const NewProjectFile = ({ project }: { project: string }) => {
     const [newFileName, setNewFileName] = useState("");
 
@@ -97,7 +102,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
       const proj = manager.getProject(project);
       const newFilenameFixed = newFileName.endsWith(".lua") ? newFileName : newFileName + ".lua";
       manager.newFile(proj, { name: newFilenameFixed, type: proj.defaultFiletype, initialContent: "ok" });
-      openedFiles.setActiveFile(newFilenameFixed);
+      globalState.setActiveFile(newFilenameFixed);
     }
 
     return (
@@ -121,10 +126,10 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
 
   return (
     <>
-      <NewAOProject />
+      {globalState.activeMode == "AO" ? <NewAOProject /> : <NewWarpProject />}
       {mounted &&
         projects.map((pname, _) => {
-          const active = pname === openedFiles.activeProject;
+          const active = pname === globalState.activeProject;
           return (
             <div data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 cursor-default h-fit rounded-none flex gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
               <Image
@@ -136,7 +141,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                 height={25}
                 className="data-[active=true]:invert cursor-pointer"
                 onClick={() => {
-                  openedFiles.setActiveProject(active ? "" : pname);
+                  globalState.setActiveProject(active ? "" : pname);
                 }}
               />
               {!collapsed && (
@@ -144,7 +149,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                   <div
                     className="flex gap-1 cursor-pointer"
                     onClick={() => {
-                      openedFiles.setActiveProject(active ? "" : pname);
+                      globalState.setActiveProject(active ? "" : pname);
                     }}
                   >
                     <div data-active={active} className="data-[active=true]:rotate-90">
@@ -159,12 +164,12 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                       {Object.keys(manager.projects[pname].files).map((fname, _) => {
                         return (
                           <Button
-                            data-active={openedFiles.activeFile == fname}
+                            data-active={globalState.activeFile == fname}
                             variant="ghost"
                             className="rounded-none p-1 h-6 justify-start w-full data-[active=true]:bg-btr-grey-2"
                             key={_}
                             onClick={() => {
-                              openedFiles.setActiveFile(fname);
+                              globalState.setActiveFile(fname);
                             }}
                           >
                             {fname}
