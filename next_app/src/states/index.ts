@@ -16,8 +16,8 @@ export const useGlobalState = create<State>((set) => ({
   activeProject: "",
   activeFile: "",
   openedFiles: [],
-  setActiveMode: (mode: "AO" | "WARP") => set((state) => ({ activeMode: mode })),
-  setActiveProject: (projectName: string) => set((state) => ({ activeProject: projectName, openedFiles: ["main.lua"], activeFile: "main.lua" })),
+  setActiveMode: (mode: "AO" | "WARP") => set((state) => ({ activeMode: mode, activeProject: "", openedFiles: [], activeFile: "" })),
+  setActiveProject: (projectName: string) => set((state) => ({ activeProject: projectName, openedFiles: [], activeFile: "" })),
   setActiveFile: (fileName: string) => set((state) => ({ activeFile: fileName, openedFiles: state.openedFiles.includes(fileName) ? state.openedFiles : [...state.openedFiles, fileName] })),
   clearFiles: () => set((state) => ({ openedFiles: [] })),
 }));

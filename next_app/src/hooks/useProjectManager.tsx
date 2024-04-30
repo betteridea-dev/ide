@@ -3,7 +3,8 @@ import { Dispatch, SetStateAction } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 ///// TYPES /////
-type TFileContent = {
+
+export type TFileContent = {
   cellOrder: string[];
   cells: { [cellId: string]: { code: string; output: string } };
 };
@@ -18,6 +19,8 @@ function extensionToLanguage(extension: string) {
   switch (extension) {
     case "js":
       return "javascript";
+    case "json":
+      return "json";
     case "md":
       return "markdown";
     case "lua":
@@ -36,7 +39,7 @@ export class ProjectManager {
   constructor(projects: TProjectStorage, saveProjects: Dispatch<SetStateAction<TProjectStorage>>) {
     this.projects = projects;
     this.saveProjects = saveProjects;
-    console.log(saveProjects);
+    // console.log(saveProjects);
   }
 
   getProject(name: string) {
@@ -82,7 +85,7 @@ export class ProjectManager {
   }
 
   updateFile(project: Project, { file, content }: { file: PFile; content: TFileContent }) {
-    console.log(file);
+    // console.log(file);
     project._updateFile(file.name, content);
     this.projects[project.name] = project;
     this.saveProjects(this.projects);

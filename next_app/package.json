@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
     "@permaweb/aoconnect": "^0.0.52",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -33,6 +34,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^0.2.1",
     "lucide-react": "^0.372.0",
+    "monaco-editor": "^0.48.0",
     "next": "14.2.2",
     "next-themes": "^0.3.0",
     "react": "^18",
@@ -41,12 +43,14 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.0",
+    "uuid": "^9.0.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.8",
     "eslint": "^8",
     "eslint-config-next": "14.2.2",
     "postcss": "^8",

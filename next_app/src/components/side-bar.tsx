@@ -15,7 +15,8 @@ import { useGlobalState } from "@/states";
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
-  const projects = Object.keys(manager.projects);
+
+  const projects = Object.keys(manager.projects).filter((p) => manager.projects[p].mode == globalState.activeMode);
 
   useEffect(() => {
     if (typeof window == "undefined") return;
@@ -91,7 +92,39 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
 
   // DIALOG
   const NewWarpProject = () => {
-    return <>+warp</>;
+    const [newProjName, setNewProjName] = useState("");
+
+    function createProject() {
+      if (!newProjName) return;
+      const p = manager.newProject({ name: newProjName, mode: "WARP", defaultFiletype: "NORMAL" });
+      manager.newFile(p, { name: "contract.js", type: "NORMAL", initialContent: "//code" });
+      manager.newFile(p, { name: "state.json", type: "NORMAL", initialContent: "{}" });
+      globalState.clearFiles();
+      globalState.setActiveProject(newProjName);
+      globalState.setActiveFile("state.json");
+      globalState.setActiveFile("contract.js");
+    }
+
+    return (
+      <>
+        <Dialog>
+          <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
+            <Image data-collapsed={collapsed} src={Icons.newProjectSVG} alt="New Project" width={25} height={25} />
+            {!collapsed && "New Project"}
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create a project</DialogTitle>
+              <DialogDescription>Add details of your project.</DialogDescription>
+            </DialogHeader>
+            <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
+            <Button className="bg-btr-green" onClick={createProject}>
+              Create Project
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
   };
 
   // DIALOG
@@ -100,7 +133,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
 
     function newFile() {
       const proj = manager.getProject(project);
-      const newFilenameFixed = newFileName.endsWith(".lua") ? newFileName : newFileName + ".lua";
+      const newFilenameFixed = newFileName.split(".").length > 1 ? newFileName : newFileName + (globalState.activeMode == "AO" ? ".lua" : ".js");
       manager.newFile(proj, { name: newFilenameFixed, type: proj.defaultFiletype, initialContent: "ok" });
       globalState.setActiveFile(newFilenameFixed);
     }
