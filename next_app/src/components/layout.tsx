@@ -17,11 +17,29 @@ import { v4 } from "uuid";
 import { PFile, Project, ProjectManager } from "@/hooks/useProjectManager";
 
 const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: string; manager: ProjectManager; project: Project }) => {
+  const [mouseHovered, setMouseHovered] = useState(false);
+
   const cell = file.content.cells[cellId];
   return (
-    <div className="min-h-[150px] rounded-md overflow-clip grid grid-rows-2 bg-btr-grey-3">
-      <div className="flex grow h-full justify-center border-b border-btr-grey-2/30 min-h-[69px]">
-        <Button variant="ghost" className="p-5 h-full rounded-none min-w-[60px]">
+    <div className="min-h-[150px] rounded-md relative  grid grid-rows-2 bg-btr-grey-3" onMouseEnter={() => setMouseHovered(true)} onMouseLeave={() => setMouseHovered(false)}>
+      {mouseHovered && (
+        <div className="absolute -top-3.5 right-10 z-10 border border-btr-grey-2 rounded-md p-0.5 px-1 bg-btr-grey-3">
+          <Button
+            variant="ghost"
+            className="p-0 h-6 px-1"
+            onClick={() => {
+              const newContent = { ...file.content };
+              delete newContent.cells[cellId];
+              newContent.cellOrder = newContent.cellOrder.filter((id) => id !== cellId);
+              manager.updateFile(project, { file, content: newContent });
+            }}
+          >
+            delete
+          </Button>
+        </div>
+      )}
+      <div className="flex grow h-full justify-center rounded-t-md border-b border-btr-grey-2/30 min-h-[69px]">
+        <Button variant="ghost" className="p-5 h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]">
           <Image src={Icons.runSVG} alt="Run" width={30} height={30} />
         </Button>
         <Editor
@@ -51,7 +69,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           }}
         />
       </div>
-      <div className="w-full p-2 pl-20 bg-white/10">output</div>
+      <div className="w-full p-2 pl-20 bg-white/10 rounded-b-md">output</div>
     </div>
   );
 };
@@ -133,7 +151,7 @@ export default function Layout() {
               </ResizablePanel>
               <ResizableHandle />
 
-              <ResizablePanel defaultSize={30} minSize={15} id="terminal-panel" className="p-2">
+              <ResizablePanel defaultSize={30} minSize={15} id="terminal-panel" className="">
                 <BottomBar />
               </ResizablePanel>
             </ResizablePanelGroup>
