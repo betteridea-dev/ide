@@ -100,7 +100,7 @@ export default function Layout() {
               <ResizablePanel defaultSize={70} minSize={15} id="editor-panel" className="flex flex-col items-center justify-center">
                 <FileBar />
                 {globalState.activeFile ? (
-                  <div className="h-full w-full overflow-scroll flex flex-col gap-4 p-4">
+                  <div data-notebook={isNotebook} className="h-full w-full overflow-scroll flex flex-col gap-4 data-[notebook=true]:p-4">
                     {isNotebook ? (
                       <>
                         {Object.keys(file.content.cells).map((cellId, index) => (
@@ -111,7 +111,20 @@ export default function Layout() {
                         </Button>
                       </>
                     ) : (
-                      <Editor height="100%" theme="vs-dark" value={file.content.cells[0].code} language={file.language} />
+                      <Editor
+                        height="100%"
+                        onMount={(editor, monaco) => {
+                          monaco.editor.defineTheme("notebook", notebookTheme as editor.IStandaloneThemeData);
+                          monaco.editor.setTheme("notebook");
+                        }}
+                        value={file.content.cells[0].code}
+                        onChange={(value) => {
+                          const newContent = { ...file.content };
+                          newContent.cells[0] = { ...file.content.cells[0], code: value };
+                          manager.updateFile(project, { file, content: newContent });
+                        }}
+                        language={file.language}
+                      />
                     )}
                   </div>
                 ) : (
