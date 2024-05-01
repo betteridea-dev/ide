@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-export default function BottomBar() {
+export default function BottomTabBar() {
   return (
     <Tabs defaultValue="output" className="w-full h-full">
       <TabsList className="flex justify-start bg-transparent">

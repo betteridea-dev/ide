@@ -6,7 +6,7 @@ import TopBar from "@/components/top-bar";
 import FileBar from "@/components/file-bar";
 import SideBar from "@/components/side-bar";
 import { useProjectManager } from "@/hooks";
-import BottomBar from "@/components/bottom-bar";
+import BottomTabBar from "@/components/bottom-tab-bar";
 import { Editor } from "@monaco-editor/react";
 import { useGlobalState } from "@/states";
 import { Button } from "./ui/button";
@@ -17,6 +17,7 @@ import { v4 } from "uuid";
 import { PFile, Project, ProjectManager } from "@/hooks/useProjectManager";
 import { runLua } from "@/lib/ao-vars";
 import { toast } from "./ui/use-toast";
+import BottomStatusbar from "@/components/bottom-statusbar";
 
 const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: string; manager: ProjectManager; project: Project }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
@@ -119,7 +120,7 @@ export default function Layout() {
 
       <TopBar />
 
-      <main className="h-[calc(100vh-64px)]">
+      <main className="h-[calc(100vh-89px)]">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel collapsedSize={5} collapsible defaultSize={20} minSize={10} maxSize={20} id="file-panel" onCollapse={() => setSidebarCollapsed(true)} onExpand={() => setSidebarCollapsed(false)} className="flex flex-col">
             <SideBar collapsed={sidebarCollapsed} manager={manager} />
@@ -166,11 +167,13 @@ export default function Layout() {
               <ResizableHandle />
 
               <ResizablePanel defaultSize={30} minSize={15} id="terminal-panel" className="">
-                <BottomBar />
+                <BottomTabBar />
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
+
+        <BottomStatusbar />
       </main>
     </>
   );

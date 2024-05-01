@@ -5,14 +5,16 @@ import { SwitchCustom } from "@/components/ui/custom/switch";
 import { useRouter } from "next/navigation";
 import { useGlobalState } from "@/states";
 import Link from "next/link";
+import { toast } from "./ui/use-toast";
+import { useState } from "react";
 
 export default function TopBar() {
   const router = useRouter();
   const globalState = useGlobalState();
 
   return (
-    <nav className="py-5 px-6 flex border-b justify-between items-center h-16">
-      <div className="flex gap-0.5 items-center">
+    <nav className="py-5 px-3 flex border-b justify-between items-center h-16">
+      <div className="flex px-3 gap-0.5 items-center">
         <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mr-5" />
 
         <Link href="/">
