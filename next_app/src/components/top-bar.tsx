@@ -4,6 +4,7 @@ import Icons from "@/assets/icons";
 import { SwitchCustom } from "@/components/ui/custom/switch";
 import { useRouter } from "next/navigation";
 import { useGlobalState } from "@/states";
+import Link from "next/link";
 
 export default function TopBar() {
   const router = useRouter();
@@ -14,15 +15,21 @@ export default function TopBar() {
       <div className="flex gap-0.5 items-center">
         <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mr-5" />
 
-        <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
-          Home
-        </Button>
-        <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
-          Docs
-        </Button>
-        <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
-          Learn
-        </Button>
+        <Link href="/">
+          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+            Home
+          </Button>
+        </Link>
+        <Link href="https://docs.betteridea.dev" target="_blank">
+          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+            Docs
+          </Button>
+        </Link>
+        <Link href="https://learn.betteridea.dev" target="_blank">
+          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+            Learn
+          </Button>
+        </Link>
       </div>
 
       <div className="flex gap-1 items-center">

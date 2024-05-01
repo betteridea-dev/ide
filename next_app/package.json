@@ -1,7 +1,8 @@
 {
-  "name": "next_app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "BetterIDEa",
+  "description": "Web based IDE for Arweave and AO",
+  "version": "3.0.0",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",

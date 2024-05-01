@@ -15,13 +15,27 @@ import notebookTheme from "@/monaco-themes/notebook.json";
 import { editor } from "monaco-editor";
 import { v4 } from "uuid";
 import { PFile, Project, ProjectManager } from "@/hooks/useProjectManager";
+import { runLua } from "@/lib/ao-vars";
+import { toast } from "./ui/use-toast";
 
 const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: string; manager: ProjectManager; project: Project }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
-
   const cell = file.content.cells[cellId];
+
+  function runCode() {
+    if (!project.process)
+      return toast({
+        title: "No process for this project :(",
+        description: "Please assign a process id from project settings before trying to run Lua code",
+      });
+    console.log("running");
+    const result = runLua(cell.code, project.process);
+    console.log(result);
+  }
+
   return (
-    <div className="min-h-[150px] rounded-md relative  grid grid-rows-2 bg-btr-grey-3" onMouseEnter={() => setMouseHovered(true)} onMouseLeave={() => setMouseHovered(false)}>
+    <div className="rounded-md relative  flex flex-col bg-btr-grey-3" onMouseEnter={() => setMouseHovered(true)} onMouseLeave={() => setMouseHovered(false)}>
+      {/* buttons that appear on hover */}
       {mouseHovered && (
         <div className="absolute -top-3.5 right-10 z-10 border border-btr-grey-2 rounded-md p-0.5 px-1 bg-btr-grey-3">
           <Button
@@ -38,8 +52,8 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           </Button>
         </div>
       )}
-      <div className="flex grow h-full justify-center rounded-t-md border-b border-btr-grey-2/30 min-h-[69px]">
-        <Button variant="ghost" className="p-5 h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]">
+      <div className="flex h-full justify-center rounded-t-md border-b border-btr-grey-2/30 min-h-[69px]">
+        <Button variant="ghost" className="p-5 h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]" onClick={runCode}>
           <Image src={Icons.runSVG} alt="Run" width={30} height={30} />
         </Button>
         <Editor
@@ -53,7 +67,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
             newContent.cells[cellId] = { ...cell, code: value };
             manager.updateFile(project, { file, content: newContent });
           }}
-          height={(cell.code.split("\n").length > 20 ? 20 : cell.code.split("\n").length) * 20}
+          height={(cell.code.split("\n").length > 10 ? 10 : cell.code.split("\n").length) * 20}
           className="min-h-[68px] pt-1"
           value={cell.code}
           defaultValue={cell.code}

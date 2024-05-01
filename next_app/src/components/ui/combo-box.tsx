@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export function Combobox({
-  options,
-  onChange,
-}: {
-  options: string[];
-  onChange: (val: string) => void;
-}) {
+export function Combobox({ options, onChange }: { options: { label: string; value: string }[]; onChange: (val: string) => void }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -32,17 +26,17 @@ export function Combobox({
           <CommandGroup>
             {options.map((option) => (
               <CommandItem
-                key={option}
-                value={option}
-                onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
+                key={option.value}
+                value={option.value}
+                onSelect={() => {
+                  setValue(option.label === value ? "" : option.label);
                   setOpen(false);
-                  console.log(currentValue);
-                  onChange(currentValue);
+                  console.log(option.value);
+                  onChange(option.label === value ? "" : option.value);
                 }}
               >
-                <Check className={cn("mr-2 h-4 w-4", value === option ? "opacity-100" : "opacity-0")} />
-                {option}
+                <Check className={cn("mr-2 h-4 w-4", value === option.label ? "opacity-100" : "opacity-0")} />
+                {option.label}
               </CommandItem>
             ))}
           </CommandGroup>

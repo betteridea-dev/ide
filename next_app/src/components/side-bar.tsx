@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGlobalState } from "@/states";
+import { spawnProcess } from "@/lib/ao-vars";
+import { toast } from "./ui/use-toast";
 
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
@@ -27,13 +29,25 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
   const NewAOProject = () => {
     const [newProjName, setNewProjName] = useState("");
     const [processUsed, setProcessUsed] = useState("");
+    const [newProcessName, setNewProcessName] = useState("");
     const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NORMAL");
 
-    function createProject() {
-      if (!newProjName) return;
+    async function createProject() {
+      if (!newProjName)
+        return toast({
+          title: "Need a project name 😑",
+          description: "A new project always needs a name",
+        });
+      if (!processUsed)
+        return toast({
+          title: "Process options not set",
+          description: "You must choose wether to create a new process or use an existing one",
+        });
       const p = manager.newProject({ name: newProjName, mode: "AO", defaultFiletype });
       console.log(processUsed);
       if (processUsed == "NEW_PROCESS") {
+        const newProcessId = await spawnProcess(newProcessName);
+        manager.setProjectProcess(p, newProcessId);
       } else {
         manager.setProjectProcess(p, processUsed);
       }
@@ -57,7 +71,8 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
             <DialogDescription>Add details of your project.</DialogDescription>
           </DialogHeader>
           <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
-          <Combobox options={processes.map((l) => l.label)} onChange={(e) => setProcessUsed(e)} />
+          <Combobox options={processes} onChange={(e) => setProcessUsed(e)} />
+          {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
           <RadioGroup defaultValue="NORMAL" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
             <div>
               What type of files do you want to use? <span className="text-sm text-btr-grey-1">(can be changed later)</span>
