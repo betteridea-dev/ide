@@ -9,7 +9,7 @@ export type TFileContent = {
   cells: { [cellId: string]: { code: string; output: string } };
 };
 
-type TLanguages = "javascript" | "markdown" | "lua" | "plaintext";
+type TLanguages = "javascript" | "markdown" | "lua" | "plaintext" | "json";
 
 type TProjectStorage = {
   [name: string]: Project;
