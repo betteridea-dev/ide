@@ -1,5 +1,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
+import Image from "next/image";
+import Icons from "@/assets/icons";
 
 export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
   return (
@@ -15,8 +17,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           Inbox
         </TabsTrigger>
 
-        <Button variant="ghost" className="ml-auto p-1 h-5" onClick={toggle}>
-          {collapsed ? "expand" : "collapse"}
+        <Button variant="link" className="ml-auto p-2 pt-1 h-6" onClick={toggle}>
+          <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80" />
         </Button>
       </TabsList>
 
