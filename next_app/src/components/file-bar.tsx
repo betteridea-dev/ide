@@ -5,7 +5,7 @@ export default function FileBar() {
   const globalState = useGlobalState();
 
   return (
-    <div className="flex gap-0.5 items-start overflow-scroll w-full">
+    <div className="flex gap-0.5 items-start overflow-scroll w-full z-0">
       {globalState.openedFiles.map((file, _) => (
         <Button
           key={_}

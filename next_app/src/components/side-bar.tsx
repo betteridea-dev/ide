@@ -231,6 +231,17 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
             </div>
           );
         })}
+      <Button
+        data-active={globalState.activeFile == "Settings"}
+        variant="ghost"
+        className="rounded-none p-1 text-btr-grey-1 hover:bg-btr-grey-3 justify-start w-full data-[active=true]:bg-btr-grey-2"
+        onClick={() => {
+          globalState.setActiveFile("Settings");
+        }}
+      >
+        <Image src={Icons.settingsSVG} alt="Settings" className="m-1" width={25} height={25} />
+        Settings
+      </Button>
     </>
   );
 }

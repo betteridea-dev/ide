@@ -33,6 +33,6 @@ export async function runLua(code: string, process: string) {
   });
 
   const result = await ao.result({ process, message });
-
+  // console.log(result);
   return result;
 }

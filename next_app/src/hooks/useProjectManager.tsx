@@ -98,14 +98,15 @@ export class Project {
   readonly name: string;
   readonly mode: "AO" | "WARP";
   readonly files: { [name: string]: PFile };
-  process?: string;
+  process: string;
   defaultFiletype: "NORMAL" | "NOTEBOOK";
 
-  constructor({ name, mode, files, defaultFiletype }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK" }) {
+  constructor({ name, mode, files, defaultFiletype, process }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK"; process?: string }) {
     this.name = name;
     this.mode = mode;
     this.files = files || {};
     this.defaultFiletype = defaultFiletype || "NORMAL";
+    this.process = process;
   }
 
   _setProcess(process: string) {

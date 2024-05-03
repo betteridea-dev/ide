@@ -2,6 +2,8 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { useLocalStorage } from "usehooks-ts";
+import { useEffect } from "react";
 
 declare global {
   interface Window {
