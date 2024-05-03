@@ -15,11 +15,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             Terminal
           </TabsTrigger>
         )}
-        {globalState.activeMode == "WARP" && (
-          <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
-            Output
-          </TabsTrigger>
-        )}
+        <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
+          Output
+        </TabsTrigger>
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green">
             Inbox
@@ -33,7 +31,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
 
       <div className="px-3">
         <TabsContent value="terminal">Term</TabsContent>
-        <TabsContent value="output">Lua output</TabsContent>
+        <TabsContent value="output">output</TabsContent>
         <TabsContent value="inbox">Inbox</TabsContent>
       </div>
     </Tabs>
