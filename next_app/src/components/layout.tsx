@@ -34,18 +34,23 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
         title: "No process for this project :(",
         description: "Please assign a process id from project settings before trying to run Lua code",
       });
-    console.log("running");
+    console.log("running", cell.code);
     setRunning(true);
+    const fileContent = { ...file.content };
     const result = await runLua(cell.code, p.process);
     console.log(result);
-    const outputData = result.Output.data;
-    const fileContent = { ...file.content };
-    if (outputData.json != "undefined") {
-      console.log(outputData.json);
-      fileContent.cells[cellId].output = JSON.stringify(outputData.json, null, 2);
+    if (result.Error) {
+      console.log(result.Error);
+      fileContent.cells[cellId].output = result.Error;
     } else {
-      console.log(outputData.output);
-      fileContent.cells[cellId].output = outputData.output;
+      const outputData = result.Output.data;
+      if (outputData.output) {
+        console.log(outputData.output);
+        fileContent.cells[cellId].output = outputData.output;
+      } else if (outputData.json) {
+        console.log(outputData.json);
+        fileContent.cells[cellId].output = JSON.stringify(outputData.json, null, 2);
+      }
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
@@ -102,7 +107,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           }}
         />
       </div>
-      <pre className="w-full max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">{<Ansi>{cell.output.toString()}</Ansi> || ""}</pre>
+      <pre className="w-full max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">{<Ansi>{`${cell.output}`}</Ansi>}</pre>
     </div>
   );
 };
@@ -145,13 +150,15 @@ const EditorArea = ({ isNotebook, file, runCodeNormal, project, addNewCell }: { 
                   newContent.cells[0] = { ...file.content.cells[0], code: value };
                   manager.updateFile(project, { file, content: newContent });
                 }}
-                language={file.language}
+                language={file && file.language}
               />
             </>
           )}
         </div>
       ) : (
-        <div className="text-btr-grey-1">Open a file ^_^</div>
+        <div className="text-btr-grey-1 h-full flex items-center">
+          <div>Open a file ^_^</div>
+        </div>
       )}
     </>
   );

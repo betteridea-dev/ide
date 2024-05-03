@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGlobalState } from "@/states";
 import { spawnProcess } from "@/lib/ao-vars";
 import { toast } from "./ui/use-toast";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
@@ -180,56 +181,91 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
         projects.map((pname, _) => {
           const active = pname === globalState.activeProject;
           return (
-            <div data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 cursor-default h-fit rounded-none flex gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
-              <Image
-                data-collapsed={collapsed}
-                data-active={active}
-                src={Icons.folderSVG}
-                alt={pname}
-                width={25}
-                height={25}
-                className="data-[active=true]:invert cursor-pointer"
-                onClick={() => {
-                  globalState.setActiveProject(active ? "" : pname);
-                }}
-              />
-              {!collapsed && (
-                <div className="flex flex-col w-full">
-                  <div
-                    className="flex gap-1 cursor-pointer"
+            <ContextMenu key={_}>
+              <ContextMenuTrigger>
+                <div data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 cursor-default h-fit rounded-none flex relative gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
+                  <Image
+                    data-collapsed={collapsed}
+                    data-active={active}
+                    src={Icons.folderSVG}
+                    alt={pname}
+                    width={25}
+                    height={25}
+                    className="data-[active=true]:invert cursor-pointer"
                     onClick={() => {
                       globalState.setActiveProject(active ? "" : pname);
                     }}
-                  >
-                    <div data-active={active} className="data-[active=true]:rotate-90">
-                      ▶
-                    </div>
-                    {pname}
-                  </div>
-                  {active && (
-                    <div className="flex flex-col items-start mt-1">
-                      <NewProjectFile project={pname} />
+                  />
+                  {!collapsed && (
+                    <div className="flex flex-col w-full">
+                      <div
+                        className="flex gap-1 cursor-pointer"
+                        onClick={() => {
+                          globalState.setActiveProject(active ? "" : pname);
+                        }}
+                      >
+                        <div data-active={active} className="data-[active=true]:rotate-90">
+                          ▶
+                        </div>
+                        {pname}
+                      </div>
+                      {active && (
+                        <div className="flex flex-col items-start mt-1">
+                          <NewProjectFile project={pname} />
 
-                      {Object.keys(manager.projects[pname].files).map((fname, _) => {
-                        return (
-                          <Button
-                            data-active={globalState.activeFile == fname}
-                            variant="ghost"
-                            className="rounded-none p-1 h-6 justify-start w-full data-[active=true]:bg-btr-grey-2"
-                            key={_}
-                            onClick={() => {
-                              globalState.setActiveFile(fname);
-                            }}
-                          >
-                            {fname}
-                          </Button>
-                        );
-                      })}
+                          {Object.keys(manager.projects[pname].files).map((fname, _) => {
+                            return (
+                              // file context
+                              <ContextMenu key={_}>
+                                <ContextMenuTrigger className="w-full">
+                                  <Button
+                                    data-active={globalState.activeFile == fname}
+                                    variant="ghost"
+                                    className="rounded-none p-1 h-6 justify-start w-full data-[active=true]:bg-btr-grey-2"
+                                    key={_}
+                                    onClick={() => {
+                                      globalState.setActiveFile(fname);
+                                    }}
+                                  >
+                                    {fname}
+                                  </Button>
+                                  <ContextMenuContent>
+                                    {/* <Button
+                                      className="p-1 h-6 w-full"
+                                      variant="ghost"
+
+                                    > */}
+                                    <ContextMenuItem
+                                      onClick={() => {
+                                        manager.deleteFile(manager.getProject(pname), fname);
+                                        globalState.fileDeleted(fname);
+                                      }}
+                                    >
+                                      Delete file
+                                    </ContextMenuItem>
+                                    {/* </Button> */}
+                                  </ContextMenuContent>
+                                </ContextMenuTrigger>
+                              </ContextMenu>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem
+                  onClick={() => {
+                    manager.deleteProject(pname);
+                    globalState.projectDeleted(pname);
+                  }}
+                >
+                  Delete project
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           );
         })}
       <div className="grow" id="spacer"></div>
