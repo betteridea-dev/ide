@@ -26,7 +26,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
   const [running, setRunning] = useState(false);
   const cell = file.content.cells[cellId];
 
-  async function runCode() {
+  async function runCellCode() {
     const p = manager.getProject(project.name);
     console.log(p);
     if (!p.process)
@@ -76,7 +76,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
         </div>
       )}
       <div className="flex h-full relative justify-center rounded-t-md border-b border-btr-grey-2/70 min-h-[69px]">
-        <Button variant="ghost" className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]" onClick={runCode}>
+        <Button variant="ghost" className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]" onClick={runCellCode}>
           <Image src={running ? Icons.loadingSVG : Icons.runSVG} alt="Run" data-running={running} width={30} height={30} className="data-[running=true]:animate-spin" />
         </Button>
         <Editor
@@ -112,16 +112,47 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
   );
 };
 
-const EditorArea = ({ isNotebook, file, runCodeNormal, project, addNewCell }: { isNotebook: boolean; file: PFile; runCodeNormal: () => void; project: Project; addNewCell: () => void }) => {
+const EditorArea = ({ isNotebook, file, project, addNewCell }: { isNotebook: boolean; file: PFile; project: Project; addNewCell: () => void }) => {
   const globalState = useGlobalState();
   const manager = useProjectManager();
+  const [running, setRunning] = useState(false);
+
+  async function runNormalCode() {
+    const p = manager.getProject(project.name);
+    if (!p.process)
+      return toast({
+        title: "No process for this project :(",
+        description: "Please assign a process id from project settings before trying to run Lua code",
+      });
+
+    console.log("running", file.content.cells[0].code);
+    setRunning(true);
+    const fileContent = { ...file.content };
+    const result = await runLua(fileContent.cells[0].code, p.process);
+    console.log(result);
+    if (result.Error) {
+      console.log(result.Error);
+      fileContent.cells[0].output = result.Error;
+    } else {
+      const outputData = result.Output.data;
+      if (outputData.output) {
+        console.log(outputData.output);
+        fileContent.cells[0].output = outputData.output;
+      } else if (outputData.json) {
+        console.log(outputData.json);
+        fileContent.cells[0].output = JSON.stringify(outputData.json, null, 2);
+      }
+    }
+    manager.updateFile(project, { file, content: fileContent });
+    setRunning(false);
+  }
 
   return (
     <>
       {!isNotebook && file && (
         <div className="absolute h-10 overflow-clip flex items-center right-10 top-5 z-10 border border-dashed border-btr-grey-1 rounded-full p-0 bg-btr-grey-3">
-          <Button variant="ghost" className="p-1" onClick={runCodeNormal}>
-            <Image src={Icons.runSVG} width={30} height={30} alt="run button" />
+          <Button variant="ghost" className="p-1" onClick={runNormalCode}>
+            <Image src={running ? Icons.loadingSVG : Icons.runSVG} width={30} height={30} data-running={running} className="data-[running=true]:animate-spin" alt="run button" />
           </Button>
         </div>
       )}
@@ -190,8 +221,6 @@ export default function Layout() {
 
   // console.log(isNotebook);
 
-  function runCode() {}
-
   function addNewCell() {
     const p = manager.getProject(globalState.activeProject);
     const f = p.getFile(globalState.activeFile);
@@ -224,7 +253,7 @@ export default function Layout() {
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={70} minSize={15} id="editor-panel" className="flex relative flex-col items-center justify-center">
                 <FileBar />
-                {globalState.activeFile == "Settings" ? <div className="h-full">settings</div> : <EditorArea isNotebook={isNotebook} file={file} runCodeNormal={runCode} project={project} addNewCell={addNewCell} />}
+                {globalState.activeFile == "Settings" ? <div className="h-full">settings</div> : <EditorArea isNotebook={isNotebook} file={file} project={project} addNewCell={addNewCell} />}
               </ResizablePanel>
               <ResizableHandle />
 

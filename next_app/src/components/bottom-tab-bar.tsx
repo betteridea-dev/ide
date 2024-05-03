@@ -3,12 +3,18 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import Icons from "@/assets/icons";
 import { useGlobalState } from "@/states";
+import { useProjectManager } from "@/hooks";
+import Ansi from "ansi-to-react";
 
 export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
+  const manager = useProjectManager();
   const globalState = useGlobalState();
 
+  const project = globalState.activeProject && manager.getProject(globalState.activeProject);
+  const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
+
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full">
       <TabsList className="flex justify-start bg-transparent">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-btr-green">
@@ -31,7 +37,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
 
       <div className="px-3">
         <TabsContent value="terminal">Term</TabsContent>
-        <TabsContent value="output">output</TabsContent>
+        <TabsContent value="output">
+          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells["0"].output}`}</Ansi>}</> : <></>}</pre>
+        </TabsContent>
         <TabsContent value="inbox">Inbox</TabsContent>
       </div>
     </Tabs>

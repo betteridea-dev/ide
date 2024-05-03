@@ -4,10 +4,16 @@ import { toast } from "@/components/ui/use-toast";
 import { useLocalStorage } from "usehooks-ts";
 import Icons from "@/assets/icons";
 import Image from "next/image";
+import { useProjectManager } from "@/hooks";
+import { useGlobalState } from "@/states";
 
 export default function BottomStatusbar() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true });
+  const manager = useProjectManager();
+  const globalState = useGlobalState();
+
+  const project = globalState.activeProject && manager.getProject(globalState.activeProject);
 
   async function connectWallet() {
     if (!window.arweaveWallet)
@@ -34,13 +40,26 @@ export default function BottomStatusbar() {
   }, [autoconnect]);
 
   return (
-    <div className="h-[25px] bg-btr-grey-2/70 flex items-center overflow-clip gap-0.5 pl-1">
-      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none text-xs data-[connected=false]:text-black data-[connected=false]:bg-btr-green" onClick={connectWallet}>
+    <div className="h-[25px] bg-btr-grey-2/70 flex items-center overflow-clip gap-0.5 px-1 text-xs">
+      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-black data-[connected=false]:bg-btr-green" onClick={connectWallet}>
         {walletAddress ? `Connected: ${walletAddress}` : "Connect"}
       </Button>
       {walletAddress.length > 0 && (
         <Button variant="ghost" className="p-1 rounded-none text-xs " onClick={disconnectWallet}>
           <Image src={Icons.disconnectSVG} alt="disconnect" width={20} height={20} />
+        </Button>
+      )}
+      <div className="grow"></div>
+      {project.process && (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => {
+            navigator.clipboard.writeText(project.process);
+            toast({ title: "Copied to clipboard" });
+          }}
+        >
+          AO Process: {project.process}
         </Button>
       )}
     </div>
