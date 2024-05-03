@@ -253,7 +253,14 @@ export default function Layout() {
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={70} minSize={15} id="editor-panel" className="flex relative flex-col items-center justify-center">
                 <FileBar />
-                {globalState.activeFile == "Settings" ? <div className="h-full">settings</div> : <EditorArea isNotebook={isNotebook} file={file} project={project} addNewCell={addNewCell} />}
+                {globalState.activeFile == "Settings" ? (
+                  <div className="h-full">
+                    <div>Process: {project.process || "NA"}</div>
+                    <div>Default Filetype: {project.defaultFiletype || "NA"}</div>
+                  </div>
+                ) : (
+                  <EditorArea isNotebook={isNotebook} file={file} project={project} addNewCell={addNewCell} />
+                )}
               </ResizablePanel>
               <ResizableHandle />
 
