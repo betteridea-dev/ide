@@ -57,6 +57,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
       globalState.setActiveFile("main.lua");
     }
 
+    // make graphql request and append processes with names to this
     const processes = [{ label: "+ Create New", value: "NEW_PROCESS" }];
 
     return (
