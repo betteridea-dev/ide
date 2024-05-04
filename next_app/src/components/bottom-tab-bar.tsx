@@ -5,21 +5,51 @@ import Icons from "@/assets/icons";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
 import Ansi from "ansi-to-react";
-import { Input } from "./ui/input";
+import { tsToDate } from "@/lib/utils";
 import { runLua } from "@/lib/ao-vars";
 import { toast } from "./ui/use-toast";
 import { useState, useRef } from "react";
 
+interface TInboxMessage {
+  Data: string;
+  "Block-Height": number;
+  From: string;
+  Id: string;
+  Nonce: number;
+  Owner: string;
+  Target: string;
+  Timestamp: number;
+}
+
 export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
-  const [commandOutputs, setCommandOutputs] = useState([]);
+  const [commandOutputs, setCommandOutputs] = useState<TInboxMessage[]>([]);
   const [running, setRunning] = useState(false);
   const [prompt, setPrompt] = useState("aos>");
+  const [loadingInbox, setLoadingInbox] = useState(false);
+  const [inbox, setInbox] = useState([]);
   const terminalInputRef = useRef<HTMLDivElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
+
+  async function getInbox() {
+    if (!process) {
+      return toast({ title: "Select a project to view Inbox" });
+    }
+    const pid = project.process;
+    if (!pid) {
+      return toast({
+        title: "No process for this project :(",
+        description: "Please assign a process id from project settings before trying to run Lua code",
+      });
+    }
+    setLoadingInbox(true);
+    const result = await runLua("require('json').encode(Inbox)", pid);
+    setInbox(JSON.parse(result.Output.data.output).reverse());
+    setLoadingInbox(false);
+  }
 
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
@@ -33,8 +63,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           Output
         </TabsTrigger>
         {globalState.activeMode == "AO" && (
-          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green">
-            Inbox
+          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green" onClick={getInbox}>
+            Inbox {loadingInbox && <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" />}
           </TabsTrigger>
         )}
 
@@ -43,7 +73,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         </Button>
       </TabsList>
 
-      <div className="px-3 ">
+      <div className="px-1">
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center">
             <div className="">{prompt}</div>&nbsp;
@@ -125,7 +155,15 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         <TabsContent value="output">
           <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells["0"].output}`}</Ansi>}</> : <></>}</pre>
         </TabsContent>
-        <TabsContent value="inbox">Inbox</TabsContent>
+        <TabsContent value="inbox" className="flex flex-col gap-1">
+          {inbox.map((msg, _) => (
+            <div key={_} className="text-sm p-2 font-btr-code text-white/50 border border-btr-grey-2/70">
+              <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
+              <br />
+              <span className="text-white/70">{msg.From}</span>: <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? msg.Data : "Message Without Data Field"}</span>
+            </div>
+          ))}
+        </TabsContent>
       </div>
     </Tabs>
   );
