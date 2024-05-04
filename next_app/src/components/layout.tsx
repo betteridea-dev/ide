@@ -264,7 +264,7 @@ export default function Layout() {
               </ResizablePanel>
               <ResizableHandle />
 
-              <ResizablePanel ref={bottombarRef} onCollapse={() => setBottombarCollapsed(true)} onExpand={() => setBottombarCollapsed(false)} collapsible collapsedSize={5} defaultSize={20} minSize={10} id="terminal-panel" className="">
+              <ResizablePanel ref={bottombarRef} onCollapse={() => setBottombarCollapsed(true)} onExpand={() => setBottombarCollapsed(false)} collapsible collapsedSize={5} defaultSize={20} minSize={10} id="terminal-panel" className="relative flex">
                 <BottomTabBar collapsed={bottombarCollapsed} toggle={toggleBottombar} />
               </ResizablePanel>
             </ResizablePanelGroup>
