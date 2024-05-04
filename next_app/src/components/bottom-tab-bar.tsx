@@ -46,18 +46,23 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       <div className="px-3 ">
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center">
-            <div>{prompt}</div>&nbsp;
+            <div className="">{prompt}</div>&nbsp;
             <div
               contentEditable={!running}
               // placeholder="Enter LUA command here..."
               ref={terminalInputRef}
               data-running={running}
-              className="p-0.5 h-6 overflow-x-scroll pr-0 data-[running=false]:border-r-8 border-white focus-visible:ring-transparent outline-none focus:animate-pulse"
+              className="p-0.5 pr-0 overflow-x-scroll data-[running=false]:border-r-8  border-white focus-visible:ring-transparent outline-none blink-with-caret"
               onKeyDown={async (e) => {
                 if (e.key === "Enter") {
+                  e.preventDefault();
                   // const code = e.target.value
                   const code = terminalInputRef.current.innerText;
                   console.log(code);
+                  if (!project)
+                    return toast({
+                      title: "Select a project to run code in",
+                    });
                   if (!project.process) {
                     return toast({
                       title: "No process for this project :(",

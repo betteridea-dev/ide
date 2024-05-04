@@ -83,6 +83,8 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           onMount={(editor, monaco) => {
             monaco.editor.defineTheme("notebook", notebookTheme as editor.IStandaloneThemeData);
             monaco.editor.setTheme("notebook");
+            // set font family
+            editor.updateOptions({ fontFamily: "DM mono" });
           }}
           onChange={(value) => {
             // console.log(value);
@@ -92,11 +94,12 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           }}
           height={(cell.code.split("\n").length > 10 ? 10 : cell.code.split("\n").length) * 20}
           width="94%"
-          className="min-h-[68px] pt-1"
+          className="min-h-[68px] pt-1 font-btr-code"
           value={cell.code}
           defaultValue={cell.code}
           language={file.language}
           options={{
+            fontSize: 14,
             minimap: { enabled: false },
             // lineNumbers: "off",
             lineHeight: 20,
@@ -107,7 +110,7 @@ const CodeCell = ({ file, cellId, manager, project }: { file: PFile; cellId: str
           }}
         />
       </div>
-      <pre className="w-full max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">{<Ansi>{`${cell.output}`}</Ansi>}</pre>
+      <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">{<Ansi useClasses className="font-btr-code">{`${cell.output}`}</Ansi>}</pre>
     </div>
   );
 };
@@ -170,6 +173,7 @@ const EditorArea = ({ isNotebook, file, project, addNewCell }: { isNotebook: boo
           ) : (
             <>
               <Editor
+                className="font-btr-code"
                 height="100%"
                 onMount={(editor, monaco) => {
                   monaco.editor.defineTheme("notebook", notebookTheme as editor.IStandaloneThemeData);

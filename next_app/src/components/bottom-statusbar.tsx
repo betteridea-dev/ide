@@ -41,7 +41,7 @@ export default function BottomStatusbar() {
 
   return (
     <div className="h-[25px] bg-btr-grey-2/70 flex items-center overflow-clip gap-0.5 px-1 text-xs">
-      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-black data-[connected=false]:bg-btr-green" onClick={connectWallet}>
+      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-black data-[connected=false]:bg-btr-green text-xs" onClick={connectWallet}>
         {walletAddress ? `Connected: ${walletAddress}` : "Connect"}
       </Button>
       {walletAddress.length > 0 && (
@@ -53,7 +53,7 @@ export default function BottomStatusbar() {
       {project.process && (
         <Button
           variant="ghost"
-          className="p-1"
+          className="p-1 text-xs"
           onClick={() => {
             navigator.clipboard.writeText(project.process);
             toast({ title: "Copied to clipboard" });
