@@ -48,13 +48,13 @@ jobs:
       #       echo "Unable to determine package manager"
       #       exit 1
       #     fi
-      - name: Setup Node and install pnpm
+      - name: Setup Node
         uses: actions/setup-node@v4
-        run: npm install -g pnpm
         with:
           node-version: "20"
           # cache: ${{ steps.detect-package-manager.outputs.manager }}
-          cache: pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
