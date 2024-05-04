@@ -52,9 +52,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
               // placeholder="Enter LUA command here..."
               ref={terminalInputRef}
               data-running={running}
-              className="p-0 h-6 bg-btr-grey-3 px-0.5 pr-0 data-[running=false]:border-r-8 border-white focus-visible:ring-transparent outline-none focus:animate-pulse"
+              className="p-0.5 h-6 overflow-x-scroll pr-0 data-[running=false]:border-r-8 border-white focus-visible:ring-transparent outline-none focus:animate-pulse"
               onKeyDown={async (e) => {
-                console.log(e.key);
                 if (e.key === "Enter") {
                   // const code = e.target.value
                   const code = terminalInputRef.current.innerText;
@@ -74,12 +73,13 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                       setCommandOutputs([result.Error, ...commandOutputs]);
                     }
                     if (result.Output) {
+                      console.log(result.Output);
                       setPrompt(result.Output.data.prompt);
                       if (result.Output.data.json != "undefined") {
-                        console.log(result.Output.data.json);
+                        // console.log(result.Output.data.json);
                         setCommandOutputs([JSON.stringify(result.Output.data.json, null, 2), ...commandOutputs]);
                       } else {
-                        console.log(result.Output.data.output);
+                        // console.log(result.Output.data.output);
                         setCommandOutputs([result.Output.data.output, ...commandOutputs]);
                       }
                     }
