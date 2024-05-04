@@ -5,10 +5,11 @@ import Icons from "@/assets/icons";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
 import Ansi from "ansi-to-react";
-import { tsToDate } from "@/lib/utils";
-import { runLua } from "@/lib/ao-vars";
+import { stripAnsiCodes, tsToDate } from "@/lib/utils";
+import { getResults, runLua } from "@/lib/ao-vars";
 import { toast } from "./ui/use-toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { toast as sonnerToast } from "sonner";
 
 interface TInboxMessage {
   Data: string;
@@ -22,17 +23,50 @@ interface TInboxMessage {
 }
 
 export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
-  const [commandOutputs, setCommandOutputs] = useState<TInboxMessage[]>([]);
+  const [commandOutputs, setCommandOutputs] = useState([]);
   const [running, setRunning] = useState(false);
   const [prompt, setPrompt] = useState("aos>");
   const [loadingInbox, setLoadingInbox] = useState(false);
-  const [inbox, setInbox] = useState([]);
+  const [inbox, setInbox] = useState<TInboxMessage[]>([]);
   const terminalInputRef = useRef<HTMLDivElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
+
+  useEffect(() => {
+    async function fetchNewInbox() {
+      if (globalState.activeMode == "WARP") return;
+      if (!project || !project.process) return;
+      // console.log("ran");
+      const cursor = sessionStorage.getItem("cursor") || "";
+      const r = await getResults(project.process, cursor);
+      if (r.cursor) sessionStorage.setItem("cursor", r.cursor);
+      let fetchFlag = false;
+      if (r.results.length > 0) {
+        const messages = r.results;
+        messages.forEach((msg: any) => {
+          const isPrint = msg.Output.print;
+          if (isPrint) {
+            const data = msg.Output.data;
+            console.log(data);
+            fetchFlag = true;
+            // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
+            sonnerToast.custom((id) => <div className="bg-btr-green text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
+          }
+        });
+        console.log(r.results);
+        fetchFlag && getInbox();
+      }
+    }
+
+    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 2500).toString());
+
+    return () => {
+      clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
+    };
+  }, [globalState.activeMode, project, project.process]);
 
   async function getInbox() {
     if (!process) {
@@ -64,7 +98,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         </TabsTrigger>
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green" onClick={getInbox}>
-            Inbox {loadingInbox && <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" />}
+            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
           </TabsTrigger>
         )}
 
@@ -155,7 +189,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         <TabsContent value="output">
           <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells["0"].output}`}</Ansi>}</> : <></>}</pre>
         </TabsContent>
-        <TabsContent value="inbox" className="flex flex-col gap-1">
+        <TabsContent value="inbox" className="flex flex-col gap-1 overflow-y-scroll max-h-[68vh]">
           {inbox.map((msg, _) => (
             <div key={_} className="text-sm p-2 font-btr-code text-white/50 border border-btr-grey-2/70">
               <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>

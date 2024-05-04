@@ -186,6 +186,12 @@ const EditorArea = ({ isNotebook, file, project, addNewCell }: { isNotebook: boo
                   manager.updateFile(project, { file, content: newContent });
                 }}
                 language={file && file.language}
+                options={{
+                  fontSize: 14,
+                  lineHeight: 20,
+                  lineNumbersMinChars: 3,
+                  scrollBeyondLastLine: false,
+                }}
               />
             </>
           )}

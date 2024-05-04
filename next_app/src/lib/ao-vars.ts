@@ -36,3 +36,22 @@ export async function runLua(code: string, process: string) {
   // console.log(result);
   return result;
 }
+
+export async function getResults(process: string, cursor = "") {
+  const ao = connect();
+
+  const r = await ao.results({
+    process,
+    from: cursor,
+    sort: "ASC",
+    limit: 50,
+  });
+
+  if (r.edges.length > 0) {
+    const newCursor = r.edges[r.edges.length - 1].cursor;
+    const results = r.edges.map((e) => e.node);
+    return { cursor: newCursor, results };
+  } else {
+    return { cursor, results: [] };
+  }
+}
