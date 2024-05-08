@@ -36,6 +36,7 @@
   }
 
   .dark {
+    /* Done */
     --background: 0 0% 2%;
     --foreground: 0 0% 98%;
 
@@ -45,6 +46,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
+    /* Done */
     --primary: 101 71% 67%;
     --primary-foreground: 0 0% 0%;
 

@@ -15,20 +15,37 @@ export default function TopBar() {
   return (
     <nav className="py-5 px-3 flex border-b justify-between items-center h-16">
       <div className="flex px-3 gap-0.5 items-center">
-        <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mr-5" />
+        <Link href="/">
+          <Image
+            src="/icon.svg"
+            alt="BetterIDEa"
+            width={15}
+            height={15}
+            className="mr-5"
+          />
+        </Link>
 
         <Link href="/">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button
+            variant="link"
+            className="text-btr-grey-1 text-md hover:text-white"
+          >
             Home
           </Button>
         </Link>
         <Link href="https://docs.betteridea.dev" target="_blank">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button
+            variant="link"
+            className="text-btr-grey-1 text-md hover:text-white"
+          >
             Docs
           </Button>
         </Link>
         <Link href="https://learn.betteridea.dev" target="_blank">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button
+            variant="link"
+            className="text-btr-grey-1 text-md hover:text-white"
+          >
             Learn
           </Button>
         </Link>
@@ -40,7 +57,12 @@ export default function TopBar() {
         </Button>
 
         <Button variant="link" className="p-2 h-7 hover:invert">
-          <Image src={Icons.downloadSVG} alt="Download" width={15} height={15} />
+          <Image
+            src={Icons.downloadSVG}
+            alt="Download"
+            width={15}
+            height={15}
+          />
         </Button>
 
         <Button variant="link" className="p-2 h-7 hover:invert">
@@ -50,7 +72,9 @@ export default function TopBar() {
         <SwitchCustom
           className="ml-5"
           onCheckedChange={(checked) => {
-            globalState.activeMode == "AO" ? globalState.setActiveMode("WARP") : globalState.setActiveMode("AO");
+            globalState.activeMode == "AO"
+              ? globalState.setActiveMode("WARP")
+              : globalState.setActiveMode("AO");
             checked ? router.replace(`/warp`) : router.replace(`/ao`);
           }}
           checked={globalState.activeMode == "WARP"}
