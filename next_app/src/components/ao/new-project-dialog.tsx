@@ -121,7 +121,12 @@ export function NewAOProjectDialog({
         data-collapsed={collapsed}
         className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
       >
-        <Icons.add data-collapsed={collapsed} height={25} width={25} />
+        <Icons.sqPlus
+          data-collapsed={collapsed}
+          height={25}
+          width={25}
+          className="fill-btr-grey-1 text-black"
+        />
 
         {!collapsed && "New Project"}
       </DialogTrigger>

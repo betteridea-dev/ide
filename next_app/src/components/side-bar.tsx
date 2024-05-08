@@ -57,7 +57,7 @@ export default function SideBar({
                 >
                   <Icons.folder
                     data-collapsed={collapsed}
-                    className="data-[active=true]:invert cursor-pointer"
+                    className="fill-btr-grey-1 data-[active=true]:invert data-[active=true]:text-white cursor-pointer"
                     data-active={active}
                     onClick={() => {
                       globalState.setActiveProject(active ? "" : pname);
@@ -74,7 +74,7 @@ export default function SideBar({
                       >
                         <Icons.play
                           data-active={active}
-                          className="data-[active=true]:rotate-90"
+                          className="fill-btr-grey-1 mr-1 data-[active=true]:rotate-90 data-[active=true]:fill-white"
                           height={12}
                           width={12}
                         />

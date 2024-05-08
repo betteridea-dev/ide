@@ -34,6 +34,7 @@ import {
   RefreshCwIcon,
   Folder,
   Play,
+  SquarePlus,
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
@@ -73,4 +74,5 @@ export const Icons = {
   refresh: RefreshCwIcon,
   folder: Folder,
   play: Play,
+  sqPlus: SquarePlus,
 };

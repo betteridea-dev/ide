@@ -42,7 +42,7 @@ export function NewFileDialog({
       <DialogTrigger>
         <Button
           variant="ghost"
-          className="rounded-none p-1 h-6 justify-start w-full"
+          className="rounded-sm py-1 px-2 h-6 justify-start w-full"
         >
           + new file
         </Button>
