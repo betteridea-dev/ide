@@ -56,7 +56,7 @@ export class ProjectManager {
   newProject({ name, mode, defaultFiletype }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK" }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
-    if (Object.keys(this.projects).includes(name)) return this.projects[name];
+    if (Object.keys(this.projects).includes(name)) return this.getProject(name);
 
     const proj = new Project({ name, mode, defaultFiletype });
     this.projects[name] = proj;
