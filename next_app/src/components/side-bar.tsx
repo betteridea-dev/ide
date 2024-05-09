@@ -5,29 +5,16 @@ import { Icons } from "@/components/icons";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useState, useEffect } from "react";
 import { useGlobalState } from "@/states";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { NewAOProjectDialog } from "./ao/new-project-dialog";
-import { NewWarpProjectDialog } from "./ao/new-wrap-project-dialog";
-import { NewFileDialog } from "./ao/new-file-dialog";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import { NewAOProjectDialog } from "@/components/ao/new-ao-project-dialog";
+import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog";
+import { NewFileDialog } from "@/components/new-file-dialog";
 
-export default function SideBar({
-  collapsed,
-  manager,
-}: {
-  collapsed: boolean;
-  manager: ProjectManager;
-}) {
+export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
 
-  const projects = Object.keys(manager.projects).filter(
-    (p) => manager.projects[p].mode == globalState.activeMode
-  );
+  const projects = Object.keys(manager.projects).filter((p) => manager.projects[p].mode == globalState.activeMode);
 
   useEffect(() => {
     if (typeof window == "undefined") return;
@@ -36,11 +23,7 @@ export default function SideBar({
 
   return (
     <>
-      {globalState.activeMode == "AO" ? (
-        <NewAOProjectDialog collapsed={collapsed} manager={manager} />
-      ) : (
-        <NewWarpProjectDialog collapsed={collapsed} manager={manager} />
-      )}
+      {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
 
       {mounted &&
         projects.map((pname, _) => {
@@ -49,12 +32,7 @@ export default function SideBar({
           return (
             <ContextMenu key={_}>
               <ContextMenuTrigger>
-                <div
-                  data-active={active}
-                  data-collapsed={collapsed}
-                  className="text-btr-grey-1 cursor-default h-fit rounded-none flex relative gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white "
-                  key={_}
-                >
+                <div data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 cursor-default h-fit rounded-none flex relative gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
                   <Icons.folder
                     data-collapsed={collapsed}
                     className="fill-btr-grey-1 data-[active=true]:invert data-[active=true]:text-white cursor-pointer"
@@ -72,12 +50,7 @@ export default function SideBar({
                           globalState.setActiveProject(active ? "" : pname);
                         }}
                       >
-                        <Icons.play
-                          data-active={active}
-                          className="fill-btr-grey-1 mr-1 data-[active=true]:rotate-90 data-[active=true]:fill-white"
-                          height={12}
-                          width={12}
-                        />
+                        <Icons.play data-active={active} className="fill-btr-grey-1 mr-1 data-[active=true]:rotate-90 data-[active=true]:fill-white" height={12} width={12} />
 
                         {pname}
                       </div>
@@ -86,43 +59,36 @@ export default function SideBar({
                         <div className="flex flex-col items-start mt-1">
                           <NewFileDialog manager={manager} project={pname} />
 
-                          {Object.keys(manager.projects[pname].files).map(
-                            (fname, _) => {
-                              return (
-                                <ContextMenu key={_}>
-                                  <ContextMenuTrigger className="w-full">
-                                    <Button
-                                      data-active={
-                                        globalState.activeFile == fname
-                                      }
-                                      variant="ghost"
-                                      className="rounded-none p-1 h-6 justify-start w-full data-[active=true]:bg-btr-grey-2"
-                                      key={_}
+                          {Object.keys(manager.projects[pname].files).map((fname, _) => {
+                            return (
+                              <ContextMenu key={_}>
+                                <ContextMenuTrigger className="w-full">
+                                  <Button
+                                    data-active={globalState.activeFile == fname}
+                                    variant="ghost"
+                                    className="rounded-none p-1 h-6 justify-start w-full data-[active=true]:bg-btr-grey-2"
+                                    key={_}
+                                    onClick={() => {
+                                      globalState.setActiveFile(fname);
+                                    }}
+                                  >
+                                    {fname}
+                                  </Button>
+
+                                  <ContextMenuContent>
+                                    <ContextMenuItem
                                       onClick={() => {
-                                        globalState.setActiveFile(fname);
+                                        manager.deleteFile(manager.getProject(pname), fname);
+                                        globalState.fileDeleted(fname);
                                       }}
                                     >
-                                      {fname}
-                                    </Button>
-
-                                    <ContextMenuContent>
-                                      <ContextMenuItem
-                                        onClick={() => {
-                                          manager.deleteFile(
-                                            manager.getProject(pname),
-                                            fname
-                                          );
-                                          globalState.fileDeleted(fname);
-                                        }}
-                                      >
-                                        Delete file
-                                      </ContextMenuItem>
-                                    </ContextMenuContent>
-                                  </ContextMenuTrigger>
-                                </ContextMenu>
-                              );
-                            }
-                          )}
+                                      Delete file
+                                    </ContextMenuItem>
+                                  </ContextMenuContent>
+                                </ContextMenuTrigger>
+                              </ContextMenu>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

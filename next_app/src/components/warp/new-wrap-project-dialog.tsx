@@ -2,26 +2,13 @@ import { useState } from "react";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useGlobalState } from "@/states";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 
-export function NewWarpProjectDialog({
-  manager,
-  collapsed,
-}: {
-  manager: ProjectManager;
-  collapsed: boolean;
-}) {
+export function NewWarpProjectDialog({ manager, collapsed }: { manager: ProjectManager; collapsed: boolean }) {
   const globalState = useGlobalState();
-
+  const [popupOpen, setPopupOpen] = useState(false);
   const [newProjName, setNewProjName] = useState("");
 
   function createProject() {
@@ -45,21 +32,14 @@ export function NewWarpProjectDialog({
     globalState.setActiveProject(newProjName);
     globalState.setActiveFile("state.json");
     globalState.setActiveFile("contract.js");
+    setPopupOpen(false);
   }
 
   return (
     <>
-      <Dialog>
-        <DialogTrigger
-          data-collapsed={collapsed}
-          className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
-        >
-          <Icons.sqPlus
-            data-collapsed={collapsed}
-            height={25}
-            width={25}
-            color="transparent"
-          />
+      <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
+        <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
+          <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} color="transparent" />
 
           {!collapsed && "Create New Project"}
         </DialogTrigger>
@@ -68,11 +48,7 @@ export function NewWarpProjectDialog({
             <DialogTitle>Create a project</DialogTitle>
             <DialogDescription>Add details of your project.</DialogDescription>
           </DialogHeader>
-          <Input
-            type="text"
-            placeholder="Project Name"
-            onChange={(e) => setNewProjName(e.target.value)}
-          />
+          <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
           <Button className="bg-btr-green" onClick={createProject}>
             Create Project
           </Button>
