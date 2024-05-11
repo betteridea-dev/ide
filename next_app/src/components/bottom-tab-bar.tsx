@@ -57,7 +57,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           }
         });
         console.log(r.results);
-        fetchFlag && getInbox();
+        // fetchFlag && getInbox();
       }
     }
 
