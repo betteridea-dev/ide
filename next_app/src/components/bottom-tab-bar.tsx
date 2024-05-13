@@ -86,6 +86,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
     setLoadingInbox(false);
   }
 
+  function showFullMessage(_){}
+
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
       <TabsList className="flex justify-start p-0 bg-transparent">
