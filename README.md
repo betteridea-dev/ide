@@ -25,14 +25,14 @@ Try it [here](https://github.com/betteridea-dev/ide/)
 
 ## Tech Stack
 
-- Vite, React, Typescript, TailwindCSS
+- NextJS, Typescript, TailwindCSS, Zustand
 - Monaco for React
 - Arweavekit
 - ArConnect
 - Arlocal
 - AOConnect
 
-## Run it yourseld
+## Run it yourself
 
 ### Prerequisites
 
@@ -48,7 +48,7 @@ pnpm install
 pnpm run dev
 ```
 
-Open [http://localhost:5173/](http://localhost:5173/) as simple as that!
+Open [http://localhost:3000/](http://localhost:3000/) as simple as that!
 
 ## Contributing
 
