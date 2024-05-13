@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export function Combobox({ options, onChange, onOpen }: { options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void }) {
+export function Combobox({ placeholder, options, onChange, onOpen }: { placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -20,14 +20,14 @@ export function Combobox({ options, onChange, onOpen }: { options: { label: stri
     >
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open} className="w-[460px] mx-auto overflow-clip truncate justify-between">
-          {value ? value : "Select process..."}
+          {value ? value : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent className="w-full  p-0">
         <Command className="w-full">
-          <CommandInput placeholder="Search process..." />
+          <CommandInput placeholder={placeholder} />
           <CommandEmpty>No process found.</CommandEmpty>
           <CommandGroup>
             {options.map((option) => (

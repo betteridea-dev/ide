@@ -12,6 +12,12 @@ import { Combobox } from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 
+import { source as aoBot } from "@/templates/ao/ao-bot"
+
+
+const templates = [{ label: "AO Bot (The Grid)", value: "THE_GRID_BOT" }]
+
+
 export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectManager; collapsed: boolean }) {
   const globalState = useGlobalState();
   const [popupOpen, setPopupOpen] = useState(false);
@@ -19,6 +25,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [processUsed, setProcessUsed] = useState("");
   const [newProcessName, setNewProcessName] = useState("");
   const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NORMAL");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   async function createProject() {
     if (!newProjName)
@@ -43,10 +50,18 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     } else {
       manager.setProjectProcess(p, processUsed);
     }
+    var initialContent = "print('Hello AO!')";
+    switch (selectedTemplate) {
+      case "THE_GRID_BOT":
+        initialContent = aoBot
+        break;
+      default:
+        initialContent = "print('Hello AO!')"
+    }
     manager.newFile(p, {
       name: "main.lua",
       type: defaultFiletype,
-      initialContent: "print('Hello AO!')",
+      initialContent,
     });
     globalState.clearFiles();
     globalState.setActiveProject(newProjName);
@@ -107,9 +122,11 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-        <Combobox options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
+        <Combobox placeholder="Select Process" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
 
         {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
+
+        <Combobox placeholder="Select Template" options={templates} onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
 
         <RadioGroup defaultValue="NORMAL" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
           <div>
