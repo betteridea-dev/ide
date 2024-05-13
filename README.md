@@ -32,7 +32,7 @@ Try it [here](https://github.com/betteridea-dev/ide/)
 - Arlocal
 - AOConnect
 
-## Run it yourseld
+## Run it yourself
 
 ### Prerequisites
 
