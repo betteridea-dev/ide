@@ -57,12 +57,13 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   // make graphql request and append processes with names to this
   const [processes, setProcesses] = useState([{ label: "+ Create New", value: "NEW_PROCESS" }]);
 
-  useEffect(() => {
+  async function fetchProcesses() {
     const client = new GraphQLClient("https://arweave.net/graphql");
+    const address = await window.arweaveWallet.getActiveAddress();
 
     const query = gql`
       query {
-        transactions(owners: "jwJSkVToBnxSeL6nJuiSZ3MiHR49PnG-qJ5C94VpYG0", tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
+        transactions(owners: "${address}", tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
           edges {
             node {
               id
@@ -76,19 +77,17 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
       }
     `;
 
-    async function fetchProcesses() {
-      const address = await window.arweaveWallet.getActiveAddress();
+    const res: any = await client.request(query);
 
-      const res: any = await client.request(query, { address });
+    const ids = res.transactions.edges.map((edge: any) => ({
+      label: `${edge.node.tags[2].value} (${edge.node.id})`,
+      value: edge.node.id,
+    }));
 
-      const ids = res.transactions.edges.map((edge: any) => ({
-        label: `${edge.node.tags[2].value} (${edge.node.id})`,
-        value: edge.node.id,
-      }));
+    setProcesses([{ label: "+ Create New", value: "NEW_PROCESS" }, ...ids]);
+  }
 
-      setProcesses([{ label: "+ Create New", value: "NEW_PROCESS" }, ...ids]);
-    }
-
+  useEffect(() => {
     fetchProcesses();
   }, []);
 
@@ -108,7 +107,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-        <Combobox options={processes} onChange={(e) => setProcessUsed(e)} />
+        <Combobox options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
 
         {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
 

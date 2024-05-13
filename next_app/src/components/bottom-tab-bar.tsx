@@ -20,6 +20,7 @@ interface TInboxMessage {
   Owner: string;
   Target: string;
   Timestamp: number;
+  Action: string;
 }
 
 export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
@@ -28,7 +29,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   const [prompt, setPrompt] = useState("aos>");
   const [loadingInbox, setLoadingInbox] = useState(false);
   const [inbox, setInbox] = useState<TInboxMessage[]>([]);
-  const terminalInputRef = useRef<HTMLDivElement>();
+  const terminalInputRef = useRef<HTMLInputElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
 
@@ -87,7 +88,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
 
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
-      <TabsList className="flex justify-start bg-transparent">
+      <TabsList className="flex justify-start p-0 bg-transparent">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-btr-green">
             Terminal
@@ -110,18 +111,20 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       <div className="px-1">
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center">
-            <div className="">{prompt}</div>&nbsp;
-            <div
-              contentEditable={!running}
-              // placeholder="Enter LUA command here..."
+            <div className="block">{prompt}</div>&nbsp;
+            <input
+              // contentEditable={!running}
+              placeholder="Enter LUA command here..."
               ref={terminalInputRef}
               data-running={running}
-              className="p-0.5 pr-0 overflow-x-scroll data-[running=false]:border-r-8  border-white focus-visible:ring-transparent outline-none blink-with-caret"
+              disabled={running}
+              className="p-0.5 pr-0 grow block overflow-x-scroll  border-white focus-visible:ring-transparent disabled:text-btr-grey-1 focus:text-btr-green outline-none "
               onKeyDown={async (e) => {
+                // console.log(e);
                 if (e.key === "Enter") {
                   e.preventDefault();
                   // const code = e.target.value
-                  const code = terminalInputRef.current.innerText;
+                  const code = terminalInputRef.current.value;
                   console.log(code);
                   if (!project)
                     return toast({
@@ -152,7 +155,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                         setCommandOutputs([result.Output.data.output, ...commandOutputs]);
                       }
                     }
-                    terminalInputRef.current.textContent = "";
+                    terminalInputRef.current.value = "";
                     setRunning(false);
                     setTimeout(() => {
                       terminalInputRef.current.focus();
@@ -172,16 +175,18 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                 // }
               }}
             />
-            {running && (
-              <div className="">
-                <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin" />
-              </div>
-            )}
           </div>
+          {running && (
+            <div className="">
+              &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block" />
+            </div>
+          )}
           {
             <div className="overflow-scroll">
               {commandOutputs.map((output, index) => (
-                <div key={index}>&gt; {`${output}`}</div>
+                <div key={index}>
+                  &gt; <Ansi>{`${output}`}</Ansi>
+                </div>
               ))}
             </div>
           }
@@ -191,10 +196,12 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         </TabsContent>
         <TabsContent value="inbox" className="flex flex-col gap-1 overflow-y-scroll max-h-[68vh]">
           {inbox.map((msg, _) => (
-            <div key={_} className="text-sm p-2 font-btr-code text-white/50 border border-btr-grey-2/70">
+            <div key={_} className="text-sm p-2 font-btr-code text-white/50 border border-btr-grey-2/70" onClick={() => showFullMessage(_)}>
               <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
               <br />
-              <span className="text-white/70">{msg.From}</span>: <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? msg.Data : "Message Without Data Field"}</span>
+              <span className="text-white/70 text-sm">{msg.From}</span> <span className="text-white/70">{msg.Action && `(${msg.Action})`}</span>
+              <br />
+              <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? <Ansi className="font-btr-code">{msg.Data}</Ansi> : "Message Without Data Field"}</span>
             </div>
           ))}
         </TabsContent>
