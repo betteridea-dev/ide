@@ -12,10 +12,15 @@ import { Combobox } from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 
-import { source as aoBot } from "@/templates/ao/ao-bot"
+import { source as aoBot } from "@/blueprints/ao/ao-bot"
+import { source as chat } from "@/blueprints/ao/chat";
+import { source as token } from "@/blueprints/ao/token";
 
-
-const templates = [{ label: "AO Bot (The Grid)", value: "THE_GRID_BOT" }]
+const templates = [
+  { label: "AO Bot (The Grid Arena)", value: "THE_GRID_BOT" },
+  { label: "Chat", value: "CHAT" },
+  // { label: "Token", value: "TOKEN" },
+];
 
 
 export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectManager; collapsed: boolean }) {
@@ -54,6 +59,12 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     switch (selectedTemplate) {
       case "THE_GRID_BOT":
         initialContent = aoBot
+        break;
+      case "CHAT":
+        initialContent = chat
+        break;
+      case "TOKEN":
+        initialContent = token
         break;
       default:
         initialContent = "print('Hello AO!')"

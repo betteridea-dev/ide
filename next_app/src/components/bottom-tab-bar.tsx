@@ -55,6 +55,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             fetchFlag = true;
             // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
             sonnerToast.custom((id) => <div className="bg-btr-green text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
+            setCommandOutputs([data, ...commandOutputs]);
           }
         });
         console.log(r.results);
@@ -184,11 +185,11 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             </div>
           )}
           {
-            <div className="overflow-scroll">
+            <div className="overflow-scroll h-[64vh]">
               {commandOutputs.map((output, index) => (
-                <div key={index}>
+                <pre key={index}>
                   &gt; <Ansi>{`${output}`}</Ansi>
-                </div>
+                </pre>
               ))}
             </div>
           }
