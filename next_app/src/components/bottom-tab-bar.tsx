@@ -86,7 +86,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
     setLoadingInbox(false);
   }
 
-  function showFullMessage(_){}
+  function showFullMessage(_) { }
 
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
@@ -96,9 +96,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             Terminal
           </TabsTrigger>
         )}
-        <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
+        {globalState.activeMode == "WARP" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
           Output
-        </TabsTrigger>
+        </TabsTrigger>}
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green" onClick={getInbox}>
             Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
@@ -194,7 +194,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           }
         </TabsContent>
         <TabsContent value="output">
-          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells["0"].output}`}</Ansi>}</> : <></>}</pre>
+          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <></>}</pre>
         </TabsContent>
         <TabsContent value="inbox" className="flex flex-col gap-1 overflow-y-scroll max-h-[68vh]">
           {inbox.map((msg, _) => (
