@@ -43,10 +43,12 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
         title: "Process options not set",
         description: "You must choose wether to create a new process or use an existing one",
       });
+    const ownerWallet = await window.arweaveWallet.getActiveAddress();
     const p = manager.newProject({
       name: newProjName,
       mode: "AO",
       defaultFiletype,
+      ownerWallet
     });
     console.log(processUsed);
     if (processUsed == "NEW_PROCESS") {

@@ -53,12 +53,12 @@ export class ProjectManager {
     this.saveProjects(this.projects);
   }
 
-  newProject({ name, mode, defaultFiletype }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK" }) {
+  newProject({ name, mode, defaultFiletype, ownerWallet }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
     if (Object.keys(this.projects).includes(name)) return this.getProject(name);
 
-    const proj = new Project({ name, mode, defaultFiletype });
+    const proj = new Project({ name, mode, defaultFiletype, ownerWallet });
     this.projects[name] = proj;
     this.saveProjects(this.projects);
     return proj;
@@ -100,13 +100,15 @@ export class Project {
   readonly files: { [name: string]: PFile };
   process: string;
   defaultFiletype: "NORMAL" | "NOTEBOOK";
+  ownerWallet: string;
 
-  constructor({ name, mode, files, defaultFiletype, process }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK"; process?: string }) {
+  constructor({ name, mode, files, defaultFiletype, process, ownerWallet }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK"; process?: string, ownerWallet: string }) {
     this.name = name;
     this.mode = mode;
     this.files = files || {};
     this.defaultFiletype = defaultFiletype || "NORMAL";
     this.process = process;
+    this.ownerWallet = ownerWallet;
   }
 
   _setProcess(process: string) {

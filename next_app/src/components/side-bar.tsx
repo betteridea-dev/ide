@@ -9,17 +9,23 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { NewAOProjectDialog } from "@/components/ao/new-ao-project-dialog";
 import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog";
 import { NewFileDialog } from "@/components/new-file-dialog";
+import { toast } from "./ui/use-toast";
 
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
+  const [activeAddress, setActiveAddress] = useState("");
 
   const projects = Object.keys(manager.projects).filter((p) => manager.projects[p].mode == globalState.activeMode);
 
   useEffect(() => {
     if (typeof window == "undefined") return;
     setMounted(true);
-  }, []);
+    async function a() {
+      setActiveAddress(await window.arweaveWallet.getActiveAddress());
+    }
+    a()
+  }, [globalState.activeProject]);
 
   return (
     <>
@@ -28,16 +34,18 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
       {mounted &&
         projects.map((pname, _) => {
           const active = pname === globalState.activeProject;
-
+          const ownedByActiveWallet = manager.projects[pname].ownerWallet == activeAddress;
           return (
             <ContextMenu key={_}>
-              <ContextMenuTrigger>
+              <ContextMenuTrigger >
                 <div data-active={active} data-collapsed={collapsed} className="text-btr-grey-1 cursor-default h-fit rounded-none flex relative gap-2 p-2 pl-2.5 hover:bg-btr-grey-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center data-[active=true]:bg-btr-grey-3 data-[active=true]:text-white " key={_}>
                   <Icons.folder
                     data-collapsed={collapsed}
+                    data-not-owned={!ownedByActiveWallet}
                     className="fill-btr-grey-1 data-[active=true]:invert data-[active=true]:text-white cursor-pointer"
                     data-active={active}
                     onClick={() => {
+                      if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: "Some things might be broken" })
                       globalState.setActiveProject(active ? "" : pname);
                     }}
                   />
@@ -47,6 +55,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                       <div
                         className="flex gap-1 cursor-pointer items-center"
                         onClick={() => {
+                          if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: "Some things might be broken" })
                           globalState.setActiveProject(active ? "" : pname);
                         }}
                       >

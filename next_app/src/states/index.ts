@@ -11,6 +11,7 @@ interface State {
   clearFiles: () => void;
   fileDeleted: (fileName: string) => void;
   projectDeleted: (projectName: string) => void;
+  closeFile: (fileName: string) => void;
 }
 
 export const useGlobalState = create<State>((set) => ({
@@ -24,4 +25,5 @@ export const useGlobalState = create<State>((set) => ({
   clearFiles: () => set((state) => ({ openedFiles: [] })),
   fileDeleted: (fileName: string) => set((state) => ({ openedFiles: state.openedFiles.filter((file) => file !== fileName), activeFile: state.activeFile === fileName ? "" : state.activeFile })),
   projectDeleted: (projectName: string) => set((state) => ({ activeProject: state.activeProject === projectName ? "" : state.activeProject, activeFile: state.activeProject === projectName ? "" : state.activeFile, openedFiles: state.activeProject === projectName ? [] : state.openedFiles })),
+  closeFile: (fileName: string) => set((state) => ({ openedFiles: state.openedFiles.filter((file) => file !== fileName), activeFile: state.activeFile === fileName ? "" : state.activeFile })),
 }));
