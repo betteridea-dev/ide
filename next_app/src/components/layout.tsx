@@ -25,6 +25,8 @@ import { toast } from "./ui/use-toast";
 import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
+import { sendGAEvent } from '@next/third-parties/google'
+
 
 const CodeCell = ({
   file,
@@ -74,6 +76,8 @@ const CodeCell = ({
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
+    const address = await window.arweaveWallet.getActiveAddress()
+    sendGAEvent({ event: 'run_code', value: address })
   }
 
   return (
@@ -328,6 +332,7 @@ export default function Layout() {
       cellOrder: [...oldContent.cellOrder, id],
     };
     manager.updateFile(p, { file: f, content: newContent });
+
   }
 
   return (
