@@ -97,7 +97,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             Terminal
           </TabsTrigger>
         )}
-        {file.type == "NORMAL" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
+        {file && file.type == "NORMAL" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
           Output
         </TabsTrigger>}
         {globalState.activeMode == "AO" && (

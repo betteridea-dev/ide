@@ -11,12 +11,14 @@ export function NewWarpProjectDialog({ manager, collapsed }: { manager: ProjectM
   const [popupOpen, setPopupOpen] = useState(false);
   const [newProjName, setNewProjName] = useState("");
 
-  function createProject() {
+  async function createProject() {
     if (!newProjName) return;
+    const ownerWallet = await window.arweaveWallet.getActiveAddress();
     const p = manager.newProject({
       name: newProjName,
       mode: "WARP",
       defaultFiletype: "NORMAL",
+      ownerWallet
     });
     manager.newFile(p, {
       name: "contract.js",

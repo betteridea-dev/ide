@@ -26,9 +26,16 @@ export default function SettingsTab() {
   return (
     <ScrollArea className="w-full h-full">
       <div className="h-full w-full p-8 max-w-4xl mx-auto">
-        <div className="my-12 max-w-xl mx-auto">
+        <div className="my-5 mb-12 max-w-xl mx-auto">
           <Input type="text" placeholder="Search in settings"></Input>
         </div>
+
+        <Title title="CURRENT PROJECT" />
+        <div className="my-8">
+          <div>Process: {project.process || "NA"}</div>
+          <div>Default Filetype: {project.defaultFiletype || "NA"}</div>
+        </div>
+
 
         <div className="mb-8">
           <Title title="NOTIFICATIONS" />
@@ -77,11 +84,6 @@ export default function SettingsTab() {
             </Label>
           </div>
         </div>
-
-        {/* TODO: Fix this */}
-        <div className="h-40"></div>
-        <div>Process: {project.process || "NA"}</div>
-        <div>Default Filetype: {project.defaultFiletype || "NA"}</div>
       </div>
     </ScrollArea>
   );
