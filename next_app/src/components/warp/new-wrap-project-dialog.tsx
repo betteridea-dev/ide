@@ -39,9 +39,9 @@ export function NewWarpProjectDialog({ manager, collapsed }: { manager: ProjectM
     <>
       <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
         <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
-          <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} color="transparent" />
+          <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className="fill-btr-grey-1 text-black" />
 
-          {!collapsed && "Create New Project"}
+          {!collapsed && "New Project"}
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

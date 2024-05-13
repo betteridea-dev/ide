@@ -18,12 +18,10 @@ function Title({ title }: { title: string }) {
 }
 
 export default function SettingsTab() {
-  const router = useRouter();
   const manager = useProjectManager();
   const globalState = useGlobalState();
 
-  const project =
-    globalState.activeProject && manager.getProject(globalState.activeProject);
+  const project = globalState.activeProject && manager.getProject(globalState.activeProject);
 
   return (
     <ScrollArea className="w-full h-full">
@@ -75,9 +73,7 @@ export default function SettingsTab() {
 
             <Label htmlFor="terms1" className="">
               Force disable popups
-              <span className="text-sm ml-2 text-muted">
-                (some features might not work correctly if you enable this)
-              </span>
+              <span className="text-sm ml-2 text-muted">(some features might not work correctly if you enable this)</span>
             </Label>
           </div>
         </div>
