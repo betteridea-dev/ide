@@ -25,8 +25,8 @@ import { toast } from "./ui/use-toast";
 import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
-// import { sendGAEvent } from '@next/third-parties/google'
-import { event } from "nextjs-google-analytics";
+import { sendGAEvent } from '@next/third-parties/google'
+// import { event } from "nextjs-google-analytics";
 
 
 
@@ -80,11 +80,10 @@ const CodeCell = ({
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
-    // sendGAEvent({ event: 'run_code', value: 'notebook' })
-    // sendGAEvent({ event: 'buttonClicked', value: 'run_code' })
-    // sendGAEvent('run_code', "buttonClicked", { value: "notebook" })
     const address = await window.arweaveWallet.getActiveAddress()
-    event('run_code')
+    sendGAEvent({ event: 'run_code', value: 'notebook' })
+    sendGAEvent('run_code', "buttonClicked", { value: "notebook" })
+    // event('run_code')
   }
 
   return (
@@ -218,9 +217,9 @@ const EditorArea = ({
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
-    // sendGAEvent({ event: 'run_code', value: 'warp' })
     const address = await window.arweaveWallet.getActiveAddress()
-    event('run_code', { label: "normal", userId: address })
+    sendGAEvent({ event: 'run_code', value: 'warp' })
+    // event('run_code', { label: "normal", userId: address })
   }
 
   return (

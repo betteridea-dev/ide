@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-// import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 // import { GoogleAnalytics } from "nextjs-google-analytics";
 
 
@@ -22,6 +22,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <div className="font-btr-normal bg-btr-black-3 min-h-screen">
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         {/* <GoogleAnalytics trackPageViews gaMeasurementId="G-7H9SL00HCC" /> */}
+        <GoogleAnalytics gaId="G-7H9SL00HCC" />
         <Component {...pageProps} />
         <Toaster />
         <Sonner />
