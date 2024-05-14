@@ -10,6 +10,7 @@ import { getResults, runLua } from "@/lib/ao-vars";
 import { toast } from "./ui/use-toast";
 import { useState, useRef, useEffect } from "react";
 import { toast as sonnerToast } from "sonner";
+import { sendGAEvent } from "@next/third-parties/google";
 
 interface TInboxMessage {
   Data: string;
@@ -82,7 +83,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       });
     }
     setLoadingInbox(true);
-    const result = await runLua("require('json').encode(Inbox)", pid);
+    const result = await runLua("require('json').encode(Inbox)", pid, [
+      { name: "File-Type", value: "Inbox" }
+    ]);
     setInbox(JSON.parse(result.Output.data.output).reverse());
     setLoadingInbox(false);
   }
@@ -142,7 +145,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                   if (code) {
                     console.log("running", code);
                     setRunning(true);
-                    const result = await runLua(code, project.process);
+                    const result = await runLua(code, project.process, [
+                      { name: "File-Type", value: "Terminal" }
+                    ]);
                     if (result.Error) {
                       console.log(result.Error);
                       setCommandOutputs([result.Error, ...commandOutputs]);
@@ -160,6 +165,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                     }
                     terminalInputRef.current.value = "";
                     setRunning(false);
+                    sendGAEvent({ event: 'run_code', value: 'terminal' })
                     setTimeout(() => {
                       terminalInputRef.current.focus();
                     }, 0);

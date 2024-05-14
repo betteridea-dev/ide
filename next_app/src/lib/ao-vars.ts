@@ -9,27 +9,44 @@ const CommonTags = [
   { name: "App-Version", value: AppVersion },
 ];
 
-export async function spawnProcess(name?: string) {
+type Tags = { name: string, value: string }[];
+
+export async function spawnProcess(name?: string, tags?: Tags) {
   const ao = connect();
+
+  if (tags) {
+    tags = [...CommonTags, ...tags];
+  } else {
+    tags = CommonTags;
+  }
+  tags = name ? [...tags, { name: "Name", value: name }] : tags;
 
   const result = await ao.spawn({
     module: AOModule,
     scheduler: AOScheduler,
-    tags: name ? [...CommonTags, { name: "Name", value: name }] : CommonTags,
+    tags,
     signer: createDataItemSigner(window.arweaveWallet),
   });
 
   return result;
 }
 
-export async function runLua(code: string, process: string) {
+export async function runLua(code: string, process: string, tags?: Tags) {
   const ao = connect();
+
+  if (tags) {
+    tags = [...CommonTags, ...tags];
+  } else {
+    tags = CommonTags;
+  }
+
+  tags = [...tags, { name: "Action", value: "Eval" }];
 
   const message = await ao.message({
     process,
     data: code,
     signer: createDataItemSigner(window.arweaveWallet),
-    tags: [...CommonTags, { name: "Action", value: "Eval" }],
+    tags,
   });
 
   const result = await ao.result({ process, message });

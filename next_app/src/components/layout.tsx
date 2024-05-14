@@ -25,7 +25,9 @@ import { toast } from "./ui/use-toast";
 import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
-import { sendGAEvent } from '@next/third-parties/google'
+// import { sendGAEvent } from '@next/third-parties/google'
+import { event } from "nextjs-google-analytics";
+
 
 
 const CodeCell = ({
@@ -55,7 +57,9 @@ const CodeCell = ({
     console.log("running", cell.code);
     setRunning(true);
     const fileContent = { ...file.content };
-    const result = await runLua(cell.code, p.process);
+    const result = await runLua(cell.code, p.process, [
+      { name: "File-Type", value: "Notebook" }
+    ]);
     console.log(result);
     if (result.Error) {
       console.log(result.Error);
@@ -76,8 +80,11 @@ const CodeCell = ({
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
+    // sendGAEvent({ event: 'run_code', value: 'notebook' })
+    // sendGAEvent({ event: 'buttonClicked', value: 'run_code' })
+    // sendGAEvent('run_code', "buttonClicked", { value: "notebook" })
     const address = await window.arweaveWallet.getActiveAddress()
-    sendGAEvent({ event: 'run_code', value: address })
+    event('run_code')
   }
 
   return (
@@ -192,7 +199,9 @@ const EditorArea = ({
     console.log("running", file.content.cells[0].code);
     setRunning(true);
     const fileContent = { ...file.content };
-    const result = await runLua(fileContent.cells[0].code, p.process);
+    const result = await runLua(fileContent.cells[0].code, p.process, [
+      { name: "File-Type", value: "Normal" }
+    ]);
     console.log(result);
     if (result.Error) {
       console.log(result.Error);
@@ -209,6 +218,9 @@ const EditorArea = ({
     }
     manager.updateFile(project, { file, content: fileContent });
     setRunning(false);
+    // sendGAEvent({ event: 'run_code', value: 'warp' })
+    const address = await window.arweaveWallet.getActiveAddress()
+    event('run_code', { label: "normal", userId: address })
   }
 
   return (
