@@ -94,7 +94,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
 
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
-      <TabsList className="flex justify-start p-0 bg-transparent">
+      {globalState.activeProject && <TabsList className="flex justify-start p-0 bg-transparent">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-btr-green">
             Terminal
@@ -109,12 +109,12 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           </TabsTrigger>
         )}
 
-        <Button variant="link" className="ml-auto p-2 pt-1 h-6" onClick={toggle}>
-          <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80" />
-        </Button>
-      </TabsList>
+      </TabsList>}
+      <Button variant="link" className="ml-auto absolute -right-1 -top-1" onClick={toggle}>
+        <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80" />
+      </Button>
 
-      <div className="px-1">
+      {globalState.activeProject && <div className="px-1">
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center">
             <div className="block">{prompt}</div>&nbsp;
@@ -214,7 +214,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             </div>
           ))}
         </TabsContent>
-      </div>
+      </div>}
     </Tabs>
   );
 }

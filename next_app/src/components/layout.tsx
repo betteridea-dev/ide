@@ -6,7 +6,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ImperativePanelHandle } from "react-resizable-panels";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import TopBar from "@/components/top-bar";
 import FileBar from "@/components/file-bar";
 import SideBar from "@/components/side-bar";
@@ -27,6 +27,7 @@ import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
 import { sendGAEvent } from '@next/third-parties/google'
 import AOLanding from "./ao/landing";
+import WarpLanding from "./warp/landing";
 // import { event } from "nextjs-google-analytics";
 
 
@@ -298,7 +299,7 @@ const EditorArea = ({
       ) : (
         <div className="text-btr-grey-1 h-full flex items-center">
           <div>
-            {globalState.activeMode == "AO" ? <AOLanding /> : <>ok</>}
+            {globalState.activeMode == "AO" ? <AOLanding /> : <WarpLanding />}
           </div>
         </div>
       )}
@@ -322,6 +323,10 @@ export default function Layout() {
       setBottombarCollapsed(!bottombarCollapsed);
     }
   };
+
+  useEffect(() => {
+    bottombarRef.current.collapse();
+  }, [])
 
   const project =
     globalState.activeProject && manager.getProject(globalState.activeProject);
@@ -403,7 +408,6 @@ export default function Layout() {
                 onExpand={() => setBottombarCollapsed(false)}
                 collapsible
                 collapsedSize={5}
-                defaultSize={20}
                 minSize={10}
                 id="terminal-panel"
                 className="relative flex"
