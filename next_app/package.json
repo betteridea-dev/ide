@@ -11,6 +11,7 @@
     "deploy": "pnpm run build && gh-pages -d out"
   },
   "dependencies": {
+    "@betteridea/codecell": "^1.0.1",
     "@monaco-editor/react": "^4.6.0",
     "@next/third-parties": "^14.2.3",
     "@permaweb/aoconnect": "^0.0.52",

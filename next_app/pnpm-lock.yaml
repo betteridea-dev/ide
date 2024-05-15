@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@betteridea/codecell':
+    specifier: ^1.0.1
+    version: 1.0.1
   '@monaco-editor/react':
     specifier: ^4.6.0
     version: 4.6.0(monaco-editor@0.48.0)(react-dom@18.2.0)(react@18.2.0)
@@ -180,6 +183,13 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.1
+
+  /@betteridea/codecell@1.0.1:
+    resolution: {integrity: sha512-UYfluIblceEbftG2+y7KzQQ61IH2nSsHoVc1HCqDJyIXuL03xeSF6aqqJmBT9YGrNGSQl8vTyEUYCKbrgRd5aw==}
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
 
   /@eslint-community/eslint-utils@4.4.0(eslint@8.57.0):
     resolution: {integrity: sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==}

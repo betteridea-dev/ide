@@ -170,7 +170,7 @@ export default function CodeCell() {
         return () => {
             window.removeEventListener("message", callback);
         };
-    }, [])
+    }, [aosProcess, code, appname])
 
     return <div suppressHydrationWarning
         className="relative h-screen w-screen flex flex-col justify-center items-center bg-btr-grey-3"
