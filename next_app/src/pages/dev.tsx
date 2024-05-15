@@ -4,7 +4,7 @@ export default function Dev() {
             <h1>Dev Page</h1>
             <p>CodeCell</p>
 
-            <button onClick={
+            {/* <button onClick={
                 () => {
                     const iframe: HTMLIFrameElement = document.querySelector("#c1");
                     iframe.contentWindow.postMessage({ action: "run" }, "http://localhost:3000");
@@ -18,7 +18,7 @@ export default function Dev() {
                     iframe.contentWindow.postMessage({ action: "run" }, "http://localhost:3000");
                 }
             }>run c2</button>
-            <iframe id="c2" src="http://localhost:3000/codecell?code=print(%27hello%20ao%27)" width="50%" height="400px"></iframe>
+            <iframe id="c2" src="http://localhost:3000/codecell?code=print(%27hello%20ao%27)" width="50%" height="400px"></iframe> */}
 
         </div>
     )

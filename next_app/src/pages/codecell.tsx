@@ -152,6 +152,7 @@ export default function CodeCell() {
                 console.log(url)
                 console.log("running", code)
                 setRunning(true);
+                console.log("process:", aosProcess)
                 const r = await runLua(code, aosProcess, [
                     { name: "External-App-Name", value: appname },
                     { name: "External-Url", value: btoa(url) },
