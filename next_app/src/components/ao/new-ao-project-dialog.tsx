@@ -52,7 +52,9 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     });
     console.log(processUsed);
     if (processUsed == "NEW_PROCESS") {
-      const newProcessId = await spawnProcess(newProcessName);
+      const newProcessId = await spawnProcess(newProcessName, [
+        { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebool" : "Normal" }
+      ]);
       manager.setProjectProcess(p, newProcessId);
     } else {
       manager.setProjectProcess(p, processUsed);

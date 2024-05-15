@@ -72,3 +72,16 @@ export async function getResults(process: string, cursor = "") {
     return { cursor, results: [] };
   }
 }
+
+export function parseOutupt(out: any) {
+  const data = out.Output.data;
+  const { json, output } = data
+  if (json != "undefined") {
+    return json;
+  }
+  try {
+    return JSON.parse(output);
+  } catch (e) {
+    return output;
+  }
+}
