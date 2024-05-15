@@ -19,7 +19,7 @@ export default function CodeCell() {
     const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true });
     const [spawning, setSpawning] = useState<boolean>(false);
     const [running, setRunning] = useState<boolean>(false);
-    const [code, setCode] = useState<string>('');
+    const [code, setCode] = useState<string>('print("Hello AO!")');
     const [output, setOutput] = useState<string>("");
     const [appname, setAppname] = useState<string>("");
 
@@ -28,6 +28,8 @@ export default function CodeCell() {
             if (searchParams.has("code")) {
                 setCode(searchParams.get("code") as string)
                 console.log("CODE:", searchParams.get("code"))
+            } else {
+                setCode('print("Hello AO!")')
             }
             if (searchParams.has("app-name")) {
                 const appnameProxy = searchParams.get("app-name") as string
@@ -37,18 +39,17 @@ export default function CodeCell() {
                 }
                 else {
                     setAppname("Unnamed")
-                    console.log("APP:", "Unnamed")
                 }
             } else {
                 setAppname("Unnamed")
-                console.log("APP:", "Unnamed")
+                setCode('print("Hello AO!")')
             }
 
-            if (autoconnect) {
-                connectHandler()
-            }
         }
-    }, [searchParams])
+        if (autoconnect) {
+            connectHandler()
+        }
+    }, [searchParams, autoconnect])
 
     async function connectHandler() {
         if (!window) return
@@ -140,6 +141,36 @@ export default function CodeCell() {
         setRunning(false);
     }
 
+    useEffect(() => {
+        const callback = async (e) => {
+            // if (e.origin == "http://localhost:3000") return;
+            // console.log(e);
+            if (e.data.action == "run") {
+                var url = (window.location != window.parent.location)
+                    ? document.referrer
+                    : document.location.href;
+                console.log(url)
+                console.log("running", code)
+                setRunning(true);
+                const r = await runLua(code, aosProcess, [
+                    { name: "External-App-Name", value: appname },
+                    { name: "External-Url", value: btoa(url) },
+                    { name: "File-Type", value: "External-Code-Cell" }
+                ]);
+                const out = parseOutupt(r);
+                console.log(out)
+                setOutput(out);
+                setRunning(false);
+            }
+        };
+
+        window.removeEventListener("message", callback);
+        window.addEventListener("message", callback);
+        return () => {
+            window.removeEventListener("message", callback);
+        };
+    }, [])
+
     return <div suppressHydrationWarning
         className="relative h-screen w-screen flex flex-col justify-center items-center bg-btr-grey-3"
     >
@@ -183,7 +214,7 @@ export default function CodeCell() {
                 // }
                 width="94%"
                 className="min-h-[68px] pt-1 font-btr-code"
-                value={code}
+                value={code || "print('Hello AO!')"}
                 defaultValue={code}
                 language="lua"
                 options={{
@@ -201,7 +232,7 @@ export default function CodeCell() {
             <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
                 {<Ansi useClasses className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output}`}</Ansi>}
             </pre></> : <>
-            {walletAddr ? <Button onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button onClick={connectHandler}>Connect Wallet</Button>}
+            {walletAddr ? <Button onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button onClick={connectHandler}>Connect</Button>}
         </>}
     </div>
 
