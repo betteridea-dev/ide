@@ -31,9 +31,13 @@ export default function SettingsTab() {
         </div>
 
         <Title title="CURRENT PROJECT" />
-        <div className="my-8">
-          <div>Process: {project.process || "NA"}</div>
-          <div>Default Filetype: {project.defaultFiletype || "NA"}</div>
+        <div className="my-8 grid grid-cols-3">
+          <div>Owner Wallet</div>
+          <div className="col-span-2">{project.ownerWallet || "NA"}</div>
+          <div>Process</div>
+          <div className="col-span-2">{project.process || "NA"}</div>
+          <div>Default Filetype</div>
+          <div className="col-span-2">{project.defaultFiletype || "NA"}</div>
         </div>
 
 

@@ -26,6 +26,7 @@ import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
 import { sendGAEvent } from '@next/third-parties/google'
+import AOLanding from "./ao/landing";
 // import { event } from "nextjs-google-analytics";
 
 
@@ -296,7 +297,9 @@ const EditorArea = ({
         </div>
       ) : (
         <div className="text-btr-grey-1 h-full flex items-center">
-          <div>Open a file ^_^</div>
+          <div>
+            {globalState.activeMode == "AO" ? <AOLanding /> : <>ok</>}
+          </div>
         </div>
       )}
     </>

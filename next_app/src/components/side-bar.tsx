@@ -57,6 +57,12 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                         onClick={() => {
                           if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: "Some things might be broken" })
                           globalState.setActiveProject(active ? "" : pname);
+                          if (active) return
+                          const file = Object.keys(manager.projects[pname].files)[0];
+                          console.log(file)
+                          if (file)
+                            globalState.setActiveFile(file);
+
                         }}
                       >
                         <Icons.play data-active={active} className="fill-btr-grey-1 mr-1 data-[active=true]:rotate-90 data-[active=true]:fill-white" height={12} width={12} />
