@@ -29,7 +29,7 @@ import { runCell } from '@betteridea/codecell';
 ...
 
 // This will run whatever code is typed in the cell with the id provided
-runCell("<id of the cell>");
+runCell("1");
 ```
 
 ## API
@@ -66,10 +66,10 @@ npm run dev
 
 then make changes to the component and run function and test them in the vite app at [http://localhost:5173](http://localhost:5173)
 
-CodeCell component -> [./src/components/CodeCell.tsx]()
+1. `CodeCell` component -> [./src/components/CodeCell.tsx](https://github.com/betteridea-dev/ide/blob/main/packages/codecell/src/components/codecell.tsx)
 
-runCell function -> [./src/lib/runCell.ts]()
+2. `runCell` function -> [./src/lib/runCell.ts](https://github.com/betteridea-dev/ide/blob/main/packages/codecell/src/lib/runCell.ts)
 
 Both are essentially a wrapper around https://ide.betteridea.dev/codecell page from the main [IDE](https://ide.betteridea.dev) to run the code in any webapp through an iframe.
 
-/codecell -> [next_app/src/pages/codecell.tsx]()
+`/codecell` -> [next_app/src/pages/codecell.tsx](https://github.com/betteridea-dev/ide/blob/main/next_app/src/pages/codecell.tsx)
