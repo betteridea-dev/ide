@@ -27,7 +27,7 @@
     ],
   },
   "include": [
-    // "src",
+    "src",
     "./src/index.ts"
   ],
   "references": [
