@@ -4,6 +4,14 @@
     "type": "git",
     "url": "https://github.com/betteridea-dev/ide/tree/main/packages/codecell"
   },
+  "keywords": [
+    "arweave",
+    "ao",
+    "betteridea",
+    "ide",
+    "codecell"
+  ],
+  "license": "MIT",
   "private": false,
   "version": "1.0.4",
   "main": "dist/index.umd.js",
