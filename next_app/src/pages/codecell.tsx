@@ -16,12 +16,14 @@ export default function CodeCell() {
     const searchParams = useSearchParams();
     const [walletAddr, setWalletAddr] = useState<string>("");
     const [aosProcess, setAosProcess] = useState<string>("");
-    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true });
+    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", undefined, { initializeWithValue: false });
     const [spawning, setSpawning] = useState<boolean>(false);
     const [running, setRunning] = useState<boolean>(false);
     const [code, setCode] = useState<string>('print("Hello AO!")');
     const [output, setOutput] = useState<string>("");
     const [appname, setAppname] = useState<string>("");
+
+    console.log("autoconn", autoconnect)
 
     useEffect(() => {
         if (searchParams.size > 0) {
@@ -172,17 +174,24 @@ export default function CodeCell() {
         };
     }, [aosProcess, code, appname])
 
+    const Loader = () => {
+        return <div className="absolute top-0 left-0 w-full h-full bg-btr-grey-3 z-50 flex justify-center items-center" suppressHydrationWarning>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-btr-green" suppressHydrationWarning></div>
+        </div>
+    }
+
     return <div suppressHydrationWarning
         className="relative h-screen w-screen flex flex-col justify-center items-center bg-btr-grey-3"
     >
-
+        {autoconnect == undefined && <Loader />}
         {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-center rounded-t-md border-b border-btr-grey-2/70 min-h-[69px]">
             <Button
+                suppressHydrationWarning
                 variant="ghost"
                 className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]"
                 onClick={runCellCode}
             >
-                <Image
+                <Image suppressHydrationWarning
                     src={running ? Icons.loadingSVG : Icons.runSVG}
                     alt="Run"
                     data-running={running}
@@ -232,8 +241,11 @@ export default function CodeCell() {
         </div>
             <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
                 {<Ansi useClasses className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output}`}</Ansi>}
-            </pre></> : <>
-            {walletAddr ? <Button onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button onClick={connectHandler}>Connect</Button>}
+            </pre>
+        </> : <>
+            {autoconnect ? <Loader /> : <>
+                {walletAddr ? <Button suppressHydrationWarning onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button suppressHydrationWarning onClick={connectHandler}>Connect</Button>}
+            </>}
         </>}
     </div>
 
