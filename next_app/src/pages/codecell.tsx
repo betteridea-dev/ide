@@ -215,7 +215,7 @@ export default function CodeCell() {
                 // }
                 width="94%"
                 className="min-h-[68px] pt-1 font-btr-code"
-                value={code || "print('Hello AO!')"}
+                value={code}
                 defaultValue={code}
                 language="lua"
                 options={{
