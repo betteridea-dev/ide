@@ -181,10 +181,10 @@ export default function CodeCell() {
     }
 
     return <div suppressHydrationWarning
-        className="relative h-screen w-screen flex flex-col justify-center items-center bg-btr-grey-3"
+        className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 bg-btr-grey-3"
     >
         {autoconnect == undefined && <Loader />}
-        {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-center rounded-t-md border-b border-btr-grey-2/70 min-h-[69px]">
+        {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
             <Button
                 suppressHydrationWarning
                 variant="ghost"
@@ -222,7 +222,7 @@ export default function CodeCell() {
                 //     ? 10
                 //     : code.split("\n").length) * 20
                 // }
-                width="94%"
+                width="95%"
                 className="min-h-[68px] pt-1 font-btr-code"
                 value={code}
                 defaultValue={code}

@@ -30,8 +30,7 @@ export default function CodeCell({ cellId,
         width={width}
         height={height}
         className={className}
-        style={style}
-
+        style={{ ...style, backgroundColor: "black !important", borderRadius: "7px", border: "1px solid #222" }}
     // referrerPolicy="no-referrer"
     />
 }

@@ -3,7 +3,7 @@ export default function runCell(cellId: string, devMode = false) {
     const iframe: any = document.getElementById(`${cellId}`);
     if (!iframe) return console.error(`Cell with id ${cellId} not found`);
     if (iframe.contentWindow != null) {
-        const host = devMode ? "http://localhost:3000" : "https://ide.betteridea.dev";
+        const host = devMode ? "*" : "https://ide.betteridea.dev";
         iframe.contentWindow.postMessage({ action: "run" }, host);
     }
 }

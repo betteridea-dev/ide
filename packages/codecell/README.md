@@ -16,7 +16,7 @@ import { CodeCell, runCell } from '@betteridea/codecell';
 // in your react app
 <CodeCell
   cellId="1" // any unique cell id
-  appName="BetterIDEa" // Your unique app name
+  appName="BetterIDEa-Code-Cell" // Your unique app name
   code="print('Portable code cell ftw!')" // initial code (optional)
 />
 ```
