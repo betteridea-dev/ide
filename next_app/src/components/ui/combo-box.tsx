@@ -37,7 +37,7 @@ export function Combobox({ placeholder, options, onChange, onOpen }: { placehold
                 onSelect={() => {
                   setValue(option.label === value ? "" : option.label);
                   setOpen(false);
-                  console.log(option.value);
+                  // console.log(option.value);
                   onChange(option.label === value ? "" : option.value);
                 }}
               >
