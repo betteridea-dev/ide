@@ -12,7 +12,7 @@ import FileBar from "@/components/file-bar";
 import SideBar from "@/components/side-bar";
 import { useProjectManager } from "@/hooks";
 import BottomTabBar from "@/components/bottom-tab-bar";
-import { Editor } from "@monaco-editor/react";
+import { Editor, useMonaco } from "@monaco-editor/react";
 import { useGlobalState } from "@/states";
 import { Button } from "./ui/button";
 import Icons from "@/assets/icons";
@@ -29,8 +29,28 @@ import { sendGAEvent } from '@next/third-parties/google'
 import AOLanding from "./ao/landing";
 import WarpLanding from "./warp/landing";
 // import { event } from "nextjs-google-analytics";
+import { luaCompletionProvider } from "@/lib/monaco-completions";
 
-
+const monacoConfig: {
+  [key: string]: editor.IStandaloneEditorConstructionOptions
+} = {
+  CodeCell: {
+    fontSize: 14,
+    minimap: { enabled: false },
+    // lineNumbers: "off",
+    lineHeight: 20,
+    lineNumbersMinChars: 2,
+    scrollBeyondLastLine: false,
+    scrollbar: { vertical: "hidden", horizontal: "hidden" },
+    renderLineHighlight: "none",
+  },
+  CodeFile: {
+    fontSize: 14,
+    lineHeight: 20,
+    lineNumbersMinChars: 3,
+    scrollBeyondLastLine: false,
+  }
+}
 
 const CodeCell = ({
   file,
@@ -154,16 +174,7 @@ const CodeCell = ({
           value={cell.code}
           defaultValue={cell.code}
           language={file.language}
-          options={{
-            fontSize: 14,
-            minimap: { enabled: false },
-            // lineNumbers: "off",
-            lineHeight: 20,
-            lineNumbersMinChars: 2,
-            scrollBeyondLastLine: false,
-            scrollbar: { vertical: "hidden", horizontal: "hidden" },
-            renderLineHighlight: "none",
-          }}
+          options={monacoConfig.CodeCell}
         />
       </div>
       <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
@@ -286,12 +297,7 @@ const EditorArea = ({
                   manager.updateFile(project, { file, content: newContent });
                 }}
                 language={file && file.language}
-                options={{
-                  fontSize: 14,
-                  lineHeight: 20,
-                  lineNumbersMinChars: 3,
-                  scrollBeyondLastLine: false,
-                }}
+                options={monacoConfig.CodeFile}
               />
             </>
           )}
@@ -313,6 +319,15 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [bottombarCollapsed, setBottombarCollapsed] = useState(false);
   const bottombarRef = useRef<ImperativePanelHandle>(null);
+  const [mounted, setMounted] = useState(false);
+  const monaco = useMonaco();
+
+  useEffect(() => {
+    if (!mounted && monaco) {
+      monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
+      setMounted(true)
+    }
+  }, [mounted, monaco])
 
   const toggleBottombar = () => {
     const panel = bottombarRef.current;
