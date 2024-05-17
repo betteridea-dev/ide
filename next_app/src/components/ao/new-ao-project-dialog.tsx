@@ -11,6 +11,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Combobox } from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
+import { ReloadIcon } from "@radix-ui/react-icons"
+
 
 import { source as aoBot } from "@/blueprints/ao/ao-bot"
 import { source as chat } from "@/blueprints/ao/chat";
@@ -31,6 +33,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [newProcessName, setNewProcessName] = useState("");
   const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NORMAL");
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [loadingProcess, setLoadingProcess] = useState(false);
 
   async function createProject() {
     if (!newProjName)
@@ -44,6 +47,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
         description: "You must choose wether to create a new process or use an existing one",
       });
     const ownerWallet = await window.arweaveWallet.getActiveAddress();
+    setLoadingProcess(true);
     const p = manager.newProject({
       name: newProjName,
       mode: "AO",
@@ -81,6 +85,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     globalState.clearFiles();
     globalState.setActiveProject(newProjName);
     globalState.setActiveFile("main.lua");
+    setLoadingProcess(false);
     setPopupOpen(false);
   }
 
@@ -123,7 +128,23 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
   return (
     <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
-      <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
+      <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
+        onClick={async (e) => {
+          e.preventDefault()
+          try {
+            await window.arweaveWallet.getActiveAddress()
+            setPopupOpen(true)
+          }
+          catch (e) {
+            console.log(e)
+            setPopupOpen(false)
+            toast({
+              title: "Connect Wallet",
+              description: "Please connect your wallet (bottom left corner) before creating a project",
+            });
+          }
+        }}
+      >
         <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className="fill-btr-grey-1 text-black" />
 
         {!collapsed && "New Project"}
@@ -173,7 +194,8 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
           </div>
         </RadioGroup>
 
-        <Button className="bg-btr-green" onClick={createProject}>
+        <Button disabled={loadingProcess} className="bg-btr-green" onClick={createProject}>
+          {loadingProcess && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           Create Project
         </Button>
       </DialogContent>
