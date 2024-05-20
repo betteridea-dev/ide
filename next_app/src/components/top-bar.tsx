@@ -9,10 +9,42 @@ import { toast } from "./ui/use-toast";
 import { useState } from "react";
 import Blueprints from "./ao/blueprints";
 import Modules from "./ao/modules";
+import { useProjectManager } from "@/hooks";
+import { parseOutupt, runLua } from "@/lib/ao-vars";
 
 export default function TopBar() {
   const router = useRouter();
   const globalState = useGlobalState();
+  const projectManager = useProjectManager();
+  const [sharing, setSharing] = useState(false);
+
+  async function shareProject() {
+    if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to share" });
+    if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Sharing only works in AO" });
+    const project = projectManager.getProject(globalState.activeProject);
+    if (!project) return toast({ title: "Project not found", description: "The active project was not found" });
+    if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
+
+    const processBackup = project.process
+    delete project.ownerWallet
+    delete project.process
+
+    const luaToRun = `_BETTERIDEA_SHARE = ${JSON.stringify(project)}
+    
+function GetBetterIDEaShare()
+  return _BETTERIDEA_SHARE
+end`
+    setSharing(true);
+    const res = await runLua(luaToRun, processBackup, [
+      { name: "BetterIDEa-Function", value: "Share-Project" }
+    ]);
+    console.log(res)
+
+    const url = `${window.location.origin}/?process=${processBackup}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Project URL copied", description: "The URL to the project has been copied to your clipboard" });
+    setSharing(false);
+  }
 
   return (
     <nav className="py-5 px-3 flex border-b justify-between items-center h-16">
@@ -42,6 +74,9 @@ export default function TopBar() {
       <div className="flex gap-1 items-center">
         {globalState.activeMode == "AO"
           && globalState.activeProject && <>
+            <Button variant="ghost" className="p-2.5 h-10" onClick={shareProject}>
+              <Image src={sharing ? Icons.loadingSVG : Icons.sendSVG} alt="Send" width={20} height={20} className={sharing && "animate-spin"} />
+            </Button>
             <Modules />
             <Blueprints />
           </>

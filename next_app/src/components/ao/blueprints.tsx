@@ -40,7 +40,7 @@ export default function Blueprints() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <Button variant="link" className="p-2 h-10">
+            <Button variant="ghost" className="p-2 h-10">
                 <Image src={Icons.blueprintSVG} alt="Blueprints" width={25} height={25} />
             </Button>
         </DialogTrigger>
