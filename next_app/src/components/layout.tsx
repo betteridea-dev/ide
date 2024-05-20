@@ -403,16 +403,14 @@ const EditorArea = ({
                 const cellType = file.content.cells[cellId].type
                 return <>
                   <CellUtilButtons key={index} position={index} addNewCell={addNewCell} />
-                  {cellType == "CODE" &&
-                    <CodeCell
+                  {(cellType == "MARKDOWN" || cellType == "LATEX") ?
+                    <VisualCell
                       key={index}
                       file={file}
                       cellId={cellId}
                       manager={manager}
                       project={project}
-                    />}
-                  {(cellType == "MARKDOWN" || cellType == "LATEX") &&
-                    <VisualCell
+                    /> : <CodeCell
                       key={index}
                       file={file}
                       cellId={cellId}
