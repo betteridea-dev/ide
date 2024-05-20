@@ -27,6 +27,12 @@ export default function Import() {
             setData(r.Messages[0].Data.replaceAll("\n", "\\n"))
             const data = JSON.parse(`${r.Messages[0].Data.replaceAll("\n", "\\n")}`)
             console.log(data)
+            try {
+                await window.arweaveWallet.getActiveAddress()
+            }
+            catch (e) {
+                await window.arweaveWallet.connect()
+            }
             const ownerWallet = await window.arweaveWallet.getActiveAddress()
             data.ownerWallet = ownerWallet
             projectManager.newProject(data)
