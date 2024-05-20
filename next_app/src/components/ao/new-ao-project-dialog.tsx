@@ -14,11 +14,14 @@ import { Icons } from "@/components/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
 
 
-import { source as aoBot } from "@/blueprints/ao/ao-bot"
+import { GetAOTemplates } from "@/templates";
 
-const templates = [
-  { label: "AO Effect Bot", value: "THE_GRID_BOT" },
-];
+
+const templates = GetAOTemplates();
+// const templates = [
+//   { label: "ArweaveIndia Deathmatch Arena", value: "ARIN_DEATH_ARENA" },
+//   { label: "AO Effect Bot", value: "THE_GRID_BOT" },
+// ];
 
 
 export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectManager; collapsed: boolean }) {
@@ -53,20 +56,24 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     console.log(processUsed);
     if (processUsed == "NEW_PROCESS") {
       const newProcessId = await spawnProcess(newProcessName, [
-        { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebool" : "Normal" }
+        { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
       ]);
       manager.setProjectProcess(p, newProcessId);
     } else {
       manager.setProjectProcess(p, processUsed);
     }
     var initialContent = "print('Hello AO!')";
-    switch (selectedTemplate) {
-      case "THE_GRID_BOT":
-        initialContent = aoBot
-        break;
-      default:
-        initialContent = "print('Hello AO!')"
-    }
+    initialContent = templates[selectedTemplate];
+    // switch (selectedTemplate) {
+    //   case "THE_GRID_BOT":
+    //     initialContent = aoBot
+    //     break;
+    //   case "ARIN_DEATH_ARENA":
+    //     initialContent = arInGrid
+    //     break;
+    //   default:
+    //     initialContent = "print('Hello AO!')"
+    // }
     manager.newFile(p, {
       name: "main.lua",
       type: defaultFiletype,
@@ -117,7 +124,11 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   }, []);
 
   return (
-    <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
+    <Dialog open={popupOpen} onOpenChange={(e) => {
+      setSelectedTemplate("");
+      setProcessUsed("");
+      setPopupOpen(e)
+    }}>
       <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
         onClick={async (e) => {
           e.preventDefault()
@@ -152,8 +163,8 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
 
-        <Combobox placeholder="Select Template" options={templates} onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
-
+        <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
+          onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
         <RadioGroup defaultValue="NORMAL" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
           <div>
             What type of files do you want to use? <span className="text-sm text-btr-grey-1">(can be changed later)</span>
