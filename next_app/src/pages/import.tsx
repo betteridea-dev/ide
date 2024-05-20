@@ -31,7 +31,7 @@ export default function Import() {
                 await window.arweaveWallet.getActiveAddress()
             }
             catch (e) {
-                await window.arweaveWallet.connect()
+                await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"])
             }
             const ownerWallet = await window.arweaveWallet.getActiveAddress()
             data.ownerWallet = ownerWallet
