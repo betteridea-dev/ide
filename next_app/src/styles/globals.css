@@ -72,17 +72,26 @@
     * {
         @apply border-border;
     }
+
     body {
         @apply bg-background text-foreground;
     }
 }
 
-* {
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
+.markdown>* {
+    all: revert;
 }
+
+* {
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
 *::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+    display: none;
+    /* Safari and Chrome */
 }
 
 div {

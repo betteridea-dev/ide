@@ -6,7 +6,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 export type TFileContent = {
   cellOrder: string[];
-  cells: { [cellId: string]: { code: string; output: string } };
+  cells: { [cellId: string]: { code: string; output: string, type: "CODE" | "LATEX" | "MARKDOWN" } };
 };
 
 type TLanguages = "javascript" | "markdown" | "lua" | "plaintext" | "json";
@@ -156,7 +156,7 @@ export class PFile {
     if (initialContent) {
       this.content = {
         cellOrder: ["0"],
-        cells: { "0": { code: initialContent, output: "" } },
+        cells: { "0": { code: initialContent, output: "", type: "CODE" } },
       };
     }
     if (content) {
