@@ -114,6 +114,7 @@ const CodeCell = ({
           const parsedData = JSON.parse(outputData.output);
           setShowGfx(parsedData.__render_gfx);
           fileContent.cells[cellId].output = parsedData;
+          console.log(fileContent.cells[cellId].output)
         }
         catch {
           setShowGfx(false);
@@ -205,7 +206,7 @@ const CodeCell = ({
           options={monacoConfig.CodeCell}
         />
       </div>
-      {showGfx ? <div className="relative w-full flex items-center justify-center">
+      {cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center">
         <Plot className={"rounded-lg mx-auto"} data={cell.output.data}
           layout={{
             ...cell.output.layout,

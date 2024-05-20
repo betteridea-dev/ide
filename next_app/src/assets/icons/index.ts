@@ -12,6 +12,7 @@ import collapseSVG from "./collapse.svg";
 import blueprintSVG from "./blueprint.svg";
 import tickSVG from "./tick.svg";
 import editSVG from "./edit.svg";
+import moduleSVG from "./module.svg";
 
-const Icons = { downloadSVG, mailSVG, sendSVG, folderSVG, newProjectSVG, runSVG, disconnectSVG, settingsSVG, deleteSVG, loadingSVG, collapseSVG, blueprintSVG, tickSVG, editSVG };
+const Icons = { downloadSVG, mailSVG, sendSVG, folderSVG, newProjectSVG, runSVG, disconnectSVG, settingsSVG, deleteSVG, loadingSVG, collapseSVG, blueprintSVG, tickSVG, editSVG, moduleSVG };
 export default Icons;

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "./ui/use-toast";
 import { useState } from "react";
 import Blueprints from "./ao/blueprints";
+import Modules from "./ao/modules";
 
 export default function TopBar() {
   const router = useRouter();
@@ -40,8 +41,11 @@ export default function TopBar() {
 
       <div className="flex gap-1 items-center">
         {globalState.activeMode == "AO"
-          && globalState.activeProject &&
-          <Blueprints />}
+          && globalState.activeProject && <>
+            <Modules />
+            <Blueprints />
+          </>
+        }
 
         {/* <Button variant="link" className="p-2 h-7 hover:invert">
           <Image src={Icons.mailSVG} alt="Inbox" width={15} height={15} />
