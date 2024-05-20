@@ -33,6 +33,17 @@ import { luaCompletionProvider } from "@/lib/monaco-completions";
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import Latex from 'react-latex-next';
+// import Plot from "react-plotly.js"
+
+import dynamic from 'next/dynamic';
+const Plot = dynamic(
+  () =>
+    import('react-plotly.js'),
+  {
+    ssr: false,
+    loading: () => <>Loading Graph...</>,
+  },
+);
 
 
 const monacoConfig: {
@@ -69,6 +80,7 @@ const CodeCell = ({
 }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
   const [running, setRunning] = useState(false);
+  const [showGfx, setShowGfx] = useState(false);
   const cell = file.content.cells[cellId];
 
   async function runCellCode() {
@@ -98,7 +110,15 @@ const CodeCell = ({
       const outputData = result.Output.data;
       if (outputData.output) {
         console.log(outputData.output);
-        fileContent.cells[cellId].output = outputData.output;
+        try {
+          const parsedData = JSON.parse(outputData.output);
+          setShowGfx(parsedData.__render_gfx);
+          fileContent.cells[cellId].output = parsedData;
+        }
+        catch {
+          setShowGfx(false);
+          fileContent.cells[cellId].output = outputData.output;
+        }
       } else if (outputData.json) {
         console.log(outputData.json);
         fileContent.cells[cellId].output = JSON.stringify(
@@ -185,9 +205,22 @@ const CodeCell = ({
           options={monacoConfig.CodeCell}
         />
       </div>
-      <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
+      {showGfx ? <div className="relative w-full flex items-center justify-center">
+        <Plot className={"rounded-lg mx-auto"} data={cell.output.data}
+          layout={{
+            ...cell.output.layout,
+            dragmode: "pan",
+            plot_bgcolor: "transparent", paper_bgcolor: "#121212",
+            font: { color: "#aaa" },
+          }} config={{
+            scrollZoom: false,
+            displayModeBar: "hover",
+            displaylogo: false,
+            modeBarButtons: [["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["resetScale2d"], ["pan2d"], ["zoom2d"]],
+          }} />
+      </div> : <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
         {<Ansi useClasses className="font-btr-code">{`${cell.output}`}</Ansi>}
-      </pre>
+      </pre>}
     </div>
   );
 };
@@ -272,7 +305,7 @@ const VisualCell = (
 
 const CellUtilButtons = ({ position, addNewCell }: { position: number, addNewCell: (foo?: number, type?: "CODE" | "MARKDOWN" | "LATEX") => void }) => {
   const [visible, setVisible] = useState(false);
-  return <div className="relative" onMouseEnter={() => { console.log("ENTER"); setVisible(true) }} onMouseLeave={() => setVisible(false)}>
+  return <div className="relative" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
     <div data-visible={visible}
       className="h-3.5 w-5/6 mx-auto relative gap-2 text-center flex items-center text-btr-grey-1 z-10 overflow-visible text-xs justify-center data-[visible=true]:visible data-[visible=false]:invisible">
       <div className="grow h-[1px] bg-btr-grey-1"></div>

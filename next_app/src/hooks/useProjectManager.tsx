@@ -6,7 +6,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 export type TFileContent = {
   cellOrder: string[];
-  cells: { [cellId: string]: { code: string; output: string, type: "CODE" | "LATEX" | "MARKDOWN" } };
+  cells: { [cellId: string]: { code: string; output: string | any, type: "CODE" | "LATEX" | "MARKDOWN" } };
 };
 
 type TLanguages = "javascript" | "markdown" | "lua" | "plaintext" | "json";
