@@ -35,6 +35,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
         projects.map((pname, _) => {
           const active = pname === globalState.activeProject;
           const ownedByActiveWallet = manager.projects[pname].ownerWallet == activeAddress;
+          const ownerAddress = manager.projects[pname].ownerWallet;
           return (
             <ContextMenu key={_}>
               <ContextMenuTrigger >
@@ -45,7 +46,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                     className="fill-btr-grey-1 data-[active=true]:invert data-[active=true]:text-white cursor-pointer"
                     data-active={active}
                     onClick={() => {
-                      const shortAddress = activeAddress.slice(0, 5) + "..." + activeAddress.slice(-5);
+                      const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                       if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                       globalState.setActiveProject(active ? "" : pname);
                     }}
@@ -56,7 +57,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                       <div
                         className="flex gap-1 cursor-pointer items-center"
                         onClick={() => {
-                          const shortAddress = activeAddress.slice(0, 5) + "..." + activeAddress.slice(-5);
+                          const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                           if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                           globalState.setActiveProject(active ? "" : pname);
                           if (active) return

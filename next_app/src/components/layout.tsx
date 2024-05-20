@@ -79,6 +79,10 @@ const CodeCell = ({
         description:
           "Please assign a process id from project settings before trying to run Lua code",
       });
+    const ownerAddress = p.ownerWallet;
+    const activeAddress = await window.arweaveWallet.getActiveAddress();
+    const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+    if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
     console.log("running", cell.code);
     setRunning(true);
     const fileContent = { ...file.content };
@@ -328,6 +332,11 @@ const EditorArea = ({
         description:
           "Please assign a process id from project settings before trying to run Lua code",
       });
+    const ownerAddress = p.ownerWallet;
+    const activeAddress = await window.arweaveWallet.getActiveAddress();
+    const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+    if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+
 
     console.log("running", file.content.cells[0].code);
     setRunning(true);
