@@ -50,7 +50,7 @@ Handlers.add(
     ]);
     console.log(res)
 
-    const url = `${window.location.origin}/import/${processBackup}`;
+    const url = `${window.location.origin}/import?id=${processBackup}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Project URL copied", description: "The URL to the project has been copied to your clipboard" });
     setSharing(false);
