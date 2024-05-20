@@ -32,7 +32,8 @@ import WarpLanding from "./warp/landing";
 import { luaCompletionProvider } from "@/lib/monaco-completions";
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import Latex from "react-latex"
+import Latex from 'react-latex-next';
+
 
 const monacoConfig: {
   [key: string]: editor.IStandaloneEditorConstructionOptions

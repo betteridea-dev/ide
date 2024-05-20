@@ -26,9 +26,9 @@ export default function SettingsTab() {
   return (
     <ScrollArea className="w-full h-full">
       <div className="h-full w-full p-8 max-w-4xl mx-auto">
-        <div className="my-5 mb-12 max-w-xl mx-auto">
+        {/* <div className="my-5 mb-12 max-w-xl mx-auto">
           <Input type="text" placeholder="Search in settings"></Input>
-        </div>
+        </div> */}
 
         <Title title="CURRENT PROJECT" />
         <div className="my-8 grid grid-cols-3">
@@ -41,7 +41,7 @@ export default function SettingsTab() {
         </div>
 
 
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <Title title="NOTIFICATIONS" />
 
           <div className="items-top flex space-x-2.5">
@@ -51,9 +51,9 @@ export default function SettingsTab() {
               Toast notifications
             </Label>
           </div>
-        </div>
+        </div> */}
 
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <Title title="EDITOR STYLE" />
 
           <div className="flex flex-col gap-3">
@@ -74,9 +74,9 @@ export default function SettingsTab() {
               </Label>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <Title title="DISABLE" />
 
           <div className="items-top flex space-x-2.5">
@@ -87,7 +87,7 @@ export default function SettingsTab() {
               <span className="text-sm ml-2 text-muted">(some features might not work correctly if you enable this)</span>
             </Label>
           </div>
-        </div>
+        </div> */}
       </div>
     </ScrollArea>
   );

@@ -1,10 +1,12 @@
 import "@/styles/globals.css";
+import 'katex/dist/katex.min.css';
 import type { AppProps } from "next/app";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 // import { GoogleAnalytics } from "nextjs-google-analytics";
+
 
 
 declare global {
