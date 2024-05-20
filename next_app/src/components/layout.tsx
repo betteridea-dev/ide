@@ -36,6 +36,7 @@ import Latex from 'react-latex-next';
 // import Plot from "react-plotly.js"
 
 import dynamic from 'next/dynamic';
+import { useRouter } from "next/router";
 const Plot = dynamic(
   () =>
     import('react-plotly.js'),
@@ -509,13 +510,29 @@ export default function Layout() {
   const bottombarRef = useRef<ImperativePanelHandle>(null);
   const [mounted, setMounted] = useState(false);
   const monaco = useMonaco();
+  const router = useRouter();
+  const projectManager = useProjectManager();
+
+  const { open } = router.query;
 
   useEffect(() => {
     if (!mounted && monaco) {
       monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
       setMounted(true)
     }
-  }, [mounted, monaco])
+    if (open)
+      if (typeof projectManager.projects[open as string] != "undefined") {
+        const p = projectManager.getProject(open as string);
+        const files = p.files;
+        globalState.setActiveProject(open as string);
+        if (Object.keys(files).length > 0) globalState.setActiveFile(files[Object.keys(files)[0]].name);
+        // globalState.setActiveProject(open as string)
+        // const files = projectManager.projects[open as string].files
+        // console.log(files)
+        // if (Object.keys(files).length > 0) globalState.setActiveFile(files[0].name)
+      }
+
+  }, [mounted, monaco, open])
 
   const toggleBottombar = () => {
     const panel = bottombarRef.current;

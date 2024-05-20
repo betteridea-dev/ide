@@ -2,36 +2,21 @@ import { GetStaticPropsContext } from "next";
 import { dryrun } from "@permaweb/aoconnect"
 import { useEffect, useState } from "react";
 import { useProjectManager } from "@/hooks";
-import { redirect } from "next/navigation";
-
-export async function getStaticPaths() {
-    return {
-        paths: [],
-        fallback: false,
-    };
-}
-
-export async function getStaticProps(context: GetStaticPropsContext) {
-    const processID = context.params?.pid as string;
+import { useRouter } from "next/router";
 
 
-    return {
-        props: {
-            pid: processID,
-        },
-    };
-}
-
-export default function Import({ pid }) {
+export default function Import() {
     const projectManager = useProjectManager();
     const [data, setData] = useState(null)
+    const router = useRouter()
+    const { id } = router.query
 
-    console.log(pid)
+    console.log(id)
     useEffect(() => {
-        if (!pid) return
+        if (!id) return
         async function fetchShared() {
             const r = await dryrun({
-                process: pid,
+                process: id as string,
                 tags: [
                     { name: "Action", value: "Get-BetterIDEa-Share" },
                     { name: "BetterIDEa-Function", value: "Import-Shared" }
@@ -45,11 +30,11 @@ export default function Import({ pid }) {
             const ownerWallet = await window.arweaveWallet.getActiveAddress()
             data.ownerWallet = ownerWallet
             projectManager.newProject(data)
-            window.location.href = "/"
+            window.location.href = "/?open=" + data.name
         }
         fetchShared()
-    }, [pid])
+    }, [id])
 
-    if (!pid) return <div>loading...</div>
+    if (!id) return <div>loading...</div>
     return <pre>{data}</pre>
 }
