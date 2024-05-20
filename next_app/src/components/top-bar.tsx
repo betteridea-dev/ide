@@ -29,18 +29,28 @@ export default function TopBar() {
     delete project.ownerWallet
     delete project.process
 
-    const luaToRun = `_BETTERIDEA_SHARE = ${JSON.stringify(project)}
-    
-function GetBetterIDEaShare()
-  return _BETTERIDEA_SHARE
-end`
+    const luaToRun = `_BETTERIDEA_SHARE = '${JSON.stringify(project, (k, v) => {
+      if (typeof v === "string") return v.replaceAll('"', '\\"').replaceAll("'", "\'").replaceAll("\n", "\\n")
+      return v
+    }).toString()}'
+   
+Handlers.add(
+  "Get-Better-IDEa-Share",
+  Handlers.utils.hasMatchingTag("Action","Get-BetterIDEa-Share"),
+  function(msg)
+    ao.send({Target=msg.From, Action="BetterIDEa-Share-Response", Data=_BETTERIDEA_SHARE})
+    return _BETTERIDEA_SHARE
+  end
+)   
+`
+    console.log(luaToRun)
     setSharing(true);
     const res = await runLua(luaToRun, processBackup, [
       { name: "BetterIDEa-Function", value: "Share-Project" }
     ]);
     console.log(res)
 
-    const url = `${window.location.origin}/?process=${processBackup}`;
+    const url = `${window.location.origin}/import/${processBackup}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Project URL copied", description: "The URL to the project has been copied to your clipboard" });
     setSharing(false);

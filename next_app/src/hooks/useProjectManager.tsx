@@ -53,12 +53,15 @@ export class ProjectManager {
     this.saveProjects(this.projects);
   }
 
-  newProject({ name, mode, defaultFiletype, ownerWallet }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string }) {
+  newProject({ name, mode, defaultFiletype, ownerWallet, files }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string; files?: { [name: string]: PFile } }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
     if (Object.keys(this.projects).includes(name)) return this.getProject(name);
 
     const proj = new Project({ name, mode, defaultFiletype, ownerWallet });
+    if (files) {
+      proj.files = files;
+    }
     this.projects[name] = proj;
     this.saveProjects(this.projects);
     return proj;
@@ -97,7 +100,7 @@ export class ProjectManager {
 export class Project {
   readonly name: string;
   readonly mode: "AO" | "WARP";
-  readonly files: { [name: string]: PFile };
+  files: { [name: string]: PFile };
   process: string;
   defaultFiletype: "NORMAL" | "NOTEBOOK";
   ownerWallet: string;
