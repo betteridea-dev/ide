@@ -33,7 +33,7 @@ import { luaCompletionProvider } from "@/lib/monaco-completions";
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import Latex from 'react-latex-next';
-// import Plot from "react-plotly.js"
+import { useTheme } from "next-themes";
 
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/router";
@@ -83,6 +83,7 @@ const CodeCell = ({
   const [running, setRunning] = useState(false);
   const [showGfx, setShowGfx] = useState(false);
   const cell = file.content.cells[cellId];
+  const { theme } = useTheme();
 
   async function runCellCode() {
     const p = manager.getProject(project.name);
@@ -140,13 +141,13 @@ const CodeCell = ({
 
   return (
     <div
-      className="rounded-md relative  flex flex-col bg-btr-grey-3"
+      className="rounded-md relative bg-accent/60 flex flex-col border border-border/30"
       onMouseEnter={() => setMouseHovered(true)}
       onMouseLeave={() => setMouseHovered(false)}
     >
       {/* buttons that appear on hover */}
       {mouseHovered && (
-        <div className="absolute  flex justify-center items-center -top-3.5 right-10 z-10 border border-dashed border-btr-grey-1 rounded-full p-0.5 px-1 bg-btr-grey-3">
+        <div className="absolute  flex justify-center items-center -top-3.5 right-10 z-10 border border-dashed rounded-full p-0.5 px-1 bg-accent">
           <Button
             variant="ghost"
             className="p-0 h-6 px-1 rounded-full"
@@ -159,11 +160,11 @@ const CodeCell = ({
               manager.updateFile(project, { file, content: newContent });
             }}
           >
-            <Image src={Icons.deleteSVG} alt="Delete" width={20} height={20} />
+            <Image src={Icons.deleteSVG} alt="Delete" width={20} height={20} className="invert dark:invert-0" />
           </Button>
         </div>
       )}
-      <div className="flex h-full relative justify-center rounded-t-md border-b border-btr-grey-2/70 min-h-[69px]">
+      <div className="flex h-full relative justify-center rounded-t-md border-b border-border/30 min-h-[69px]">
         <Button
           variant="ghost"
           className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]"
@@ -184,7 +185,8 @@ const CodeCell = ({
               "notebook",
               notebookTheme as editor.IStandaloneThemeData
             );
-            monaco.editor.setTheme("notebook");
+            if (theme == "dark") monaco.editor.setTheme("notebook");
+            else monaco.editor.setTheme("vs-light");
             // set font family
             editor.updateOptions({ fontFamily: "DM mono" });
           }}
@@ -200,27 +202,28 @@ const CodeCell = ({
               : cell.code.split("\n").length) * 20
           }
           width="94%"
-          className="min-h-[68px] pt-1 font-btr-code"
+          className="min-h-[68px] pt-0 font-btr-code"
           value={cell.code}
           defaultValue={cell.code}
           language={file.language}
           options={monacoConfig.CodeCell}
         />
       </div>
-      {cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center">
+      {cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center ">
         <Plot className={"rounded-lg mx-auto"} data={cell.output.data}
           layout={{
             ...cell.output.layout,
             dragmode: "pan",
-            plot_bgcolor: "transparent", paper_bgcolor: "#121212",
-            font: { color: "#aaa" },
+            plot_bgcolor: "white",
+            paper_bgcolor: "transparent",
+            font: { color: theme == "dark" ? "#999" : "#000" },
           }} config={{
             scrollZoom: false,
             displayModeBar: "hover",
             displaylogo: false,
             modeBarButtons: [["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["resetScale2d"], ["pan2d"], ["zoom2d"]],
           }} />
-      </div> : <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
+      </div> : <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20">
         {<Ansi useClasses className="font-btr-code">{`${cell.output}`}</Ansi>}
       </pre>}
     </div>
@@ -232,16 +235,17 @@ const VisualCell = (
 ) => {
   const [mouseHovered, setMouseHovered] = useState(false);
   const [editing, setEditing] = useState(false);
+  const { theme } = useTheme();
 
   const cellType = file.content.cells[cellId].type
 
-  return <div data-editing={editing} className="rounded-md relative bg-transparent"
+  return <div data-editing={editing} className="rounded-md relative bg-accent/30"
     onMouseEnter={() => setMouseHovered(true)}
     onMouseLeave={() => setMouseHovered(false)}
   >
     {/* buttons that appear on hover */}
     {mouseHovered && (
-      <div className="absolute flex justify-center items-center -top-3.5 right-10 z-10 border border-dashed border-btr-grey-1 rounded-full p-0.5 px-1 bg-btr-grey-3">
+      <div className="absolute flex justify-center items-center -top-3.5 right-10 z-10 border border-dashed bg-accent rounded-full p-0.5 px-1">
         <Button
           variant="ghost"
           className="h-6 px-1 rounded-full"
@@ -250,7 +254,7 @@ const VisualCell = (
             setEditing(!editing);
           }}
         >
-          <Image src={editing ? Icons.tickSVG : Icons.editSVG} alt="Save Markdown" width={20} height={20} />
+          <Image src={editing ? Icons.tickSVG : Icons.editSVG} alt="Save Markdown" width={20} height={20} className="invert dark:invert-0" />
         </Button>
         <Button
           variant="ghost"
@@ -264,7 +268,7 @@ const VisualCell = (
             manager.updateFile(project, { file, content: newContent });
           }}
         >
-          <Image src={Icons.deleteSVG} alt="Delete" width={20} height={20} />
+          <Image src={Icons.deleteSVG} alt="Delete" width={20} height={20} className="invert dark:invert-0" />
         </Button>
       </div>
     )}
@@ -275,7 +279,8 @@ const VisualCell = (
             "notebook",
             notebookTheme as editor.IStandaloneThemeData
           );
-          monaco.editor.setTheme("notebook");
+          if (theme == "dark") monaco.editor.setTheme("notebook");
+          else monaco.editor.setTheme("vs-light");
           // set font family
           editor.updateOptions({ fontFamily: "DM mono" });
         }}
@@ -290,8 +295,8 @@ const VisualCell = (
             ? 10
             : file.content.cells[cellId].code.split("\n").length) * 20
         }
-        width="94%"
-        className="min-h-[69px] block pt-1 font-btr-code"
+        width="100%"
+        className="min-h-[69px] block p-1 font-btr-code"
         value={file.content.cells[cellId].code}
         defaultValue={file.content.cells[cellId].code}
         language={file.content.cells[cellId].type == "MARKDOWN" ? "markdown" : "latex"}
@@ -332,6 +337,7 @@ const EditorArea = ({
   const globalState = useGlobalState();
   const manager = useProjectManager();
   const [running, setRunning] = useState(false);
+  const { theme } = useTheme();
 
   function addNewCell(position?: number, type?: "CODE" | "MARKDOWN" | "LATEX") {
     const p = manager.getProject(globalState.activeProject);
@@ -474,7 +480,8 @@ const EditorArea = ({
                     "notebook",
                     notebookTheme as editor.IStandaloneThemeData
                   );
-                  monaco.editor.setTheme("notebook");
+                  if (theme == "dark") monaco.editor.setTheme("notebook");
+                  else monaco.editor.setTheme("vs-light");
                 }}
                 value={file ? file.content.cells[0].code : ""}
                 onChange={(value) => {
@@ -612,6 +619,7 @@ export default function Layout() {
                 collapsible
                 collapsedSize={5}
                 minSize={10}
+                maxSize={50}
                 id="terminal-panel"
                 className="relative flex"
               >

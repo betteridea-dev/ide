@@ -39,8 +39,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
           const ownerAddress = manager.projects[pname].ownerWallet;
           return (
             <DropdownMenu key={_}>
-
-              <div data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}>
+              <div data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 mb-2 data-[active=true]:mb-0 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}>
                 <Icons.folder
                   data-collapsed={collapsed}
                   data-not-owned={!ownedByActiveWallet}
@@ -80,7 +79,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                 )}
               </div>
               {active && (
-                <div className="flex flex-col items-center justify-center px-3 w-full">
+                <div className="flex flex-col items-center justify-center px-3 mb-3 w-full">
                   <div className="flex justify-between items-center w-full">
                     <NewFileDialog manager={manager} project={pname} />
                     <DropdownMenuTrigger className="cursor-pointer hover:bg-accent/70 px-2">
@@ -150,7 +149,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
       <Button
         data-active={globalState.activeFile == "Settings"}
         variant="ghost"
-        className="rounded-none p-1 text-btr-grey-1 hover:bg-btr-grey-3 w-full data-[active=true]:bg-btr-grey-3 flex justify-center"
+        className="rounded-none p-1  w-full data-[active=true]:bg-accent flex justify-center"
         onClick={() => {
           globalState.setActiveFile("Settings");
         }}

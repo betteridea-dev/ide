@@ -11,6 +11,8 @@ import { toast } from "./ui/use-toast";
 import { useState, useRef, useEffect } from "react";
 import { toast as sonnerToast } from "sonner";
 import { sendGAEvent } from "@next/third-parties/google";
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 
 interface TInboxMessage {
   Data: string;
@@ -55,7 +57,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             console.log(data);
             fetchFlag = true;
             // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
-            sonnerToast.custom((id) => <div className="bg-btr-green text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
+            sonnerToast.custom((id) => <div className="bg-primary text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
             setCommandOutputs([data, ...commandOutputs]);
           }
         });
@@ -93,28 +95,28 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full h-full">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full">
       {globalState.activeProject && <TabsList className="flex justify-start p-0 bg-transparent">
         {globalState.activeMode == "AO" && (
-          <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-btr-green">
+          <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
             Terminal
           </TabsTrigger>
         )}
-        {file && file.type == "NORMAL" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-btr-green">
+        {file && file.type == "NORMAL" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-primary">
           Output
         </TabsTrigger>}
         {globalState.activeMode == "AO" && (
-          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-btr-green" onClick={getInbox}>
-            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
+          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-primary" onClick={getInbox}>
+            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1 bg-black rounded-full" /> : `(${inbox.length})`}
           </TabsTrigger>
         )}
 
       </TabsList>}
       <Button variant="link" className="ml-auto absolute -right-1 -top-1" onClick={toggle}>
-        <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80" />
+        <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
       </Button>
 
-      {globalState.activeProject && <div className="px-1">
+      {globalState.activeProject && <div className="px-2">
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center">
             <div className="block">{prompt}</div>&nbsp;
@@ -124,7 +126,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
               ref={terminalInputRef}
               data-running={running}
               disabled={running}
-              className="p-0.5 pr-0 grow block overflow-x-scroll  border-white focus-visible:ring-transparent disabled:text-btr-grey-1 focus:text-btr-green outline-none "
+              className="p-0.5 pr-0 grow block overflow-x-scroll border border-border/20 focus-visible:ring-transparent disabled:text-muted text-muted focus:text-primary outline-none "
               onKeyDown={async (e) => {
                 // console.log(e);
                 if (e.key === "Enter") {
@@ -187,7 +189,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           </div>
           {running && (
             <div className="">
-              &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block" />
+              &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block bg-black rounded-full" />
             </div>
           )}
           {
@@ -201,18 +203,20 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           }
         </TabsContent>
         <TabsContent value="output">
-          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <></>}</pre>
+          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <>...</>}</pre>
         </TabsContent>
-        <TabsContent value="inbox" className="flex flex-col gap-1 overflow-y-scroll max-h-[68vh]">
-          {inbox.map((msg, _) => (
-            <div key={_} className="text-sm p-2 font-btr-code text-white/50 border border-btr-grey-2/70" onClick={() => showFullMessage(_)}>
-              <span className="text-red-300/50 text-xs">{tsToDate(msg.Timestamp)} </span>
-              <br />
-              <span className="text-white/70 text-sm">{msg.From}</span> <span className="text-white/70">{msg.Action && `(${msg.Action})`}</span>
-              <br />
-              <span className={msg.Data ? "text-green-300" : "text-white/30"}>{msg.Data ? <Ansi className="font-btr-code">{msg.Data}</Ansi> : "Message Without Data Field"}</span>
-            </div>
-          ))}
+        <TabsContent value="inbox" className="h-[35vh]">
+          <ScrollArea className="h-[35vh]">
+            {inbox.map((msg, _) => (
+              <div key={_} className="text-sm p-2 my-2 font-btr-code  border" onClick={() => showFullMessage(_)}>
+                <span className="text-accent text-xs">{tsToDate(msg.Timestamp)} </span>
+                <br />
+                <span className="text-sm">{msg.From}</span> <span className="">{msg.Action && `(${msg.Action})`}</span>
+                <br />
+                <span className={msg.Data ? "text-primary" : "text-muted"}>{msg.Data ? <Ansi className="font-btr-code">{msg.Data}</Ansi> : "Message Without Data Field"}</span>
+              </div>
+            ))}
+          </ScrollArea>
         </TabsContent>
       </div>}
     </Tabs>
