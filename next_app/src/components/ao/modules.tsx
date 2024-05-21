@@ -66,6 +66,7 @@ export default function Modules() {
                     {code}
                 </pre>
                 <Button disabled={loading} onClick={async () => {
+                    if (!code) return toast({ title: "No module selected", description: "You need to select a module to load" });
                     setLoading(true);
                     const project = projectManager.getProject(globalState.activeProject);
                     const res = await runLua(code, project.process, [

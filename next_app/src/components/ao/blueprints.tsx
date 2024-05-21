@@ -68,6 +68,7 @@ export default function Blueprints() {
                     {code}
                 </pre>
                 <Button disabled={loading} onClick={async () => {
+                    if (!code) return toast({ title: "No code to load", description: "You need to select a blueprint to load" });
                     setLoading(true);
                     const project = projectManager.getProject(globalState.activeProject);
                     const res = await runLua(code, project.process, [
