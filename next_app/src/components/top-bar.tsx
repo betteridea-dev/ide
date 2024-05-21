@@ -64,17 +64,17 @@ Handlers.add(
         </Link>
 
         <Link href="/">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button variant="ghost" className="text-md">
             Home
           </Button>
         </Link>
         <Link href="https://docs.betteridea.dev" target="_blank">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button variant="ghost" className="text-md">
             Docs
           </Button>
         </Link>
         <Link href="https://learn.betteridea.dev" target="_blank">
-          <Button variant="link" className="text-btr-grey-1 text-md hover:text-white">
+          <Button variant="ghost" className="text-md">
             Learn
           </Button>
         </Link>
@@ -85,7 +85,7 @@ Handlers.add(
         {globalState.activeMode == "AO"
           && globalState.activeProject && <>
             <Button variant="ghost" className="p-2.5 h-10" onClick={shareProject}>
-              <Image src={sharing ? Icons.loadingSVG : Icons.sendSVG} alt="Send" width={20} height={20} className={sharing && "animate-spin"} />
+              <Image src={sharing ? Icons.loadingSVG : Icons.sendSVG} alt="Send" width={20} height={20} className={`${sharing && "animate-spin bg-foreground rounded-full"}`} />
             </Button>
             <Modules />
             <Blueprints />

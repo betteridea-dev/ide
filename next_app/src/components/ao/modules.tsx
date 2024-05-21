@@ -35,7 +35,7 @@ export default function Modules() {
             setOpen(true);
         }}>
             <Button variant="ghost" className="p-2 h-10">
-                <Image src={Icons.moduleSVG} alt="Modules" width={25} height={25} />
+                <Image src={Icons.moduleSVG} alt="Modules" width={25} height={25} className="invert dark:invert-0 opacity-70" />
             </Button>
         </DialogTrigger>
         <DialogContent className="">

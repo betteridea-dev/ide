@@ -6,24 +6,24 @@ export default function FileBar() {
   const globalState = useGlobalState();
 
   return (
-    <div className="flex gap-0.5 items-start overflow-scroll w-full z-0">
+    <div className="flex gap-0.5 items-start overflow-scroll border-b w-full z-0">
       {globalState.openedFiles.map((file, _) => (
         <Button
           key={_}
           data-active={file == globalState.activeFile}
           variant="ghost"
-          className="p-2 w-fit rounded-none border-b mb-1 flex items-center justify-evenly gap-1  data-[active=true]:text-btr-green data-[active=true]:border-btr-green"
+          className="p-2 w-fit rounded-none flex items-center justify-evenly gap-1  data-[active=true]:bg-primary data-[active=true]:text-white"
           onClick={() => {
             globalState.setActiveFile(file);
           }}
         >
           {file}
-          <div className="text-btr-grey-1 rounded-full hover:bg-btr-grey-1 hover:text-black " onClick={
+          <div className="hover:bg-white hover:text-primary rounded-sm" onClick={
             (e) => {
               e.stopPropagation();
               globalState.closeFile(file)
             }
-          }><Icons.close size={13} /></div>
+          }><Icons.close size={13} className="" /></div>
         </Button>
       ))}
     </div>

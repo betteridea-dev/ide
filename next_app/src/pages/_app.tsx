@@ -21,7 +21,7 @@ declare global {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className="font-btr-normal bg-btr-black-3 min-h-screen">
+    <div className="font-btr-normal min-h-screen">
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         {/* <GoogleAnalytics trackPageViews gaMeasurementId="G-7H9SL00HCC" /> */}
         <GoogleAnalytics gaId="G-7H9SL00HCC" />
