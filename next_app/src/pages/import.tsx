@@ -25,9 +25,9 @@ export default function Import() {
                 ]
             })
             // console.log(r)
-            console.log(r.Messages[0].Data.replaceAll("\n", "\\n"))
-            setData(r.Messages[0].Data.replaceAll("\n", "\\n"))
-            const data = JSON.parse(`${r.Messages[0].Data.replaceAll("\n", "\\n")}`)
+            console.log(decodeURIComponent(r.Messages[0].Data))
+            setData(decodeURIComponent(r.Messages[0].Data))
+            const data = JSON.parse(`${decodeURIComponent(r.Messages[0].Data)}`)
             console.log(data)
             try {
                 await window.arweaveWallet.getActiveAddress()

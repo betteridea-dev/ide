@@ -34,8 +34,9 @@ export default function Modules() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <Button variant="ghost" className="p-2 h-10">
+            <Button variant="ghost" className="p-2 h-10 flex-col">
                 <Image src={Icons.moduleSVG} alt="Modules" width={25} height={25} className="invert dark:invert-0 opacity-70" />
+                <div className="text-[12px]">MODULES</div>
             </Button>
         </DialogTrigger>
         <DialogContent className="">

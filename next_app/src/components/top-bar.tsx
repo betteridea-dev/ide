@@ -11,6 +11,7 @@ import Blueprints from "./ao/blueprints";
 import Modules from "./ao/modules";
 import { useProjectManager } from "@/hooks";
 import { parseOutupt, runLua } from "@/lib/ao-vars";
+import { unescape } from "querystring";
 
 export default function TopBar() {
   const router = useRouter();
@@ -32,26 +33,30 @@ export default function TopBar() {
     delete project.ownerWallet
     delete project.process
 
-    const luaToRun = `_BETTERIDEA_SHARE = '${JSON.stringify(project, (k, v) => {
-      if (typeof v === "string") return v.replaceAll('"', '\\"').replaceAll("'", "\'").replaceAll("\n", "\\n")
-      return v
-    }).toString()}'
-   
-Handlers.add(
-  "Get-Better-IDEa-Share",
-  Handlers.utils.hasMatchingTag("Action","Get-BetterIDEa-Share"),
-  function(msg)
-    ao.send({Target=msg.From, Action="BetterIDEa-Share-Response", Data=_BETTERIDEA_SHARE})
-    return _BETTERIDEA_SHARE
-  end
-)   
-`
+    // const stringProj = JSON.stringify(project, null, 2).replaceAll("\\n","")
+    const urlEncodedJson = encodeURIComponent(JSON.stringify(project)).replaceAll("'", "\\'")
+
+    const luaToRun = `_BETTERIDEA_SHARE = '${urlEncodedJson}'
+
+    Handlers.add(
+      "Get-Better-IDEa-Share",
+      Handlers.utils.hasMatchingTag("Action","Get-BetterIDEa-Share"),
+      function(msg)
+        ao.send({Target=msg.From, Action="BetterIDEa-Share-Response", Data=_BETTERIDEA_SHARE})
+        return _BETTERIDEA_SHARE
+      end
+    )   
+    `
     console.log(luaToRun)
     setSharing(true);
     const res = await runLua(luaToRun, processBackup, [
       { name: "BetterIDEa-Function", value: "Share-Project" }
     ]);
     console.log(res)
+
+    if (res.Error) {
+      return toast({ title: "Error sharing project", description: res.Error });
+    }
 
     const url = `${window.location.origin}/import?id=${processBackup}`;
     navigator.clipboard.writeText(url);
@@ -108,7 +113,7 @@ Handlers.add(
         </Button> */}
 
         <SwitchCustom
-          className="ml-5"
+          className="ml-5 hidden"
           onCheckedChange={(checked) => {
             globalState.activeMode == "AO" ? globalState.setActiveMode("WARP") : globalState.setActiveMode("AO");
             // checked ? router.replace(`/warp`) : router.replace(`/ao`);
