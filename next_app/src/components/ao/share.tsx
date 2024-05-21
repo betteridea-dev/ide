@@ -75,7 +75,7 @@ export default function Share() {
     }
 
     const p = projectManager.getProject(globalState.activeProject);
-    const shortProcess = p.process.slice(0, 5) + "..." + p.process.slice(-5);
+    const shortProcess = p.process ? p.process.slice(0, 5) + "..." + p.process.slice(-5) : "";
 
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger onClick={(e) => {
