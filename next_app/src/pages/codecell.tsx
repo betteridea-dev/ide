@@ -11,6 +11,7 @@ import Ansi from "ansi-to-react";
 import { toast } from "sonner"
 import { useSearchParams } from "next/navigation";
 import { GraphQLClient, gql } from "graphql-request";
+import { useTheme } from "next-themes";
 
 export default function CodeCell() {
     const searchParams = useSearchParams();
@@ -22,6 +23,7 @@ export default function CodeCell() {
     const [code, setCode] = useState<string>('print("Hello AO!")');
     const [output, setOutput] = useState<string>("");
     const [appname, setAppname] = useState<string>("");
+    const { theme } = useTheme();
 
     console.log("autoconn", autoconnect)
 
@@ -175,13 +177,13 @@ export default function CodeCell() {
     }, [aosProcess, code, appname])
 
     const Loader = () => {
-        return <div className="absolute top-0 left-0 w-full h-full bg-btr-grey-3 z-50 flex justify-center items-center" suppressHydrationWarning>
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-btr-green" suppressHydrationWarning></div>
+        return <div className="absolute top-0 left-0 w-full h-full z-50 flex justify-center items-center" suppressHydrationWarning>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
         </div>
     }
 
     return <div suppressHydrationWarning
-        className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 bg-btr-grey-3"
+        className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 "
     >
         {autoconnect == undefined && <Loader />}
         {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
@@ -197,7 +199,7 @@ export default function CodeCell() {
                     data-running={running}
                     width={30}
                     height={30}
-                    className="data-[running=true]:animate-spin"
+                    className="data-[running=true]:animate-spin data-[running=true]:bg-black rounded-full"
                 />
             </Button>
             <Editor
@@ -206,7 +208,9 @@ export default function CodeCell() {
                         "notebook",
                         notebookTheme as editor.IStandaloneThemeData
                     );
-                    monaco.editor.setTheme("notebook");
+                    // monaco.editor.setTheme("notebook");
+                    if (theme == "dark") monaco.editor.setTheme("notebook");
+                    else monaco.editor.setTheme("vs-light");
                     // set font family
                     editor.updateOptions({ fontFamily: "DM mono" });
                 }}

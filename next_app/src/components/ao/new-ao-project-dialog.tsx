@@ -30,7 +30,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [newProjName, setNewProjName] = useState("");
   const [processUsed, setProcessUsed] = useState("");
   const [newProcessName, setNewProcessName] = useState("");
-  const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NORMAL");
+  const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NOTEBOOK");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [loadingProcess, setLoadingProcess] = useState(false);
 
@@ -165,16 +165,27 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
           onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
-        <RadioGroup defaultValue="NORMAL" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
+        <RadioGroup defaultValue="NOTEBOOK" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
           <div>
             What type of files do you want to use? <span className="text-sm text-muted">(can be changed later)</span>
           </div>
 
           <div className="flex flex-col gap-2 items-center justify-center">
+            <div className="flex flex-row gap-0 items-center justify-between w-full">
+              <div className="flex items-center space-x-2 p-2">
+                <RadioGroupItem value="NOTEBOOK" id="option-one" className="" />
+                <Label data-selected={defaultFiletype == "NOTEBOOK"} className="data-[selected=true]:text-primary" htmlFor="option-one">
+                  Notebook
+                </Label>
+              </div>
+
+              <div className="text-sm  col-span-2 text-right">Split code in cells - For Rapid development and testing</div>
+            </div>
+
             <div className="flex flex-row items-center gap-4 justify-between w-full">
               <div className="flex items-center space-x-2 p-2">
-                <RadioGroupItem value="NORMAL" id="option-one" />
-                <Label data-selected={defaultFiletype == "NORMAL"} className="data-[selected=true]:text-primary" htmlFor="option-one">
+                <RadioGroupItem value="NORMAL" id="option-two" />
+                <Label data-selected={defaultFiletype == "NORMAL"} className="data-[selected=true]:text-primary" htmlFor="option-two">
                   Regular
                 </Label>
               </div>
@@ -182,16 +193,6 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
               <div className="text-sm  col-span-2">Write code line by line - simple & efficient</div>
             </div>
 
-            <div className="flex flex-row gap-0 items-center justify-between w-full">
-              <div className="flex items-center space-x-2 p-2">
-                <RadioGroupItem value="NOTEBOOK" id="option-two" />
-                <Label data-selected={defaultFiletype == "NOTEBOOK"} className="data-[selected=true]:text-primary" htmlFor="option-two">
-                  Notebook
-                </Label>
-              </div>
-
-              <div className="text-sm   col-span-2 text-right">Split code in cells - For Rapid development and testing</div>
-            </div>
           </div>
         </RadioGroup>
 

@@ -6,9 +6,8 @@ import { Separator } from "./ui/separator";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { ScrollArea } from "./ui/scroll-area";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
+import { MoonIcon, ReloadIcon, SunIcon } from "@radix-ui/react-icons"
 import { useTheme } from "next-themes"
-
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,6 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Combobox } from "./ui/combo-box";
+import { useEffect, useState } from "react";
+import { GraphQLClient, gql } from "graphql-request";
+import { spawnProcess } from "@/lib/ao-vars";
+import { Icons } from "plotly.js";
 
 function Title({ title }: { title: string }) {
   return (
@@ -30,9 +34,64 @@ function Title({ title }: { title: string }) {
 export default function SettingsTab() {
   const manager = useProjectManager();
   const globalState = useGlobalState();
+  const [processUsed, setProcessUsed] = useState("");
   const { theme, setTheme } = useTheme()
+  const [processes, setProcesses] = useState([{ label: "+ Create New", value: "NEW_PROCESS" }]);
+  const [newProcessName, setNewProcessName] = useState("");
+  const [spawning, setSpawning] = useState(false);
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
+
+
+  async function fetchProcesses() {
+    const client = new GraphQLClient("https://arweave.net/graphql");
+    const address = await window.arweaveWallet.getActiveAddress();
+
+    const query = gql`
+      query {
+        transactions(owners: "${address}", tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
+          edges {
+            node {
+              id
+              tags {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const res: any = await client.request(query);
+
+    const ids = res.transactions.edges.map((edge: any) => ({
+      label: `${edge.node.tags[2].value} (${edge.node.id})`,
+      value: edge.node.id,
+    }));
+
+    setProcesses([{ label: "+ Create New", value: "NEW_PROCESS" }, ...ids]);
+  }
+
+  useEffect(() => {
+    fetchProcesses();
+  }, []);
+
+  async function setProcess() {
+    const p = manager.getProject(globalState.activeProject);
+    if (processUsed === "NEW_PROCESS") {
+      setSpawning(true);
+      const np = await spawnProcess(newProcessName, [
+        { name: "File-Type", value: p.defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
+      ]);
+      manager.setProjectProcess(p, np);
+      setSpawning(false);
+    } else {
+      manager.setProjectProcess(p, processUsed);
+    }
+    setNewProcessName("");
+    setProcessUsed("");
+  }
 
   return (
     <ScrollArea className="w-full h-full">
@@ -42,13 +101,25 @@ export default function SettingsTab() {
         </div> */}
 
         <Title title="CURRENT PROJECT" />
-        <div className="my-8 grid grid-cols-3">
+        <div className="my-8 grid grid-cols-3 items-center">
           <div>Owner Wallet</div>
           <div className="col-span-2">{project.ownerWallet || "NA"}</div>
-          <div>Process</div>
+          <div>Current Process</div>
           <div className="col-span-2">{project.process || "NA"}</div>
           <div>Default Filetype</div>
           <div className="col-span-2">{project.defaultFiletype || "NA"}</div>
+          <div className="col-span-3 h-5"></div>
+          <div>Change Process</div>
+          <div className="col-span-2 flex flex-col gap-1 items-center">
+            <Combobox placeholder="Select Process" disabled={spawning} options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
+            {processUsed == "NEW_PROCESS" && <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-[83%]" onChange={(e) => { setNewProcessName(e.target.value) }} />}
+            <Button size="sm" disabled={
+              processUsed === "" || (processUsed === "NEW_PROCESS" && newProcessName === "") || spawning
+            } onClick={setProcess}>
+              {spawning && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm
+            </Button>
+          </div>
         </div>
 
         <Title title="GLOBAL" />
