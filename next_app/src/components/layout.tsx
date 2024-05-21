@@ -38,6 +38,7 @@ import { useTheme } from "next-themes";
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/router";
 import { dryrun } from "@permaweb/aoconnect";
+import { title } from "process";
 const Plot = dynamic(
   () =>
     import('react-plotly.js'),
@@ -106,9 +107,15 @@ const CodeCell = ({
       { name: "File-Type", value: "Notebook" }
     ]);
     console.log(result);
-    if (result.Error) {
-      console.log(result.Error);
-      fileContent.cells[cellId].output = result.Error;
+
+    // @ts-ignore
+    if (result.Error || result.error) {
+      // @ts-ignore
+      console.log(result.Error || result.error);
+      // @ts-ignore
+      fileContent.cells[cellId].output = result.Error || result.error;
+      // @ts-ignore
+      toast({ title: "Error", description: result.Error || result.error })
     } else {
       const outputData = result.Output.data;
       if (outputData.output) {
@@ -177,7 +184,7 @@ const CodeCell = ({
             data-running={running}
             width={30}
             height={30}
-            className="data-[running=true]:animate-spin"
+            className="data-[running=true]:animate-spin data-[running=true]:bg-black rounded-full"
           />
         </Button>
         <Editor
