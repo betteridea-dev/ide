@@ -25,7 +25,7 @@ export function NewFileDialog({ manager, project }: { manager: ProjectManager; p
   return (
     <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
       <DialogTrigger>
-        <Button variant="ghost" className="rounded-sm py-1 px-2 h-6 justify-start w-full">
+        <Button variant="ghost" className="rounded-none hover:bg-accent/30 py-1 px-2 h-6 w-full grow">
           + new file
         </Button>
       </DialogTrigger>

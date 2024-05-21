@@ -129,7 +129,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
       setProcessUsed("");
       setPopupOpen(e)
     }}>
-      <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3"
+      <DialogTrigger data-collapsed={collapsed} className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
         onClick={async (e) => {
           e.preventDefault()
           try {
@@ -146,7 +146,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
           }
         }}
       >
-        <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className="fill-btr-grey-1 text-black" />
+        <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className=" " />
 
         {!collapsed && "New Project"}
       </DialogTrigger>
