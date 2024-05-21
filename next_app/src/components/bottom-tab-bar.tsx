@@ -40,6 +40,12 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
 
   useEffect(() => {
+    if (globalState.activeMode == "AO") {
+      setCommandOutputs([]);
+    }
+  }, [globalState.activeProject]);
+
+  useEffect(() => {
     async function fetchNewInbox() {
       if (globalState.activeMode == "WARP") return;
       if (!project || !project.process) return;
@@ -95,7 +101,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} className="w-full">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className="w-full">
       {globalState.activeProject && <TabsList className="flex justify-start p-0 bg-transparent">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
