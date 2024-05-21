@@ -78,7 +78,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                   </div>
                 )}
               </div>
-              {active && (
+              {active && !collapsed && (
                 <div className="flex flex-col items-center justify-center px-3 mb-3 w-full">
                   <div className="flex justify-between items-center w-full">
                     <NewFileDialog manager={manager} project={pname} />
