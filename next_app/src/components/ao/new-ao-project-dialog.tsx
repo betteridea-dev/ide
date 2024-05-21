@@ -33,6 +33,27 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NOTEBOOK");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [loadingProcess, setLoadingProcess] = useState(false);
+  const [searchName, setSearchName] = useState("");
+  const [searchNameProxy, setSearchNameProxy] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState<any>(0)
+
+  useEffect(() => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    setSearchTimeout(setTimeout(() => {
+      setSearchName(searchNameProxy);
+    }, 690))
+    return () => { clearTimeout(searchTimeout) }
+  }, [searchNameProxy])
+
+  useEffect(() => {
+    if (!popupOpen) setSearchName("");
+  }, [popupOpen]);
+
+  // useEffect(() => {
+  //   if (searchName) {
+  //     fetchProcessesWithName(searchName);
+  //   }
+  // }, [searchName]);
 
   async function createProject() {
     if (!newProjName)
@@ -95,7 +116,10 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
     const query = gql`
       query {
-        transactions(owners: "${address}", tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
+        transactions(owners: "${address}",
+        tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }],
+        first: 999
+      ) {
           edges {
             node {
               id
@@ -111,12 +135,94 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
     const res: any = await client.request(query);
 
-    const ids = res.transactions.edges.map((edge: any) => ({
-      label: `${edge.node.tags[2].value} (${edge.node.id})`,
-      value: edge.node.id,
-    }));
+    const ids = res.transactions.edges.map((edge: any) => {
+      const name = edge.node.tags.find((tag: any) => tag.name == "Name")?.value || "";
+      // console.log(name)
+      return {
+        label: `${name} (${edge.node.id})`,
+        value: edge.node.id,
+      }
+    });
 
     setProcesses([{ label: "+ Create New", value: "NEW_PROCESS" }, ...ids]);
+  }
+
+  async function fetchProcessesWithName(searchName: string) {
+    console.log("fetching processes with name or id", searchName)
+    const client = new GraphQLClient("https://arweave.net/graphql");
+    const address = await window.arweaveWallet.getActiveAddress();
+
+    const queryName = gql`
+      query {
+        transactions(owners: "${address}",
+        tags: [
+          { name: "Data-Protocol", values: ["ao"] },
+          { name: "Type", values: ["Process"] },
+          {name:"Name", values: ["${searchName}"]}
+        ]
+      ) {
+          edges {
+            node {
+              id
+              tags {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const resName: any = await client.request(queryName);
+
+    const idsName = resName.transactions.edges.map((edge: any) => {
+      const name = edge.node.tags.find((tag: any) => tag.name == "Name").value;
+      console.log(name)
+      return {
+        label: `${name} (${edge.node.id})`,
+        value: edge.node.id,
+      }
+    });
+
+    const queryId = gql`
+      query {
+        transactions(owners: "${address}",
+        tags: [
+          { name: "Data-Protocol", values: ["ao"] },
+          { name: "Type", values: ["Process"] },
+        ],
+        ids: ["${searchName}"]
+      ) {
+          edges {
+            node {
+              id
+              tags {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const resId: any = await client.request(queryId);
+
+    const idsId = resId.transactions.edges.map((edge: any) => {
+      const name = edge.node.tags.find((tag: any) => tag.name == "Name").value;
+      console.log(name)
+      return {
+        label: `${name} (${edge.node.id})`,
+        value: edge.node.id,
+      }
+    });
+
+    const ids = [{ label: "+ Create New", value: "NEW_PROCESS" }, ...idsName, ...idsId];
+    console.log(ids)
+
+    setProcesses(ids);
+
   }
 
   useEffect(() => {
@@ -159,7 +265,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-        <Combobox placeholder="Select Process" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
+        <Combobox className="p-0 max-h-[50vh]" placeholder="Select Process (or search with ID)" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setSearchNameProxy(e)} />
 
         {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
 

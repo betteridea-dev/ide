@@ -1,14 +1,16 @@
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTimeout } from "usehooks-ts";
+import { GraphQLClient, gql } from "graphql-request";
 
-export function Combobox({ placeholder, options, onChange, onOpen, disabled = false }: { placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void; disabled?: boolean }) {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+export function Combobox({ className = "", placeholder, options, onChange, onOpen, disabled = false, onSearchChange }: { className?: string; placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void; disabled?: boolean; onSearchChange?: (e: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
 
   return (
     <Popover
@@ -25,14 +27,14 @@ export function Combobox({ placeholder, options, onChange, onOpen, disabled = fa
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-full  p-0">
-        <Command className="w-full">
-          <CommandInput placeholder={placeholder} />
+      <PopoverContent className={cn(className, "w-full overflow-scroll")}>
+        <Command className={cn(className, "w-full overflow-scroll")}>
+          <CommandInput placeholder={placeholder} onChangeCapture={(e) => onSearchChange(e.currentTarget.value)} />
           <CommandEmpty>No process found.</CommandEmpty>
           <CommandGroup>
             {options.map((option) => (
               <CommandItem
-                key={option.value}
+                key={option.label}
                 value={option.value}
                 onSelect={() => {
                   setValue(option.label === value ? "" : option.label);
