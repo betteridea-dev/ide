@@ -24,7 +24,10 @@ export default function TopBar() {
     const project = projectManager.getProject(globalState.activeProject);
     if (!project) return toast({ title: "Project not found", description: "The active project was not found" });
     if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
-
+    const ownerAddress = project.ownerWallet;
+    const activeAddress = await window.arweaveWallet.getActiveAddress();
+    const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+    if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
     const processBackup = project.process
     delete project.ownerWallet
     delete project.process

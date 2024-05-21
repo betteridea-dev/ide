@@ -144,6 +144,10 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                       description: "Please assign a process id from project settings before trying to run Lua code",
                     });
                   }
+                  const ownerAddress = project.ownerWallet;
+                  const activeAddress = await window.arweaveWallet.getActiveAddress();
+                  const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                  if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                   if (code) {
                     console.log("running", code);
                     setRunning(true);

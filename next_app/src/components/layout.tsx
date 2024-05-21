@@ -37,6 +37,7 @@ import { useTheme } from "next-themes";
 
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/router";
+import { dryrun } from "@permaweb/aoconnect";
 const Plot = dynamic(
   () =>
     import('react-plotly.js'),
@@ -524,7 +525,25 @@ export default function Layout() {
 
   const { open } = router.query;
 
+  // const readGetRequests = async () => {
+  //   try {
+  //     console.log("run")
+  //     const { Error, Messages } = await dryrun({
+  //       // process: "4_jJUtiNjq5Xrg8OMrEDo-_bud7p5vbSJh1e69VJ76U",
+  //       process: "WSXUI2JjYUldJ7CKq9wE1MGwXs-ldzlUlHOQszwQe0s",
+  //       tags: [{ name: "Read", value: "GET_REQUESTS" }],
+  //     })
+  //     console.log("yooo", Messages)
+  //     if (Error) throw Error
+  //     if (!Messages[0] || !Messages[0].Data) throw new Error("Unable to read the message")
+  //     return Messages[0].Data
+  //   } catch (error) {
+  //     throw new Error(`Error in dryrun GET: ${error}`)
+  //   }
+  // }
+
   useEffect(() => {
+    // readGetRequests()
     if (!mounted && monaco) {
       monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
       setMounted(true)
