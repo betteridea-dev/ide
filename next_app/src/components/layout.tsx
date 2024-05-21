@@ -349,7 +349,9 @@ const EditorArea = ({
     const oldContent = f.content;
     const id = v4();
     const newCellContent = {
-      code: type == "CODE" ? 'print("Hello AO!")' : type == "MARKDOWN" ? "# Hello AO!" : "New LaTeX Cell",
+      code: type == "CODE" ? 'print("Hello AO!")' : type == "MARKDOWN" ? "# Hello AO!" : `The LaTeX cell supports adding Math equations through MathTex syntax
+
+$$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
       output: "",
       type: type,
     };

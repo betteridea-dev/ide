@@ -167,7 +167,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
           onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
         <RadioGroup defaultValue="NORMAL" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
           <div>
-            What type of files do you want to use? <span className="text-sm text-btr-grey-1">(can be changed later)</span>
+            What type of files do you want to use? <span className="text-sm text-muted">(can be changed later)</span>
           </div>
 
           <div className="flex flex-col gap-2 items-center justify-center">
@@ -179,7 +179,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
                 </Label>
               </div>
 
-              <div className="text-sm  text-btr-grey-1 col-span-2">Write code line by line - simple & efficient</div>
+              <div className="text-sm  col-span-2">Write code line by line - simple & efficient</div>
             </div>
 
             <div className="flex flex-row gap-0 items-center justify-between w-full">
@@ -190,12 +190,12 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
                 </Label>
               </div>
 
-              <div className="text-sm  text-btr-grey-1 col-span-2 text-right">Split code in cells - For Rapid development and testing</div>
+              <div className="text-sm   col-span-2 text-right">Split code in cells - For Rapid development and testing</div>
             </div>
           </div>
         </RadioGroup>
 
-        <Button disabled={loadingProcess} className="bg-btr-green" onClick={createProject}>
+        <Button disabled={loadingProcess} className="bg-primary" onClick={createProject}>
           {loadingProcess && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           Create Project
         </Button>

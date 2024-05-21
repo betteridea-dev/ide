@@ -40,8 +40,8 @@ export function NewWarpProjectDialog({ manager, collapsed }: { manager: ProjectM
   return (
     <>
       <Dialog open={popupOpen} onOpenChange={(e) => setPopupOpen(e)}>
-        <DialogTrigger data-collapsed={collapsed} className="flex text-btr-grey-1 hover:text-white gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center w-full p-2 hover:bg-btr-grey-3">
-          <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className="fill-btr-grey-1 text-black" />
+        <DialogTrigger data-collapsed={collapsed} className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2">
+          <Icons.sqPlus data-collapsed={collapsed} height={25} width={25} className="" />
 
           {!collapsed && "New Project"}
         </DialogTrigger>
@@ -51,7 +51,7 @@ export function NewWarpProjectDialog({ manager, collapsed }: { manager: ProjectM
             <DialogDescription>Add details of your project.</DialogDescription>
           </DialogHeader>
           <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
-          <Button className="bg-btr-green" onClick={createProject}>
+          <Button className="" onClick={createProject}>
             Create Project
           </Button>
         </DialogContent>

@@ -19,7 +19,7 @@ export default function Warp() {
               <br />
               <div>
                 Luckily the entire IDE is opensource on{" "}
-                <Link className="text-btr-green" href="https://github.com/betteridea-dev">
+                <Link className="text-primary" href="https://github.com/betteridea-dev">
                   Github
                 </Link>
                 , we would love if you could contribute something ;)

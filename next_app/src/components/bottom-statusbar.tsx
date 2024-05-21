@@ -40,7 +40,7 @@ export default function BottomStatusbar() {
   }, [autoconnect]);
 
   return (
-    <div className="h-[25px] flex items-center overflow-clip gap-0.5 px-1 text-xs">
+    <div className="h-[25px] flex items-center overflow-clip gap-0.5 px-1 text-xs border-t">
       <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-black data-[connected=false]:bg-btr-green text-xs" onClick={connectWallet}>
         {walletAddress ? `Connected: ${walletAddress}` : "Connect"}
       </Button>
