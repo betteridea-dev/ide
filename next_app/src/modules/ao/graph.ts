@@ -16,11 +16,11 @@ function SetTitle(graph, title)
     graph.layout.title = title
 end
 
-function SetXAxisTitle(graph, title)
+function SetXLabel(graph, title)
     graph.layout.xaxis.title = title
 end
 
-function SetYAxisTitle(graph, title)
+function SetYLabel(graph, title)
     graph.layout.yaxis.title = title
 end
 
