@@ -35,7 +35,7 @@ export default function Modules() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <div className="flex flex-col items-center justify-center hover:opacity-70 active:opacity-50">
+            <div className="flex flex-col items-center justify-center opacity-50 hover:opacity-80 active:opacity-100">
                 {/* <Image src={Icons.modulesSVG} alt="Modules" width={20} height={20} className="my-1 hover:invert" /> */}
                 <LucidIcons.modules className="my-1 fill-foreground" />
                 <div className="text-xs">MODULES</div>

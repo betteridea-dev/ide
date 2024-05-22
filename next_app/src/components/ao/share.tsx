@@ -91,7 +91,7 @@ export default function Share() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <div className="flex flex-col items-center justify-start hover:opacity-70 active:opacity-50">
+            <div className="flex flex-col items-center justify-start opacity-50 hover:opacity-80 active:opacity-100">
                 {/* <Image src={Icons.shareSVG} alt="Send" width={22} height={22} className="my-2" /> */}
                 <LucidIcons.share className="my-2 fill-foreground" />
                 <div className="text-xs">SHARE</div>
