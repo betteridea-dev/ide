@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useTimeout } from "usehooks-ts";
 import { GraphQLClient, gql } from "graphql-request";
 
-export function Combobox({ className = "", placeholder, options, onChange, onOpen, disabled = false, onSearchChange }: { className?: string; placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void; disabled?: boolean; onSearchChange?: (e: string) => void }) {
+export function Combobox({ className = "", placeholder, options, onChange, onOpen, disabled = false, onSearchChange = (e) => { } }: { className?: string; placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen: () => void; disabled?: boolean; onSearchChange?: (e: string) => void }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
@@ -27,11 +27,11 @@ export function Combobox({ className = "", placeholder, options, onChange, onOpe
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className={cn(className, "w-full overflow-scroll")}>
-        <Command className={cn(className, "w-full overflow-scroll")}>
+      <PopoverContent className={cn(className, "w-full p-0")}>
+        <Command className={cn(className, "w-full max-h-[50vh] overflow-scroll p-0")}>
           <CommandInput placeholder={placeholder} onChangeCapture={(e) => onSearchChange(e.currentTarget.value)} />
           <CommandEmpty>No process found.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="overflow-scroll">
             {options.map((option) => (
               <CommandItem
                 key={option.label}

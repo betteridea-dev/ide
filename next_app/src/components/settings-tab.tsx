@@ -49,7 +49,11 @@ export default function SettingsTab() {
 
     const query = gql`
       query {
-        transactions(owners: "${address}", tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }]) {
+        transactions(
+          owners: "${address}", 
+          tags: [{ name: "Data-Protocol", values: ["ao"] }, { name: "Type", values: ["Process"] }],
+          first: 999
+        ) {
           edges {
             node {
               id

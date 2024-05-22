@@ -265,7 +265,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-        <Combobox className="p-0 max-h-[50vh]" placeholder="Select Process (or search with ID)" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setSearchNameProxy(e)} />
+        <Combobox placeholder="Select Process (or search with ID)" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setSearchNameProxy(e)} />
 
         {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
 
