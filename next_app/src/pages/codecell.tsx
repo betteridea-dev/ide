@@ -177,7 +177,7 @@ export default function CodeCell() {
     }, [aosProcess, code, appname])
 
     const Loader = () => {
-        return <div className="absolute top-0 left-0 w-full h-full z-50 flex justify-center items-center" suppressHydrationWarning>
+        return <div className=" top-0 left-0 w-full h-full z-50 flex justify-center items-center" suppressHydrationWarning>
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
         </div>
     }
@@ -185,7 +185,7 @@ export default function CodeCell() {
     return <div suppressHydrationWarning
         className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 "
     >
-        {autoconnect == undefined && <Loader />}
+
         {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
             <Button
                 suppressHydrationWarning
@@ -247,10 +247,11 @@ export default function CodeCell() {
                 {<Ansi useClasses className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output}`}</Ansi>}
             </pre>
         </> : <>
-            {autoconnect ? <Loader /> : <>
+            {autoconnect ? <Loader /> : <div className="flex items-center justify-center w-full h-full">
                 {walletAddr ? <Button suppressHydrationWarning onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button suppressHydrationWarning onClick={connectHandler}>Connect</Button>}
-            </>}
+            </div>}
         </>}
+        {/* {autoconnect == undefined && <Loader />} */}
     </div>
 
 
