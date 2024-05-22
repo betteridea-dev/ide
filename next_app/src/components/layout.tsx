@@ -172,7 +172,7 @@ const CodeCell = ({
           </Button>
         </div>
       )}
-      <div className="flex h-full relative justify-center rounded-t-md border-b border-border/30 min-h-[69px]">
+      <div className="flex h-fit relative justify-center rounded-t-md border-b border-border/30 min-h-[69px]">
         <Button
           variant="ghost"
           className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]"
