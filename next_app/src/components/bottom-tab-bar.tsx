@@ -50,6 +50,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
     async function fetchNewInbox() {
       if (globalState.activeMode == "WARP") return;
       if (!project || !project.process) return;
+      const ownerWallet = project.ownerWallet;
+      const activeWallet = await window.arweaveWallet.getActiveAddress();
+      if (ownerWallet != activeWallet) return;
       // console.log("ran");
       const cursor = sessionStorage.getItem("cursor") || "";
       const r = await getResults(project.process, cursor);
@@ -96,12 +99,12 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       { name: "File-Type", value: "Inbox" }
     ]);
     setInbox(JSON.parse(result.Output.data.output).reverse());
-    const r = await dryrun({
-      process: pid,
-      code: "require('json').encode(Inbox)",
-      tags: [{ name: "Action", value: "Eval" }, { name: "File-Type", value: "Inbox" }],
-    })
-    console.log(r)
+    // const r = await dryrun({
+    //   process: pid,
+    //   code: "return require('json').encode(Inbox)",
+    //   tags: [{ name: "Action", value: "Eval" }, { name: "File-Type", value: "Inbox" }],
+    // })
+    // console.log(r)
     setLoadingInbox(false);
 
   }

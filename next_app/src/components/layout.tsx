@@ -420,7 +420,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
   return (
     <>
       {!isNotebook && file && (
-        <div className="absolute h-10 overflow-clip flex items-center right-10 top-5 z-10 border border-dashed border-btr-grey-1 rounded-full p-0 bg-btr-grey-3">
+        <div className="absolute h-10 overflow-clip flex items-center right-10 top-5 z-10 border border-dashed rounded-full p-0 bg-accent">
           <Button variant="ghost" className="p-1" onClick={runNormalCode}>
             <Image
               src={running ? Icons.loadingSVG : Icons.runSVG}

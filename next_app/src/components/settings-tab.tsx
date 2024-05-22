@@ -83,15 +83,16 @@ export default function SettingsTab() {
 
   async function setProcess() {
     const p = manager.getProject(globalState.activeProject);
+    const activeWallet = await window.arweaveWallet.getActiveAddress();
     if (processUsed === "NEW_PROCESS") {
       setSpawning(true);
       const np = await spawnProcess(newProcessName, [
         { name: "File-Type", value: p.defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
       ]);
-      manager.setProjectProcess(p, np);
+      manager.setProjectProcess(p, np, activeWallet);
       setSpawning(false);
     } else {
-      manager.setProjectProcess(p, processUsed);
+      manager.setProjectProcess(p, processUsed, activeWallet);
     }
     setNewProcessName("");
     setProcessUsed("");

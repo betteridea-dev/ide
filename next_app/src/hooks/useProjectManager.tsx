@@ -47,8 +47,9 @@ export class ProjectManager {
     return new Project(this.projects[name]);
   }
 
-  setProjectProcess(proj: Project, processId: string) {
+  setProjectProcess(proj: Project, processId: string, ownerWallet?: string) {
     proj._setProcess(processId);
+    if (ownerWallet) proj.ownerWallet = ownerWallet;
     this.projects[proj.name] = proj;
     this.saveProjects(this.projects);
   }
