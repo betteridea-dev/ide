@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast as sonnerToast } from "sonner";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { dryrun } from "@permaweb/aoconnect";
 
 
 interface TInboxMessage {
@@ -95,7 +96,14 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       { name: "File-Type", value: "Inbox" }
     ]);
     setInbox(JSON.parse(result.Output.data.output).reverse());
+    const r = await dryrun({
+      process: pid,
+      code: "require('json').encode(Inbox)",
+      tags: [{ name: "Action", value: "Eval" }, { name: "File-Type", value: "Inbox" }],
+    })
+    console.log(r)
     setLoadingInbox(false);
+
   }
 
   function showFullMessage(_) { }
@@ -113,7 +121,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         </TabsTrigger>}
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-primary" onClick={getInbox}>
-            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1 bg-black rounded-full" /> : `(${inbox.length})`}
+            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
           </TabsTrigger>
         )}
 
@@ -199,7 +207,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           </div>
           {running && (
             <div className="">
-              &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block bg-black rounded-full" />
+              &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block" />
             </div>
           )}
           {

@@ -26,11 +26,9 @@ export default function TopBar() {
           <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mr-5" />
         </Link>
 
-        <Link href="/">
-          <Button variant="ghost" className="text-md">
-            Home
-          </Button>
-        </Link>
+        <Button variant="ghost" className="text-md" onClick={() => { globalState.setActiveProject("") }}>
+          Home
+        </Button>
         <Link href="https://docs.betteridea.dev" target="_blank">
           <Button variant="ghost" className="text-md">
             Docs

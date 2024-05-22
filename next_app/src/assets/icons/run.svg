@@ -1,6 +1,9 @@
-<svg width="29" height="30" viewBox="0 0 29 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="play_arrow">
-<rect y="0.477295" width="29" height="28.5455" rx="14.2727" fill="#282828"/>
-<path id="play_arrow_2" d="M10 22V8L21 15L10 22Z" fill="#97E771"/>
-</g>
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 25" width="25" height="25">
+	<title>New Project</title>
+	<style>
+		.s0 { fill: #69a14f } 
+	</style>
+	<path id="Background" class="s0" d="m-3 3"/>
+	<path id="Shape 1" class="s0" d="m-3 3"/>
+	<path id="Shape 2" class="s0" d="m3 2v21l19-10z"/>
 </svg>

@@ -184,7 +184,7 @@ const CodeCell = ({
             data-running={running}
             width={30}
             height={30}
-            className="data-[running=true]:animate-spin data-[running=true]:bg-black rounded-full"
+            className="data-[running=true]:animate-spin p-0.5"
           />
         </Button>
         <Editor
@@ -424,10 +424,10 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
           <Button variant="ghost" className="p-1" onClick={runNormalCode}>
             <Image
               src={running ? Icons.loadingSVG : Icons.runSVG}
-              width={30}
-              height={30}
+              width={25}
+              height={25}
               data-running={running}
-              className="data-[running=true]:animate-spin"
+              className="data-[running=true]:animate-spin p-0.5"
               alt="run button"
             />
           </Button>

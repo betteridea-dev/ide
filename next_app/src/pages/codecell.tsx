@@ -199,7 +199,7 @@ export default function CodeCell() {
                     data-running={running}
                     width={30}
                     height={30}
-                    className="data-[running=true]:animate-spin data-[running=true]:bg-black rounded-full"
+                    className="data-[running=true]:animate-spin"
                 />
             </Button>
             <Editor
