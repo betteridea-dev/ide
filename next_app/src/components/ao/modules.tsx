@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Icons from "@/assets/icons";
+import { Icons as LucidIcons } from "@/components/icons"
 import { useGlobalState } from "@/states";
 import { toast } from "../ui/use-toast";
 import { useState } from "react";
@@ -34,10 +35,11 @@ export default function Modules() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <Button variant="ghost" className="p-2 h-10 flex-col">
-                <Image src={Icons.moduleSVG} alt="Modules" width={25} height={25} className="invert dark:invert-0 opacity-70" />
-                <div className="text-[12px]">MODULES</div>
-            </Button>
+            <div className="flex flex-col items-center justify-center hover:opacity-70 active:opacity-50">
+                {/* <Image src={Icons.modulesSVG} alt="Modules" width={20} height={20} className="my-1 hover:invert" /> */}
+                <LucidIcons.modules className="my-1 fill-foreground" />
+                <div className="text-xs">MODULES</div>
+            </div>
         </DialogTrigger>
         <DialogContent className="">
             <DialogHeader>

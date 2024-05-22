@@ -44,7 +44,7 @@ export default function TopBar() {
       </div>
 
 
-      <div className="flex gap-1 items-center">
+      <div className="flex gap-4 items-end">
         {globalState.activeMode == "AO"
           && globalState.activeProject && <>
             <Share />

@@ -72,7 +72,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
       }
     }
 
-    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 2500).toString());
+    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 3000).toString());
 
     return () => {
       clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));

@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Icons from "@/assets/icons";
+import { Icons as LucidIcons } from "@/components/icons"
 import { useGlobalState } from "@/states";
 import { toast } from "../ui/use-toast";
 import { useState } from "react";
@@ -90,10 +91,11 @@ export default function Share() {
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
             setOpen(true);
         }}>
-            <Button variant="ghost" className="p-2 h-10 flex-col">
-                <Image src={sharing ? Icons.loadingSVG : Icons.sendSVG} alt="Send" width={20} height={20} className={`${sharing && "animate-spin bg-black rounded-full"}`} />
-                <div className="text-[12px]">SHARE</div>
-            </Button>
+            <div className="flex flex-col items-center justify-start hover:opacity-70 active:opacity-50">
+                {/* <Image src={Icons.shareSVG} alt="Send" width={22} height={22} className="my-2" /> */}
+                <LucidIcons.share className="my-2 fill-foreground" />
+                <div className="text-xs">SHARE</div>
+            </div>
         </DialogTrigger>
         <DialogContent className="w-screen">
             <DialogHeader>
