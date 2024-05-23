@@ -1,5 +1,6 @@
 {
   "name": "BetterIDEa",
+  "license": "GPL-3.0-only",
   "description": "Web based IDE for Arweave and AO",
   "version": "3.0.0",
   "private": false,

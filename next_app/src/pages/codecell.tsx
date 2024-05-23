@@ -12,6 +12,7 @@ import { toast } from "sonner"
 import { useSearchParams } from "next/navigation";
 import { GraphQLClient, gql } from "graphql-request";
 import { useTheme } from "next-themes";
+import crypto from "crypto"
 
 export default function CodeCell() {
     const searchParams = useSearchParams();
@@ -77,6 +78,15 @@ export default function CodeCell() {
         // const r = await spawnProcess();
         // setAosProcess(r);
         // setSpawning(false);
+        var url = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
+        // get only domain name of the referrer
+        const hostname = new URL(url).hostname;
+        const hostnameHash = crypto.createHash("sha256").update(hostname).digest("hex");
+        console.log("hostname", hostname)
+        const prcName = `${appname}-BetterIDEa-CodeCell-${hostnameHash}`
+
         const client = new GraphQLClient("https://arweave.net/graphql");
 
         const queryToFetchAlreadyCreatedProcess = gql`
@@ -86,7 +96,7 @@ export default function CodeCell() {
     tags: [
       { name: "Data-Protocol", values: ["ao"] }
       { name: "Type", values: ["Process"] }
-      { name: "Name", values: ["${appname}-Process-BetterIDEa-Code-Cell"] }
+      { name: "Name", values: ["${prcName}"] }
     ]
   ) {
     edges {
@@ -111,11 +121,11 @@ export default function CodeCell() {
 
         if (ids.length == 0) {
             console.log("No process found, creating one")
-            const loc = window.location.origin + window.location.pathname;
-            console.log(loc)
-            const r = await spawnProcess(`${appname}-Process-BetterIDEa-Code-Cell`, [
+            // const loc = window.location.origin + window.location.pathname;
+            // console.log(loc)
+            const r = await spawnProcess(`${prcName}`, [
                 { name: "External-App-Name", value: appname },
-                { name: "External-Url", value: `${btoa(loc)}` },
+                { name: "External-Url", value: `${btoa(url)}` },
                 { name: "File-Type", value: "External-Code-Cell" }
             ]);
             if (r) {
@@ -131,12 +141,15 @@ export default function CodeCell() {
     }
 
     async function runCellCode() {
-        const loc = window.location.origin + window.location.pathname;
+        // const loc = window.location.origin + window.location.pathname;
+        const url = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
         setRunning(true);
         console.log("running", code)
         const r = await runLua(code, aosProcess, [
             { name: "External-App-Name", value: appname },
-            { name: "External-Url", value: `${btoa(loc)}` },
+            { name: "External-Url", value: `${btoa(url)}` },
             { name: "File-Type", value: "External-Code-Cell" }
         ]);
         const out = parseOutupt(r);
@@ -150,22 +163,25 @@ export default function CodeCell() {
             // if (e.origin == "http://localhost:3000") return;
             // console.log(e);
             if (e.data.action == "run") {
-                var url = (window.location != window.parent.location)
-                    ? document.referrer
-                    : document.location.href;
-                console.log(url)
-                console.log("running", code)
-                setRunning(true);
-                console.log("process:", aosProcess)
-                const r = await runLua(code, aosProcess, [
-                    { name: "External-App-Name", value: appname },
-                    { name: "External-Url", value: btoa(url) },
-                    { name: "File-Type", value: "External-Code-Cell" }
-                ]);
-                const out = parseOutupt(r);
-                console.log(out)
-                setOutput(out);
-                setRunning(false);
+                throw new Error("runCode has been deprecated for security reasons")
+                // var url = (window.location != window.parent.location)
+                //     ? document.referrer
+                //     : document.location.href;
+                // console.log(url)
+                // console.log("running", code)
+                // setRunning(true);
+                // console.log("process:", aosProcess)
+                // const r = await runLua(code, aosProcess, [
+                //     { name: "External-App-Name", value: appname },
+                //     { name: "External-Url", value: btoa(url) },
+                //     { name: "File-Type", value: "External-Code-Cell" }
+                // ]);
+                // const out = parseOutupt(r);
+                // console.log(out)
+                // setOutput(out);
+                // setRunning(false);
+            } else if (e.data.action == "set_code") {
+                setCode(e.data.code)
             }
         };
 
