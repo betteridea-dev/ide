@@ -56,9 +56,14 @@ export default function AOLanding() {
         setAutoconnect(false);
         setWalletAddress("");
     }
-
     useEffect(() => {
-        if (autoconnect) connectWallet();
+        if (autoconnect) {
+            window.arweaveWallet.getActiveAddress().then((addr: string) => {
+                connectWallet()
+            }).catch(() => {
+                setAutoconnect(false);
+            });
+        }
         else {
             disconnectWallet();
         }

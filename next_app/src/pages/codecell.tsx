@@ -24,6 +24,7 @@ export default function CodeCell() {
     const [code, setCode] = useState<string>('print("Hello AO!")');
     const [output, setOutput] = useState<string>("");
     const [appname, setAppname] = useState<string>("");
+    const [mounted, setMounted] = useState(false);
     const { theme } = useTheme();
 
     console.log("autoconn", autoconnect)
@@ -51,10 +52,15 @@ export default function CodeCell() {
             }
 
         }
-        if (autoconnect) {
-            connectHandler()
+        if (autoconnect && !mounted) {
+            window.arweaveWallet.getActiveAddress().then((addr: string) => {
+                connectHandler();
+                setMounted(true);
+            }).catch(() => {
+                setAutoconnect(false);
+            });
         }
-    }, [searchParams, autoconnect])
+    }, [searchParams, autoconnect, mounted])
 
     async function connectHandler() {
         if (!window) return
@@ -193,16 +199,27 @@ export default function CodeCell() {
     }, [aosProcess, code, appname])
 
     const Loader = () => {
-        return <div className=" top-0 left-0 w-full h-full z-50 flex justify-center items-center" suppressHydrationWarning>
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
-        </div>
+        const [showConnectBtn, setShowConnectBtn] = useState(false);
+
+        useEffect(() => {
+            setTimeout(() => {
+                setShowConnectBtn(true);
+            }, 6000);
+        }, []);
+
+        return <>
+            <div className="top-0 left-0 w-full h-full z-20 flex justify-center items-center" suppressHydrationWarning>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
+            </div>
+            {showConnectBtn && <Button className="w-fit absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" onClick={connectHandler}>Connect</Button>}
+        </>
     }
 
     return <div suppressHydrationWarning
         className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 "
     >
 
-        {aosProcess ? <><div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
+        {aosProcess && <><div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
             <Button
                 suppressHydrationWarning
                 variant="ghost"
@@ -262,12 +279,11 @@ export default function CodeCell() {
             <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
                 {<Ansi useClasses className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output}`}</Ansi>}
             </pre>
-        </> : <>
-            {autoconnect ? <Loader /> : <div className="flex items-center justify-center w-full h-full">
-                {walletAddr ? <Button suppressHydrationWarning onClick={spawnProcessHandler} disabled={spawning}>{spawning ? "Loading Process" : "Spawn Process"}</Button> : <Button suppressHydrationWarning onClick={connectHandler}>Connect</Button>}
-            </div>}
         </>}
-        {/* {autoconnect == undefined && <Loader />} */}
+        {autoconnect ?
+            <>{!aosProcess && <Loader />}</> : <div className="w-full h-full flex items-center justify-center"> <Button onClick={connectHandler} className="w-fit mx-auto">Connect</Button></div>
+        }
+
     </div>
 
 

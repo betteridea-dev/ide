@@ -10,6 +10,7 @@ import { useGlobalState } from "@/states";
 export default function BottomStatusbar() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true });
+  const [mounted, setMounted] = useState(false);
   const manager = useProjectManager();
   const globalState = useGlobalState();
 
@@ -23,8 +24,8 @@ export default function BottomStatusbar() {
       });
     await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
     const addr = await window.arweaveWallet.getActiveAddress();
-    const addrCropped = addr.slice(0, 9) + "..." + addr.slice(-9);
     setWalletAddress(addr);
+    const addrCropped = addr.slice(0, 9) + "..." + addr.slice(-9);
     toast({ title: `Connected to ${addrCropped}` });
     setAutoconnect(true);
   }
@@ -36,11 +37,19 @@ export default function BottomStatusbar() {
   }
 
   useEffect(() => {
-    if (autoconnect) connectWallet();
+    if (autoconnect) {
+      if (!mounted)
+        window.arweaveWallet.getActiveAddress().then((addr: string) => {
+          connectWallet()
+          setMounted(true);
+        }).catch(() => {
+          setAutoconnect(false);
+        });
+    }
     else {
       disconnectWallet();
     }
-  }, [autoconnect]);
+  }, [autoconnect, mounted]);
 
   return (
     <div className="h-[25px] flex items-center overflow-clip gap-0.5 px-1 text-xs border-t">
