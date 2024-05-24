@@ -11,7 +11,7 @@ const CommonTags = [
 
 type Tags = { name: string, value: string }[];
 
-export async function spawnProcess(name?: string, tags?: Tags) {
+export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?: string) {
   const ao = connect();
 
   if (tags) {
@@ -22,7 +22,7 @@ export async function spawnProcess(name?: string, tags?: Tags) {
   tags = name ? [...tags, { name: "Name", value: name }] : tags;
 
   const result = await ao.spawn({
-    module: AOModule,
+    module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,
     tags,
     signer: createDataItemSigner(window.arweaveWallet),

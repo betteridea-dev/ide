@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useGlobalState } from "@/states";
-import { spawnProcess } from "@/lib/ao-vars";
+import { AOModule, spawnProcess } from "@/lib/ao-vars";
 import { GraphQLClient, gql } from "graphql-request";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -12,9 +12,12 @@ import { Combobox } from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
-
-
 import { GetAOTemplates } from "@/templates";
+
+const AOModules = {
+  "Default": AOModule,
+  "SQL-Lite": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0"
+}
 
 
 const templates = GetAOTemplates();
@@ -36,6 +39,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [searchName, setSearchName] = useState("");
   const [searchNameProxy, setSearchNameProxy] = useState("");
   const [searchTimeout, setSearchTimeout] = useState<any>(0)
+  const [newProcessModule, setNewProcessModule] = useState("");
 
   useEffect(() => {
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -78,7 +82,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
     if (processUsed == "NEW_PROCESS") {
       const newProcessId = await spawnProcess(newProcessName, [
         { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
-      ]);
+      ], processUsed == "NEW_PROCESS" ? newProcessModule : null);
       manager.setProjectProcess(p, newProcessId);
     } else {
       manager.setProjectProcess(p, processUsed);
@@ -272,6 +276,14 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
         <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
           onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
+
+        {/* advanced settings dropdown */}
+        <details>
+          <summary className="text-foreground/60 text-sm pl-2 pb-2">Advanced Settings</summary>
+          <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module" options={Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} />
+        </details>
+
+
         <RadioGroup defaultValue="NOTEBOOK" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
           <div>
             What type of files do you want to use? <span className="text-sm text-muted">(can be changed later)</span>

@@ -242,7 +242,7 @@ const VisualCell = (
   { file, cellId, manager, project }: { file: PFile; cellId: string; manager: ProjectManager; project: Project }
 ) => {
   const [mouseHovered, setMouseHovered] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(true);
   const { theme } = useTheme();
 
   const cellType = file.content.cells[cellId].type
