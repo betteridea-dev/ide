@@ -13,6 +13,7 @@ import { toast as sonnerToast } from "sonner";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { dryrun } from "@permaweb/aoconnect";
+import Term from "./terminal";
 
 
 interface TInboxMessage {
@@ -46,42 +47,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
     }
   }, [globalState.activeProject]);
 
-  useEffect(() => {
-    async function fetchNewInbox() {
-      if (globalState.activeMode == "WARP") return;
-      if (!project || !project.process) return;
-      const ownerWallet = project.ownerWallet;
-      const activeWallet = await window.arweaveWallet.getActiveAddress();
-      if (ownerWallet != activeWallet) return;
-      // console.log("ran");
-      const cursor = sessionStorage.getItem("cursor") || "";
-      const r = await getResults(project.process, cursor);
-      if (r.cursor) sessionStorage.setItem("cursor", r.cursor);
-      let fetchFlag = false;
-      if (r.results.length > 0) {
-        const messages = r.results;
-        messages.forEach((msg: any) => {
-          const isPrint = msg.Output.print;
-          if (isPrint) {
-            const data = msg.Output.data;
-            console.log(data);
-            fetchFlag = true;
-            // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
-            sonnerToast.custom((id) => <div className="bg-primary text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
-            setCommandOutputs([data, ...commandOutputs]);
-          }
-        });
-        console.log(r.results);
-        // fetchFlag && getInbox();
-      }
-    }
 
-    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 3000).toString());
-
-    return () => {
-      clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
-    };
-  }, [globalState.activeMode, project, project.process]);
 
   async function getInbox() {
     if (!process) {
@@ -98,7 +64,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
     const result = await runLua("require('json').encode(Inbox)", pid, [
       { name: "File-Type", value: "Inbox" }
     ]);
-    setInbox(JSON.parse(result.Output.data.output).reverse());
+    if (result.Output.data.output)
+      setInbox(JSON.parse(result.Output.data.output).reverse());
     // const r = await dryrun({
     //   process: pid,
     //   code: "return require('json').encode(Inbox)",
@@ -112,7 +79,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className=" pt-7 w-full h-full overflow-scroll">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
       {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
@@ -129,12 +96,12 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         )}
       </TabsList>}
       <Button variant="link" className="ml-auto absolute -right-2 -top-2 z-40" onClick={toggle}>
-        <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
+        <Image src={Icons.collapseSVG} alt="collapse-expand" width={22} height={22} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
       </Button>
 
-      {globalState.activeProject && <div className={`px-2`}>
-        <TabsContent value="terminal" className="font-btr-code">
-          <div className="flex items-center h-full">
+      {globalState.activeProject && <div className={`px-2 h-full overflow-scroll`}>
+        <TabsContent value="terminal" className=" -m-2 mt-0 h-full">
+          {/* <div className="flex items-center h-full">
             <div className="block">{prompt}</div>&nbsp;
             <input
               // contentEditable={!running}
@@ -206,8 +173,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                 // }
               }}
             />
-          </div>
-          {running && (
+          </div> */}
+          <Term />
+          {/* {running && (
             <div className="">
               &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block" />
             </div>
@@ -220,7 +188,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
                 </pre>
               ))}
             </div>
-          }
+          } */}
         </TabsContent>
         <TabsContent value="output">
           <pre className="w-full overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <>...</>}</pre>

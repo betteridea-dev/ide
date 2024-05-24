@@ -103,3 +103,7 @@ div {
 pre {
     font-family: "DM Mono", monospace !important;
 }
+
+.xterm-rows>div {
+    font-family: "DM Mono", monospace !important;
+}

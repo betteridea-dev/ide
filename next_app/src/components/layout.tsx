@@ -579,9 +579,9 @@ export default function Layout() {
     }
   };
 
-  useEffect(() => {
-    bottombarRef.current.collapse();
-  }, [])
+  // useEffect(() => {
+  //   bottombarRef.current.collapse();
+  // }, [])
 
   const project =
     globalState.activeProject && manager.getProject(globalState.activeProject);
