@@ -524,7 +524,6 @@ export default function Layout() {
   const globalState = useGlobalState();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [bottombarCollapsed, setBottombarCollapsed] = useState(false);
-  const [tabBarContentSize, setTabBarContentSize] = useState(30);
   const bottombarRef = useRef<ImperativePanelHandle>(null);
   const [mounted, setMounted] = useState(false);
   const monaco = useMonaco();
@@ -647,15 +646,13 @@ export default function Layout() {
                 onCollapse={() => setBottombarCollapsed(true)}
                 onExpand={() => setBottombarCollapsed(false)}
                 collapsible
-                collapsedSize={5}
+                collapsedSize={4}
                 minSize={15}
                 defaultSize={30}
                 id="terminal-panel"
                 className="relative flex"
-                onResize={(size) => { setTabBarContentSize(size) }}
               >
                 <BottomTabBar
-                  contentSize={tabBarContentSize}
                   collapsed={bottombarCollapsed}
                   toggle={toggleBottombar}
                 />

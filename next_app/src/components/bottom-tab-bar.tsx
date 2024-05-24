@@ -27,7 +27,7 @@ interface TInboxMessage {
   Action: string;
 }
 
-export default function BottomTabBar({ collapsed, toggle, contentSize }: { collapsed: boolean; toggle: () => void; contentSize: number }) {
+export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void; }) {
   const [commandOutputs, setCommandOutputs] = useState([]);
   const [running, setRunning] = useState(false);
   const [prompt, setPrompt] = useState("aos>");
@@ -36,8 +36,6 @@ export default function BottomTabBar({ collapsed, toggle, contentSize }: { colla
   const terminalInputRef = useRef<HTMLInputElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
-  const contentSizeFixed = parseInt(contentSize.toString());
-  console.log(contentSizeFixed);
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
@@ -114,8 +112,8 @@ export default function BottomTabBar({ collapsed, toggle, contentSize }: { colla
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className="w-full h-full">
-      {globalState.activeProject && <TabsList className="flex justify-start p-0 bg-transparent">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className=" pt-7 w-full h-full overflow-scroll">
+      {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
             Terminal
@@ -129,13 +127,12 @@ export default function BottomTabBar({ collapsed, toggle, contentSize }: { colla
             Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
           </TabsTrigger>
         )}
-
       </TabsList>}
-      <Button variant="link" className="ml-auto absolute -right-1 -top-1" onClick={toggle}>
+      <Button variant="link" className="ml-auto absolute -right-2 -top-2 z-40" onClick={toggle}>
         <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
       </Button>
 
-      {globalState.activeProject && <div className={`px-2 border-white overflow-scroll border`} style={{ height: `calc(${contentSizeFixed}% - 80px)` }}>
+      {globalState.activeProject && <div className={`px-2`}>
         <TabsContent value="terminal" className="font-btr-code">
           <div className="flex items-center h-full">
             <div className="block">{prompt}</div>&nbsp;
@@ -228,18 +225,16 @@ export default function BottomTabBar({ collapsed, toggle, contentSize }: { colla
         <TabsContent value="output">
           <pre className="w-full overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <>...</>}</pre>
         </TabsContent>
-        <TabsContent value="inbox" className="">
-          <ScrollArea className="">
-            {inbox.map((msg, _) => (
-              <div key={_} className="text-sm p-2 my-2 font-btr-code  border" onClick={() => showFullMessage(_)}>
-                <span className="text-accent text-xs">{tsToDate(msg.Timestamp)} </span>
-                <br />
-                <span className="text-sm">{msg.From}</span> <span className="">{msg.Action && `(${msg.Action})`}</span>
-                <br />
-                <span className={msg.Data ? "text-primary" : "text-muted"}>{msg.Data ? <Ansi className="font-btr-code">{msg.Data}</Ansi> : "Message Without Data Field"}</span>
-              </div>
-            ))}
-          </ScrollArea>
+        <TabsContent value="inbox" className="flex flex-col gap-2 pb-2">
+          {inbox.map((msg, _) => (
+            <div key={_} className="text-sm p-2 font-btr-code  border" onClick={() => showFullMessage(_)}>
+              <span className="text-accent text-xs">{tsToDate(msg.Timestamp)} </span>
+              <br />
+              <span className="text-sm">{msg.From}</span> <span className="">{msg.Action && `(${msg.Action})`}</span>
+              <br />
+              <span className={msg.Data ? "text-primary" : "text-muted"}>{msg.Data ? <Ansi className="font-btr-code">{msg.Data}</Ansi> : "Message Without Data Field"}</span>
+            </div>
+          ))}
         </TabsContent>
       </div>}
     </Tabs>
