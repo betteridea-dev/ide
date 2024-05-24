@@ -30,6 +30,7 @@ export default function CodeCell() {
     console.log("autoconn", autoconnect)
 
     useEffect(() => {
+
         if (searchParams.size > 0) {
             if (searchParams.has("code")) {
                 setCode(searchParams.get("code") as string)
@@ -52,14 +53,19 @@ export default function CodeCell() {
             }
 
         }
-        if (autoconnect && !mounted) {
-            window.arweaveWallet.getActiveAddress().then((addr: string) => {
-                connectHandler();
-                setMounted(true);
-            }).catch(() => {
-                setAutoconnect(false);
-            });
+        async function run() {
+            if (autoconnect && !mounted) {
+                try {
+                    const addr = await window.arweaveWallet.getActiveAddress()
+                    setWalletAddr(addr);
+                    setAutoconnect(true);
+                }
+                catch {
+                    setAutoconnect(false);
+                }
+            }
         }
+        run()
     }, [searchParams, autoconnect, mounted])
 
     async function connectHandler() {

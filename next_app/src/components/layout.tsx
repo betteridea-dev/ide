@@ -596,7 +596,7 @@ export default function Layout() {
   return (
     <>
       <Head>
-        <title>BetterIDEa | {globalState.activeProject || "Home"}</title>
+        <title>{`BetterIDEa ${globalState.activeProject && ("| " + globalState.activeProject)}`}</title>
       </Head>
 
       <TopBar />
