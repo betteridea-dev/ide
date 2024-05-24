@@ -31,20 +31,18 @@ export default function Import() {
             const data = JSON.parse(`${decodeURIComponent(r.Messages[0].Data)}`)
             console.log(data)
 
+            let owner = ""
             try {
                 if (!window.arweaveWallet)
-                    return toast({
-                        title: "No Arweave wallet found",
-                        description: "You might want to install ArConnect extension to import the project",
-                    });
-
-                await window.arweaveWallet.getActiveAddress()
+                    owner = ""
+                else
+                    owner = window.arweaveWallet.getActiveAddress()
             }
             catch (e) {
                 await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"])
+                owner = await window.arweaveWallet.getActiveAddress()
             }
-            const ownerWallet = await window.arweaveWallet.getActiveAddress()
-            data.ownerWallet = ownerWallet
+            data.ownerWallet = owner
             projectManager.newProject(data)
             window.location.href = "/?open=" + data.name
         }

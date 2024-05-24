@@ -562,6 +562,9 @@ export default function Layout() {
         const files = p.files;
         globalState.setActiveProject(open as string);
         if (Object.keys(files).length > 0) globalState.setActiveFile(files[Object.keys(files)[0]].name);
+        // reset query params
+        router.push({ query: {} })
+
         // globalState.setActiveProject(open as string)
         // const files = projectManager.projects[open as string].files
         // console.log(files)

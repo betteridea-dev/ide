@@ -44,6 +44,7 @@ export default function SettingsTab() {
 
 
   async function fetchProcesses() {
+    if (!window.arweaveWallet) return
     const client = new GraphQLClient("https://arweave.net/graphql");
     const address = await window.arweaveWallet.getActiveAddress();
 
@@ -78,7 +79,7 @@ export default function SettingsTab() {
   }
 
   useEffect(() => {
-    fetchProcesses();
+    fetchProcesses()
   }, []);
 
   async function setProcess() {
