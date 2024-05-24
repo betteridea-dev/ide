@@ -18,7 +18,7 @@ export default function CodeCell() {
     const searchParams = useSearchParams();
     const [walletAddr, setWalletAddr] = useState<string>("");
     const [aosProcess, setAosProcess] = useState<string>("");
-    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", undefined, { initializeWithValue: false });
+    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", undefined, { initializeWithValue: true });
     const [spawning, setSpawning] = useState<boolean>(false);
     const [running, setRunning] = useState<boolean>(false);
     const [code, setCode] = useState<string>('print("Hello AO!")');
@@ -218,7 +218,7 @@ export default function CodeCell() {
             <div className="top-0 left-0 w-full h-full z-20 flex justify-center items-center" suppressHydrationWarning>
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
             </div>
-            {showConnectBtn && <Button className="w-fit absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" onClick={connectHandler}>Connect</Button>}
+            {showConnectBtn && <Button className="w-fit absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" onClick={connectHandler} suppressHydrationWarning>Connect</Button>}
         </>
     }
 
@@ -288,7 +288,7 @@ export default function CodeCell() {
             </pre>
         </>}
         {autoconnect ?
-            <>{!aosProcess && <Loader />}</> : <div className="w-full h-full flex items-center justify-center"> <Button onClick={connectHandler} className="w-fit mx-auto">Connect</Button></div>
+            <>{!aosProcess && <Loader />}</> : <div suppressHydrationWarning className="w-full h-full flex items-center justify-center"> <Button suppressHydrationWarning onClick={connectHandler} className="w-fit mx-auto">Connect</Button></div>
         }
 
     </div>
