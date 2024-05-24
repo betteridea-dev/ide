@@ -21,7 +21,7 @@ export function Combobox({ className = "", placeholder, options, onChange, onOpe
       }}
     >
       <PopoverTrigger asChild disabled={disabled}>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-[460px] mx-auto overflow-clip truncate justify-between">
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full mx-auto overflow-clip truncate justify-between">
           {value ? value : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

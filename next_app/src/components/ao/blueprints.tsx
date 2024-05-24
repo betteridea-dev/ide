@@ -47,15 +47,16 @@ export default function Blueprints() {
                 <div className="text-xs">BLUEPRINTS</div>
             </div>
         </DialogTrigger>
-        <DialogContent className="">
-            <DialogHeader>
+        <DialogContent className="max-w-[50vw]">
+            <DialogHeader className="w-full">
                 <DialogTitle>Load a Blueprint</DialogTitle>
                 <DialogDescription>
                     Blueprints are pre-written code that you can use to get started quickly.
                 </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col gap-3 items-center justify-center">
+            <div className="flex flex-col gap-3 items-center justify-center w-full">
                 <Combobox
+                    className=""
                     placeholder="Select a blueprint"
                     options={blueprints.map((bp) => ({ label: bp, value: bp }))}
                     onChange={async (val) => {
@@ -66,7 +67,7 @@ export default function Blueprints() {
                     }}
                     onOpen={() => { }}
                 />
-                <pre className="w-full max-w-[450px] text-xs h-[300px] overflow-scroll ring-1 ring-btr-grey-2 rounded-md p-1">
+                <pre className="w-full max-w-[46vw] text-xs h-[300px] overflow-scroll ring-1 ring-btr-grey-2 rounded-md p-1">
                     {code}
                 </pre>
                 <Button disabled={loading} onClick={async () => {

@@ -41,7 +41,7 @@ export default function Modules() {
                 <div className="text-xs">MODULES</div>
             </div>
         </DialogTrigger>
-        <DialogContent className="">
+        <DialogContent className="max-w-[50vw]">
             <DialogHeader>
                 <DialogTitle>Load a Module</DialogTitle>
                 <DialogDescription>
@@ -64,7 +64,7 @@ export default function Modules() {
                     }}
                     onOpen={() => { }}
                 />
-                <pre className="w-full max-w-[450px] text-xs h-[300px] overflow-scroll ring-1 ring-btr-grey-2 rounded-md p-1">
+                <pre className="w-full max-w-[46vw] text-xs h-[300px] overflow-scroll ring-1 ring-btr-grey-2 rounded-md p-1">
                     {code}
                 </pre>
                 <Button disabled={loading} onClick={async () => {

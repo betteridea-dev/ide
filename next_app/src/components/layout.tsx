@@ -524,6 +524,7 @@ export default function Layout() {
   const globalState = useGlobalState();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [bottombarCollapsed, setBottombarCollapsed] = useState(false);
+  const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const bottombarRef = useRef<ImperativePanelHandle>(null);
   const [mounted, setMounted] = useState(false);
   const monaco = useMonaco();
@@ -624,6 +625,8 @@ export default function Layout() {
               <ResizablePanel
                 defaultSize={70}
                 minSize={10}
+                onCollapse={() => setTopbarCollapsed(true)}
+                onExpand={() => setTopbarCollapsed(false)}
                 collapsible
                 id="editor-panel"
                 className="flex relative flex-col items-center justify-center"
@@ -648,13 +651,21 @@ export default function Layout() {
                 collapsible
                 collapsedSize={4}
                 minSize={15}
-                defaultSize={30}
+                defaultSize={35}
                 id="terminal-panel"
                 className="relative flex"
               >
                 <BottomTabBar
                   collapsed={bottombarCollapsed}
+                  fullscreen={topbarCollapsed}
                   toggle={toggleBottombar}
+                  setFullScreen={() => {
+                    const panel = bottombarRef.current;
+                    if (panel) {
+                      if (bottombarCollapsed) panel.expand();
+                      panel.resize(100);
+                    }
+                  }}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>

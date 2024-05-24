@@ -14,6 +14,7 @@ import { sendGAEvent } from "@next/third-parties/google";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { dryrun } from "@permaweb/aoconnect";
 import Term from "./terminal";
+import { ArrowBigUp, Expand, Fullscreen, PanelBottomCloseIcon, PanelBottomOpenIcon } from "lucide-react";
 
 
 interface TInboxMessage {
@@ -28,7 +29,7 @@ interface TInboxMessage {
   Action: string;
 }
 
-export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void; }) {
+export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscreen }: { collapsed: boolean; toggle: () => void; setFullScreen: () => void; fullscreen: boolean }) {
   const [commandOutputs, setCommandOutputs] = useState([]);
   const [running, setRunning] = useState(false);
   const [prompt, setPrompt] = useState("aos>");
@@ -80,7 +81,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
 
   return (
     <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
-      {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full">
+      {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full" onClick={() => { if (collapsed) toggle() }}>
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
             Terminal
@@ -95,8 +96,13 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           </TabsTrigger>
         )}
       </TabsList>}
-      <Button variant="link" className="ml-auto absolute -right-2 -top-2 z-40" onClick={toggle}>
-        <Image src={Icons.collapseSVG} alt="collapse-expand" width={22} height={22} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
+      {!fullscreen && <Button variant="link" className="ml-auto absolute right-10 h-6 p-0 top-0.5 z-40" title="Maximise Panel" onClick={() => { setFullScreen() }}>
+        {/* <Image src={Icons.collapseSVG} alt="collapse-expand" width={22} height={22} data-collapsed={collapsed} className=" opacity-80 invert dark:invert-0" /> */}
+        <Expand className="stroke-foreground opacity-70" size={20} />
+      </Button>}
+      <Button variant="link" className="ml-auto absolute right-2.5 p-0 h-6 top-0.5 z-40" onClick={toggle} title="Toggle Panel">
+        {/* <Image src={Icons.collapseSVG} alt="collapse-expand" width={22} height={22} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" /> */}
+        {collapsed ? <PanelBottomOpenIcon className="stroke-foreground opacity-60" size={23} /> : <PanelBottomCloseIcon className="stroke-foreground opacity-60" size={23} />}
       </Button>
 
       {globalState.activeProject && <div className={`px-2 h-full overflow-scroll`}>
