@@ -23,6 +23,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
     if (typeof window == "undefined") return;
     setMounted(true);
     async function a() {
+      if (!window.arweaveWallet) return;
       setActiveAddress(await window.arweaveWallet.getActiveAddress());
     }
     a()

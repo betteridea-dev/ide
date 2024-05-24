@@ -5,6 +5,7 @@ import { useProjectManager } from "@/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Icons from "@/assets/icons";
+import { toast } from "@/components/ui/use-toast";
 
 
 export default function Import() {
@@ -29,7 +30,14 @@ export default function Import() {
             setData(decodeURIComponent(r.Messages[0].Data))
             const data = JSON.parse(`${decodeURIComponent(r.Messages[0].Data)}`)
             console.log(data)
+
             try {
+                if (!window.arweaveWallet)
+                    return toast({
+                        title: "No Arweave wallet found",
+                        description: "You might want to install ArConnect extension to import the project",
+                    });
+
                 await window.arweaveWallet.getActiveAddress()
             }
             catch (e) {

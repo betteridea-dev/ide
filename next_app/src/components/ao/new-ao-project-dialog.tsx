@@ -111,6 +111,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
   const [processes, setProcesses] = useState([{ label: "+ Create New", value: "NEW_PROCESS" }]);
 
   async function fetchProcesses() {
+    if (!window.arweaveWallet) return;
     const client = new GraphQLClient("https://arweave.net/graphql");
     const address = await window.arweaveWallet.getActiveAddress();
 

@@ -52,6 +52,7 @@ export default function AOLanding() {
     }
 
     function disconnectWallet() {
+        if (!window.arweaveWallet) return;
         window.arweaveWallet.disconnect();
         setAutoconnect(false);
         setWalletAddress("");
