@@ -195,6 +195,7 @@ export default function CodeCell() {
                 // setRunning(false);
             } else if (e.data.action == "set_code") {
                 setCode(e.data.code)
+                setOutput("")
             }
         };
 
@@ -211,13 +212,13 @@ export default function CodeCell() {
         useEffect(() => {
             setTimeout(() => {
                 setShowConnectBtn(true);
-            }, 6000);
+            }, 3000);
         }, []);
 
         return <>
-            <div className="top-0 left-0 w-full h-full z-20 flex justify-center items-center" suppressHydrationWarning>
+            {!showConnectBtn && <div className="top-0 left-0 w-full h-full z-20 flex justify-center items-center" suppressHydrationWarning>
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary" suppressHydrationWarning></div>
-            </div>
+            </div>}
             {showConnectBtn && <Button className="w-fit absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" onClick={connectHandler} suppressHydrationWarning>Connect</Button>}
         </>
     }
@@ -290,7 +291,6 @@ export default function CodeCell() {
         {autoconnect ?
             <>{!aosProcess && <Loader />}</> : <div suppressHydrationWarning className="w-full h-full flex items-center justify-center"> <Button suppressHydrationWarning onClick={connectHandler} className="w-fit mx-auto">Connect</Button></div>
         }
-
     </div>
 
 
