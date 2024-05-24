@@ -60,7 +60,8 @@ export default function CodeCell() {
                     setWalletAddr(addr);
                     setAutoconnect(true);
                 }
-                catch {
+                catch (e) {
+                    console.log(e)
                     // setAutoconnect(false);
                 }
             }
