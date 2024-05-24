@@ -61,7 +61,7 @@ export default function CodeCell() {
                     setAutoconnect(true);
                 }
                 catch {
-                    setAutoconnect(false);
+                    // setAutoconnect(false);
                 }
             }
         }

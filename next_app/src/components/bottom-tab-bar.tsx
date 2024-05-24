@@ -27,7 +27,7 @@ interface TInboxMessage {
   Action: string;
 }
 
-export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) {
+export default function BottomTabBar({ collapsed, toggle, contentSize }: { collapsed: boolean; toggle: () => void; contentSize: number }) {
   const [commandOutputs, setCommandOutputs] = useState([]);
   const [running, setRunning] = useState(false);
   const [prompt, setPrompt] = useState("aos>");
@@ -36,6 +36,8 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   const terminalInputRef = useRef<HTMLInputElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
+  const contentSizeFixed = parseInt(contentSize.toString());
+  console.log(contentSizeFixed);
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
@@ -112,7 +114,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className="w-full">
+    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className="w-full h-full">
       {globalState.activeProject && <TabsList className="flex justify-start p-0 bg-transparent">
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
@@ -133,9 +135,9 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
         <Image src={Icons.collapseSVG} alt="collapse-expand" width={20} height={20} data-collapsed={collapsed} className="data-[collapsed=false]:rotate-180 opacity-80 invert dark:invert-0" />
       </Button>
 
-      {globalState.activeProject && <div className="px-2">
+      {globalState.activeProject && <div className={`px-2 border-white overflow-scroll border`} style={{ height: `calc(${contentSizeFixed}% - 80px)` }}>
         <TabsContent value="terminal" className="font-btr-code">
-          <div className="flex items-center">
+          <div className="flex items-center h-full">
             <div className="block">{prompt}</div>&nbsp;
             <input
               // contentEditable={!running}
@@ -214,7 +216,7 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
             </div>
           )}
           {
-            <div className="overflow-scroll h-[64vh]">
+            <div className="overflow-scroll">
               {commandOutputs.map((output, index) => (
                 <pre key={index}>
                   &gt; <Ansi>{`${output}`}</Ansi>
@@ -224,10 +226,10 @@ export default function BottomTabBar({ collapsed, toggle }: { collapsed: boolean
           }
         </TabsContent>
         <TabsContent value="output">
-          <pre className="w-full max-h-[69vh] overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <>...</>}</pre>
+          <pre className="w-full overflow-scroll p-2 ">{globalState.activeMode == "AO" ? <>{<Ansi>{`${file && file.content.cells[0] && file.content.cells[0].output}`}</Ansi>}</> : <>...</>}</pre>
         </TabsContent>
-        <TabsContent value="inbox" className="h-[35vh]">
-          <ScrollArea className="h-[35vh]">
+        <TabsContent value="inbox" className="">
+          <ScrollArea className="">
             {inbox.map((msg, _) => (
               <div key={_} className="text-sm p-2 my-2 font-btr-code  border" onClick={() => showFullMessage(_)}>
                 <span className="text-accent text-xs">{tsToDate(msg.Timestamp)} </span>
