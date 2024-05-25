@@ -242,7 +242,7 @@ const VisualCell = (
   { file, cellId, manager, project }: { file: PFile; cellId: string; manager: ProjectManager; project: Project }
 ) => {
   const [mouseHovered, setMouseHovered] = useState(false);
-  const [editing, setEditing] = useState(true);
+  const [editing, setEditing] = useState(file.content.cells[cellId].editing);
   const { theme } = useTheme();
 
   const cellType = file.content.cells[cellId].type
@@ -260,6 +260,9 @@ const VisualCell = (
           onClick={(e) => {
             e.stopPropagation()
             setEditing(!editing);
+            const newContent = { ...file.content };
+            newContent.cells[cellId].editing = !editing;
+            manager.updateFile(project, { file, content: newContent });
           }}
         >
           <Image src={editing ? Icons.tickSVG : Icons.editSVG} alt="Save Markdown" width={20} height={20} className="invert dark:invert-0" />
@@ -362,6 +365,7 @@ const EditorArea = ({
 $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
       output: "",
       type: type,
+      editing: true
     };
 
     const newContent = {
