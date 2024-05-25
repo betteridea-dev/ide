@@ -86,6 +86,14 @@ export default function CodeCell() {
         spawnProcessHandler()
     }, [walletAddr])
 
+    useEffect(() => {
+        if (!aosProcess) return
+        //send aosProcess to parent
+        if (window.parent) {
+            window.parent.postMessage({ action: "set_process", process: aosProcess }, "*")
+        }
+    }, [aosProcess])
+
     async function spawnProcessHandler() {
         setSpawning(true);
         // const r = await spawnProcess();
