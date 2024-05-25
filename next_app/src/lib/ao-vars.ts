@@ -40,6 +40,16 @@ export async function runLua(code: string, process: string, tags?: Tags) {
     tags = CommonTags;
   }
 
+
+  // if (!window.arweaveWallet) {
+  //   const dryMessage = await ao.dryrun({
+  //     process,
+  //     data: code,
+  //     tags,
+  //   });
+  //   return dryMessage
+  // }
+
   tags = [...tags, { name: "Action", value: "Eval" }];
 
   const message = await ao.message({

@@ -1,7 +1,7 @@
 import "@xterm/xterm/css/xterm.css"
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Terminal } from "@xterm/xterm";
-import { FitAddon } from "@xterm/addon-fit";
+// import { FitAddon } from "@xterm/addon-fit";
 import { Readline } from "xterm-readline";
 import { sendGAEvent } from "@next/third-parties/google";
 import { getResults, runLua } from "@/lib/ao-vars";
@@ -13,9 +13,12 @@ import { useTheme } from "next-themes";
 import { stripAnsiCodes } from "@/lib/utils";
 
 
-let history: string[] = [];
-let prompt = "aos> "
-export default function Term() {
+let promptBuf = ""
+export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutputs }: {
+    prompt: string, setPrompt: Dispatch<SetStateAction<string>>,
+    commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
+}) {
+    promptBuf = prompt
     const [termDiv, setTermDiv] = useState<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState(false)
     const globalState = useGlobalState()
@@ -23,7 +26,6 @@ export default function Term() {
     const project = projectManager.getProject(globalState.activeProject)
     const [running, setRunning] = useState(false)
     // const [prompt, setPrompt] = useState("aos> ")
-    const [length, setLength] = useState(1)
     const { theme } = useTheme()
     const [term, setTerm] = useState(new Terminal({
         cursorBlink: true,
@@ -47,59 +49,26 @@ export default function Term() {
     const [rl, setRl] = useState(new Readline())
 
     const maxRows = 50;
-    const maxCols = 150
+    const maxCols = 150;
+
+    useEffect(() => {
+        console.log(loaded)
+        if (!loaded) return;
+        term.focus()
+        term.clear()
+        rl.println("\r\x1b[K");
+        commandOutputs.forEach((line) => {
+            rl.println(line);
+            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+        })
+        rl.print(prompt)
+    }, [loaded])
 
 
     useEffect(() => {
         const p = document.getElementById('ao-terminal')
         if (p) setTermDiv(p as HTMLDivElement)
     }, [])
-
-    useEffect(() => {
-        async function fetchNewInbox() {
-            if (globalState.activeMode == "WARP") return;
-            if (!project || !project.process) return;
-            const ownerWallet = project.ownerWallet;
-            const activeWallet = await window.arweaveWallet.getActiveAddress();
-            if (ownerWallet != activeWallet) return;
-            // console.log("ran");
-            const cursor = sessionStorage.getItem("cursor") || "";
-            const r = await getResults(project.process, cursor);
-            if (r.cursor) sessionStorage.setItem("cursor", r.cursor);
-            let fetchFlag = false;
-            if (r.results.length > 0) {
-                const messages = r.results;
-                messages.forEach((msg: any) => {
-                    const isPrint = msg.Output.print;
-                    if (isPrint) {
-                        const data = msg.Output.data;
-                        console.log(data);
-                        fetchFlag = true;
-                        // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
-                        sonnerToast.custom((id) => <div className="bg-primary text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
-                        // setCommandOutputs([data, ...commandOutputs]);
-                        rl.print("\r\x1b[K");
-                        rl.println(data);
-                        rl.print(prompt)
-                        // term.writeln(data);
-                        // term.write(prompt)
-                        term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-                        history.push(data);
-                        console.log(history)
-
-                    }
-                });
-                console.log(r.results);
-                // fetchFlag && getInbox();
-            }
-        }
-
-        sessionStorage.setItem("interval", setInterval(fetchNewInbox, 3000).toString());
-
-        return () => {
-            clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
-        };
-    }, [globalState.activeMode, project, project.process]);
 
 
     function readLine(newPrompt: string) {
@@ -126,7 +95,8 @@ export default function Term() {
 
         term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         if (text.trim().length == 0) {
-            return readLine(prompt);
+            setCommandOutputs(p => [...p, ""]);
+            return readLine(promptBuf);
         }
         console.log("running", text);
         setRunning(true);
@@ -135,38 +105,35 @@ export default function Term() {
         ]);
         if (result.Error) {
             console.log(result.Error);
-            rl.println(result.Error);
-            history.push(result.Error);
+            setCommandOutputs(p => [...p, result.Error]);
+            // rl.println(result.Error);
         }
         if (result.Output) {
             console.log(result.Output);
-            // setPrompt(result.Output.data.prompt);
-            prompt = result.Output.data.prompt;
+            setPrompt(result.Output.data.prompt)
             console.log(result.Output.data.prompt)
             if (result.Output.data.json != "undefined") {
-                // console.log(result.Output.data.json);
-                // setCommandOutputs([JSON.stringify(result.Output.data.json, null, 2), ...commandOutputs]);
-                console.log("json out")
+                console.log("json", result.Output.data.json);
                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);
-                outputStr.split("\n").forEach((line) => {
-                    rl.println(line);
-                    history.push(line);
-                    term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-                })
+                setCommandOutputs(p => [...p, outputStr]);
+                // outputStr.split("\n").forEach((line) => {
+                // rl.println(line);
+                // history.push(line);
+                // term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+                // })
                 // rl.println(JSON.stringify(result.Output.data.json, null, 2));
             } else {
-                // console.log(result.Output.data.output);
-                // setCommandOutputs([result.Output.data.output, ...commandOutputs]);
+                console.log("normal", result.Output.data.output);
+                setCommandOutputs(p => [...p, result.Output.data.output]);
                 // rl.println(result.Output.data.output);
-                console.log("normal out")
-                const outputStr = `${result.Output.data.output}`;
-                outputStr.split("\n").forEach((line) => {
-                    rl.println(line);
-                    history.push(line);
-                    term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length + 1)
-                });
+                // console.log("normal out")
+                // const outputStr = `${result.Output.data.output}`;
+                // outputStr.split("\n").forEach((line) => {
+                //     rl.println(line);
+                //     history.push(line);
+                //     term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length + 1)
+                // });
             }
-            setLength(term.buffer.normal.length)
         }
         setRunning(false);
         sendGAEvent({ event: 'run_code', value: 'terminal' })
@@ -184,11 +151,11 @@ export default function Term() {
         // term.loadAddon(fit);
         term.open(termDiv);
         // console.log(history)
-        history.forEach((line) => {
-            console.log("history", line)
-            rl.appendHistory(line)
-            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-        })
+        // history.forEach((line) => {
+        //     console.log("history", line)
+        //     rl.appendHistory(line)
+        //     term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+        // })
         // fit.fit();
 
         rl.setCheckHandler((text) => {
@@ -203,6 +170,18 @@ export default function Term() {
 
         setLoaded(true)
     }, [termDiv])
+
+    useEffect(() => {
+        if (!termDiv) return;
+        if (!loaded) return;
+        term.clear()
+        rl.println("\r\x1b[K");
+        commandOutputs.forEach((line) => {
+            rl.println(line);
+            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+        })
+        rl.print(prompt)
+    }, [commandOutputs, prompt])
 
 
 

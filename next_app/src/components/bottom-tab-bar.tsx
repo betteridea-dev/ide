@@ -48,6 +48,44 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
     }
   }, [globalState.activeProject]);
 
+  useEffect(() => {
+    async function fetchNewInbox() {
+      if (globalState.activeMode == "WARP") return;
+      if (!project || !project.process) return;
+      const ownerWallet = project.ownerWallet;
+      const activeWallet = await window.arweaveWallet.getActiveAddress();
+      if (ownerWallet != activeWallet) return;
+      // console.log("ran");
+      const cursor = sessionStorage.getItem("cursor") || "";
+      const r = await getResults(project.process, cursor);
+      if (r.cursor) sessionStorage.setItem("cursor", r.cursor);
+      let fetchFlag = false;
+      if (r.results.length > 0) {
+        const messages = r.results;
+        messages.forEach((msg: any) => {
+          const isPrint = msg.Output.print;
+          if (isPrint) {
+            const data = msg.Output.data;
+            console.log(data);
+            fetchFlag = true;
+            // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
+            sonnerToast.custom((id) => <div className="bg-primary text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
+            setCommandOutputs(p => [...p, data]);
+
+          }
+        });
+        console.log(r.results);
+        // fetchFlag && getInbox();
+      }
+    }
+
+    sessionStorage.setItem("interval", setInterval(fetchNewInbox, 3000).toString());
+
+    return () => {
+      clearInterval(parseInt(sessionStorage.getItem("interval") || "0"));
+    };
+  }, [globalState.activeMode, project, project.process]);
+
 
 
   async function getInbox() {
@@ -107,6 +145,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
 
       {globalState.activeProject && <div className={`px-2 h-full overflow-scroll`}>
         <TabsContent value="terminal" className=" -m-2 mt-0 h-full">
+          <Term prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
           {/* <div className="flex items-center h-full">
             <div className="block">{prompt}</div>&nbsp;
             <input
@@ -180,7 +219,6 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
               }}
             />
           </div> */}
-          <Term />
           {/* {running && (
             <div className="">
               &gt; <Image alt="loading" src={Icons.loadingSVG} width={20} height={20} className="animate-spin mx-1 inline-block" />
