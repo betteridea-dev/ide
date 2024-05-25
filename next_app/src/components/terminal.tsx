@@ -95,17 +95,20 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
 
         term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         if (text.trim().length == 0) {
-            setCommandOutputs(p => [...p, ""]);
+            setCommandOutputs(p => [...p, ">"]);
             return readLine(promptBuf);
         }
         console.log("running", text);
         setRunning(true);
+        // print a line that says computing
+        rl.println(`\r\x1b[K\x1b[34mComputing State Transformations... \x1b[0m`);
         const result = await runLua(text, project.process, [
             { name: "File-Type", value: "Terminal" }
         ]);
         if (result.Error) {
             console.log(result.Error);
-            setCommandOutputs(p => [...p, result.Error]);
+
+            setCommandOutputs(p => [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]);
             // rl.println(result.Error);
         }
         if (result.Output) {
@@ -115,7 +118,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
             if (result.Output.data.json != "undefined") {
                 console.log("json", result.Output.data.json);
                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);
-                setCommandOutputs(p => [...p, outputStr]);
+                setCommandOutputs(p => [...p, `> ${text}`, outputStr]);
                 // outputStr.split("\n").forEach((line) => {
                 // rl.println(line);
                 // history.push(line);
@@ -124,7 +127,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
                 // rl.println(JSON.stringify(result.Output.data.json, null, 2));
             } else {
                 console.log("normal", result.Output.data.output);
-                setCommandOutputs(p => [...p, result.Output.data.output]);
+                setCommandOutputs(p => [...p, `> ${text}`, result.Output.data.output]);
                 // rl.println(result.Output.data.output);
                 // console.log("normal out")
                 // const outputStr = `${result.Output.data.output}`;
