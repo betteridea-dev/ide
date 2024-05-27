@@ -54,6 +54,7 @@ const monacoConfig: {
 } = {
   CodeCell: {
     fontSize: 14,
+    fontFamily: "monospace",
     minimap: { enabled: false },
     // lineNumbers: "off",
     lineHeight: 20,
@@ -68,6 +69,7 @@ const monacoConfig: {
     smoothScrolling: true,
   },
   CodeFile: {
+    fontFamily: "monospace",
     fontSize: 14,
     lineHeight: 20,
     lineNumbersMinChars: 3,
@@ -193,6 +195,9 @@ const CodeCell = ({
           />
         </Button>
         <Editor
+          // beforeMount={(m) => {
+          //   m.editor.remeasureFonts()
+          // }}
           onMount={(editor, monaco) => {
             monaco.editor.defineTheme(
               "notebook",
@@ -201,7 +206,8 @@ const CodeCell = ({
             if (theme == "dark") monaco.editor.setTheme("notebook");
             else monaco.editor.setTheme("vs-light");
             // set font family
-            editor.updateOptions({ fontFamily: "DM mono" });
+            // editor.updateOptions({ fontFamily: "DM Mono" });
+            // monaco.editor.remeasureFonts();
             // run function on ctrl+enter
             editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
               runCellCode();
@@ -304,6 +310,9 @@ const VisualCell = (
     )}
     {editing ? <div className="min-h-[69px]">
       <Editor
+        // beforeMount={(m) => {
+        //   m.editor.remeasureFonts()
+        // }}
         onMount={(editor, monaco) => {
           monaco.editor.defineTheme(
             "notebook",
@@ -312,7 +321,8 @@ const VisualCell = (
           if (theme == "dark") monaco.editor.setTheme("notebook");
           else monaco.editor.setTheme("vs-light");
           // set font family
-          editor.updateOptions({ fontFamily: "DM mono" });
+          // editor.updateOptions({ fontFamily: "DM Mono" });
+          // monaco.editor.remeasureFonts();
           // run function on ctrl+enter
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
             setEditing(false);
@@ -513,6 +523,9 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
               <Editor
                 className="font-btr-code"
                 height="100%"
+                // beforeMount={(m) => {
+                //   m.editor.remeasureFonts()
+                // }}
                 onMount={(editor, monaco) => {
                   monaco.editor.defineTheme(
                     "notebook",
@@ -520,6 +533,9 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                   );
                   if (theme == "dark") monaco.editor.setTheme("notebook");
                   else monaco.editor.setTheme("vs-light");
+                  // set font family
+                  // editor.updateOptions({ fontFamily: "DM Mono" });
+                  // monaco.editor.remeasureFonts();
                 }}
                 value={file ? file.content.cells[0].code : ""}
                 onChange={(value) => {

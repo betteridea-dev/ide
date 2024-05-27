@@ -94,22 +94,25 @@
     /* Safari and Chrome */
 }
 
-div {
+/* div {
     font-family: "DM Sans", sans-serif;
-}
+} */
 
-.view-line,
+/* .view-line,
+.view-lines,
 .line-numbers,
 pre {
-    font-family: "DM Mono", monospace !important;
-}
+    font-family: "DM Mono" !important;
+    font-size: unset !important;
+} */
 
 .xterm-rows>div {
     font-family: "DM Mono", monospace !important;
 }
 
-#monacodiv div,
+
+/* #monacodiv div,
 #monacoDiffEditor div {
     font-family: "DM Mono" !important;
-    font-size: unset !important;
-}
+     font-size: unset !important;
+} */
