@@ -6,7 +6,7 @@
 [![](https://img.shields.io/badge/Read_the_docs-lightgreen)](https://docs.betteridea.dev)
 [![X Follow](https://img.shields.io/twitter/follow/betteridea_dev)](https://twitter.com/betteridea_dev)
 
-[![protocol.land](https://arweave.net/eZp8gOeR8Yl_cyH9jJToaCrt2He1PHr0pR4o-mHbEcY)](https://protocol.land/#/repository/c38d3d29-8fd8-4d40-af69-570e6feca20e)
+[![protocol.land](https://arweave.net/eZp8gOeR8Yl_cyH9jJToaCrt2He1PHr0pR4o-mHbEcY)](https://protocol.land/#/repository/b4b210a3-a1ec-4b6b-8e0e-a37bdfa7a22a)
 
 </center>
 
