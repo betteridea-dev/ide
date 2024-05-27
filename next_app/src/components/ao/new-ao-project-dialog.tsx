@@ -298,7 +298,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
                 </Label>
               </div>
 
-              <div className="text-sm  col-span-2 text-right">Split code in cells - For Rapid development and testing</div>
+              <div className="text-sm  col-span-2 text-right">Split code in cells</div>
             </div>
 
             <div className="flex flex-row items-center gap-4 justify-between w-full">
@@ -309,7 +309,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
                 </Label>
               </div>
 
-              <div className="text-sm  col-span-2">Write code line by line - simple & efficient</div>
+              <div className="text-sm  col-span-2">Write code line by line</div>
             </div>
 
           </div>

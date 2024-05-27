@@ -18,7 +18,7 @@ import {
 import { Combobox } from "./ui/combo-box";
 import { useEffect, useState } from "react";
 import { GraphQLClient, gql } from "graphql-request";
-import { spawnProcess } from "@/lib/ao-vars";
+import { AOModule, spawnProcess } from "@/lib/ao-vars";
 import { Icons } from "plotly.js";
 
 function Title({ title }: { title: string }) {
@@ -31,6 +31,11 @@ function Title({ title }: { title: string }) {
   );
 }
 
+const AOModules = {
+  "Default": AOModule,
+  "SQL-Lite": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0"
+}
+
 export default function SettingsTab() {
   const manager = useProjectManager();
   const globalState = useGlobalState();
@@ -38,6 +43,7 @@ export default function SettingsTab() {
   const { theme, setTheme } = useTheme()
   const [processes, setProcesses] = useState([{ label: "+ Create New", value: "NEW_PROCESS" }]);
   const [newProcessName, setNewProcessName] = useState("");
+  const [newProcessModule, setNewProcessModule] = useState("");
   const [spawning, setSpawning] = useState(false);
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
@@ -89,7 +95,7 @@ export default function SettingsTab() {
       setSpawning(true);
       const np = await spawnProcess(newProcessName, [
         { name: "File-Type", value: p.defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
-      ]);
+      ], processUsed === "NEW_PROCESS" ? newProcessModule : AOModule);
       manager.setProjectProcess(p, np, activeWallet);
       setSpawning(false);
     } else {
@@ -118,7 +124,10 @@ export default function SettingsTab() {
           <div>Change Process</div>
           <div className="col-span-2 flex flex-col gap-1 items-center">
             <Combobox placeholder="Select Process" disabled={spawning} options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} />
-            {processUsed == "NEW_PROCESS" && <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-[83%]" onChange={(e) => { setNewProcessName(e.target.value) }} />}
+            {processUsed == "NEW_PROCESS" && <>
+              <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-full" onChange={(e) => { setNewProcessName(e.target.value) }} />
+              <Combobox placeholder="AO Process Module" disabled={spawning} options={Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} />
+            </>}
             <Button size="sm" disabled={
               processUsed === "" || (processUsed === "NEW_PROCESS" && newProcessName === "") || spawning
             } onClick={setProcess}>
