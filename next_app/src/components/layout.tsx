@@ -202,6 +202,10 @@ const CodeCell = ({
             else monaco.editor.setTheme("vs-light");
             // set font family
             editor.updateOptions({ fontFamily: "DM mono" });
+            // run function on ctrl+enter
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+              runCellCode();
+            });
           }}
           onChange={(value) => {
             // console.log(value);
@@ -246,9 +250,21 @@ const VisualCell = (
 ) => {
   const [mouseHovered, setMouseHovered] = useState(false);
   const [editing, setEditing] = useState(file.content.cells[cellId].editing);
+  const [clickCount, setClickCount] = useState(0);
   const { theme } = useTheme();
 
   const cellType = file.content.cells[cellId].type
+
+  function checkDoubleClick() {
+    if (editing) return
+    setClickCount(clickCount + 1);
+    setTimeout(() => {
+      if (clickCount == 1) {
+        setEditing(true);
+      }
+      setClickCount(0);
+    }, 200);
+  }
 
   return <div data-editing={editing} className="rounded-md relative bg-accent/30"
     onMouseEnter={() => setMouseHovered(true)}
@@ -297,6 +313,11 @@ const VisualCell = (
           else monaco.editor.setTheme("vs-light");
           // set font family
           editor.updateOptions({ fontFamily: "DM mono" });
+          // run function on ctrl+enter
+          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+            setEditing(false);
+          });
+          editor.focus();
         }}
         onChange={(value) => {
           // console.log(value);
@@ -316,7 +337,7 @@ const VisualCell = (
         language={file.content.cells[cellId].type == "MARKDOWN" ? "markdown" : "latex"}
         options={monacoConfig.CodeCell}
       />
-    </div> : <div className="markdown m-5">
+    </div> : <div className="markdown m-5" onClick={checkDoubleClick}>
       {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]}>{file.content.cells[cellId].code}</Markdown> :
         <Latex>{file.content.cells[cellId].code}</Latex>
       }
