@@ -59,8 +59,13 @@ const monacoConfig: {
     lineHeight: 20,
     lineNumbersMinChars: 2,
     scrollBeyondLastLine: false,
-    scrollbar: { vertical: "hidden", horizontal: "hidden" },
+    scrollBeyondLastColumn: 10,
+    scrollbar: {
+      vertical: "hidden", horizontal: "hidden",
+      alwaysConsumeMouseWheel: false
+    },
     renderLineHighlight: "none",
+    smoothScrolling: true,
   },
   CodeFile: {
     fontSize: 14,
@@ -205,12 +210,10 @@ const CodeCell = ({
             manager.updateFile(project, { file, content: newContent });
           }}
           height={
-            (cell.code.split("\n").length > 10
-              ? 10
-              : cell.code.split("\n").length) * 20
+            (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
           }
           width="94%"
-          className="min-h-[68px] pt-0 font-btr-code"
+          className="min-h-[68px] pt-0 font-btr-code overflow-y-clip"
           value={cell.code}
           defaultValue={cell.code}
           language={file.language}
@@ -302,8 +305,8 @@ const VisualCell = (
           manager.updateFile(project, { file, content: newContent });
         }}
         height={
-          (file.content.cells[cellId].code.split("\n").length > 10
-            ? 10
+          (file.content.cells[cellId].code.split("\n").length > 15
+            ? 15
             : file.content.cells[cellId].code.split("\n").length) * 20
         }
         width="100%"

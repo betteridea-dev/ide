@@ -1,4 +1,3 @@
-import "@xterm/xterm/css/xterm.css"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "@xterm/addon-fit";
@@ -23,16 +22,15 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
     const [loaded, setLoaded] = useState(false)
     const globalState = useGlobalState()
     const projectManager = useProjectManager()
-    const project = projectManager.getProject(globalState.activeProject)
     const [running, setRunning] = useState(false)
     // const [prompt, setPrompt] = useState("aos> ")
     const { theme } = useTheme()
     const [term, setTerm] = useState(new Terminal({
         cursorBlink: true,
         cursorStyle: "bar",
-        fontSize: 14.5,
+        fontSize: 14,
         fontFamily: "DM Mono",
-        cursorWidth: 50,
+        cursorWidth: 25,
         theme: {
             background: theme == "dark" ? "black" : "white",
             foreground: theme == "dark" ? "white" : "black",
@@ -41,9 +39,9 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
             selectionForeground: theme == "dark" ? "black" : "white",
             cursorAccent: theme == "dark" ? "white" : "black",
         },
-        allowTransparency: true,
+        allowTransparency: false,
         cols: 150,
-        rows: 20,
+        rows: 50,
         lineHeight: 1,
     }))
     const [rl, setRl] = useState(new Readline())
@@ -62,7 +60,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
             term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         })
         rl.print(prompt)
-    }, [loaded])
+    }, [loaded, globalState.activeProject])
 
 
     useEffect(() => {
@@ -70,6 +68,46 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
         if (p) setTermDiv(p as HTMLDivElement)
     }, [])
 
+    useEffect(() => {
+        if (loaded) return;
+        if (!termDiv) return;
+
+
+        term.loadAddon(rl);
+        // term.loadAddon(fit);
+        term.open(termDiv);
+        // console.log(history)
+        // history.forEach((line) => {
+        //     console.log("history", line)
+        //     rl.appendHistory(line)
+        //     term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+        // })
+        // fit.fit();
+
+        rl.setCheckHandler((text) => {
+            let trimmedText = text.trimEnd();
+            if (trimmedText.endsWith("&&")) {
+                return false;
+            }
+            return true;
+        });
+
+        readLine(prompt)
+
+        setLoaded(true)
+    }, [termDiv])
+
+    useEffect(() => {
+        if (!termDiv) return;
+        if (!loaded) return;
+        term.clear()
+        rl.println("\r\x1b[K");
+        commandOutputs.forEach((line) => {
+            rl.println(line);
+            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+        })
+        rl.print(prompt)
+    }, [commandOutputs, prompt])
 
     function readLine(newPrompt: string) {
         rl.read(newPrompt || prompt).then(processLine);
@@ -144,49 +182,10 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
         setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
     }
 
-
-    useEffect(() => {
-        if (loaded) return;
-        if (!termDiv) return;
-
-
-        term.loadAddon(rl);
-        // term.loadAddon(fit);
-        term.open(termDiv);
-        // console.log(history)
-        // history.forEach((line) => {
-        //     console.log("history", line)
-        //     rl.appendHistory(line)
-        //     term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-        // })
-        // fit.fit();
-
-        rl.setCheckHandler((text) => {
-            let trimmedText = text.trimEnd();
-            if (trimmedText.endsWith("&&")) {
-                return false;
-            }
-            return true;
-        });
-
-        readLine(prompt)
-
-        setLoaded(true)
-    }, [termDiv])
-
-    useEffect(() => {
-        if (!termDiv) return;
-        if (!loaded) return;
-        term.clear()
-        rl.println("\r\x1b[K");
-        commandOutputs.forEach((line) => {
-            rl.println(line);
-            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-        })
-        rl.print(prompt)
-    }, [commandOutputs, prompt])
-
-
+    if (!globalState.activeProject) {
+        return <div className="w-full h-full flex items-center justify-center text-lg font-btr-code"></div>
+    }
+    const project = projectManager.getProject(globalState.activeProject)
 
     return <div id="ao-terminal" className=" w-full bg-transparent p-1 view-line font-btr-code"></div>
 }

@@ -143,9 +143,9 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
         {collapsed ? <PanelBottomOpenIcon className="stroke-foreground opacity-60" size={23} /> : <PanelBottomCloseIcon className="stroke-foreground opacity-60" size={23} />}
       </Button>
 
-      {globalState.activeProject && <div className={`px-2 h-full overflow-scroll`}>
+      <div className={`px-2 h-full overflow-scroll`}>
         <TabsContent value="terminal" className=" -m-2 mt-0 h-full">
-          <Term prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
+          {globalState.activeProject && <Term prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />}
           {/* <div className="flex items-center h-full">
             <div className="block">{prompt}</div>&nbsp;
             <input
@@ -248,7 +248,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
             </div>
           ))}
         </TabsContent>
-      </div>}
+      </div>
     </Tabs>
   );
 }
