@@ -79,7 +79,7 @@
 }
 
 .markdown>* {
-    all: revert;
+    all: revert !important;
 }
 
 * {
@@ -106,4 +106,10 @@ pre {
 
 .xterm-rows>div {
     font-family: "DM Mono", monospace !important;
+}
+
+#monacodiv div,
+#monacoDiffEditor div {
+    font-family: "DM Mono" !important;
+    font-size: unset !important;
 }
