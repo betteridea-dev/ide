@@ -32,7 +32,7 @@ export function luaCompletionProvider(monaco: typeof import("monaco-editor")): m
                     {
                         label: "Send",
                         kind: monaco.languages.CompletionItemKind.Function,
-                        insertText: 'Send({\n\tTarget = ${1|ao.id|},\n\tData = "${2}"\n\tAction="${3}"\n})',
+                        insertText: 'Send({\n\tTarget = ${1|ao.id|},\n\tData = "${2}",\n\tAction="${3}"\n})',
                         documentation: "Send a message to a process",
                         range: {
                             startLineNumber: position.lineNumber,
@@ -45,7 +45,7 @@ export function luaCompletionProvider(monaco: typeof import("monaco-editor")): m
                     {
                         label: 'Handlers.add',
                         kind: monaco.languages.CompletionItemKind.Function,
-                        insertText: 'Handlers.add(\n\t"${1:handler_name}",\n\tHandlers.utils.hasMatching${2|Tag,Action|}()\n\tfunction(msg)\n\t\t${3}\n\tend\n)',
+                        insertText: 'Handlers.add(\n\t"${1:handler_name}",\n\tHandlers.utils.hasMatching${2|Tag,Action|}(),\n\tfunction(msg)\n\t\t${3}\n\tend\n)',
                         range: {
                             startLineNumber: position.lineNumber,
                             startColumn: position.column - 1,
