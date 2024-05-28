@@ -209,7 +209,7 @@ const CodeCell = ({
             // editor.updateOptions({ fontFamily: "DM Mono" });
             // monaco.editor.remeasureFonts();
             // run function on ctrl+enter
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+            editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
               runCellCode();
             });
           }}
@@ -324,7 +324,7 @@ const VisualCell = (
           // editor.updateOptions({ fontFamily: "DM Mono" });
           // monaco.editor.remeasureFonts();
           // run function on ctrl+enter
-          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+          editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
             setEditing(false);
           });
           editor.focus();
@@ -537,6 +537,10 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                   // set font family
                   // editor.updateOptions({ fontFamily: "DM Mono" });
                   // monaco.editor.remeasureFonts();
+                  // run function on shift+enter
+                  editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+                    runNormalCode();
+                  });
                 }}
                 value={file ? file.content.cells[0].code : ""}
                 onChange={(value) => {
