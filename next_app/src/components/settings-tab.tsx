@@ -115,7 +115,7 @@ export default function SettingsTab() {
         <Title title="CURRENT PROJECT" />
         <div className="my-8 grid grid-cols-3 items-center">
           <div>Owner Wallet</div>
-          <div className="col-span-2">{project.ownerWallet || "NA"}</div>
+          <div className="col-span-2">{typeof project.ownerWallet == "string" ? project.ownerWallet : "NA"}</div>
           <div>Current Process</div>
           <div className="col-span-2">{project.process || "NA"}</div>
           <div>Default Filetype</div>

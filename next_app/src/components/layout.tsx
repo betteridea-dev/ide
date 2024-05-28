@@ -356,9 +356,9 @@ const VisualCell = (
   </div>
 }
 
-const CellUtilButtons = ({ position, addNewCell }: { position: number, addNewCell: (foo?: number, type?: "CODE" | "MARKDOWN" | "LATEX") => void }) => {
-  const [visible, setVisible] = useState(false);
-  return <div className="relative" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+const CellUtilButtons = ({ defaultVisible = false, position, addNewCell }: { defaultVisible?: boolean, position: number, addNewCell: (foo?: number, type?: "CODE" | "MARKDOWN" | "LATEX") => void }) => {
+  const [visible, setVisible] = useState(defaultVisible);
+  return <div className="relative" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(defaultVisible)}>
     <div data-visible={visible}
       className="h-3.5 w-5/6 mx-auto relative gap-2 text-center flex items-center text-btr-grey-1 z-10 overflow-visible text-xs justify-center data-[visible=true]:visible data-[visible=false]:invisible">
       <div className="grow h-[1px] bg-btr-grey-1"></div>
@@ -518,7 +518,8 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
               >
                 + Add new cell
               </Button> */}
-              <CellUtilButtons position={file.content.cellOrder.length} addNewCell={addNewCell} />
+              <div className="mt-2"></div>
+              <CellUtilButtons defaultVisible position={file.content.cellOrder.length} addNewCell={addNewCell} />
             </>
           ) : (
             <>
