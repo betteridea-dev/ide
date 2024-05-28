@@ -245,7 +245,7 @@ const CodeCell = ({
             modeBarButtons: [["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["resetScale2d"], ["pan2d"], ["zoom2d"]],
           }} />
       </div> : <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20">
-        {<Ansi useClasses className="font-btr-code">{`${cell.output}`}</Ansi>}
+        {<Ansi useClasses className="font-btr-code">{`${typeof cell.output == "object" ? JSON.stringify(cell.output, null, 2) : cell.output}`}</Ansi>}
       </pre>}
     </div>
   );
@@ -490,7 +490,8 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                   /></>
               ))} */}
               {file.content.cellOrder.map((cellId, index) => {
-                const cellType = file.content.cells[cellId].type
+                const cellType = file?.content?.cells[cellId!]?.type
+                if (!cellType) return
                 return <>
                   <CellUtilButtons key={index} position={index} addNewCell={addNewCell} />
                   {(cellType == "MARKDOWN" || cellType == "LATEX") ?
