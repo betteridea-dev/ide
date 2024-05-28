@@ -39,6 +39,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from "next/router";
 import { dryrun } from "@permaweb/aoconnect";
 import { title } from "process";
+import { capOutputTo200Lines } from "@/lib/utils";
 const Plot = dynamic(
   () =>
     import('react-plotly.js'),
@@ -245,7 +246,7 @@ const CodeCell = ({
             modeBarButtons: [["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["resetScale2d"], ["pan2d"], ["zoom2d"]],
           }} />
       </div> : <pre className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20">
-        {<Ansi useClasses className="font-btr-code">{`${typeof cell.output == "object" ? JSON.stringify(cell.output, null, 2) : cell.output}`}</Ansi>}
+        {<Ansi useClasses className="font-btr-code">{`${capOutputTo200Lines(typeof cell.output == "object" ? JSON.stringify(cell.output, null, 2) : cell.output as string)}`}</Ansi>}
       </pre>}
     </div>
   );
