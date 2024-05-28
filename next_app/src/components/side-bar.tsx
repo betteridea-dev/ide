@@ -37,7 +37,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
         projects.map((pname, _) => {
           const active = pname === globalState.activeProject;
           const ownedByActiveWallet = manager.projects[pname].ownerWallet == activeAddress;
-          const ownerAddress = manager.projects[pname].ownerWallet;
+          let ownerAddress = manager.projects[pname].ownerWallet;
           return (
             <DropdownMenu key={_}>
               <div data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 mb-2 data-[active=true]:mb-0 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}>
@@ -47,7 +47,9 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                   className="fill-foreground stroke-none cursor-pointer data-[active=true]:fill-primary"
                   data-active={active}
                   onClick={() => {
-                    const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                    let shortAddress = "unknown"
+                    if (typeof ownerAddress == "string")
+                      shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                     if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                     globalState.setActiveProject(active ? "" : pname);
                   }}
@@ -59,7 +61,9 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                       data-active={active}
                       className="flex gap-1 cursor-pointer items-center data-[active=true]:text-primary"
                       onClick={() => {
-                        const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                        let shortAddress = "unknown"
+                        if (typeof ownerAddress == "string")
+                          shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                         if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                         globalState.setActiveProject(active ? "" : pname);
                         if (active) return
