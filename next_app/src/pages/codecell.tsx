@@ -204,6 +204,13 @@ export default function CodeCell() {
             } else if (e.data.action == "set_code") {
                 setCode(e.data.code)
                 setOutput("")
+            } else if (e.data.action == "get_inbox") {
+                const inb = await runLua("return require('json').encode(Inbox)", aosProcess, [
+                    { name: "External-App-Name", value: appname },
+                    { name: "File-Type", value: "External-Code-Cell" }
+                ])
+                const out = parseOutupt(inb);
+                window.parent.postMessage({ action: "inbox", data: out }, "*")
             }
         };
 
