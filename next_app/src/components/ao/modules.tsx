@@ -12,9 +12,11 @@ import { runLua, parseOutupt } from "@/lib/ao-vars";
 import { ReloadIcon } from "@radix-ui/react-icons"
 
 import { source as graphSource } from "@/modules/ao/graph";
+import { source as dbadminSource } from "@/modules/ao/db-admin";
 
 const modules = [
-    "graph.lua"
+    "graph.lua",
+    "dbAdmin.lua"
 ]
 
 export default function Modules() {
@@ -57,6 +59,9 @@ export default function Modules() {
                         switch (val) {
                             case "graph.lua":
                                 setCode(graphSource);
+                                break;
+                            case "dbAdmin.lua":
+                                setCode(dbadminSource);
                                 break;
                             default:
                                 setCode("");
