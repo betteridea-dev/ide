@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@betteridea/codecell':
-    specifier: ^1.0.3
-    version: 1.0.3
+    specifier: ^1.3.1
+    version: 1.3.1
   '@monaco-editor/react':
     specifier: ^4.6.0
     version: 4.6.0(monaco-editor@0.48.0)(react-dom@18.2.0)(react@18.2.0)
@@ -214,8 +214,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  /@betteridea/codecell@1.0.3:
-    resolution: {integrity: sha512-n8Q/l6ZYbKiw5Fugp/N1YKmnEOpXzGxxcxWrD5P9sEiI2YEhwUX3vMSsCXSUZe2TSTFveXaQ9ue4CWud5Kt3Rw==}
+  /@betteridea/codecell@1.3.1:
+    resolution: {integrity: sha512-JCaymQk2nxiqNzU7ztJlDp04qTj/Y2aPuLdlkg4nJENWbHgUAm0rjCdB/4yVavyA/o/Z4ZYWXGz8hCKCqtlWyw==}
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

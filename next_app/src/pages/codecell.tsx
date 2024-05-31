@@ -27,9 +27,9 @@ export default function CodeCell() {
     const [mounted, setMounted] = useState(false);
     const { theme } = useTheme();
 
-    console.log("autoconn", autoconnect)
 
     useEffect(() => {
+        console.log("autoconn", autoconnect)
 
         if (searchParams.size > 0) {
             if (searchParams.has("code")) {
@@ -138,7 +138,7 @@ export default function CodeCell() {
             label: `${edge.node.tags[2].value} (${edge.node.id})`,
             value: edge.node.id,
         }));
-        console.log(ids)
+        // console.log(ids)
 
         if (ids.length == 0) {
             console.log("No process found, creating one")
