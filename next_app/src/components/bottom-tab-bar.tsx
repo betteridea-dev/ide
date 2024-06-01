@@ -38,7 +38,6 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   const terminalInputRef = useRef<HTMLInputElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
-  const [currentTab, setTab] = useState("");
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
@@ -46,7 +45,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   useEffect(() => {
     if (globalState.activeMode == "AO") {
       setCommandOutputs([]);
-      setTab("terminal");
+      getInbox();
     }
   }, [globalState.activeProject]);
 
@@ -120,8 +119,13 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   function showFullMessage(_) { }
 
   return (
-    <Tabs value={currentTab} defaultValue="" onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
+    <Tabs defaultValue="inbox" onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
       {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full" onClick={() => { if (collapsed) toggle() }}>
+        {globalState.activeMode == "AO" && (
+          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-primary" onClick={getInbox}>
+            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
+          </TabsTrigger>
+        )}
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
             Terminal
@@ -130,11 +134,6 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
         {file && file.type == "NORMAL" && <TabsTrigger value="output" className="rounded-none border-b data-[state=active]:border-primary">
           Output
         </TabsTrigger>}
-        {globalState.activeMode == "AO" && (
-          <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-primary" onClick={getInbox}>
-            Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
-          </TabsTrigger>
-        )}
       </TabsList>}
       {!fullscreen && <Button variant="link" className="ml-auto absolute right-10 h-6 p-0 top-0.5 z-40" title="Maximise Panel" onClick={() => { setFullScreen() }}>
         {/* <Image src={Icons.collapseSVG} alt="collapse-expand" width={22} height={22} data-collapsed={collapsed} className=" opacity-80 invert dark:invert-0" /> */}
