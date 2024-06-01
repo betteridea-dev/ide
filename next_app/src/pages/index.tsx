@@ -11,8 +11,9 @@ import Warp from "@/components/warp";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export default function Home() {
-  const globalState = useGlobalState();
-  return globalState.activeMode == "AO" ? <Ao /> : <Warp />;
+  // const globalState = useGlobalState();
+  // return globalState.activeMode == "AO" ? <Ao /> : <Warp />;
+  return <Ao/>
 }
 
 

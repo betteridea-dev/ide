@@ -38,6 +38,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   const terminalInputRef = useRef<HTMLInputElement>();
   const manager = useProjectManager();
   const globalState = useGlobalState();
+  const [currentTab, setTab] = useState("");
 
   const project = globalState.activeProject && manager.getProject(globalState.activeProject);
   const file = project && globalState.activeFile && project.getFile(globalState.activeFile);
@@ -45,6 +46,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   useEffect(() => {
     if (globalState.activeMode == "AO") {
       setCommandOutputs([]);
+      setTab("terminal");
     }
   }, [globalState.activeProject]);
 
@@ -118,7 +120,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue={globalState.activeMode == "AO" ? "terminal" : "output"} onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
+    <Tabs value={currentTab} defaultValue="" onChange={(e) => console.log(e)} className=" pt-7 w-full h-full">
       {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full" onClick={() => { if (collapsed) toggle() }}>
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="terminal" className="rounded-none border-b data-[state=active]:border-primary">
