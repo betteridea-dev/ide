@@ -26,16 +26,16 @@ export default function TopBar() {
           <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mr-5" />
         </Link>
 
-        <Button variant="ghost" className="text-md" onClick={() => { globalState.setActiveProject("") }}>
+        <Button variant="link" className="text-md text-foreground opacity-50 hover:opacity-70 active:opacity-100" onClick={() => { globalState.setActiveProject("") }}>
           Home
         </Button>
         <Link href="https://docs.betteridea.dev" target="_blank">
-          <Button variant="ghost" className="text-md">
+          <Button variant="link" className="text-md text-foreground opacity-50 hover:opacity-70 active:opacity-100">
             Docs
           </Button>
         </Link>
         <Link href="https://learn.betteridea.dev" target="_blank">
-          <Button variant="ghost" className="text-md">
+          <Button variant="link" className="text-md text-foreground opacity-50 hover:opacity-70 active:opacity-100">
             Learn
           </Button>
         </Link>
