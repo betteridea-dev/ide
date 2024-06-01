@@ -1,4 +1,4 @@
-import { GetStaticPropsContext } from "next";
+import { GetServerSidePropsContext } from "next";
 import { dryrun } from "@permaweb/aoconnect"
 import { useEffect, useState } from "react";
 import { useProjectManager } from "@/hooks";
@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Icons from "@/assets/icons";
 import { toast } from "@/components/ui/use-toast";
+import Head from 'next/head';
 
 
 export default function Import() {
@@ -44,19 +45,30 @@ export default function Import() {
             }
             data.ownerWallet = owner
             projectManager.newProject(data)
-            window.location.href = "/?open=" + data.name
+            // window.location.href = "/?open=" + data.name
         }
         fetchShared()
     }, [id])
 
     // if (!id) return <div>loading...</div>
-    return <div className="w-screen h-screen flex flex-col gap-1 items-center justify-center">
-        <Image src={Icons.loadingSVG} alt="loading" width={50} height={50} className="animate-spin" />
-        <div>Loading Project</div>
-        <div className="text-sm text-btr-grey-1">You might need to connect your wallet</div>
+    return <>
+        {/* OG META TAGS */}
+        <Head>
+        <meta name="og:title" content={`Import Shared Project - BetterIDEa`} />
+            <meta name="og:description" content={`Welcome to the intuitive web IDE for building powerful actor oriented applications.
+            
+            Shared by process: ${id}`} />
+        <meta name="og:url" content={`https://ide.betteridea.dev/import?id=${id}`} />
+        </Head>
 
-        {!id && <div className="text-btr-grey-1">finding process id...</div>}
-        {data && <div className="text-btr-grey-1">loading project...</div>}
+        <div className="w-screen h-screen flex flex-col gap-1 items-center justify-center">
+        <Image src={Icons.loadingSVG} alt="loading" width={50} height={50} className="animate-spin z-10" />
+        <div>Loading Project</div>
+        {/* <div className="text-sm text-btr-grey-1">You might need to connect your wallet</div> */}
+
+        {!id && <div className="text-white z-10">finding process id...</div>}
+        {data && <div className="text-white z-10">data loaded...</div>}
         <pre className="text-xs text-btr-grey-1 p-2 absolute top-0 left-0 bottom-0 overflow-scroll">{JSON.stringify(JSON.parse(data), null, 2)}</pre>
     </div>
+    </>
 }
