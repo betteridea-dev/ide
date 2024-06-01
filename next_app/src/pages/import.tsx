@@ -45,7 +45,9 @@ export default function Import() {
             }
             data.ownerWallet = owner
             projectManager.newProject(data)
-            // window.location.href = "/?open=" + data.name
+            setTimeout(() => {
+                window.location.href = "/?open=" + data.name
+            }, 500)
         }
         fetchShared()
     }, [id])
