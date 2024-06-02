@@ -20,3 +20,20 @@ export const capOutputTo200Lines = (str: string): string => {
   if (lines.length <= 200) return str;
   return lines.slice(0, 100).join("\n") + "\n\x1b[31m... output has been capped at 200 lines ...\x1b[0m\n" + lines.slice(-100).join("\n");
 }
+
+export function createLoaderFunc(src:string, name:string){
+  return `local func, err = load([[
+        local function _load()
+            ${src}
+        end
+        _G.package.loaded["${name}"] = _load()
+    ]])
+
+    if not func then
+        print(err)
+        error("Error compiling load function")
+    end
+
+    func()
+    print("Loaded ${name} module")`
+}

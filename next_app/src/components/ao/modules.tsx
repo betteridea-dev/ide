@@ -5,19 +5,14 @@ import Icons from "@/assets/icons";
 import { Icons as LucidIcons } from "@/components/icons"
 import { useGlobalState } from "@/states";
 import { toast } from "../ui/use-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Combobox } from "../ui/combo-box";
 import { useProjectManager } from "@/hooks";
 import { runLua, parseOutupt } from "@/lib/ao-vars";
 import { ReloadIcon } from "@radix-ui/react-icons"
 
-import { source as graphSource } from "@/modules/ao/graph";
-import { source as dbadminSource } from "@/modules/ao/db-admin";
-
-const modules = [
-    "graph.lua",
-    "dbAdmin.lua"
-]
+import modules from "@/modules/ao"
+import { createLoaderFunc } from "@/lib/utils";
 
 export default function Modules() {
     const globalState = useGlobalState();
@@ -25,6 +20,13 @@ export default function Modules() {
     const [open, setOpen] = useState(false);
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
+    const [selectedModule, setSelectedModule] = useState("")
+
+    useEffect(() => {
+        if (selectedModule)setCode(createLoaderFunc(selectedModule,modules[selectedModule]))
+            else setCode("")
+
+    },[selectedModule])
 
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger onClick={(e) => {
@@ -53,29 +55,22 @@ export default function Modules() {
             <div className="flex flex-col gap-3 items-center justify-center">
                 <Combobox
                     placeholder="Select a module"
-                    options={modules.map((m) => ({ label: m, value: m }))}
+                    options={Object.keys(modules).map((m) => ({ label: m, value: m }))}
                     onChange={async (val) => {
                         console.log(val);
-                        switch (val) {
-                            case "graph.lua":
-                                setCode(graphSource);
-                                break;
-                            case "dbAdmin.lua":
-                                setCode(dbadminSource);
-                                break;
-                            default:
-                                setCode("");
-                        }
+                            setSelectedModule(val)
                     }}
                     onOpen={() => { }}
                 />
                 <pre className="w-full max-w-[46vw] text-xs h-[300px] overflow-scroll ring-1 ring-btr-grey-2 rounded-md p-1">
-                    {code}
+                    {modules[selectedModule]}
                 </pre>
                 <Button disabled={loading} onClick={async () => {
                     if (!code) return toast({ title: "No module selected", description: "You need to select a module to load" });
                     setLoading(true);
                     const project = projectManager.getProject(globalState.activeProject);
+                    if(!project.process)return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
+                    if(!selectedModule)return toast({ title: "No module selected", description: "You need to select a module to load" });
                     const res = await runLua(code, project.process, [
                         { name: "BetterIDEa-Function", value: "load-module" }
                     ]);

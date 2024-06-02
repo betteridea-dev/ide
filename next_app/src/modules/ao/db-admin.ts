@@ -1,6 +1,5 @@
-export const source = `
-local func, err = load([[
-        local function _load()
+export const name = "DbAdmin"
+export const src = `
 local dbAdmin = {}
 dbAdmin.__index = dbAdmin
 
@@ -38,15 +37,4 @@ function dbAdmin:exec(sql)
 end
 
 return dbAdmin
-        end
-        _G.package.loaded["DbAdmin"] = _load()
-    ]])
-
-    if not func then
-        print(err)
-        error("Error compiling load function: ")
-    end
-
-    func()
-    print("Loaded DbAdmin module")
 `

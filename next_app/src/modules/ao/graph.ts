@@ -1,4 +1,5 @@
-export const source = `function NewGraph(options)
+export const name = 'Graph'
+export const src = `function NewGraph(options)
     local graph = {
         data = {
 
