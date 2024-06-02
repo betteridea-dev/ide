@@ -21,7 +21,8 @@ export const capOutputTo200Lines = (str: string): string => {
   return lines.slice(0, 100).join("\n") + "\n\x1b[31m... output has been capped at 200 lines ...\x1b[0m\n" + lines.slice(-100).join("\n");
 }
 
-export function createLoaderFunc(src:string, name:string){
+export function createLoaderFunc(name:string, src:string){
+
   return `local func, err = load([[
         local function _load()
             ${src}
@@ -35,5 +36,5 @@ export function createLoaderFunc(src:string, name:string){
     end
 
     func()
-    print("Loaded ${name} module")`
+    return "Loaded ${name} module"`
 }

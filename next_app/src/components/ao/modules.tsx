@@ -32,6 +32,7 @@ export default function Modules() {
         <DialogTrigger onClick={(e) => {
             e.preventDefault();
             setCode("");
+            setSelectedModule("");
             if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to use Modules" });
             if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Modules only work in AO" });
             const project = projectManager.getProject(globalState.activeProject);
@@ -71,6 +72,7 @@ export default function Modules() {
                     const project = projectManager.getProject(globalState.activeProject);
                     if(!project.process)return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
                     if(!selectedModule)return toast({ title: "No module selected", description: "You need to select a module to load" });
+                    console.log(code)
                     const res = await runLua(code, project.process, [
                         { name: "BetterIDEa-Function", value: "load-module" }
                     ]);
