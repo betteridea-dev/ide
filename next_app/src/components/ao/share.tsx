@@ -11,12 +11,7 @@ import { useProjectManager } from "@/hooks";
 import { runLua, parseOutupt } from "@/lib/ao-vars";
 import { ReloadIcon } from "@radix-ui/react-icons"
 
-import { source as graphSource } from "@/modules/ao/graph";
 import { CopyIcon } from "lucide-react";
-
-const modules = [
-    "graph.lua"
-]
 
 export default function Share() {
     const globalState = useGlobalState();
@@ -84,8 +79,8 @@ export default function Share() {
             setUrl("");
             setShared(false);
             setSharing(false);
-            if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to use Modules" });
-            if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Modules only work in AO" });
+            if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to use share feature" });
+            if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Sharing only work in AO" });
             const project = projectManager.getProject(globalState.activeProject);
             if (!project) return toast({ title: "Project not found", description: "The active project was not found" });
             if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
