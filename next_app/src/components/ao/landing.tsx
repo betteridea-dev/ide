@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "../ui/button"
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
+import Link from "next/link";
 
 const words = [
     "winston",
@@ -29,9 +30,12 @@ const words = [
     "⁄⁠(⁠⁄⁠ ⁠⁄⁠•⁠⁄⁠-⁠⁄⁠•⁠⁄⁠ ⁠⁄⁠)⁠⁄"
 ]
 
-const cat = `
-ᓚᘏᗢ
-`
+function ContentItem({ title, desc, link }) {
+    return <Link href={link} target="_blank" className="flex flex-col items-center gap-2 ring-1 p-2 px-4 rounded-md ring-foreground bg-foreground/0 hover:bg-primary/20 active:bg-primary/40 hover:scale-105 active:scale-100 transition-all duration-200">
+        <span className="font-bold">{title} 🔗</span>
+        <span className="text-sm">{desc}</span>
+    </Link>
+}
 
 export default function AOLanding() {
     const [walletAddress, setWalletAddress] = useState<string>("");
@@ -84,11 +88,17 @@ export default function AOLanding() {
 
                 {!walletAddress && <Button onClick={connectWallet}>Connect Wallet</Button>}
 
-                <div className="flex flex-col text-center gap-x-4 mt-8">
+                <div className="flex flex-col text-center gap-x-4 my-6">
                     <h1 className="px-8">Create a new project from the sidebar</h1>
                     <h1 className="px-8">
                         Or open an existing one ;)
                     </h1>
+                </div>
+                <div>Latest content</div>
+                <div className="grid grid-cols-3 gap-3">
+                    <ContentItem title="Portable Codecells" desc="Learn how to integrate our codecells into your webapps" link="https://youtu.be/e7Gx2NdWXLQ?si=hg8Ih7828AsVjpp7" />
+                    <ContentItem title="Unit Testing" desc="Try writing unit tests for your AO functions" link="https://mirror.xyz/0xCf673b87aFBed6091617331cC895376209d3b923/uBgGB-HNhlig7RucAzdSyRjJIJSXCug5NMgN7bXS9qk" />
+                    <ContentItem title="BetterIDEa graphs" desc="Fetch and plot live crypto prices data using 0rbit oracle and BetterIDEa graphs" link="https://ide.betteridea.dev/import?id=2voE0ERMT6CCPRVEkTsotDR-dmHgfoSH6dvucL9rSQc"/>
                 </div>
             </div>
         </section>

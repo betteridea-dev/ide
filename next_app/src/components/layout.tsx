@@ -574,7 +574,7 @@ export default function Layout() {
   const manager = useProjectManager();
   const globalState = useGlobalState();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [bottombarCollapsed, setBottombarCollapsed] = useState(false);
+  const [bottombarCollapsed, setBottombarCollapsed] = useState(true);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const bottombarRef = useRef<ImperativePanelHandle>(null);
   const [mounted, setMounted] = useState(false);
@@ -634,9 +634,13 @@ export default function Layout() {
     }
   };
 
-  // useEffect(() => {
-  //   bottombarRef.current.collapse();
-  // }, [])
+  useEffect(() => {
+    bottombarRef.current.collapse();
+  }, [])
+
+    useEffect(()=>{
+        if(!globalState.activeProject)bottombarRef.current.collapse()
+    },[globalState.activeProject])
 
   const project =
     globalState.activeProject && manager.getProject(globalState.activeProject);
