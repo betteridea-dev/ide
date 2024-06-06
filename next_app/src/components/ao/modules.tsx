@@ -4,7 +4,7 @@ import Image from "next/image";
 import Icons from "@/assets/icons";
 import { Icons as LucidIcons } from "@/components/icons"
 import { useGlobalState } from "@/states";
-import { toast } from "../ui/use-toast";
+import {toast} from "sonner"
 import { useEffect, useState } from "react";
 import { Combobox } from "../ui/combo-box";
 import { useProjectManager } from "@/hooks";
@@ -33,11 +33,15 @@ export default function Modules() {
             e.preventDefault();
             setCode("");
             setSelectedModule("");
-            if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to use Modules" });
-            if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Modules only work in AO" });
+            // if (!globalState.activeProject) return toast({ title: "No active project", description: "You need to have an active project to use Modules" });
+            if (!globalState.activeProject) return toast.error("No active project",{description:"You need to have an active project to use Modules", id:"error"});
+            // if (globalState.activeMode != "AO") return toast({ title: "Not in AO mode", description: "Modules only work in AO" });
+            if (globalState.activeMode != "AO") return toast.error("Not in AO mode",{description:"Modules only work in AO", id:"error"});
             const project = projectManager.getProject(globalState.activeProject);
-            if (!project) return toast({ title: "Project not found", description: "The active project was not found" });
-            if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
+            // if (!project) return toast({ title: "Project not found", description: "The active project was not found" });
+            if (!project) return toast.error("Project not found",{description:"The active project was not found", id:"error"});
+            // if (!project.process) return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
+            if (!project.process) return toast.error("Process id missing",{description:"The active project doesnot seem to have a process id", id:"error"});
             setOpen(true);
         }}>
             <div className="flex flex-col items-center justify-center opacity-50 hover:opacity-80 active:opacity-100">
@@ -67,11 +71,14 @@ export default function Modules() {
                     {modules[selectedModule]}
                 </pre>
                 <Button disabled={loading} onClick={async () => {
-                    if (!code) return toast({ title: "No module selected", description: "You need to select a module to load" });
+                    // if (!code) return toast({ title: "No module selected", description: "You need to select a module to load" });
+                    if (!code) return toast.error("No module selected", { description: "You need to select a module to load", id: "error" });
                     setLoading(true);
                     const project = projectManager.getProject(globalState.activeProject);
-                    if(!project.process)return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
-                    if(!selectedModule)return toast({ title: "No module selected", description: "You need to select a module to load" });
+                    // if(!project.process)return toast({ title: "Process id missing", description: "The active project doesnot seem to have a process id" });
+                    if(!project.process)return toast.error("Process id missing", { description: "The active project doesnot seem to have a process id", id: "error" });
+                    // if(!selectedModule)return toast({ title: "No module selected", description: "You need to select a module to load" });
+                    if(!selectedModule)return toast.error("No module selected", { description: "You need to select a module to load", id: "error" });
                     console.log(code)
                     const res = await runLua(code, project.process, [
                         { name: "BetterIDEa-Function", value: "load-module" }

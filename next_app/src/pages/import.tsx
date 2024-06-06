@@ -5,7 +5,6 @@ import { useProjectManager } from "@/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Icons from "@/assets/icons";
-import { toast } from "@/components/ui/use-toast";
 import Head from 'next/head';
 
 

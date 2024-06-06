@@ -21,7 +21,7 @@ import { editor } from "monaco-editor";
 import { v4 } from "uuid";
 import { PFile, Project, ProjectManager, TFileContent } from "@/hooks/useProjectManager";
 import { runLua } from "@/lib/ao-vars";
-import { toast } from "./ui/use-toast";
+import {toast} from "sonner"
 import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
@@ -99,15 +99,17 @@ const CodeCell = ({
     const p = manager.getProject(project.name);
     console.log(p);
     if (!p.process)
-      return toast({
-        title: "No process for this project :(",
-        description:
-          "Please assign a process id from project settings before trying to run Lua code",
-      });
+      // return toast({
+      //   title: "No process for this project :(",
+      //   description:
+      //     "Please assign a process id from project settings before trying to run Lua code",
+      // });
+      return toast.error("No process for this project :(\nPlease assign a process id from project settings before trying to run Lua code")
     const ownerAddress = p.ownerWallet;
     const activeAddress = await window.arweaveWallet.getActiveAddress();
     const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-    if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+    // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+    if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
     console.log("running", cell.code);
     setRunning(true);
     const fileContent = { ...file.content };
@@ -123,7 +125,8 @@ const CodeCell = ({
       // @ts-ignore
       fileContent.cells[cellId].output = result.Error || result.error;
       // @ts-ignore
-      toast({ title: "Error", description: result.Error || result.error })
+      // toast({ title: "Error", description: result.Error || result.error })
+      toast.error(result.Error || result.error)
     } else {
       const outputData = result.Output.data;
       if (outputData.output) {
@@ -418,15 +421,17 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
   async function runNormalCode() {
     const p = manager.getProject(project.name);
     if (!p.process)
-      return toast({
-        title: "No process for this project :(",
-        description:
-          "Please assign a process id from project settings before trying to run Lua code",
-      });
+      // return toast({
+      //   title: "No process for this project :(",
+      //   description:
+      //     "Please assign a process id from project settings before trying to run Lua code",
+      // });
+      return toast.error("No process for this project :(\nPlease assign a process id from project settings before trying to run Lua code")
     const ownerAddress = p.ownerWallet;
     const activeAddress = await window.arweaveWallet.getActiveAddress();
     const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-    if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+    // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+      if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
 
 
     console.log("running", file.content.cells[0].code);

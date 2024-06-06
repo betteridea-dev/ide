@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { NewAOProjectDialog } from "@/components/ao/new-ao-project-dialog";
 import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog";
 import { NewFileDialog } from "@/components/new-file-dialog";
-import { toast } from "./ui/use-toast";
+import {toast} from "sonner"
 
 export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
   const globalState = useGlobalState();
@@ -50,7 +50,8 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                     let shortAddress = "unknown"
                     if (typeof ownerAddress == "string")
                       shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                    if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+                    // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+                      if(!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", {description: `It was created with ${shortAddress}.\nSome things might be broken` ,id:"error"})
                     globalState.setActiveProject(active ? "" : pname);
                   }}
                 />
@@ -64,7 +65,8 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
                         let shortAddress = "unknown"
                         if (typeof ownerAddress == "string")
                           shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                        if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+                        // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+                          if(!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", {description: `It was created with ${shortAddress}.\nSome things might be broken`, id:"error"})
                         globalState.setActiveProject(active ? "" : pname);
                         if (active) return
                         const file = Object.keys(manager.projects[pname].files)[0];

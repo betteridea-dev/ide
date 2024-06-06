@@ -7,9 +7,8 @@ import { useProjectManager } from "@/hooks";
 import Ansi from "ansi-to-react";
 import { stripAnsiCodes, tsToDate } from "@/lib/utils";
 import { getResults, runLua } from "@/lib/ao-vars";
-import { toast } from "./ui/use-toast";
 import { useState, useRef, useEffect } from "react";
-import { toast as sonnerToast } from "sonner";
+import { toast } from "sonner";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { dryrun } from "@permaweb/aoconnect";
@@ -69,7 +68,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
             console.log(data);
             fetchFlag = true;
             // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
-            sonnerToast.custom((id) => <div className="bg-primary text-black p-2 px-4 border border-btr-black-1 rounded-md">{stripAnsiCodes(data)}</div>);
+            toast.custom((id) => <div className="bg-primary text-white p-2 px-4 border border-btr-black-1 rounded-md max-h-[400px]">{stripAnsiCodes(data)}</div>);
             setCommandOutputs(p => [...p, data]);
 
           }
@@ -90,14 +89,16 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
 
   async function getInbox() {
     if (!process) {
-      return toast({ title: "Select a project to view Inbox" });
+      // return toast({ title: "Select a project to view Inbox" });
+      return toast.error("Select a project to view Inbox");
     }
     const pid = project.process;
     if (!pid) {
-      return toast({
-        title: "No process for this project :(",
-        description: "Please assign a process id from project settings before trying to run Lua code",
-      });
+      // return toast({
+      //   title: "No process for this project :(",
+      //   description: "Please assign a process id from project settings before trying to run Lua code",
+      // });
+      return toast.error("No process for this project :(\nPlease assign a process id from project settings before trying to run Lua code");
     }
     setLoadingInbox(true);
     const result = await runLua("require('json').encode(Inbox)", pid, [

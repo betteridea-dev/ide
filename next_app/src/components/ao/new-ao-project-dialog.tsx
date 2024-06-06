@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import {toast} from "sonner"
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useGlobalState } from "@/states";
 import { AOModule, spawnProcess } from "@/lib/ao-vars";
@@ -61,15 +61,20 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
   async function createProject() {
     if (!newProjName)
-      return toast({
-        title: "Need a project name 😑",
-        description: "A new project always needs a name",
-      });
+      // return toast({
+      //   title: "Need a project name 😑",
+      //   description: "A new project always needs a name",
+      // });
+      return toast.error("Need a project name 😑", {
+        description: "A new project always needs a name", id:"error"})
     if (!processUsed)
-      return toast({
-        title: "Process options not set",
-        description: "You must choose wether to create a new process or use an existing one",
-      });
+      // return toast({
+      //   title: "Process options not set",
+      //   description: "You must choose wether to create a new process or use an existing one",
+      // });
+      return toast.error("Process options not set", {
+        description: "You must choose wether to create a new process or use an existing one", id:"error"})
+
     const ownerWallet = await window.arweaveWallet.getActiveAddress();
     setLoadingProcess(true);
     const p = manager.newProject({
@@ -250,10 +255,11 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
           catch (e) {
             console.log(e)
             setPopupOpen(false)
-            toast({
-              title: "Connect Wallet",
-              description: "Please connect your wallet (bottom left corner) before creating a project",
-            });
+            // toast({
+            //   title: "Connect Wallet",
+            //   description: "Please connect your wallet (bottom left corner) before creating a project",
+            // });
+            toast.error("Connect Wallet", {description: "Please connect your wallet (bottom left corner) before creating a project", id:"error"})
           }
         }}
       >

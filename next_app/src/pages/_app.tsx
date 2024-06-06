@@ -45,7 +45,7 @@ export default function App({ Component, pageProps }: AppProps) {
         </div></div> :
           <Component {...pageProps} />}
         <Toaster />
-        <Sonner />
+        <Sonner richColors />
       </ThemeProvider>
     </div>
   );

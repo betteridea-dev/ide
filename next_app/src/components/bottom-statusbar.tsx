@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import {toast} from "sonner"
 import { useLocalStorage } from "usehooks-ts";
 import Icons from "@/assets/icons";
 import Image from "next/image";
@@ -18,15 +18,12 @@ export default function BottomStatusbar() {
 
   async function connectWallet() {
     if (!window.arweaveWallet)
-      return toast({
-        title: "No Arweave wallet found",
-        description: "You might want to install ArConnect extension to connect your wallet",
-      });
+      return toast.error("No Arweave wallet found, please install ArConnect and try again");
     await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
     const addr = await window.arweaveWallet.getActiveAddress();
     setWalletAddress(addr);
     const addrCropped = addr.slice(0, 9) + "..." + addr.slice(-9);
-    toast({ title: `Connected to ${addrCropped}` });
+    toast.success(`Connected to ${addrCropped}`, {id:"connected"});
     setAutoconnect(true);
   }
 
@@ -69,7 +66,7 @@ export default function BottomStatusbar() {
           className="p-1 text-xs"
           onClick={() => {
             navigator.clipboard.writeText(project.process);
-            toast({ title: "Copied to clipboard" });
+            toast.info("Copied to clipboard");
           }}
         >
           AO Process: {project.process}

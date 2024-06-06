@@ -6,8 +6,7 @@ import { sendGAEvent } from "@next/third-parties/google";
 import { getResults, runLua } from "@/lib/ao-vars";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
-import { toast } from "./ui/use-toast";
-import { toast as sonnerToast } from "sonner"
+import { toast} from "sonner"
 import { useTheme } from "next-themes";
 import { stripAnsiCodes } from "@/lib/utils";
 
@@ -118,18 +117,21 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
 
 
         if (!project)
-            return toast({
-                title: "Select a project to run code in",
-            });
+            // return toast({
+            //     title: "Select a project to run code in",
+            // });
+            return toast.error("Select a project to run code in", {id:"error"})
         if (!project.process)
-            return toast({
-                title: "No process for this project :(",
-                description: "Please assign a process id from project settings before trying to run Lua code",
-            });
+            // return toast({
+            //     title: "No process for this project :(",
+            //     description: "Please assign a process id from project settings before trying to run Lua code",
+            // });
+            return toast.error("No process for this project :(", {description: "Please assign a process id from project settings before trying to run Lua code",id:"error"})
         const ownerAddress = project.ownerWallet;
         const activeAddress = await window.arweaveWallet.getActiveAddress();
         const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-        if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+        // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+            if (ownerAddress != activeAddress) return toast.error("The owner wallet for this project is differnet", {description: `It was created with ${shortAddress}.\nSome things might be broken`,id:"error"})
 
         term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         if (text.trim().length == 0) {

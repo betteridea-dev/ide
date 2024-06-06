@@ -18,8 +18,9 @@ import {
 import { Combobox } from "./ui/combo-box";
 import { useEffect, useState } from "react";
 import { GraphQLClient, gql } from "graphql-request";
-import { AOModule, spawnProcess } from "@/lib/ao-vars";
+import { AOModule, runLua, spawnProcess } from "@/lib/ao-vars";
 import { Icons } from "plotly.js";
+import { toast } from "sonner";
 
 function Title({ title }: { title: string }) {
   return (
@@ -105,6 +106,38 @@ export default function SettingsTab() {
     setProcessUsed("");
   }
 
+    async function patch6524(){
+      if(!globalState.activeProject) return toast.error("No active project", {id:"error"})
+        const p = manager.getProject(globalState.activeProject);
+      if(!p) return toast.error("No active project",{id:"error"})
+        if(!p.process) return toast.error("Process for active project not found", {id:"error"})
+          const activeWallet = await window.arweaveWallet.getActiveAddress();
+          if (!activeWallet) return toast.error("No wallet connected", { id: "error" })
+        const patchCode = `local AO_TESTNET = 'fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY'
+local SEC_PATCH = 'sec-patch-6-5-2024'
+
+if not Utils.includes(AO_TESTNET, ao.authorities) then
+  table.insert(ao.authorities, AO_TESTNET)
+end
+if not Utils.includes(SEC_PATCH, Utils.map(Utils.prop('name'), Handlers.list)) then
+  Handlers.prepend(SEC_PATCH, 
+    function (msg)
+      return msg.From ~= msg.Owner and not ao.isTrusted(msg)
+    end,
+    function (msg)
+      Send({Target = msg.From, Data = "Message is not trusted."})
+      print("Message is not trusted. From: " .. msg.From .. " - Owner: " .. msg.Owner)
+    end
+  )
+end
+return "Added Patch Handler"`
+        const r = await runLua(patchCode, p.process)
+        console.log(r)
+        if(r.Output.data.output == "Added Patch Handler")toast.success("Process Patched")
+
+    
+    }
+
   return (
     <ScrollArea className="w-full h-full">
       <div className="h-full w-full p-8 max-w-4xl mx-auto">
@@ -135,6 +168,7 @@ export default function SettingsTab() {
               Confirm
             </Button>
           </div>
+                    <Button onClick={patch6524}>Patch 6-5-24</Button>
         </div>
 
         <Title title="GLOBAL" />

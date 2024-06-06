@@ -1,8 +1,10 @@
-import { toast } from "@/components/ui/use-toast";
+
+import {toast} from "sonner"
 import { Button } from "../ui/button"
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import Link from "next/link";
+import { AlertTriangleIcon, InfoIcon } from "lucide-react";
 
 const words = [
     "winston",
@@ -43,15 +45,17 @@ export default function AOLanding() {
 
     async function connectWallet() {
         if (!window.arweaveWallet)
-            return toast({
-                title: "No Arweave wallet found",
-                description: "You might want to install ArConnect extension to connect your wallet",
-            });
+            // return toast({
+            //     title: "No Arweave wallet found",
+            //     description: "You might want to install ArConnect extension to connect your wallet",
+            // });
+            return toast.error("No Arweave wallet found. Please install ArConnect extension to connect your wallet");
         await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
         const addr = await window.arweaveWallet.getActiveAddress();
         const addrCropped = addr.slice(0, 9) + "..." + addr.slice(-9);
         setWalletAddress(addr);
-        toast({ title: `Connected to ${addrCropped}` });
+        // toast({ title: `Connected to ${addrCropped}` });
+        toast.success(`Connected to ${addrCropped}`, {id:"connected"});
         setAutoconnect(true);
     }
 
@@ -77,13 +81,16 @@ export default function AOLanding() {
     return <>
         <section className="container text-foreground/90 p-24 my-16">
             <div className="flex flex-col gap-5 items-center">
-
+                <div className="flex flex-col gap-1 items-end absolute top-0 p-2 w-full bg-background">
+                    <div className="flex gap-2 items-center text-red-500">Old processes must perform a security update by going into settings and clicking on patch 6-5-24 <AlertTriangleIcon/></div>
+                <div className="flex gap-2 items-center">All new processes will be spawned with WASM64 support! <InfoIcon/></div>
+                </div>
                 <h1 className="text-6xl font-bold" suppressHydrationWarning>gm {
                     words[Math.floor(Math.random() * words.length)]
                 }</h1>
 
                 <p className="text-lg">
-                    Welcome to the intuitive web IDE for building powerful <span className="text-primary">actor oriented</span> applications.
+                    Welcome to the intuitive web IDE for building powerful <span className="text-primary font-medium">actor oriented</span> applications.
                 </p>
 
                 {!walletAddress && <Button onClick={connectWallet}>Connect Wallet</Button>}

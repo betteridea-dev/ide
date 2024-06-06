@@ -1,7 +1,7 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 
 const AppVersion = "3.0.0";
-export const AOModule = "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0";
+export const AOModule = "nI_jcZgPd0rcsnjaHtaaJPpMCW847ou-3RGA5_W3aZg";
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
 const CommonTags = [
