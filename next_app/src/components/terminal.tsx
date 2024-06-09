@@ -138,6 +138,13 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
             setCommandOutputs(p => [...p, ">"]);
             return readLine(promptBuf);
         }
+
+        if (text == "clear")
+        {
+            setCommandOutputs([]);
+            return readLine(promptBuf);
+
+        }
         console.log("running", text);
         setRunning(true);
         // print a line that says computing
