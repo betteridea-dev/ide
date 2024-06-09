@@ -114,7 +114,6 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
 
     async function processLine(text: string) {
         // rl.println("you entered: " + text);
-        // console.log(text)
 
 
         if (!project)
@@ -153,7 +152,6 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
         const result = await runLua(text, project.process, [
             { name: "File-Type", value: "Terminal" }
         ]);
-        console.log("Result after Running command  ", result)
         if (result.Error) {
             console.log(result.Error);
 
@@ -163,7 +161,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
         if (result.Output) {
             console.log(result.Output);
             setPrompt(result.Output.data.prompt)
-            console.log(result.Output.data.prompt )
+            console.log(result.Output.data.prompt)
             if (result.Output.data.json != "undefined") {
                 console.log("json", result.Output.data.json);
                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);
@@ -174,9 +172,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
                 // term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
                 // })
                 // rl.println(JSON.stringify(result.Output.data.json, null, 2));
-            }
-
-            else {
+            } else {
                 console.log("normal", result.Output.data.output);
                 setCommandOutputs(p => [...p, `> ${text}`, result.Output.data.output]);
                 // rl.println(result.Output.data.output);
@@ -192,7 +188,7 @@ export default function Term({ prompt, setPrompt, commandOutputs, setCommandOutp
         setRunning(false);
         sendGAEvent({ event: 'run_code', value: 'terminal' })
 
-        setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 200);
+        setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
     }
 
     if (!globalState.activeProject) {
