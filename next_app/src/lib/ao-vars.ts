@@ -4,6 +4,8 @@ const AppVersion = "3.0.0";
 export const AOModule = "nI_jcZgPd0rcsnjaHtaaJPpMCW847ou-3RGA5_W3aZg";
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
+export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4"
+
 const CommonTags = [
   { name: "App-Name", value: "BetterIDEa" },
   { name: "App-Version", value: AppVersion },

@@ -13,6 +13,7 @@ import { ReloadIcon } from "@radix-ui/react-icons"
 
 const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
 const blueprints = [
+    "apm.lua",
     "arena.lua",
     "arns.lua",
     "chat.lua",

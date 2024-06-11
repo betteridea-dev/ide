@@ -12,6 +12,7 @@ import { useProjectManager } from "@/hooks";
 import { parseOutupt, runLua } from "@/lib/ao-vars";
 import { unescape } from "querystring";
 import Share from "./ao/share";
+import Packages from "./ao/packages";
 
 export default function TopBar() {
   const router = useRouter();
@@ -45,7 +46,8 @@ export default function TopBar() {
         {globalState.activeMode == "AO"
           && globalState.activeProject && <>
             <Share />
-            <Modules />
+            {/* <Modules /> */}
+            <Packages />
             <Blueprints />
           </>
         }

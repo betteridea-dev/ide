@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 // import Icons from "@/assets/icons";
 import { Icons } from "@/components/icons";
 import { ProjectManager } from "@/hooks/useProjectManager";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { useGlobalState } from "@/states";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,7 +12,11 @@ import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog"
 import { NewFileDialog } from "@/components/new-file-dialog";
 import {toast} from "sonner"
 
-export default function SideBar({ collapsed, manager }: { collapsed: boolean; manager: ProjectManager }) {
+export default function SideBar({ collapsed, setCollapsed, manager }: {
+  collapsed: boolean;
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
+  manager: ProjectManager
+}) {
   const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
   const [activeAddress, setActiveAddress] = useState("");
@@ -30,7 +34,7 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
   }, [globalState.activeProject]);
 
   return (
-    <>
+    <div data-collapsed={collapsed} className="absolute flex flex-col truncate justify-center left-0 z-50 transition-all duration-200 bg-background w-[50px] data-[collapsed=false]:w-[250px] overflow-clip border-r h-[calc(100vh-89px)]" onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
       {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
       <div className="h-[1px] w-[90%] mb-2 bg-border mx-auto"></div>
       {mounted &&
@@ -161,10 +165,10 @@ export default function SideBar({ collapsed, manager }: { collapsed: boolean; ma
           globalState.setActiveFile("Settings");
         }}
       >
-        <Icons.settings className="mr-2" />
+        <Icons.settings className="" />
 
-        {!collapsed && "Settings"}
+        {!collapsed && <span className="ml-2">Settings</span>}
       </Button>
-    </>
+    </div>
   );
 }

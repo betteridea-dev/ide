@@ -21,7 +21,7 @@ import { editor } from "monaco-editor";
 import { v4 } from "uuid";
 import { PFile, Project, ProjectManager, TFileContent } from "@/hooks/useProjectManager";
 import { runLua } from "@/lib/ao-vars";
-import {toast} from "sonner"
+import { toast } from "sonner"
 import BottomStatusbar from "@/components/bottom-statusbar";
 import Ansi from "ansi-to-react";
 import SettingsTab from "@/components/settings-tab";
@@ -183,7 +183,7 @@ const CodeCell = ({
           </Button>
         </div>
       )}
-      <div className="flex h-fit relative justify-center rounded-t-md border-b border-border/30 min-h-[69px]">
+      <div className="flex h-fit relative justify-center rounded-t-md border-b border-border/30 min-h-[69px] overflow-x-clip">
         <Button
           variant="ghost"
           className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]"
@@ -431,7 +431,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
     const activeAddress = await window.arweaveWallet.getActiveAddress();
     const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
     // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
-      if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
+    if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
 
 
     console.log("running", file.content.cells[0].code);
@@ -578,7 +578,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
 export default function Layout() {
   const manager = useProjectManager();
   const globalState = useGlobalState();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [bottombarCollapsed, setBottombarCollapsed] = useState(true);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const bottombarRef = useRef<ImperativePanelHandle>(null);
@@ -643,9 +643,9 @@ export default function Layout() {
     bottombarRef.current.collapse();
   }, [])
 
-    useEffect(()=>{
-        if(!globalState.activeProject)bottombarRef.current.collapse()
-    },[globalState.activeProject])
+  useEffect(() => {
+    if (!globalState.activeProject) bottombarRef.current.collapse()
+  }, [globalState.activeProject])
 
   const project =
     globalState.activeProject && manager.getProject(globalState.activeProject);
@@ -665,25 +665,11 @@ export default function Layout() {
 
       <TopBar />
 
-      <main className="h-[calc(100vh-89px)]">
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel
-            collapsedSize={5}
-            collapsible
-            defaultSize={20}
-            minSize={10}
-            maxSize={20}
-            id="file-panel"
-            onCollapse={() => setSidebarCollapsed(true)}
-            onExpand={() => setSidebarCollapsed(false)}
-            className="flex flex-col"
-          >
-            <SideBar collapsed={sidebarCollapsed} manager={manager} />
-          </ResizablePanel>
-
-          <ResizableHandle />
-
-          <ResizablePanel>
+      <main className="h-[calc(100vh-89px)] flex flex-row">
+          {/* <div className="w-fit border-r"> */}
+            <SideBar collapsed={sidebarCollapsed} manager={manager} setCollapsed={setSidebarCollapsed} />
+          {/* </div> */}
+          <div className="flex flex-col grow h-full w-screen pl-[50px]">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel
                 defaultSize={70}
@@ -732,11 +718,31 @@ export default function Layout() {
                 />
               </ResizablePanel>
             </ResizablePanelGroup>
+          </div>
+        {/* <ResizablePanelGroup direction="horizontal"> */}
+        {/* <ResizablePanel
+            collapsedSize={5}
+            collapsible
+            defaultSize={20}
+            minSize={10}
+            maxSize={20}
+            id="file-panel"
+            onCollapse={() => setSidebarCollapsed(true)}
+            onExpand={() => setSidebarCollapsed(false)}
+            className="flex flex-col"
+          >
           </ResizablePanel>
-        </ResizablePanelGroup>
 
-        <BottomStatusbar />
+          <ResizableHandle /> */}
+
+        {/* <ResizablePanel> */}
+
+        {/* </ResizablePanel> */}
+        {/* </ResizablePanelGroup> */}
       </main>
+      <div className="h-fit">
+        <BottomStatusbar />
+      </div>
     </>
   );
 }
