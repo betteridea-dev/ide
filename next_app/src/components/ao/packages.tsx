@@ -35,6 +35,7 @@ export default function Packages() {
     const [installing, setInstalling] = useState(false);
     const [packages, setPackages] = useState<TPackage[]>([]);
     const [activePackage, setActivePackage] = useState<TPackage | null>(null);
+    const [activePackageInfo, setActivePackageInfo] = useState<TPackage | null>(null);
     const [debounce, setDebounceVal] = useState("");
     const [search, setSearch] = useState("");
     const p = projectManager.getProject(globalState.activeProject);
@@ -75,9 +76,29 @@ export default function Packages() {
             setActivePackage(null);
             setInstalling(false)
             fetchPopular();
-            
         }
     }, [open])
+
+    useEffect(() => {
+        if (activePackage) {
+            setActivePackageInfo(null)
+            ao.dryrun({
+                process: APM_ID,
+                tags: [
+                    { name: "Action", value: "APM.Info" }
+                ],
+                data: `${activePackage.Vendor}/${activePackage.Name}`
+            }).then((res) => {
+                if (res.Error) return toast.error("Error fetching package info", { description: res.Error, id: "error" })
+                const { Messages } = res;
+                const msg = Messages.find((msg) => msg.Tags.find((tag) => tag.name == "Action").value == "APM.InfoResponse")
+                if (!msg) return toast.error("Error fetching package info", { description: "No info response found", id: "error" })
+                const data: TPackage = JSON.parse(msg.Data);
+                setActivePackageInfo(data)
+            })
+
+        }
+    }, [activePackage])
 
     async function loadapm() {
         //dryrun and check if apm is already installed
@@ -86,7 +107,7 @@ export default function Packages() {
             tags: [
                 { name: "Action", value: "APM.UpdateNotice" }
             ],
-            data:"CHECK"
+            data: "CHECK"
         })
         console.log(dry)
         if (dry.Output.data == "CHECK") return
@@ -154,15 +175,15 @@ export default function Packages() {
         ])
         console.log(r)
         if (r.Error) return toast.error("Error installing package", { description: r.Error, id: "error" })
-        else 
-            toast.success("Package installed successfully",{description:`Now you can import it using require('${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}')`})
+        else
+            toast.success("Package installed successfully", { description: `Now you can import it using require('${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}')` })
         setInstalling(false);
     }
 
     useEffect(() => {
-            const timer = setTimeout(() => {
-                setSearch(debounce)
-            }, 500);
+        const timer = setTimeout(() => {
+            setSearch(debounce)
+        }, 500);
         return () => clearTimeout(timer);
     }, [debounce])
 
@@ -233,12 +254,12 @@ export default function Packages() {
             <div className="flex gap-2">
                 <div className="flex flex-col gap-1 w-[269px]">
                     <div>
-                        <Input placeholder="search packages" className="focus:!ring-transparent" onChange={(e)=>setDebounceVal(e.target.value)} />
+                        <Input placeholder="search packages" className="focus:!ring-transparent" onChange={(e) => setDebounceVal(e.target.value)} />
                     </div>
                     <div className="h-[60vh] overflow-scroll p-0.5 flex flex-col gap-0.5">
                         {
-                         loading?<><ReloadIcon className=" animate-spin mx-auto"/></>:   packages.map((pkg: TPackage, _: number) => {
-                                return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 px-2 ring-1 ring-foreground/10 m-0.5 rounded-lg cursor-pointer data-[active=true]:bg-foreground/5" onClick={()=>setActivePackage(pkg)}>
+                            loading ? <><ReloadIcon className=" animate-spin mx-auto" /></> : packages.map((pkg: TPackage, _: number) => {
+                                return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 px-2 ring-1 ring-foreground/10 m-0.5 rounded-lg cursor-pointer data-[active=true]:bg-foreground/5" onClick={() => setActivePackage(pkg)}>
                                     <div>{pkg.Name}</div>
                                     <div className="truncate">{pkg.Description}</div>
                                     <div className="text-xs text-right">{pkg.Installs} installs</div>
@@ -249,7 +270,7 @@ export default function Packages() {
                 </div>
                 <div className="border border-foreground/10 rounded-lg grow overflow-scroll whitespace-normal max-w-[calc(75vw-300px)] h-[66vh]">
                     {activePackage && <div className="p-2 text-sm">
-                        <div className="text-lg">{ activePackage.Vendor!=="@apm"&&activePackage.Vendor+"/"}{activePackage.Name}</div>
+                        <div className="text-lg">{activePackage.Vendor !== "@apm" && activePackage.Vendor + "/"}{activePackage.Name}</div>
                         <div className="">{activePackage.Description}</div>
                         <div className="">{activePackage.Installs} installs | version: {activePackage.Version}</div>
 
@@ -258,14 +279,14 @@ export default function Packages() {
                         <div className="">by {activePackage.Owner}</div>
                         <div className="flex items-center justify-center gap-2 p-1">
                             <Link href={`https://apm.betteridea.dev/pkg?id=${activePackage.PkgID}`} target="_blank" className="text-primary underline underline-offset-4">
-                            <Button className="">View on APM</Button>
+                                <Button className="">View on APM</Button>
                             </Link>
-                            <Button disabled={installing}  onClick={installPackage}>
-                                { installing&&<ReloadIcon className="animate-spin"/>} Install Package
+                            <Button disabled={installing} onClick={installPackage}>
+                                {installing && <ReloadIcon className="animate-spin" />} Install Package
                             </Button>
                         </div>
                         <div className="overflow-scroll h-[40vh]">
-                        <Markdown className="markdown">{Buffer.from(activePackage.README, 'hex').toString()}</Markdown>
+                            <Markdown className="markdown">{activePackageInfo ? Buffer.from(activePackageInfo.README, 'hex').toString() : "loading..."}</Markdown>
 
                         </div>
                     </div>}
