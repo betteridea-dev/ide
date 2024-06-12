@@ -102,7 +102,8 @@ export default function AOLanding() {
                     </h1>
                 </div>
                 <div>Latest content</div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <ContentItem title="Installing Packages" desc="Learn how to use APM and install packages on processes" link="https://mirror.xyz/0xCf673b87aFBed6091617331cC895376209d3b923/M4XoQFFCAKBH54bwIsCFT3Frxd575-plCg2o4H1Tujs" />
                     <ContentItem title="Portable Codecells" desc="Learn how to integrate our codecells into your webapps" link="https://youtu.be/e7Gx2NdWXLQ?si=hg8Ih7828AsVjpp7" />
                     <ContentItem title="Unit Testing" desc="Try writing unit tests for your AO functions" link="https://mirror.xyz/0xCf673b87aFBed6091617331cC895376209d3b923/uBgGB-HNhlig7RucAzdSyRjJIJSXCug5NMgN7bXS9qk" />
                     <ContentItem title="BetterIDEa graphs" desc="Fetch and plot live crypto prices data using 0rbit oracle and BetterIDEa graphs" link="https://ide.betteridea.dev/import?id=2voE0ERMT6CCPRVEkTsotDR-dmHgfoSH6dvucL9rSQc"/>

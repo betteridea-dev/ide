@@ -35,7 +35,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
 
   return (
     <div data-collapsed={collapsed} className="absolute flex flex-col truncate justify-center left-0 z-50 transition-all duration-200 bg-background w-[50px] data-[collapsed=false]:w-[250px] overflow-clip border-r h-[calc(100vh-89px)]" onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
-      {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
+      {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} setCollapsed={setCollapsed} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
       <div className="h-[1px] w-[90%] mb-2 bg-border mx-auto"></div>
       {mounted &&
         projects.map((pname, _) => {

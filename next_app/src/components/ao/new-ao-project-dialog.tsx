@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {toast} from "sonner"
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useGlobalState } from "@/states";
@@ -27,7 +27,7 @@ const templates = GetAOTemplates();
 // ];
 
 
-export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectManager; collapsed: boolean }) {
+export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manager: ProjectManager; collapsed: boolean, setCollapsed: Dispatch<SetStateAction<boolean>> }) {
   const globalState = useGlobalState();
   const [popupOpen, setPopupOpen] = useState(false);
   const [newProjName, setNewProjName] = useState("");
@@ -51,6 +51,7 @@ export function NewAOProjectDialog({ manager, collapsed }: { manager: ProjectMan
 
   useEffect(() => {
     if (!popupOpen) setSearchName("");
+    setCollapsed(true);
   }, [popupOpen]);
 
   // useEffect(() => {
