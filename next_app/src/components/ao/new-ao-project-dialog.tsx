@@ -16,7 +16,7 @@ import { GetAOTemplates } from "@/templates";
 
 const AOModules = {
   "Default": AOModule,
-  "SQL-Lite": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0"
+  "SQLite64": "z9iaKddl-rIBinPG7_3-oLAdgIujPPPCbUul5mBSIOk"
 }
 
 
