@@ -95,8 +95,9 @@ const CodeCell = ({
   const cell = file.content.cells[cellId];
   const { theme } = useTheme();
 
-  async function runCellCode() {
+  const runCellCode =async()=> {
     // get file state, run code get output, read latest file state and add output
+    console.log("running cell code",cellId);
     const p = manager.getProject(project.name);
     console.log(p);
     if (!p.process)
@@ -113,12 +114,12 @@ const CodeCell = ({
     if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
     console.log("running", cell.code);
     setRunning(true);
-    // const fileContent = { ...file.content };
+    const fileContent = { ...file.content };
     const result = await runLua(cell.code, p.process, [
       { name: "File-Type", value: "Notebook" }
     ]);
     console.log(result);
-    const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
+    // const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
 
 
     // @ts-ignore
@@ -189,7 +190,7 @@ const CodeCell = ({
       <div className="flex h-fit relative justify-center rounded-t-md border-b border-border/30 min-h-[69px] overflow-x-clip">
         <Button
           variant="ghost"
-          className="p-5 block h-full rounded-l rounded-b-none rounded-r-none min-w-[60px]"
+          className="p-5 h-full rounded-l rounded-b-none rounded-r-none min-w-[50px] grow flex items-center justify-center"
           onClick={runCellCode}
         >
           <Image
@@ -198,13 +199,10 @@ const CodeCell = ({
             data-running={running}
             width={30}
             height={30}
-            className="data-[running=true]:animate-spin p-0.5"
+            className="data-[running=true]:animate-spin p-0.5 block min-w-[30px]"
           />
         </Button>
         <Editor
-          // beforeMount={(m) => {
-          //   m.editor.remeasureFonts()
-          // }}
           onMount={(editor, monaco) => {
             monaco.editor.defineTheme(
               "notebook",
@@ -214,11 +212,8 @@ const CodeCell = ({
             else monaco.editor.setTheme("vs-light");
             // set font family
             // editor.updateOptions({ fontFamily: "DM Mono" });
-            // monaco.editor.remeasureFonts();
-            // run function on ctrl+enter
-            editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-              runCellCode();
-            });
+            
+            // run function on ctrl+enter only in this specific cell
           }}
           onChange={(value) => {
             // console.log(value);
@@ -500,9 +495,9 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
               ))} */}
               {file.content.cellOrder.map((cellId, index) => {
                 const cellType = file?.content?.cells[cellId!]?.type
-                if (!cellType) return
+                if (!cellType) return 
                 return <>
-                  <CellUtilButtons key={index} position={index} addNewCell={addNewCell} />
+                  <CellUtilButtons key={"util-"+index.toString()} position={index} addNewCell={addNewCell} />
                   {(cellType == "MARKDOWN" || cellType == "LATEX") ?
                     <VisualCell
                       key={index}
@@ -589,7 +584,7 @@ export default function Layout() {
   const monaco = useMonaco();
   const router = useRouter();
   const projectManager = useProjectManager();
-
+  const { theme } = useTheme()
   const { open } = router.query;
 
   // const readGetRequests = async () => {
@@ -615,8 +610,11 @@ export default function Layout() {
       // monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
       setMounted(true)
     }
-    if (open)
-      if (typeof projectManager.projects[open as string] != "undefined") {
+    if (monaco) {
+      if (theme == "dark") monaco.editor.setTheme("notebook");
+      else monaco.editor.setTheme("vs-light");
+    }
+    if (open && typeof projectManager.projects[open as string] != "undefined"){
         const p = projectManager.getProject(open as string);
         const files = p.files;
         globalState.setActiveProject(open as string);
@@ -630,7 +628,7 @@ export default function Layout() {
         // if (Object.keys(files).length > 0) globalState.setActiveFile(files[0].name)
       }
 
-  }, [mounted, monaco, open])
+  }, [mounted, monaco, open,theme])
 
   const toggleBottombar = () => {
     const panel = bottombarRef.current;
