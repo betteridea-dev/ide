@@ -29,7 +29,7 @@ import { sendGAEvent } from '@next/third-parties/google'
 import AOLanding from "./ao/landing";
 import WarpLanding from "./warp/landing";
 // import { event } from "nextjs-google-analytics";
-import { luaCompletionProvider } from "@/lib/monaco-completions";
+// import { luaCompletionProvider } from "@/lib/monaco-completions";
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import Latex from 'react-latex-next';
@@ -96,6 +96,7 @@ const CodeCell = ({
   const { theme } = useTheme();
 
   async function runCellCode() {
+    // get file state, run code get output, read latest file state and add output
     const p = manager.getProject(project.name);
     console.log(p);
     if (!p.process)
@@ -112,11 +113,13 @@ const CodeCell = ({
     if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${shortAddress}.\nSome things might be broken`)
     console.log("running", cell.code);
     setRunning(true);
-    const fileContent = { ...file.content };
+    // const fileContent = { ...file.content };
     const result = await runLua(cell.code, p.process, [
       { name: "File-Type", value: "Notebook" }
     ]);
     console.log(result);
+    const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
+
 
     // @ts-ignore
     if (result.Error || result.error) {
@@ -609,7 +612,7 @@ export default function Layout() {
   useEffect(() => {
     // readGetRequests()
     if (!mounted && monaco) {
-      monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
+      // monaco.languages.registerCompletionItemProvider("lua", luaCompletionProvider(monaco))
       setMounted(true)
     }
     if (open)
