@@ -10,13 +10,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { NewAOProjectDialog } from "@/components/ao/new-ao-project-dialog";
 import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog";
 import { NewFileDialog } from "@/components/new-file-dialog";
-import {toast} from "sonner"
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
-export default function SideBar({ collapsed, setCollapsed, manager }: {
-  collapsed: boolean;
-  setCollapsed: Dispatch<SetStateAction<boolean>>;
-  manager: ProjectManager
-}) {
+export default function SideBar({ collapsed, setCollapsed, manager }: { collapsed: boolean; setCollapsed: Dispatch<SetStateAction<boolean>>; manager: ProjectManager }) {
   const globalState = useGlobalState();
   const [mounted, setMounted] = useState(false);
   const [activeAddress, setActiveAddress] = useState("");
@@ -30,7 +27,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
       if (!window.arweaveWallet) return;
       setActiveAddress(await window.arweaveWallet.getActiveAddress());
     }
-    a()
+    a();
   }, [globalState.activeProject]);
 
   return (
@@ -43,7 +40,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
           const ownedByActiveWallet = manager.projects[pname].ownerWallet == activeAddress;
           let ownerAddress = manager.projects[pname].ownerWallet;
           return (
-            <DropdownMenu key={_}>
+            <div key={_}>
               <div data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 mb-2 data-[active=true]:mb-0 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}>
                 <Icons.folder
                   data-collapsed={collapsed}
@@ -51,11 +48,10 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
                   className="fill-foreground stroke-none cursor-pointer data-[active=true]:fill-primary"
                   data-active={active}
                   onClick={() => {
-                    let shortAddress = "unknown"
-                    if (typeof ownerAddress == "string")
-                      shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                    let shortAddress = "unknown";
+                    if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                     // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
-                      if(!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", {description: `It was created with ${shortAddress}.\nSome things might be broken` ,id:"error"})
+                    if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
                     globalState.setActiveProject(active ? "" : pname);
                   }}
                 />
@@ -66,26 +62,21 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
                       data-active={active}
                       className="flex gap-1 cursor-pointer items-center data-[active=true]:text-primary"
                       onClick={() => {
-                        let shortAddress = "unknown"
-                        if (typeof ownerAddress == "string")
-                          shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                        let shortAddress = "unknown";
+                        if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
                         // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
-                          if(!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", {description: `It was created with ${shortAddress}.\nSome things might be broken`, id:"error"})
+                        if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
                         globalState.setActiveProject(active ? "" : pname);
-                        if (active) return
+                        if (active) return;
                         const file = Object.keys(manager.projects[pname].files)[0];
-                        console.log(file)
-                        if (file)
-                          globalState.setActiveFile(file);
-
+                        console.log(file);
+                        if (file) globalState.setActiveFile(file);
                       }}
                     >
                       <Icons.play data-active={active} className="fill-foreground data-[active=true]:fill-primary stroke-none mr-1 data-[active=true]:rotate-90" height={12} width={12} />
 
                       {pname}
                     </div>
-
-
                   </div>
                 )}
               </div>
@@ -93,10 +84,39 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
                 <div className="flex flex-col items-center justify-center px-3 mb-3 w-full">
                   <div className="flex justify-between items-center w-full">
                     <NewFileDialog manager={manager} project={pname} />
-                    <DropdownMenuTrigger className="cursor-pointer hover:bg-accent/70 px-2">
-                      :
-                      {/* <Icons.settings className="cursor-pointer hover:bg-accent/70 p-1" width={24} /> */}
-                    </DropdownMenuTrigger>
+                    <Dialog onOpenChange={(open) => setCollapsed(!open)}>
+                      <DialogTrigger className="hover:bg-accent/70 px-2">:</DialogTrigger>
+                      <DialogContent>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            disabled
+                            onClick={() => {
+                              // manager.duplicateProject(manager.getProject(pname));
+                              // globalState.projectDuplicated(pname);
+                            }}
+                          >
+                            Duplicate project
+                          </Button>
+                          <Button
+                            disabled
+                            onClick={() => {
+                              // manager.renameProject(manager.getProject(pname));
+                            }}
+                          >
+                            Rename project
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              manager.deleteProject(pname);
+                              globalState.projectDeleted(pname);
+                            }}
+                          >
+                            Delete project
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   {Object.keys(manager.projects[pname].files).map((fname, _) => {
@@ -114,11 +134,44 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
                           >
                             <div>{fname}</div>
                             <div>
-                              <DropdownMenu>
+                              <Dialog onOpenChange={(open) => setCollapsed(!open)}>
+                                <DialogTrigger>:</DialogTrigger>
+                                <DialogContent>
+                                  <div className="flex flex-col gap-2">
+                                    <Button
+                                      disabled
+                                      onClick={() => {
+                                        // manager.duplicateFile(manager.getProject(pname), fname);
+                                        // globalState.fileDuplicated(fname);
+                                      }}
+                                    >
+                                      Duplicate file
+                                    </Button>
+                                    <Button
+                                      disabled
+                                      onClick={() => {
+                                        // manager.renameFile(manager.getProject(pname), fname);
+                                      }}
+                                    >
+                                      Rename file
+                                    </Button>
+                                    <Button variant="destructive" onClick={() => manager.deleteFile(manager.getProject(pname), fname)}>
+                                      Delete file
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              {/* <DropdownMenu onOpenChange={(e) => setCollapsed(!e)}>
                                 <DropdownMenuTrigger>
-                                  <Button variant="ghost" className="h-6 px-2 rounded-none" onClick={(e) => {
-                                    e.stopPropagation()
-                                  }}>:</Button>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-6 px-2 rounded-none"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    :
+                                  </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                   <DropdownMenuItem
@@ -130,28 +183,16 @@ export default function SideBar({ collapsed, setCollapsed, manager }: {
                                     Delete file
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
-                              </DropdownMenu>
+                              </DropdownMenu> */}
                             </div>
                           </Button>
-
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
-
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => {
-                    manager.deleteProject(pname);
-                    globalState.projectDeleted(pname);
-                  }}
-                >
-                  Delete project
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            </div>
           );
         })}
 
