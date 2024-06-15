@@ -68,7 +68,7 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
             console.log(data);
             fetchFlag = true;
             // toast({ variant: "newMessage", title: stripAnsiCodes(data) });
-            toast.custom((id) => <div className="bg-primary text-white p-2 px-4 border border-btr-black-1 rounded-md max-h-[400px]">{stripAnsiCodes(data)}</div>);
+            toast.custom((id) => <div className="bg-primary text-white p-2 px-4 border border-btr-black-1 rounded-md max-h-[200px] overflow-scroll">{stripAnsiCodes(data)}</div>);
             setCommandOutputs(p => [...p, data]);
 
           }
