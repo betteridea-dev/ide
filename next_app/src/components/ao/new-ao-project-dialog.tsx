@@ -13,14 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { GetAOTemplates } from "@/templates";
-
-const AOModules = {
-    "Default (WASM64)": AOModule,
-    "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
-    "SQLite64": "z9iaKddl-rIBinPG7_3-oLAdgIujPPPCbUul5mBSIOk",
-    "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0"
-}
-
+import {modules as AOModules} from "@/lib/ao-vars";
 
 const templates = GetAOTemplates();
 // const templates = [

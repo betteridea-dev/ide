@@ -21,6 +21,7 @@ import { GraphQLClient, gql } from "graphql-request";
 import { AOModule, runLua, spawnProcess } from "@/lib/ao-vars";
 import { Icons } from "plotly.js";
 import { toast } from "sonner";
+import {modules as AOModules} from "@/lib/ao-vars"
 
 function Title({ title }: { title: string }) {
   return (
@@ -30,11 +31,6 @@ function Title({ title }: { title: string }) {
       <Separator className="" />
     </div>
   );
-}
-
-const AOModules = {
-  "Default": AOModule,
-  "SQL-Lite": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0"
 }
 
 export default function SettingsTab() {
