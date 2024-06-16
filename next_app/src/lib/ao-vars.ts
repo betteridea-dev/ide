@@ -81,7 +81,7 @@ export async function getResults(process: string, cursor = "") {
         process,
         from: cursor,
         sort: "ASC",
-        limit: 999,
+        limit: 999999,
     });
 
     if (r.edges.length > 0) {
