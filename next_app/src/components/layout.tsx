@@ -653,7 +653,7 @@ export default function Layout() {
 
   if (globalState.activeFile && globalState.activeFile != "Settings") {
     var file = project.getFile(globalState.activeFile);
-    var isNotebook = file && globalState.activeFile && file.type == "NOTEBOOK";
+    var isNotebook = file && globalState.activeFile && file.name.endsWith(".luanb");
   }
 
   // console.log(isNotebook);

@@ -30,8 +30,9 @@ export default function TopBar() {
         const zip = new JSZip();
         fileContents.forEach(file => {
             console.log(file)
-            const fileName = file.name.split(".")[0] + ".luajson";
-            const contents = JSON.stringify(file);
+            // const fileName = file.name.split(".")[0] + ".luanb";
+            const fileName = file.name;
+            const contents = file.name.endsWith(".luanb") ? JSON.stringify(file) : file.content.cells[0].code;
             zip.file(fileName, contents);
         })
         zip.generateAsync({ type: "blob" }).then((blob) => {

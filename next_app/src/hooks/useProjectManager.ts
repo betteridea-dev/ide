@@ -23,7 +23,7 @@ function extensionToLanguage(extension: string) {
       return "json";
     case "md":
       return "markdown";
-    case "lua":
+    case "lua": case "luanb":
       return "lua";
     default:
       return "plaintext";

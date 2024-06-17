@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "sonner"
-import { ProjectManager } from "@/hooks/useProjectManager";
+import { PFile, ProjectManager } from "@/hooks/useProjectManager";
 import { useGlobalState } from "@/states";
 import { AOModule, spawnProcess } from "@/lib/ao-vars";
 import { GraphQLClient, gql } from "graphql-request";
@@ -38,7 +38,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
     const [newProcessModule, setNewProcessModule] = useState("");
     const [usingManualProcessId, setUsingManualProcessId] = useState("");
     const [fileDragOver, setFileDragOver] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState<{ [foo: string]: string }>({});
+    const [uploadedFiles, setUploadedFiles] = useState<{ [foo: string]: PFile|string }>({});
 
     useEffect(() => {
         if (searchTimeout) clearTimeout(searchTimeout);
@@ -114,13 +114,26 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
         //   default:
         //     initialContent = "print('Hello AO!')"
         // }
+        globalState.clearFiles();
+        globalState.setActiveProject(newProjName);
         if (Object.keys(uploadedFiles).length > 0) {
             for (const file in uploadedFiles) {
-                manager.newFile(p, {
-                    name: file,
-                    type: defaultFiletype,
-                    initialContent: uploadedFiles[file],
-                });
+                // manager.newFile(p, {
+                //     name: file,
+                //     type: uploadedFiles[file].type,
+                // });
+                if (file.endsWith(".luanb")) {
+                    p.files[file] = uploadedFiles[file] as PFile;
+                    console.log(p.files[file])
+                    manager.projects[p.name] = p;
+                    manager.saveProjects(manager.projects);
+                } else {
+                    manager.newFile(p, {
+                        name: file,
+                        type: defaultFiletype,
+                        initialContent: uploadedFiles[file] as string,
+                    });
+                }
             }
             globalState.setActiveFile(Object.keys(uploadedFiles)[0]);
         } else {
@@ -131,8 +144,6 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
             });
             globalState.setActiveFile("main.lua");
         }
-        globalState.clearFiles();
-        globalState.setActiveProject(newProjName);
         setLoadingProcess(false);
         setPopupOpen(false);
     }
@@ -276,20 +287,24 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
             const files = Object.keys(zipFile.files);
             // console.log(files)
             if (files.length == 0) return toast.error("No files found in zip", { id: "error" })
-            const localFiles = {}
+            const localFiles: {[foo:string]:PFile|string} = {}
             // add all files to the project
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const allowedFileExtensions = ["lua", "luajson", "md"]
+                const allowedFileExtensions = ["lua", "luanb", "md"]
                 const fileExtension = file.split(".").pop();
                 if (!allowedFileExtensions.includes(fileExtension)) {
-                    toast.info("Skipping file as the extension is not allowed", { description: file, id: "info" })
+                    toast.info("Skipping file as the extension is not allowed", { description: file })
                     console.log("skipping", file)
                     continue;
                 };
                 const content = await zipFile.file(file).async("string");
                 // console.log(file, content)
-                localFiles[file] = content;
+                if (file.endsWith(".luanb")) {
+                    localFiles[file] = JSON.parse(content);
+                } else {
+                    localFiles[file] = content as string;
+                }
             }
             setUploadedFiles(localFiles);
             setSelectedTemplate("");

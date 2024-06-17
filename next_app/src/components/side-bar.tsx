@@ -85,7 +85,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                 {active && !collapsed && (
                                     <div className="flex flex-col items-center justify-center px-3 mb-3 w-full">
                                         <div className="flex justify-between items-center w-full">
-                                            <NewFileDialog manager={manager} project={pname} />
+                                            <NewFileDialog manager={manager} project={pname} collapsed={collapsed} setCollapsed={setCollapsed} />
                                             <Dialog onOpenChange={(open) => setCollapsed(!open)}>
                                                 <DialogTrigger className="hover:bg-accent/70 px-2">:</DialogTrigger>
                                                 <DialogContent>
@@ -128,16 +128,16 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                         <Button
                                                             data-active={globalState.activeFile == fname}
                                                             variant="ghost"
-                                                            className="rounded-none flex pl-1 pr-0 h-6 justify-between w-full hover:bg-accent/30 data-[active=true]:bg-accent/60"
+                                                            className="rounded-none hover:bg-transparent text-foreground flex pl-0 pr-0 h-6 justify-between w-full"
                                                             key={_}
                                                             onClick={() => {
                                                                 globalState.setActiveFile(fname);
                                                             }}
                                                         >
-                                                            <div>{fname}</div>
+                                                            <div data-active={globalState.activeFile == fname} className="hover:bg-accent/40 data-[active=true]:bg-accent/70 w-full pl-2 h-6 text-left">{fname}</div>
                                                             <div>
                                                                 <Dialog onOpenChange={(open) => setCollapsed(!open)}>
-                                                                    <DialogTrigger>:</DialogTrigger>
+                                                                    <DialogTrigger className="px-2 hover:bg-accent/70">:</DialogTrigger>
                                                                     <DialogContent>
                                                                         <div className="flex flex-col gap-2">
                                                                             <Button
