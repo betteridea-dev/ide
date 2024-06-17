@@ -296,7 +296,7 @@ export default function Packages() {
                                 <Button className="">View on APM</Button>
                             </Link>
                             <Button disabled={installing} onClick={installPackage}>
-                                {installing && <ReloadIcon className="animate-spin" />} Install Package
+                                {installing && <ReloadIcon className="animate-spin mr-1" />} Install Package
                             </Button>
                         </div>
                         <div className="overflow-scroll h-[40vh]">
