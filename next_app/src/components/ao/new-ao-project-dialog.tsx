@@ -14,6 +14,7 @@ import { Icons } from "@/components/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { GetAOTemplates } from "@/templates";
 import { modules as AOModules } from "@/lib/ao-vars";
+import JSZip from "jszip";
 
 const templates = GetAOTemplates();
 // const templates = [
@@ -36,6 +37,8 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
     const [searchTimeout, setSearchTimeout] = useState<any>(0)
     const [newProcessModule, setNewProcessModule] = useState("");
     const [usingManualProcessId, setUsingManualProcessId] = useState("");
+    const [fileDragOver, setFileDragOver] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState<{ [foo: string]: string }>({});
 
     useEffect(() => {
         if (searchTimeout) clearTimeout(searchTimeout);
@@ -111,14 +114,25 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
         //   default:
         //     initialContent = "print('Hello AO!')"
         // }
-        manager.newFile(p, {
-            name: "main.lua",
-            type: defaultFiletype,
-            initialContent,
-        });
+        if (Object.keys(uploadedFiles).length > 0) {
+            for (const file in uploadedFiles) {
+                manager.newFile(p, {
+                    name: file,
+                    type: defaultFiletype,
+                    initialContent: uploadedFiles[file],
+                });
+            }
+            globalState.setActiveFile(Object.keys(uploadedFiles)[0]);
+        } else {
+            manager.newFile(p, {
+                name: "main.lua",
+                type: defaultFiletype,
+                initialContent,
+            });
+            globalState.setActiveFile("main.lua");
+        }
         globalState.clearFiles();
         globalState.setActiveProject(newProjName);
-        globalState.setActiveFile("main.lua");
         setLoadingProcess(false);
         setPopupOpen(false);
     }
@@ -246,10 +260,62 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
         fetchProcesses();
     }, []);
 
+    function droppedFile(e: any) {
+        e.preventDefault();
+        setFileDragOver(false)
+        const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if (files == 0) return toast.error("No files dropped", { id: "error" })
+        const file = files[0];
+        if (file.type != "application/zip") return toast.error("Invalid file type. Need a project zip file", { id: "error" })
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const content = e.target.result;
+            console.log(content)
+            const zip = new JSZip();
+            const zipFile = await zip.loadAsync(content);
+            const files = Object.keys(zipFile.files);
+            // console.log(files)
+            if (files.length == 0) return toast.error("No files found in zip", { id: "error" })
+            const localFiles = {}
+            // add all files to the project
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const allowedFileExtensions = ["lua", "luajson", "md"]
+                const fileExtension = file.split(".").pop();
+                if (!allowedFileExtensions.includes(fileExtension)) {
+                    toast.info("Skipping file as the extension is not allowed", { description: file, id: "info" })
+                    console.log("skipping", file)
+                    continue;
+                };
+                const content = await zipFile.file(file).async("string");
+                // console.log(file, content)
+                localFiles[file] = content;
+            }
+            setUploadedFiles(localFiles);
+            setSelectedTemplate("");
+            console.log(localFiles)
+        }
+        reader.readAsArrayBuffer(file);
+
+    }
+
+    function dragOveredFile(e: any) {
+        e.preventDefault();
+        setFileDragOver(true);
+        // console.log(e)
+    }
+
     return (
         <Dialog open={popupOpen} onOpenChange={(e) => {
             setSelectedTemplate("");
             setProcessUsed("");
+            setUploadedFiles({});
+            setNewProjName("");
+            setNewProcessName("");
+            setNewProcessModule("");
+            setUsingManualProcessId("");
+            setFileDragOver(false);
+
             setPopupOpen(e)
         }}>
             <DialogTrigger data-collapsed={collapsed} className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
@@ -291,7 +357,12 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
                 <details>
                     <summary className="text-foreground/60 text-sm pl-2 pb-2">Advanced Settings</summary>
                     <div className="flex flex-col gap-2">
-                        <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
+                        <input id="projext-zip" type="file" accept=".zip" placeholder="Upload project zip" hidden onChange={droppedFile} />
+                        <label htmlFor="projext-zip" className="text-center" onDragOver={dragOveredFile} onDrop={droppedFile} onDragLeave={() => setFileDragOver(false)}>
+                            <div data-draggedover={fileDragOver} className="border border-dashed data-[draggedover=true]:border-primary rounded-lg p-4">{Object.keys(uploadedFiles).length > 0 ? `Found ${Object.keys(uploadedFiles).length} files` : "Upload project zip"}</div>
+
+                        </label>
+                        <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
                             onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
 
                         <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module" options={Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} />
