@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { GetAOTemplates } from "@/templates";
-import {modules as AOModules} from "@/lib/ao-vars";
+import { modules as AOModules } from "@/lib/ao-vars";
 
 const templates = GetAOTemplates();
 // const templates = [
@@ -35,6 +35,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
     const [searchNameProxy, setSearchNameProxy] = useState("");
     const [searchTimeout, setSearchTimeout] = useState<any>(0)
     const [newProcessModule, setNewProcessModule] = useState("");
+    const [usingManualProcessId, setUsingManualProcessId] = useState("");
 
     useEffect(() => {
         if (searchTimeout) clearTimeout(searchTimeout);
@@ -49,11 +50,19 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
         setCollapsed(true);
     }, [popupOpen]);
 
-    // useEffect(() => {
-    //   if (searchName) {
-    //     fetchProcessesWithName(searchName);
-    //   }
-    // }, [searchName]);
+    useEffect(() => {
+        if (searchName) {
+            // fetchProcessesWithName(searchName);
+            if (searchName.length == 43) {
+                console.log("got process id", searchName)
+                setUsingManualProcessId(searchName)
+            }
+            else {
+                setUsingManualProcessId("")
+
+            }
+        }
+    }, [searchName]);
 
     async function createProject() {
         if (!newProjName)
@@ -274,17 +283,19 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
 
                 <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-                <Combobox placeholder="Select Process (or search with ID)" options={processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setSearchNameProxy(e)} />
+                <Combobox placeholder="Select Process (or search with ID)" options={usingManualProcessId ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setSearchNameProxy(e)} />
 
-                {processUsed == "NEW_PROCESS" && <Input type="text" placeholder="Process Name (optional)" onChange={(e) => setNewProcessName(e.target.value)} />}
-
-                <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
-                    onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
+                {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName || "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
 
                 {/* advanced settings dropdown */}
                 <details>
                     <summary className="text-foreground/60 text-sm pl-2 pb-2">Advanced Settings</summary>
-                    <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module" options={Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} />
+                    <div className="flex flex-col gap-2">
+                        <Combobox placeholder="Select Template" options={Object.keys(templates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
+                            onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
+
+                        <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module" options={Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} />
+                    </div>
                 </details>
 
 
