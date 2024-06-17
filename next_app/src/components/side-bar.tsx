@@ -150,9 +150,22 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                                 Duplicate file
                                                                             </Button>
                                                                             <Button
-                                                                                disabled
                                                                                 onClick={() => {
-                                                                                    // manager.renameFile(manager.getProject(pname), fname);
+                                                                                    const newName = prompt("Enter the new name for the file");
+                                                                                    if (!newName) return;
+                                                                                    const p = manager.getProject(pname);
+                                                                                    const oldFile = p.files[fname];
+                                                                                    manager.newFile(p, { name: newName, type: oldFile.type, initialContent: '' });
+                                                                                    const newFile = p.getFile(newName);
+                                                                                    newFile.content = oldFile.content;
+                                                                                    manager.deleteFile(p, fname);
+                                                                                    globalState.closeFile(fname);
+                                                                                    globalState.fileDeleted(fname);
+                                                                                    globalState.setActiveFile(newName);
+                                                                                    p.files[newName] = newFile;
+                                                                                    manager.projects[pname] = p;
+                                                                                    manager.saveProjects(manager.projects);
+
                                                                                 }}
                                                                             >
                                                                                 Rename file

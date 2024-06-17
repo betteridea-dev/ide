@@ -547,11 +547,11 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                     runNormalCode();
                   });
                 }}
-                value={file ? file.content.cells[0].code : ""}
+                  value={file ? file.content.cells[file.content.cellOrder[0]].code : ""}
                 onChange={(value) => {
                   const newContent = { ...file.content };
-                  newContent.cells[0] = {
-                    ...file.content.cells[0],
+                  newContent.cells[file.content.cellOrder[0]] = {
+                    ...file.content.cells[file.content.cellOrder[0]],
                     code: value,
                   };
                   manager.updateFile(project, { file, content: newContent });
