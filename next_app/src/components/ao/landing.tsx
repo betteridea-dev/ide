@@ -81,9 +81,10 @@ export default function AOLanding() {
     return <>
         <section className="container text-foreground/90 p-24 my-16">
             <div className="flex flex-col gap-5 items-center">
-                <div className="flex flex-col gap-1 items-end absolute top-0 p-2 w-full bg-background">
+                <div className="flex flex-col gap-1 items-end absolute top-0 p-2 w-full bg-background/30 backdrop-blur text-sm text-right">
+                    <div className="flex gap-2 items-center text-red-400">Update: If you had notebook files which have become normal files now, please change their filename to .luanb extension <AlertTriangleIcon/></div>
                     <div className="flex gap-2 items-center text-red-400">Old processes must perform a security update (settings -&gt; patch 6-5-24) <AlertTriangleIcon/></div>
-                <div className="flex gap-2 items-center">All new processes will be spawned with WASM64 support! 🤩</div>
+                    {/* <div className="flex gap-2 items-center">All new processes will be spawned with WASM64 support! 🤩</div> */}
                 </div>
                 <h1 className="text-6xl font-bold" suppressHydrationWarning>gm {
                     words[Math.floor(Math.random() * words.length)]
