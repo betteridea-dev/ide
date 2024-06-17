@@ -6,7 +6,7 @@ import { useProjectManager } from "@/hooks";
 import { toast } from "sonner";
 import { Icons as LucidIcons } from "@/components/icons"
 import Link from "next/link";
-import { connect } from "@permaweb/aoconnect";
+import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { APM_ID, runLua } from "@/lib/ao-vars";
 import { Input } from "../ui/input";
 import { ReloadIcon } from "@radix-ui/react-icons";
@@ -126,16 +126,30 @@ export default function Packages() {
         console.log("Installing package", activePackage.Name)
         setInstalling(true);
         await loadapm()
-        const installRes = await ao.dryrun({
-            process: APM_ID,
+        const m_id = await ao.message({
+            process: p.process,
             tags: [
-                { name: "Action", value: "APM.Info" }
+                { name: "Action", value: "Eval" }
             ],
-            data: `${activePackage.Vendor}/${activePackage.Name}`
+            data: `APM.install("${activePackage.Vendor}/${activePackage.Name}")`,
+            signer: createDataItemSigner(window.arweaveWallet)
         })
-        console.log(installRes)
-        if (installRes.Error) return toast.error("Error installing package", { description: installRes.Error, id: "error" })
-        const { Messages } = installRes;
+        console.log("install request: ", m_id)
+        const res = await ao.result({
+            process: p.process,
+            message: m_id
+        })
+        console.log(res)
+        // const installRes = await ao.dryrun({
+        //     process: APM_ID,
+        //     tags: [
+        //         { name: "Action", value: "APM.Info" }
+        //     ],
+        //     data: `${activePackage.Vendor}/${activePackage.Name}`
+        // })
+        // console.log(installRes)
+        // if (installRes.Error) return toast.error("Error installing package", { description: installRes.Error, id: "error" })
+        // const { Messages } = installRes;
         // Messages.forEach((msg) => {
         //     const { Tags } = msg;
         //     const name = Tags.find((tag) => tag.name == "Action").value;
@@ -161,22 +175,22 @@ export default function Packages() {
 
         //     }
         // })
-        const msg = Messages.find((msg) => msg.Tags.find((tag) => tag.name == "Action").value == "APM.InfoResponse")
-        if (!msg) return toast.error("Error installing package", { description: "No info response found", id: "error" })
-        const data: TPackage = JSON.parse(msg.Data);
-        // console.log(data)
-        const Items = JSON.parse(Buffer.from(data.Items, 'hex').toString())
-        console.log(Items)
-        const mainSrc = Items.find((item: any) => item.meta.name == "main.lua").data
-        console.log("Installing package", data.Name)
-        const src = createLoaderFunc(`${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}`, mainSrc)
-        const r = await runLua(src, p.process, [
-            { name: "BetterIDEa-Function", value: "Install-Package" }
-        ])
-        console.log(r)
-        if (r.Error) return toast.error("Error installing package", { description: r.Error, id: "error" })
-        else
-            toast.success("Package installed successfully", { description: `Now you can import it using require('${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}')` })
+        // const msg = Messages.find((msg) => msg.Tags.find((tag) => tag.name == "Action").value == "APM.InfoResponse")
+        // if (!msg) return toast.error("Error installing package", { description: "No info response found", id: "error" })
+        // const data: TPackage = JSON.parse(msg.Data);
+        // // console.log(data)
+        // const Items = JSON.parse(Buffer.from(data.Items, 'hex').toString())
+        // console.log(Items)
+        // const mainSrc = Items.find((item: any) => item.meta.name == "main.lua").data
+        // console.log("Installing package", data.Name)
+        // const src = createLoaderFunc(`${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}`, mainSrc)
+        // const r = await runLua(src, p.process, [
+        //     { name: "BetterIDEa-Function", value: "Install-Package" }
+        // ])
+        // console.log(r)
+        // if (r.Error) return toast.error("Error installing package", { description: r.Error, id: "error" })
+        // else
+        //     toast.success("Package installed successfully", { description: `Now you can import it using require('${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}')` })
         setInstalling(false);
     }
 
