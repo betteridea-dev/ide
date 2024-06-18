@@ -199,7 +199,7 @@ const CodeCell = ({
             data-running={running}
             width={30}
             height={30}
-            className="data-[running=true]:animate-spin p-0.5 block min-w-[30px]"
+            className="data-[running=true]:animate-spin bg-foreground/15  rounded-full p-1.5 block min-w-[30px]"
           />
         </Button>
         <Editor
