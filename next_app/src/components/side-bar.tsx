@@ -151,7 +151,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                             </Button>
                                                                             <Button
                                                                                 onClick={() => {
-                                                                                    const newName = prompt("Enter the new name for the file");
+                                                                                    const newName = prompt("Enter the new name for the file", fname);
                                                                                     if (!newName) return;
                                                                                     const p = manager.getProject(pname);
                                                                                     const oldFile = p.files[fname];
