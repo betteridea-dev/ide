@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { HtmlContext } from "next/dist/server/future/route-modules/app-page/vendored/contexts/entrypoints";
 
 export function NewFileDialog({ manager, project, collapsed, setCollapsed }: { manager: ProjectManager; project: string; collapsed:boolean; setCollapsed: Dispatch<SetStateAction<boolean>> }) {
   const globalState = useGlobalState();
