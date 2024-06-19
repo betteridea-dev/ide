@@ -27,6 +27,12 @@ export function NewFileDialog({ manager, project, collapsed, setCollapsed }: { m
     setPopupOpen(false);
     setCollapsed(true);
   }
+  const handleEnter =( event :React.KeyboardEvent<HTMLInputElement>  ) =>{
+    if(event.key === "Enter"){
+      newFile();  
+    }
+
+  }
 
   return (
     <Dialog open={popupOpen} onOpenChange={(e) => { setPopupOpen(e); setCollapsed(!e)}}>
@@ -40,7 +46,7 @@ export function NewFileDialog({ manager, project, collapsed, setCollapsed }: { m
           <DialogTitle>Create a new file</DialogTitle>
           <DialogDescription>Enter the name of the file you want to create<br/>(supported extensions: lua, luanb, md)</DialogDescription>
         </DialogHeader>
-        <Input type="text" placeholder="File Name" onChange={(e) => setNewFileName(e.target.value)} />
+        <Input type="text" placeholder="File Name" onChange={(e) => setNewFileName(e.target.value)} onKeyDown={handleEnter}/>
         <Button onClick={() => newFile()}>Create File</Button>
       </DialogContent>
     </Dialog>
