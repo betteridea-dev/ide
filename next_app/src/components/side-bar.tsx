@@ -13,10 +13,14 @@ import { NewFileDialog } from "@/components/new-file-dialog";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
+
 export default function SideBar({ collapsed, setCollapsed, manager }: { collapsed: boolean; setCollapsed: Dispatch<SetStateAction<boolean>>; manager: ProjectManager }) {
     const globalState = useGlobalState();
     const [mounted, setMounted] = useState(false);
     const [activeAddress, setActiveAddress] = useState("");
+
+    const [renamingFile, setRenamingFile] = useState<string | null>(null);
+    const [newFileName, setNewFileName] = useState("");
 
     const projects = Object.keys(manager.projects).filter((p) => manager.projects[p].mode == globalState.activeMode);
 
@@ -29,6 +33,43 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
         }
         a();
     }, [globalState.activeProject]);
+
+    const isValidExtension = (fileName: string) => {
+        const validExtensions = ["lua", "luanb", "md"];
+        const extension = fileName.split('.').pop();
+        return validExtensions.includes(extension || "");
+    };
+
+    const handleRenameFile = (pname: string, fname: string) => {
+        if (!isValidExtension(newFileName)) {
+            toast.error("Invalid file extension. Only .lua, .luanb, and .md are supported.");
+            return;
+        }
+
+        const p = manager.getProject(pname);
+        const oldFile = p.files[fname];
+        manager.newFile(p, { name: newFileName, type: oldFile.type, initialContent: '' });
+        const newFile = p.getFile(newFileName);
+        newFile.content = oldFile.content;
+        manager.deleteFile(p, fname);
+        globalState.closeFile(fname);
+        globalState.fileDeleted(fname);
+        globalState.setActiveFile(newFileName);
+        p.files[newFileName] = newFile;
+        manager.projects[pname] = p;
+        manager.saveProjects(manager.projects);
+        setRenamingFile(null);
+        setNewFileName("");
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, pname: string, fname: string) => {
+        if (e.key === 'Enter') {
+            handleRenameFile(pname, fname);
+        } else if (e.key === 'Escape') {
+            setRenamingFile(null);
+            setNewFileName("");
+        }
+    };
 
     return (
         <div data-collapsed={collapsed} className="absolute flex flex-col truncate justify-center left-0 z-50 transition-all duration-200 bg-background w-[50px] data-[collapsed=false]:w-[250px] border-r h-[calc(100vh-89px)]" 
@@ -52,7 +93,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                         onClick={() => {
                                             let shortAddress = "unknown";
                                             if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                                            // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+                                             // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                                             if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
                                             globalState.setActiveProject(active ? "" : pname);
                                         }}
@@ -71,7 +112,6 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                     globalState.setActiveProject(active ? "" : pname);
                                                     if (active) return;
                                                     const file = Object.keys(manager.projects[pname].files)[0];
-                                                    console.log(file);
                                                     if (file) globalState.setActiveFile(file);
                                                 }}
                                             >
@@ -122,6 +162,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                         </div>
 
                                         {Object.keys(manager.projects[pname].files).map((fname, _) => {
+                                            const isRenaming = renamingFile === fname;
                                             return (
                                                 <div key={_} className="w-full">
                                                     <div className="w-full flex">
@@ -134,7 +175,22 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                 globalState.setActiveFile(fname);
                                                             }}
                                                         >
-                                                            <div data-active={globalState.activeFile == fname} className="hover:bg-accent/40 data-[active=true]:bg-accent/70 w-full pl-2 h-6 text-left">{fname}</div>
+                                                            {isRenaming ? (
+                                                                <input
+                                                                    value={newFileName}
+                                                                    onChange={(e) => setNewFileName(e.target.value)}
+                                                                    onKeyDown={(e) => handleKeyDown(e, pname, fname)}
+                                                                    className="w-full pl-2 h-6 text-left"
+                                                                    autoFocus
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    data-active={globalState.activeFile == fname}
+                                                                    className="hover:bg-accent/40 data-[active=true]:bg-accent/70 w-full pl-2 h-6 text-left"
+                                                                >
+                                                                    {fname}
+                                                                </div>
+                                                            )}
                                                             <div>
                                                                 <Dialog onOpenChange={(open) => setCollapsed(!open)}>
                                                                     <DialogTrigger className="px-2 hover:bg-accent/70">:</DialogTrigger>
@@ -151,54 +207,23 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                             </Button>
                                                                             <Button
                                                                                 onClick={() => {
-                                                                                    const newName = prompt("Enter the new name for the file", fname);
-                                                                                    if (!newName) return;
-                                                                                    const p = manager.getProject(pname);
-                                                                                    const oldFile = p.files[fname];
-                                                                                    manager.newFile(p, { name: newName, type: oldFile.type, initialContent: '' });
-                                                                                    const newFile = p.getFile(newName);
-                                                                                    newFile.content = oldFile.content;
-                                                                                    manager.deleteFile(p, fname);
-                                                                                    globalState.closeFile(fname);
-                                                                                    globalState.fileDeleted(fname);
-                                                                                    globalState.setActiveFile(newName);
-                                                                                    p.files[newName] = newFile;
-                                                                                    manager.projects[pname] = p;
-                                                                                    manager.saveProjects(manager.projects);
 
+                                                                                    setRenamingFile(fname);
+                                                                                    setNewFileName(fname);
+                                                                                    setCollapsed(true)
                                                                                 }}
                                                                             >
                                                                                 Rename file
                                                                             </Button>
-                                                                            <Button variant="destructive" onClick={() => manager.deleteFile(manager.getProject(pname), fname)}>
+                                                                            <Button variant="destructive" onClick={() => {
+                                                                                manager.deleteFile(manager.getProject(pname), fname);
+                                                                                globalState.fileDeleted(fname);
+                                                                            }}>
                                                                                 Delete file
                                                                             </Button>
                                                                         </div>
                                                                     </DialogContent>
                                                                 </Dialog>
-                                                                {/* <DropdownMenu onOpenChange={(e) => setCollapsed(!e)}>
-                                <DropdownMenuTrigger>
-                                  <Button
-                                    variant="ghost"
-                                    className="h-6 px-2 rounded-none"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                    }}
-                                  >
-                                    :
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      manager.deleteFile(manager.getProject(pname), fname);
-                                      globalState.fileDeleted(fname);
-                                    }}
-                                  >
-                                    Delete file
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu> */}
                                                             </div>
                                                         </Button>
                                                     </div>
