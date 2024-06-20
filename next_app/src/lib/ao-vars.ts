@@ -36,7 +36,7 @@ export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?
     module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,
     tags,
-    signer: window.arweaveWallet?.dataItemSigner ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: window.arweaveWallet?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
   });
 
   return result;
@@ -65,7 +65,7 @@ export async function runLua(code: string, process: string, tags?: Tags) {
   const message = await ao.message({
     process,
     data: code,
-    signer: window.arweaveWallet?.dataItemSigner ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: window.arweaveWallet?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
     tags,
   });
 

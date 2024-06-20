@@ -21,7 +21,12 @@ export default function CodeCell() {
   const searchParams = useSearchParams();
   const [walletAddr, setWalletAddr] = useState<string>("");
   const [aosProcess, setAosProcess] = useState<string>("");
+  // local storage flag to make sure if there are multiple iframes, only one of them spawns the process
+  const [isSpawning, setIsSpawning] = useLocalStorage("isSpawning", undefined, { initializeWithValue: true });
   const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", undefined, { initializeWithValue: true });
+  const [localAosProcess, setLocalAosProcess] = useLocalStorage("aosProcess", undefined, { initializeWithValue: true });
+  const [wallet, setWallet] = useState<any>(undefined);
+  const [walletProxy, setWalletProxy] = useLocalStorage("wallet", undefined, { initializeWithValue: true });
   const [spawning, setSpawning] = useState<boolean>(false);
   const [running, setRunning] = useState<boolean>(false);
   const [code, setCode] = useState<string>('print("Hello AO!")');
@@ -30,6 +35,51 @@ export default function CodeCell() {
   const [mounted, setMounted] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    //debouncer
+    const timeout = setTimeout(() => {
+      if (searchParams.has("nowallet")) {
+        console.log("wallet debounced: ", walletProxy);
+        setWallet(walletProxy);
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [walletProxy]);
+
+  useEffect(() => {
+    //anonymous async function
+    (async () => {
+      if (wallet) {
+        const arweave = Arweave.init({
+          host: "arweave.net",
+          port: 443,
+          protocol: "https",
+        });
+        const addr = await arweave.wallets.jwkToAddress(JSON.parse(wallet));
+        window.arweaveWallet = JSON.parse(wallet);
+        setWalletAddr(addr);
+      }
+    })();
+  }, [wallet]);
+
+  useEffect(() => {
+    if (walletAddr) {
+      console.log("walletAddr: ", walletAddr);
+      setAutoconnect(true);
+
+      spawnProcessHandler();
+    }
+  }, [walletAddr]);
+
+  useEffect(() => {
+    if (localAosProcess) {
+      console.log("got local aos process: ", localAosProcess);
+      setAosProcess(localAosProcess);
+      setIsSpawning(false);
+      // setLocalAosProcess(undefined);
+    }
+  }, [localAosProcess]);
 
   async function setWalletData() {
     if (searchParams.has("nowallet")) {
@@ -41,7 +91,7 @@ export default function CodeCell() {
       // check if a wallet already exists in localstorage
       // if not, generate a new one
 
-      const w = localStorage.getItem("wallet");
+      const w = walletProxy;
       const arweave = Arweave.init({
         host: "arweave.net",
         port: 443,
@@ -52,27 +102,29 @@ export default function CodeCell() {
         jwk = JSON.parse(w);
       } else {
         jwk = await arweave.wallets.generate();
-        localStorage.setItem("wallet", JSON.stringify(jwk));
+        // localStorage.setItem("wallet", JSON.stringify(jwk));
+        setWalletProxy(JSON.stringify(jwk));
       }
-      window.arweaveWallet = { ...jwk };
+      // window.arweaveWallet = { ...jwk };
 
-      setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
-      setAutoconnect(true);
+      // setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
+      // setAutoconnect(true);
 
       // add a listener to localstorage so when wallet is updated, it updates the walletAddr
-      window.addEventListener("storage", async (e) => {
-        if (e.key === "wallet") {
-          const jwk = JSON.parse(e.newValue);
-          window.arweaveWallet = { ...jwk };
-          setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
-        }
-      });
+      // window.addEventListener("storage", async (e) => {
+      //   if (e.key === "wallet") {
+      //     const jwk = JSON.parse(e.newValue);
+      //     window.arweaveWallet = { ...jwk };
+      //     setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
+      //   }
+      // });
     } else {
       try {
+        console.log("connecting with web wallet");
         await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
         const addr = await window.arweaveWallet.getActiveAddress();
-        setWalletAddr(addr);
-        setAutoconnect(true);
+        if (walletAddr == addr) spawnProcessHandler();
+        else setWalletAddr(addr);
       } catch (e) {
         console.log(e);
       }
@@ -118,12 +170,6 @@ export default function CodeCell() {
   }
 
   useEffect(() => {
-    if (!walletAddr) return;
-    console.log(walletAddr);
-    spawnProcessHandler();
-  }, [walletAddr]);
-
-  useEffect(() => {
     if (!aosProcess) return;
     //send aosProcess to parent
     if (window.parent) {
@@ -133,6 +179,9 @@ export default function CodeCell() {
 
   async function spawnProcessHandler() {
     setSpawning(true);
+    const locisSpawning = localStorage.getItem("isSpawning");
+    if (isSpawning || locisSpawning === "true") return;
+    setIsSpawning(true);
     // const r = await spawnProcess();
     // setAosProcess(r);
     // setSpawning(false);
@@ -179,6 +228,7 @@ export default function CodeCell() {
       console.log("No process found, creating one");
       // const loc = window.location.origin + window.location.pathname;
       // console.log(loc)
+      console.log("Creating process", prcName, appname, walletAddr);
       const r = await spawnProcess(`${prcName}`, [
         { name: "External-App-Name", value: appname },
         { name: "External-Url", value: `${btoa(url)}` },
@@ -186,12 +236,14 @@ export default function CodeCell() {
       ]);
       if (r) {
         setAosProcess(r);
+        setLocalAosProcess(r);
         setSpawning(false);
         console.log("Process created", r);
       }
     } else {
       console.log("Found existing process using", ids[0].value);
       setAosProcess(ids[0].value);
+      setLocalAosProcess(ids[0].value);
       setSpawning(false);
     }
   }

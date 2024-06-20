@@ -15,7 +15,7 @@ declare global {
       connect: Function;
       disconnect: Function;
       getActiveAddress: Function;
-      dataItemSigner: Function;
+      signDataItem: Function;
     };
   }
 }
