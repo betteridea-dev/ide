@@ -15,6 +15,7 @@ import { useTheme } from "next-themes";
 import crypto from "crypto";
 import Link from "next/link";
 
+var codeproxy = "";
 export default function CodeCell() {
   const searchParams = useSearchParams();
   const [walletAddr, setWalletAddr] = useState<string>("");
@@ -157,12 +158,17 @@ export default function CodeCell() {
     }
   }
 
+  useEffect(() => {
+    codeproxy = code;
+  }, [code]);
+
   async function runCellCode() {
+    const code_ = codeproxy;
     // const loc = window.location.origin + window.location.pathname;
     const url = window.location != window.parent.location ? document.referrer : document.location.href;
     setRunning(true);
-    console.log("running", code);
-    const r = await runLua(code, aosProcess, [
+    console.log("running", code_);
+    const r = await runLua(code_, aosProcess, [
       { name: "External-App-Name", value: appname },
       { name: "External-Url", value: `${btoa(url)}` },
       { name: "File-Type", value: "External-Code-Cell" },
@@ -261,6 +267,9 @@ export default function CodeCell() {
                     else monaco.editor.setTheme("vs-light");
                   }
                 });
+                // set keybinding to run code to shift enter
+                editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, runCellCode);
+
                 // set font family
                 editor.updateOptions({ fontFamily: "DM mono" });
               }}
