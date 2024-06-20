@@ -75,11 +75,15 @@ export default function CodeCell() {
   useEffect(() => {
     if (localAosProcess) {
       console.log("got local aos process: ", localAosProcess);
-      setAosProcess(localAosProcess);
-      setIsSpawning(false);
+      const processappname = localAosProcess.split(";")[0];
+      const processid = localAosProcess.split(";")[1];
+      if (processappname == appname) {
+        setAosProcess(processid);
+        setIsSpawning(false);
+      }
       // setLocalAosProcess(undefined);
     }
-  }, [localAosProcess]);
+  }, [localAosProcess, appname]);
 
   async function setWalletData() {
     if (searchParams.has("nowallet")) {
@@ -178,10 +182,6 @@ export default function CodeCell() {
   }, [aosProcess]);
 
   async function spawnProcessHandler() {
-    setSpawning(true);
-    const locisSpawning = localStorage.getItem("isSpawning");
-    if (isSpawning || locisSpawning === "true") return;
-    setIsSpawning(true);
     // const r = await spawnProcess();
     // setAosProcess(r);
     // setSpawning(false);
@@ -225,6 +225,10 @@ export default function CodeCell() {
     // console.log(ids)
 
     if (ids.length == 0) {
+      setSpawning(true);
+      const locisSpawning = localStorage.getItem("isSpawning");
+      if (isSpawning || locisSpawning === "true") return;
+      setIsSpawning(true);
       console.log("No process found, creating one");
       // const loc = window.location.origin + window.location.pathname;
       // console.log(loc)
@@ -236,14 +240,14 @@ export default function CodeCell() {
       ]);
       if (r) {
         setAosProcess(r);
-        setLocalAosProcess(r);
+        setLocalAosProcess(`${appname};${r}`);
         setSpawning(false);
         console.log("Process created", r);
       }
     } else {
       console.log("Found existing process using", ids[0].value);
       setAosProcess(ids[0].value);
-      setLocalAosProcess(ids[0].value);
+      // setLocalAosProcess(ids[0].value);
       setSpawning(false);
     }
   }
