@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-// import Icons from "@/assets/icons";
 import { Icons } from "@/components/icons";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
@@ -30,6 +29,32 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
         a();
     }, [globalState.activeProject]);
 
+    const isValidExtension = (fileName: string) => {
+        const validExtensions = ["lua", "luanb", "md"];
+        const extension = fileName.split('.').pop();
+        return validExtensions.includes(extension || "");
+    };
+
+    const handleRenameFile = (pname: string, oldName: string, newName: string) => {
+        if (!isValidExtension(newName)) {
+            toast.error("Invalid file extension. Only .lua, .luanb, and .md are supported.");
+            return;
+        }
+
+        const p = manager.getProject(pname);
+        const oldFile = p.files[oldName];
+        manager.newFile(p, { name: newName, type: oldFile.type, initialContent: '' });
+        const newFile = p.getFile(newName);
+        newFile.content = oldFile.content;
+        manager.deleteFile(p, oldName);
+        globalState.closeFile(oldName);
+        globalState.fileDeleted(oldName);
+        globalState.setActiveFile(newName);
+        p.files[newName] = newFile;
+        manager.projects[pname] = p;
+        manager.saveProjects(manager.projects);
+    };
+
     return (
         <div data-collapsed={collapsed} className="absolute flex flex-col truncate justify-center left-0 z-50 transition-all duration-200 bg-background w-[50px] data-[collapsed=false]:w-[250px] border-r h-[calc(100vh-89px)]" 
             onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
@@ -52,7 +77,6 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                         onClick={() => {
                                             let shortAddress = "unknown";
                                             if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                                            // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                                             if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
                                             globalState.setActiveProject(active ? "" : pname);
                                         }}
@@ -66,7 +90,6 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                 onClick={() => {
                                                     let shortAddress = "unknown";
                                                     if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                                                    // if (!ownedByActiveWallet) toast({ title: "The owner wallet for this project cant be verified", description: `It was created with ${shortAddress}.\nSome things might be broken` })
                                                     if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
                                                     globalState.setActiveProject(active ? "" : pname);
                                                     if (active) return;
@@ -153,19 +176,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                                 onClick={() => {
                                                                                     const newName = prompt("Enter the new name for the file", fname);
                                                                                     if (!newName) return;
-                                                                                    const p = manager.getProject(pname);
-                                                                                    const oldFile = p.files[fname];
-                                                                                    manager.newFile(p, { name: newName, type: oldFile.type, initialContent: '' });
-                                                                                    const newFile = p.getFile(newName);
-                                                                                    newFile.content = oldFile.content;
-                                                                                    manager.deleteFile(p, fname);
-                                                                                    globalState.closeFile(fname);
-                                                                                    globalState.fileDeleted(fname);
-                                                                                    globalState.setActiveFile(newName);
-                                                                                    p.files[newName] = newFile;
-                                                                                    manager.projects[pname] = p;
-                                                                                    manager.saveProjects(manager.projects);
-
+                                                                                    handleRenameFile(pname, fname, newName);
                                                                                 }}
                                                                             >
                                                                                 Rename file
@@ -176,29 +187,6 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                                                         </div>
                                                                     </DialogContent>
                                                                 </Dialog>
-                                                                {/* <DropdownMenu onOpenChange={(e) => setCollapsed(!e)}>
-                                <DropdownMenuTrigger>
-                                  <Button
-                                    variant="ghost"
-                                    className="h-6 px-2 rounded-none"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                    }}
-                                  >
-                                    :
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      manager.deleteFile(manager.getProject(pname), fname);
-                                      globalState.fileDeleted(fname);
-                                    }}
-                                  >
-                                    Delete file
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu> */}
                                                             </div>
                                                         </Button>
                                                     </div>
