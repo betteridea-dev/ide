@@ -15,8 +15,8 @@ dependencies:
     specifier: ^14.2.3
     version: 14.2.4(next@14.2.2)(react@18.3.1)
   '@permaweb/aoconnect':
-    specifier: ^0.0.52
-    version: 0.0.52
+    specifier: ^0.0.56
+    version: 0.0.56
   '@radix-ui/react-alert-dialog':
     specifier: ^1.0.5
     version: 1.0.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -564,9 +564,9 @@ packages:
       zod: 3.23.8
     dev: false
 
-  /@permaweb/aoconnect@0.0.52:
-    resolution: {integrity: sha512-0NEohkDAzJwqa12+7d2u/RrseW8swPdjQYupf/yqLYUQw5xXkViRUb2FaU7R7aQaZrzb5R3q90OCr5lMyk/7UA==}
-    engines: {node: '>=18'}
+  /@permaweb/aoconnect@0.0.56:
+    resolution: {integrity: sha512-Eu4AC1KeX2EOIS9ihWkwPJs7rK+/+XV43QwOJ9DCQAu6EhjanlT3UfV2wSpGiFK/dT/B1YsQyTcxNrmQaXn81g==}
+    engines: {node: '>=18', yarn: please-use-npm}
     dependencies:
       '@permaweb/ao-scheduler-utils': 0.0.19
       buffer: 6.0.3

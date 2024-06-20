@@ -1,4 +1,5 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
+import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 const AppVersion = "3.0.0";
 export const AOModule = "nI_jcZgPd0rcsnjaHtaaJPpMCW847ou-3RGA5_W3aZg";
@@ -35,7 +36,7 @@ export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?
     module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,
     tags,
-    signer: window.arweaveWallet?.dataItemSigner ? createDataItemSigner(window.arweaveWallet) : window.arweaveWallet,
+    signer: window.arweaveWallet?.dataItemSigner ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
   });
 
   return result;
@@ -64,7 +65,7 @@ export async function runLua(code: string, process: string, tags?: Tags) {
   const message = await ao.message({
     process,
     data: code,
-    signer: createDataItemSigner(window.arweaveWallet),
+    signer: window.arweaveWallet?.dataItemSigner ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
     tags,
   });
 
