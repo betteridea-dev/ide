@@ -24,7 +24,7 @@ export default function CodeCell() {
   // local storage flag to make sure if there are multiple iframes, only one of them spawns the process
   const [isSpawning, setIsSpawning] = useLocalStorage("isSpawning", undefined, { initializeWithValue: true });
   const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", undefined, { initializeWithValue: true });
-  const [localAosProcess, setLocalAosProcess] = useLocalStorage("aosProcess", undefined, { initializeWithValue: true });
+  const [localAosProcess, setLocalAosProcess] = useLocalStorage("aosProcess", {}, { initializeWithValue: true });
   const [wallet, setWallet] = useState<any>(undefined);
   const [walletProxy, setWalletProxy] = useLocalStorage("wallet", undefined, { initializeWithValue: true });
   const [spawning, setSpawning] = useState<boolean>(false);
@@ -37,10 +37,11 @@ export default function CodeCell() {
   const { theme } = useTheme();
 
   useEffect(() => {
+    console.log("wallet proxied");
     //debouncer
     const timeout = setTimeout(() => {
       if (searchParams.has("nowallet")) {
-        console.log("wallet debounced: ", walletProxy);
+        // console.log("wallet debounced: ", walletProxy);
         setWallet(walletProxy);
       }
     }, 1000);
@@ -73,21 +74,22 @@ export default function CodeCell() {
   }, [walletAddr]);
 
   useEffect(() => {
-    if (localAosProcess) {
-      console.log("got local aos process: ", localAosProcess);
-      const processappname = localAosProcess.split(";")[0];
-      const processid = localAosProcess.split(";")[1];
-      if (processappname == appname) {
-        setAosProcess(processid);
-        setIsSpawning(false);
-      }
+    if (localAosProcess[appname]) {
+      console.log("got local aos process: ", appname, localAosProcess);
+      // const processappname = localAosProcess.split(";")[0];
+      // const processid = localAosProcess.split(";")[1];
+      // if (processappname == appname) {
+      setAosProcess(localAosProcess[appname]);
+      setIsSpawning(false);
+      // }
       // setLocalAosProcess(undefined);
     }
   }, [localAosProcess, appname]);
 
   async function setWalletData() {
     if (searchParams.has("nowallet")) {
-      console.log("no wallet");
+      console.log("no web wallet");
+      if (!wallet && walletProxy) return setWallet(walletProxy);
       // generate a jwk and set localstorage to the jwk
       // set walletAddr to the address of the jwk
       // set autoconnect to true
@@ -107,8 +109,9 @@ export default function CodeCell() {
       } else {
         jwk = await arweave.wallets.generate();
         // localStorage.setItem("wallet", JSON.stringify(jwk));
-        setWalletProxy(JSON.stringify(jwk));
       }
+      setWalletProxy(JSON.stringify(jwk));
+      window.arweaveWallet = { ...jwk };
       // window.arweaveWallet = { ...jwk };
 
       // setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
@@ -182,6 +185,7 @@ export default function CodeCell() {
   }, [aosProcess, appname]);
 
   async function spawnProcessHandler() {
+    console.log("handling spawn");
     // const r = await spawnProcess();
     // setAosProcess(r);
     // setSpawning(false);
@@ -225,11 +229,18 @@ export default function CodeCell() {
     // console.log(ids)
 
     if (ids.length == 0) {
-      setSpawning(true);
-      const locisSpawning = localStorage.getItem("isSpawning");
-      if (isSpawning || locisSpawning === "true") return;
-      setIsSpawning(true);
-      console.log("No process found, creating one");
+      // setSpawning(true);
+      // const locisSpawning = localStorage.getItem("isSpawning");
+      //   if (localStorage.getItem("localAosProcess").split(";")[0] === appname) {
+      //     // check if the last aosProcess appname is same as this, if yes return else spawn
+      //     console.log("Same appname, returning");
+      //     return;
+      //   }
+      // if (locisSpawning === "true")
+      // setIsSpawning(true);
+      // console.log("No process found, creating one");
+      // -----------------------------
+
       // const loc = window.location.origin + window.location.pathname;
       // console.log(loc)
       console.log("Creating process", prcName, appname, walletAddr);
@@ -240,7 +251,10 @@ export default function CodeCell() {
       ]);
       if (r) {
         setAosProcess(r);
-        setLocalAosProcess(`${appname};${r}`);
+        // setLocalAosProcess(`${r}`);
+        setLocalAosProcess((prev) => {
+          return { ...prev, [appname]: r };
+        });
         setSpawning(false);
         console.log("Process created", r);
       }
@@ -248,6 +262,9 @@ export default function CodeCell() {
       console.log("Found existing process using", ids[0].value);
       setAosProcess(ids[0].value);
       // setLocalAosProcess(ids[0].value);
+      setLocalAosProcess((prev) => {
+        return { ...prev, [appname]: ids[0].value };
+      });
       setSpawning(false);
     }
   }
