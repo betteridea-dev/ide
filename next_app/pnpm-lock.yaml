@@ -18,8 +18,8 @@ importers:
         specifier: ^14.2.3
         version: 14.2.3(next@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@permaweb/aoconnect':
-        specifier: ^0.0.52
-        version: 0.0.52
+        specifier: ^0.0.56
+        version: 0.0.56
       '@radix-ui/react-alert-dialog':
         specifier: ^1.0.5
         version: 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -89,6 +89,9 @@ importers:
       ansi-to-react:
         specifier: ^6.1.6
         version: 6.1.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      arweave:
+        specifier: ^1.15.1
+        version: 1.15.1
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -424,9 +427,9 @@ packages:
     resolution: {integrity: sha512-hN5Iu1jV9xMYUwUsmU9ZpSktHqaKQ3zMXqrXwEjfwNiGEZXmuOLz5grY7PKY/cwlkIZN83cTOM/mtgPPJ33E/A==}
     engines: {node: '>=18'}
 
-  '@permaweb/aoconnect@0.0.52':
-    resolution: {integrity: sha512-0NEohkDAzJwqa12+7d2u/RrseW8swPdjQYupf/yqLYUQw5xXkViRUb2FaU7R7aQaZrzb5R3q90OCr5lMyk/7UA==}
-    engines: {node: '>=18'}
+  '@permaweb/aoconnect@0.0.56':
+    resolution: {integrity: sha512-Eu4AC1KeX2EOIS9ihWkwPJs7rK+/+XV43QwOJ9DCQAu6EhjanlT3UfV2wSpGiFK/dT/B1YsQyTcxNrmQaXn81g==}
+    engines: {node: '>=18', yarn: please-use-npm}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1291,8 +1294,8 @@ packages:
     resolution: {integrity: sha512-bMxMKAjg13EBSVscxTaYA4mRc5t1UAXa2kXiGTNfZ079HIWXEkKmkgFrh/nJqamaLSrXO5H4WFFkPEaLJWbs3A==}
     engines: {node: '>= 0.4'}
 
-  arweave@1.15.0:
-    resolution: {integrity: sha512-sYfq2yJwkJLthRADsfHygNP+L7fTCyprTjOLYnpP8zaqwywddoNO3UpTk6XGjEiyyU3WfxoFLRLpzx+llZx1WA==}
+  arweave@1.15.1:
+    resolution: {integrity: sha512-rT7FOwqdudd5npqp4xOYdDT2035LtpcqePjwirh4wjRiEtVsz1FZkRiM2Yj+fOAwYzOm/hNG0GDOipDSaiEGGQ==}
     engines: {node: '>=18'}
 
   asn1.js@5.4.1:
@@ -3940,7 +3943,7 @@ snapshots:
       ramda: 0.29.1
       zod: 3.23.4
 
-  '@permaweb/aoconnect@0.0.52':
+  '@permaweb/aoconnect@0.0.56':
     dependencies:
       '@permaweb/ao-scheduler-utils': 0.0.18
       buffer: 6.0.3
@@ -4885,7 +4888,7 @@ snapshots:
 
   arconnect@0.4.2:
     dependencies:
-      arweave: 1.15.0
+      arweave: 1.15.1
 
   arg@5.0.2: {}
 
@@ -4991,7 +4994,7 @@ snapshots:
       is-array-buffer: 3.0.4
       is-shared-array-buffer: 1.0.3
 
-  arweave@1.15.0:
+  arweave@1.15.1:
     dependencies:
       arconnect: 0.4.2
       asn1.js: 5.4.1
@@ -7997,7 +8000,7 @@ snapshots:
 
   warp-arbundles@1.0.4:
     dependencies:
-      arweave: 1.15.0
+      arweave: 1.15.1
       base64url: 3.0.1
       buffer: 6.0.3
       warp-isomorphic: 1.0.7

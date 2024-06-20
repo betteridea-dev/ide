@@ -1,12 +1,11 @@
-import { CodeCell, getInbox } from '@betteridea/codecell';
-import Ansi from 'ansi-to-react';
-import { useState } from 'react';
-import { toast } from "sonner"
+import { CodeCell, getInbox } from "@betteridea/codecell";
+import Ansi from "ansi-to-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Dev() {
-    // dev mode based on domain name
-    const devMode = typeof window != "undefined" ? window.location.hostname === "localhost" : false
-    const [inbox, setInbox] = useState<any>()
+  const devMode = typeof window == "undefined" ? true : window.location.hostname === "localhost";
+  const [inbox, setInbox] = useState<any>();
 
     return (
         <div className="flex flex-col items-center justify-center gap-5 p-5">

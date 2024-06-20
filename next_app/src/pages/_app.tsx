@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
-import 'katex/dist/katex.min.css';
-import "@xterm/xterm/css/xterm.css"
+import "katex/dist/katex.min.css";
+import "@xterm/xterm/css/xterm.css";
 import type { AppProps } from "next/app";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,16 +9,15 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
 // import { GoogleAnalytics } from "nextjs-google-analytics";
 
-
-
 declare global {
-    interface Window {
-        arweaveWallet: {
-            connect: Function;
-            disconnect: Function;
-            getActiveAddress: Function;
-        };
-    }
+  interface Window {
+    arweaveWallet: {
+      connect: Function;
+      disconnect: Function;
+      getActiveAddress: Function;
+      signDataItem: Function;
+    };
+  }
 }
 
 export default function App({ Component, pageProps }: AppProps) {
