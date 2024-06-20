@@ -14,6 +14,7 @@ import { GraphQLClient, gql } from "graphql-request";
 import { useTheme } from "next-themes";
 import crypto from "crypto";
 import Link from "next/link";
+import Arweave from "arweave";
 
 var codeproxy = "";
 export default function CodeCell() {
@@ -29,6 +30,51 @@ export default function CodeCell() {
   const [mounted, setMounted] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const { theme } = useTheme();
+
+  async function setWalletData() {
+    if (searchParams.has("nowallet")) {
+      console.log("no wallet");
+      // generate a jwk and set localstorage to the jwk
+      // set walletAddr to the address of the jwk
+      // set autoconnect to true
+
+      // check if a wallet already exists in localstorage
+      // if not, generate a new one
+
+      const w = localStorage.getItem("wallet");
+      const arweave = Arweave.init({
+        host: "arweave.net",
+        port: 443,
+        protocol: "https",
+      });
+      let jwk;
+      if (w) {
+        jwk = JSON.parse(w);
+      } else {
+        jwk = await arweave.wallets.generate();
+        localStorage.setItem("wallet", JSON.stringify(jwk));
+      }
+      window.arweaveWallet = {
+        ...jwk,
+        // getActiveAddress: () => arweave.wallets.jwkToAddress(jwk),
+        // connect: () => {},
+        // disconnect: () => {},
+        // signDataItem: () => {},
+      };
+
+      setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
+      setAutoconnect(true);
+    } else {
+      try {
+        await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
+        const addr = await window.arweaveWallet.getActiveAddress();
+        setWalletAddr(addr);
+        setAutoconnect(true);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
 
   useEffect(() => {
     console.log("autoconn", autoconnect);
@@ -55,14 +101,7 @@ export default function CodeCell() {
     }
     async function run() {
       if (autoconnect && !mounted) {
-        try {
-          const addr = await window.arweaveWallet.getActiveAddress();
-          setWalletAddr(addr);
-          setAutoconnect(true);
-        } catch (e) {
-          console.log(e);
-          // setAutoconnect(false);
-        }
+        setWalletData();
       }
     }
     run();
@@ -70,13 +109,9 @@ export default function CodeCell() {
 
   async function connectHandler() {
     if (!window) return;
-    const wallet = window.arweaveWallet;
-    if (!wallet) return toast("Please install the ArConnect extension");
-
-    await wallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
-    const addr = await wallet.getActiveAddress();
-    setWalletAddr(addr);
-    setAutoconnect(true);
+    let wallet = window.arweaveWallet;
+    if (!wallet && !searchParams.has("nowallet")) return toast("Please install the ArConnect extension");
+    setWalletData();
   }
 
   useEffect(() => {
@@ -271,7 +306,8 @@ export default function CodeCell() {
                 editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, runCellCode);
 
                 // set font family
-                editor.updateOptions({ fontFamily: "DM mono" });
+                // editor.updateOptions({ fontFamily: "DM mono" });
+                editor.updateOptions({ fontFamily: "monospace" });
               }}
               onChange={(value) => {
                 // console.log(value);
