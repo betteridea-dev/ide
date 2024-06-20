@@ -36,7 +36,9 @@ export default function BottomStatusbar() {
 
   useEffect(() => {
     if (autoconnect) {
-      if (!mounted)
+      if (!window.arweaveWallet)
+        {toast.error("No Arweave wallet found, please install ArConnect and try again");return}
+      if (!mounted) 
         window.arweaveWallet.getActiveAddress().then((addr: string) => {
           connectWallet()
           setMounted(true);
