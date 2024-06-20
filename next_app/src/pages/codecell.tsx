@@ -54,16 +54,19 @@ export default function CodeCell() {
         jwk = await arweave.wallets.generate();
         localStorage.setItem("wallet", JSON.stringify(jwk));
       }
-      window.arweaveWallet = {
-        ...jwk,
-        // getActiveAddress: () => arweave.wallets.jwkToAddress(jwk),
-        // connect: () => {},
-        // disconnect: () => {},
-        // signDataItem: () => {},
-      };
+      window.arweaveWallet = { ...jwk };
 
       setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
       setAutoconnect(true);
+
+      // add a listener to localstorage so when wallet is updated, it updates the walletAddr
+      window.addEventListener("storage", async (e) => {
+        if (e.key === "wallet") {
+          const jwk = JSON.parse(e.newValue);
+          window.arweaveWallet = { ...jwk };
+          setWalletAddr(await arweave.wallets.jwkToAddress(jwk));
+        }
+      });
     } else {
       try {
         await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"]);
