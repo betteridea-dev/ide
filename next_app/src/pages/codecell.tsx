@@ -177,9 +177,9 @@ export default function CodeCell() {
     if (!aosProcess) return;
     //send aosProcess to parent
     if (window.parent) {
-      window.parent.postMessage({ action: "set_process", process: aosProcess }, "*");
+      window.parent.postMessage({ action: "set_process", process: aosProcess, appname: appname }, "*");
     }
-  }, [aosProcess]);
+  }, [aosProcess, appname]);
 
   async function spawnProcessHandler() {
     // const r = await spawnProcess();
@@ -408,7 +408,7 @@ export default function CodeCell() {
           </Button>
         </div>
       )}
-      <Link href="https://ide.betteridea.dev" target="_blank" className="absolute right-0 top-0 bottom-0 bg-[#97E771] overflow-visible">
+      <Link href="https://ide.betteridea.dev" target="_blank" className="fixed right-0 top-0 bottom-0 bg-[#97E771] overflow-visible">
         <div
           className="opacity-0 hover:opacity-100 cursor-pointer overflow-visible grow flex items-center justify-center h-full hover:p-1 w-2 hover:w-7 transition-all transition-duration-200"
           onMouseEnter={() => setTooltipVisible(true)}
