@@ -15,7 +15,8 @@ export default function Dev() {
                 cellId="1" // any unique cell id
                 appName="BetterIDEa" // Your unique app name
                 code="print('Portable code cell ftw!')" // initial code (optional)
-                devMode={devMode}
+                // devMode={devMode}
+                nowallet
                 onNewMessage={(message) => {
                     message.forEach((m) => {
                         if (m.Output)
