@@ -282,7 +282,13 @@ export default function CodeCell() {
         const url = window.location != window.parent.location ? document.referrer : document.location.href;
         setRunning(true);
         console.log("running", code_);
-        const r = await runLua(code_, aosProcess, [
+        const localProcesses = JSON.parse(localStorage.getItem("aosProcess") || "{}");
+        if (!localProcesses[appname]) {
+            console.log("No process found");
+            return
+        }
+        setAosProcess(localProcesses[appname]);
+        const r = await runLua(code_, localProcesses[appname], [
             { name: "External-App-Name", value: appname },
             { name: "External-Url", value: `${btoa(url)}` },
             { name: "File-Type", value: "External-Code-Cell" },
