@@ -138,7 +138,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
             globalState.setActiveFile(Object.keys(uploadedFiles)[0]);
         } else {
             manager.newFile(p, {
-                name: "main.lua",
+                name: defaultFiletype == "NOTEBOOK" ? "main.luanb" : "main.lua",
                 type: defaultFiletype,
                 initialContent,
             });
