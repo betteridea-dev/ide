@@ -142,7 +142,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
                 type: defaultFiletype,
                 initialContent,
             });
-            globalState.setActiveFile("main.lua");
+            globalState.setActiveFile(defaultFiletype == "NOTEBOOK" ? "main.luanb" : "main.lua");
         }
         setLoadingProcess(false);
         setPopupOpen(false);
