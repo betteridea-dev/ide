@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import Link from "next/link";
 import { AlertTriangleIcon, FileCodeIcon, FolderOpen, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react";
+import {FaDiscord, FaTwitter, FaGithub} from "react-icons/fa"
 
 const words = [
     // "winston",
@@ -136,6 +137,17 @@ export default function AOLanding() {
                     {/* <Button variant="link" className="justify-start h-7 ring-1 text-foreground/90 gap-1 px-0">
                         <FolderOpen size={20} /> Open Existing
                     </Button> */}
+                </div>
+                <div className=" flex gap-5">
+                    <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="hover:scale-150">
+                        <FaDiscord size={25} />
+                    </Link>
+                    <Link href="https://x.com/betteridea_dev" target="_blank" className="hover:scale-150">
+                        <FaTwitter size={25} />
+                    </Link>
+                    <Link href="https://github.com/betteridea-dev" target="_blank" className="hover:scale-150">
+                        <FaGithub size={25} />
+                    </Link>
                 </div>
                 {/* <div>Latest content</div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
