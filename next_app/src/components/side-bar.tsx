@@ -68,18 +68,36 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                         let ownerAddress = manager.projects[pname].ownerWallet;
                         return (
                             <div key={_}>
-                                <div data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 mb-2 data-[active=true]:mb-0 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}>
+                                <div id={pname} data-active={active} data-collapsed={collapsed} className=" cursor-default h-fit rounded-none flex relative gap-2 px-3 mb-2 data-[active=true]:mb-0 items-start data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center" key={_}
+                                    onClick={() => {
+                                    let shortAddress = "unknown";
+                                    if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+                                    if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
+                                    globalState.setActiveProject(active ? "" : pname);
+                                    if (active) return;
+                                    const file = Object.keys(manager.projects[pname].files)[0];
+                                    console.log(file);
+                                    if (file) globalState.setActiveFile(file);
+                                    const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];
+                                    if (!recents.includes(pname) && recents.length < 5) {
+                                        recents.push(pname);
+                                        localStorage.setItem("recents", JSON.stringify(recents));
+                                    } else if (!recents.includes(pname) && recents.length >= 5) {
+                                        recents.shift();
+                                        recents.push(pname);
+                                        localStorage.setItem("recents", JSON.stringify(recents));
+                                    } else if (recents.includes(pname)) {
+                                        recents.splice(recents.indexOf(pname), 1);
+                                        recents.push(pname);
+                                        localStorage.setItem("recents", JSON.stringify(recents));
+                                    }
+                                }}>
                                     <Icons.folder
                                         data-collapsed={collapsed}
                                         data-not-owned={!ownedByActiveWallet}
                                         className="fill-foreground stroke-none cursor-pointer data-[active=true]:fill-primary"
                                         data-active={active}
-                                        onClick={() => {
-                                            let shortAddress = "unknown";
-                                            if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                                            if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
-                                            globalState.setActiveProject(active ? "" : pname);
-                                        }}
+                                        onClick={() => document.getElementById(pname)?.click()}    
                                     />
 
                                     {!collapsed && (
@@ -87,16 +105,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                             <div
                                                 data-active={active}
                                                 className="flex gap-1 cursor-pointer items-center data-[active=true]:text-primary"
-                                                onClick={() => {
-                                                    let shortAddress = "unknown";
-                                                    if (typeof ownerAddress == "string") shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-                                                    if (!ownedByActiveWallet) toast.error("The owner wallet for this project cant be verified", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" });
-                                                    globalState.setActiveProject(active ? "" : pname);
-                                                    if (active) return;
-                                                    const file = Object.keys(manager.projects[pname].files)[0];
-                                                    console.log(file);
-                                                    if (file) globalState.setActiveFile(file);
-                                                }}
+                                                onClick={() => document.getElementById(pname)?.click()}
                                             >
                                                 <Icons.play data-active={active} className="fill-foreground data-[active=true]:fill-primary stroke-none mr-1 data-[active=true]:rotate-90" height={12} width={12} />
 

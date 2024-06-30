@@ -262,7 +262,7 @@ export default function Packages() {
             <DialogHeader>
                 <DialogTitle>Explore packages</DialogTitle>
                 <DialogDescription>
-                    Packages allow you to add extra functionality to your ao processes. To publish your own package visit <Link href="https://apm.betteridea.dev" target="_blank">apm.betteridea.dev</Link>
+                    Packages allow you to add extra functionality to your ao processes. To publish your own package visit <Link href="https://apm.betteridea.dev" target="_blank" className="underline underline-offset-4">apm.betteridea.dev</Link>
                 </DialogDescription>
             </DialogHeader>
             <div className="flex gap-2">

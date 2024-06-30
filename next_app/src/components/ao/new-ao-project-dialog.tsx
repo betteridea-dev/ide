@@ -146,6 +146,21 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
         }
         setLoadingProcess(false);
         setPopupOpen(false);
+
+        const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];
+        const pname = newProjName;
+        if (!recents.includes(pname) && recents.length < 5) {
+            recents.push(pname);
+            localStorage.setItem("recents", JSON.stringify(recents));
+        } else if (!recents.includes(pname) && recents.length >= 5) {
+            recents.shift();
+            recents.push(pname);
+            localStorage.setItem("recents", JSON.stringify(recents));
+        } else if (recents.includes(pname)) {
+            recents.splice(recents.indexOf(pname), 1);
+            recents.push(pname);
+            localStorage.setItem("recents", JSON.stringify(recents));
+        }
     }
 
     // make graphql request and append processes with names to this
@@ -333,7 +348,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
 
             setPopupOpen(e)
         }}>
-            <DialogTrigger data-collapsed={collapsed} className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
+            <DialogTrigger data-collapsed={collapsed} id="new-proj-dialog" className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
                 onClick={async (e) => {
                     e.preventDefault()
                     try {
