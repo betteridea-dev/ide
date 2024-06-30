@@ -22,7 +22,9 @@ export const luaCompletionPretext = `
     - If you do not have a suggestion, return an empty string.
 `
 
-export function generateContext(code: string) {
+export function generateContext(textbeforecursor: string, textbeforecursoroncurrentline) {
     return `${luaCompletionPretext}
-${code}`
-}
+TEXT BEFORE CURSOR: ${textbeforecursor}
+
+TEXT BEFORE CURSOR ON CURRENT LINE: ${textbeforecursoroncurrentline}
+`}

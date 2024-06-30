@@ -44,6 +44,7 @@ import { capOutputTo200Lines } from "@/lib/utils";
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from "ai";
 import { generateContext } from "@/lib/ai";
+import { useLocalStorage } from "usehooks-ts";
 
 
 const Plot = dynamic(
@@ -55,7 +56,33 @@ const Plot = dynamic(
   },
 );
 
+function makeLuaInlineCompletions(suggestion: string) {
+  return {
+    provideInlineCompletions: (model: any, position: any, context: any, token: any) => {
+      return {
+        items: [
+          {
+            range: {
+              // make the completion only available where it was triggered
+              startLineNumber: position.lineNumber,
+              startColumn: position.column - 1,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column,
+            },
+            text: suggestion,
+            insertText: suggestion,
+            kind: 18,//18 is text
+            label: "AI Suggestion",
+            detail: "AI Suggestion",
+          },
+        ],
+      };
+    },
+    freeInlineCompletions: () => { }
+  }
+}
 
+let codes = {}
 const monacoConfig: {
   [key: string]: editor.IStandaloneEditorConstructionOptions
 } = {
@@ -89,13 +116,20 @@ const CodeCell = ({
   cellId,
   manager,
   project,
-  inferenceFunction
+  inferenceFunction,
+  aiSuggestions
 }: {
   file: PFile;
   cellId: string;
   manager: ProjectManager;
-    project: Project;
-    inferenceFunction?: (value: string) => void
+  project: Project;
+    inferenceFunction?: (textBeforeCursor:string, textBeforeCursorOnCurrentLine: string, range: {
+      startLineNumber: number,
+      startColumn: number,
+      endLineNumber: number,
+      endColumn: number
+    }) => Promise<void>;
+  aiSuggestions: AiSuggestion[]
 }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
   const [running, setRunning] = useState(false);
@@ -103,11 +137,48 @@ const CodeCell = ({
   const cell = file.content.cells[cellId];
   const [code, setCode] = useState("");
   const { theme } = useTheme();
+  const monaco = useMonaco();
   const globalState = useGlobalState();
 
-  const runCellCode =async()=> {
+  useEffect(() => {
+    console.log("aiSuggestions", aiSuggestions)
+    if (monaco && aiSuggestions.length > 0) {
+      const cmp = monaco.languages.registerInlineCompletionsProvider("lua", {
+        provideInlineCompletions(model, position, context, token) {
+          const suggestionItems = aiSuggestions.filter((suggestion) => {
+            const rangeText = model.getValueInRange(suggestion.range)
+            return suggestion.insertText.startsWith(rangeText)
+          }).map((suggestion) => {
+            return {
+              range: {
+                // make the completion only available where it was triggered
+                startLineNumber: position.lineNumber,
+                startColumn: position.column-1,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column
+              },
+              text: suggestion.insertText,
+              insertText: suggestion.insertText,
+              kind: 18,//18 is text
+              label: "AI Suggestion",
+              detail: "AI Suggestion",
+            }
+          })
+          console.log(suggestionItems)
+          
+          return Promise.resolve({
+            items: suggestionItems
+          })
+        },
+        freeInlineCompletions() { },
+      })
+      return () => cmp.dispose()
+    }
+  }, [aiSuggestions])
+
+  const runCellCode = async () => {
     // get file state, run code get output, read latest file state and add output
-    console.log("running cell code",cellId);
+    console.log("running cell code", cellId);
     const p = manager.getProject(project.name);
     const file = p.files[globalState.activeFile];
     if (!file) return
@@ -223,23 +294,31 @@ const CodeCell = ({
             else monaco.editor.setTheme("vs-light");
             // set font family
             // editor.updateOptions({ fontFamily: "DM Mono" });
-            
-            // run function on ctrl+enter only in this specific cell
-
-            // autocomplete keybind
-            console.log(cellId)
-
-            // editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Period, () => {
-            //   console.log(cellId)
-            // })
 
             // add command only to this particular cell
-            editor.getContainerDomNode().addEventListener("keydown", (e) => {
-              if (e.shiftKey && e.key == "Enter") {
+            editor.getContainerDomNode().addEventListener("keydown", async (e) => {
+              // console.log(e.key)
+              if (e.shiftKey && e.key == "Enter" && !e.metaKey) {
                 e.preventDefault()
                 const runbtn = document.getElementById(`run-cell-${cellId}`)
                 // console.log(cellId, runbtn)
                 runbtn?.click()
+              } else if (e.ctrlKey && e.key == ".") {
+                e.preventDefault()
+                const val = editor.getValue()
+                const model = editor.getModel()
+                const position = editor.getPosition()
+                const currentLine =model.getLineContent(position.lineNumber)
+                const offset = model.getOffsetAt(position)
+                const textBeforeCursor = val.substring(0, offset - currentLine.length)
+                const textBeforeCursorOnCurrentLine = currentLine.substring(0, position.column-1)
+                if (!textBeforeCursor)return
+                inferenceFunction(textBeforeCursor, textBeforeCursorOnCurrentLine, {
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column
+                })
               }
             })
 
@@ -249,7 +328,6 @@ const CodeCell = ({
             const newContent = { ...file.content };
             newContent.cells[cellId] = { ...cell, code: value };
             manager.updateFile(project, { file, content: newContent });
-            // if (inferenceFunction) inferenceFunction(value)
           }}
           height={
             (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
@@ -402,6 +480,16 @@ const CellUtilButtons = ({ defaultVisible = false, position, addNewCell }: { def
   </div>
 }
 
+type AiSuggestion = {
+  insertText: string,
+  range: {
+    startLineNumber: number,
+    startColumn: number,
+    endLineNumber: number,
+    endColumn: number
+  }
+}
+
 const EditorArea = ({
   isNotebook,
   file,
@@ -415,20 +503,45 @@ const EditorArea = ({
   const manager = useProjectManager();
   const [running, setRunning] = useState(false);
   const { theme } = useTheme();
-  
-  const model = createGoogleGenerativeAI({
-    apiKey: "API_KEY"
-  })("models/gemini-1.5-flash-latest")
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([])
 
-  
-  async function aiCompletion(value: string) {
-    console.log(generateContext(value))
-    //  generateText({
-    //   model,
-    //   prompt: generateContext(value),
-    // }).then((res) => {
-    //   console.log(res)
-    // })
+
+  async function inferenceFunction(textBeforeCursor: string, textBeforeCursorOnCurrentLine: string, range: {
+    startLineNumber: number,
+    startColumn: number,
+    endLineNumber: number,
+    endColumn: number
+  }) {
+    const geminiApiKey = localStorage.getItem("geminiApiKey") || ""
+    if (!geminiApiKey) {
+      toast.error("No Gemini API key found\nPlease add your Gemini API key in the settings")
+      throw new Error("No Gemini API key found")
+    }
+
+    const model = createGoogleGenerativeAI({
+      apiKey: geminiApiKey,
+    })("models/gemini-1.5-flash-latest")
+
+    console.log(textBeforeCursor, textBeforeCursorOnCurrentLine, range)
+
+    const res = await generateText({
+      model,
+      prompt: generateContext(textBeforeCursor, textBeforeCursorOnCurrentLine),
+    })
+    console.log(res.text)
+    const newSuggestion = {
+      insertText: res.text,
+      range: {
+        startLineNumber: range.startLineNumber,
+        startColumn: range.startColumn,
+        endLineNumber: range.endLineNumber + (res.text.match(/\n/g) || []).length,
+        endColumn: range.endColumn + res.text.length
+      }
+    }
+    setAiSuggestions((prev) => [...prev, newSuggestion])
+    // setAiSuggestions((prev) => [...prev, res.text])
+    // console.log(res.text)
+    // return { current: res.text, all: [...aiSuggestions, res.text] }
   }
 
   function addNewCell(position?: number, type?: "CODE" | "MARKDOWN" | "LATEX") {
@@ -540,9 +653,9 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
               ))} */}
               {file.content.cellOrder.map((cellId, index) => {
                 const cellType = file?.content?.cells[cellId!]?.type
-                if (!cellType) return 
+                if (!cellType) return
                 return <>
-                  <CellUtilButtons key={"util-"+index.toString()} position={index} addNewCell={addNewCell} />
+                  <CellUtilButtons key={"util-" + index.toString()} position={index} addNewCell={addNewCell} />
                   {(cellType == "MARKDOWN" || cellType == "LATEX") ?
                     <VisualCell
                       key={index}
@@ -556,7 +669,8 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                       cellId={cellId}
                       manager={manager}
                       project={project}
-                      inferenceFunction={aiCompletion}
+                      inferenceFunction={inferenceFunction}
+                      aiSuggestions={aiSuggestions}
                     />}
                 </>
               })}
@@ -593,7 +707,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                     runNormalCode();
                   });
                 }}
-                  value={file ? file.content.cells[file.content.cellOrder[0]].code : ""}
+                value={file ? file.content.cells[file.content.cellOrder[0]].code : ""}
                 onChange={(value) => {
                   const newContent = { ...file.content };
                   newContent.cells[file.content.cellOrder[0]] = {
@@ -660,21 +774,21 @@ export default function Layout() {
       if (theme == "dark") monaco.editor.setTheme("notebook");
       else monaco.editor.setTheme("vs-light");
     }
-    if (open && typeof projectManager.projects[open as string] != "undefined"){
-        const p = projectManager.getProject(open as string);
-        const files = p.files;
-        globalState.setActiveProject(open as string);
-        if (Object.keys(files).length > 0) globalState.setActiveFile(files[Object.keys(files)[0]].name);
-        // reset query params
-        router.push({ query: {} })
+    if (open && typeof projectManager.projects[open as string] != "undefined") {
+      const p = projectManager.getProject(open as string);
+      const files = p.files;
+      globalState.setActiveProject(open as string);
+      if (Object.keys(files).length > 0) globalState.setActiveFile(files[Object.keys(files)[0]].name);
+      // reset query params
+      router.push({ query: {} })
 
-        // globalState.setActiveProject(open as string)
-        // const files = projectManager.projects[open as string].files
-        // console.log(files)
-        // if (Object.keys(files).length > 0) globalState.setActiveFile(files[0].name)
-      }
+      // globalState.setActiveProject(open as string)
+      // const files = projectManager.projects[open as string].files
+      // console.log(files)
+      // if (Object.keys(files).length > 0) globalState.setActiveFile(files[0].name)
+    }
 
-  }, [mounted, monaco, open,theme])
+  }, [mounted, monaco, open, theme])
 
   const toggleBottombar = () => {
     const panel = bottombarRef.current;
@@ -713,60 +827,60 @@ export default function Layout() {
       <TopBar />
 
       <main className="h-[calc(100vh-89px)] flex flex-row">
-          {/* <div className="w-fit border-r"> */}
-            <SideBar collapsed={sidebarCollapsed} manager={manager} setCollapsed={setSidebarCollapsed} />
-          {/* </div> */}
-          <div className="flex flex-col grow h-full w-screen pl-[50px]">
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel
-                defaultSize={70}
-                minSize={10}
-                onCollapse={() => setTopbarCollapsed(true)}
-                onExpand={() => setTopbarCollapsed(false)}
-                collapsible
-                id="editor-panel"
-                className="flex relative flex-col items-center justify-center"
-              >
-                <FileBar />
-                {globalState.activeFile == "Settings" ? (
-                  <SettingsTab />
-                ) : (
-                  <EditorArea
-                    isNotebook={isNotebook}
-                    file={file}
-                    project={project}
-                  />
-                )}
-              </ResizablePanel>
-            {<ResizableHandle data-hidden={globalState.activeProject ? false : true} className="data-[hidden=true]:invisible data-[hidden=true]:pointer-actions-none"/>}
+        {/* <div className="w-fit border-r"> */}
+        <SideBar collapsed={sidebarCollapsed} manager={manager} setCollapsed={setSidebarCollapsed} />
+        {/* </div> */}
+        <div className="flex flex-col grow h-full w-screen pl-[50px]">
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel
+              defaultSize={70}
+              minSize={10}
+              onCollapse={() => setTopbarCollapsed(true)}
+              onExpand={() => setTopbarCollapsed(false)}
+              collapsible
+              id="editor-panel"
+              className="flex relative flex-col items-center justify-center"
+            >
+              <FileBar />
+              {globalState.activeFile == "Settings" ? (
+                <SettingsTab />
+              ) : (
+                <EditorArea
+                  isNotebook={isNotebook}
+                  file={file}
+                  project={project}
+                />
+              )}
+            </ResizablePanel>
+            {<ResizableHandle data-hidden={globalState.activeProject ? false : true} className="data-[hidden=true]:invisible data-[hidden=true]:pointer-actions-none" />}
 
             <ResizablePanel
-                ref={bottombarRef}
-                onCollapse={() => setBottombarCollapsed(true)}
-                onExpand={() => setBottombarCollapsed(false)}
-                collapsible
-                collapsedSize={4}
-                minSize={15}
-                defaultSize={35}
-                id="terminal-panel"
-                data-hidden={globalState.activeProject ? false : true}
+              ref={bottombarRef}
+              onCollapse={() => setBottombarCollapsed(true)}
+              onExpand={() => setBottombarCollapsed(false)}
+              collapsible
+              collapsedSize={4}
+              minSize={15}
+              defaultSize={35}
+              id="terminal-panel"
+              data-hidden={globalState.activeProject ? false : true}
               className="relative flex data-[hidden=true]:invisible"
-              >
+            >
               <BottomTabBar
-                  collapsed={bottombarCollapsed}
-                  fullscreen={topbarCollapsed}
-                  toggle={toggleBottombar}
-                  setFullScreen={() => {
-                    const panel = bottombarRef.current;
-                    if (panel) {
-                      if (bottombarCollapsed) panel.expand();
-                      panel.resize(100);
-                    }
-                  }}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
+                collapsed={bottombarCollapsed}
+                fullscreen={topbarCollapsed}
+                toggle={toggleBottombar}
+                setFullScreen={() => {
+                  const panel = bottombarRef.current;
+                  if (panel) {
+                    if (bottombarCollapsed) panel.expand();
+                    panel.resize(100);
+                  }
+                }}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
         {/* <ResizablePanelGroup direction="horizontal"> */}
         {/* <ResizablePanel
             collapsedSize={5}
