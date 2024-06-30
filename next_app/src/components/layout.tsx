@@ -40,6 +40,12 @@ import { useRouter } from "next/router";
 import { dryrun } from "@permaweb/aoconnect";
 import { title } from "process";
 import { capOutputTo200Lines } from "@/lib/utils";
+
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from "ai";
+import { generateContext } from "@/lib/ai";
+
+
 const Plot = dynamic(
   () =>
     import('react-plotly.js'),
@@ -83,29 +89,32 @@ const CodeCell = ({
   cellId,
   manager,
   project,
+  inferenceFunction
 }: {
   file: PFile;
   cellId: string;
   manager: ProjectManager;
-  project: Project;
+    project: Project;
+    inferenceFunction?: (value: string) => void
 }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
   const [running, setRunning] = useState(false);
   const [showGfx, setShowGfx] = useState(false);
   const cell = file.content.cells[cellId];
+  const [code, setCode] = useState("");
   const { theme } = useTheme();
+  const globalState = useGlobalState();
 
   const runCellCode =async()=> {
     // get file state, run code get output, read latest file state and add output
     console.log("running cell code",cellId);
     const p = manager.getProject(project.name);
+    const file = p.files[globalState.activeFile];
+    if (!file) return
+    const cell = file.content.cells[cellId];
+
     console.log(p);
     if (!p.process)
-      // return toast({
-      //   title: "No process for this project :(",
-      //   description:
-      //     "Please assign a process id from project settings before trying to run Lua code",
-      // });
       return toast.error("No process for this project :(\nPlease assign a process id from project settings before trying to run Lua code")
     const ownerAddress = p.ownerWallet;
     const activeAddress = await window.arweaveWallet.getActiveAddress();
@@ -137,13 +146,13 @@ const CodeCell = ({
         console.log(outputData.output);
         try {
           const parsedData = JSON.parse(outputData.output);
-          setShowGfx(parsedData.__render_gfx);
           fileContent.cells[cellId].output = parsedData;
           console.log(fileContent.cells[cellId].output)
+          setShowGfx(parsedData.__render_gfx);
         }
         catch {
-          setShowGfx(false);
           fileContent.cells[cellId].output = outputData.output;
+          setShowGfx(false);
         }
       } else if (outputData.json) {
         console.log(outputData.json);
@@ -155,10 +164,10 @@ const CodeCell = ({
       }
     }
     manager.updateFile(project, { file, content: fileContent });
-    setRunning(false);
-    const address = await window.arweaveWallet.getActiveAddress()
+    console.log("done running");
     sendGAEvent({ event: 'run_code', value: 'notebook' })
     sendGAEvent('run_code', "buttonClicked", { value: "notebook" })
+    setRunning(false);
     // event('run_code')
   }
 
@@ -192,6 +201,7 @@ const CodeCell = ({
           variant="ghost"
           className="p-5 h-full rounded-l rounded-b-none rounded-r-none min-w-[50px] grow flex items-center justify-center"
           onClick={runCellCode}
+          id={`run-cell-${cellId}`}
         >
           <Image
             src={running ? Icons.loadingSVG : Icons.runSVG}
@@ -203,6 +213,7 @@ const CodeCell = ({
           />
         </Button>
         <Editor
+          data-cellId={cellId}
           onMount={(editor, monaco) => {
             monaco.editor.defineTheme(
               "notebook",
@@ -214,12 +225,31 @@ const CodeCell = ({
             // editor.updateOptions({ fontFamily: "DM Mono" });
             
             // run function on ctrl+enter only in this specific cell
+
+            // autocomplete keybind
+            console.log(cellId)
+
+            // editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Period, () => {
+            //   console.log(cellId)
+            // })
+
+            // add command only to this particular cell
+            editor.getContainerDomNode().addEventListener("keydown", (e) => {
+              if (e.shiftKey && e.key == "Enter") {
+                e.preventDefault()
+                const runbtn = document.getElementById(`run-cell-${cellId}`)
+                // console.log(cellId, runbtn)
+                runbtn?.click()
+              }
+            })
+
           }}
           onChange={(value) => {
             // console.log(value);
             const newContent = { ...file.content };
             newContent.cells[cellId] = { ...cell, code: value };
             manager.updateFile(project, { file, content: newContent });
+            // if (inferenceFunction) inferenceFunction(value)
           }}
           height={
             (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
@@ -385,6 +415,21 @@ const EditorArea = ({
   const manager = useProjectManager();
   const [running, setRunning] = useState(false);
   const { theme } = useTheme();
+  
+  const model = createGoogleGenerativeAI({
+    apiKey: "API_KEY"
+  })("models/gemini-1.5-flash-latest")
+
+  
+  async function aiCompletion(value: string) {
+    console.log(generateContext(value))
+    //  generateText({
+    //   model,
+    //   prompt: generateContext(value),
+    // }).then((res) => {
+    //   console.log(res)
+    // })
+  }
 
   function addNewCell(position?: number, type?: "CODE" | "MARKDOWN" | "LATEX") {
     const p = manager.getProject(globalState.activeProject);
@@ -511,6 +556,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                       cellId={cellId}
                       manager={manager}
                       project={project}
+                      inferenceFunction={aiCompletion}
                     />}
                 </>
               })}
