@@ -9,8 +9,8 @@ export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4";
 
 export const modules = {
   "Default (WASM64)": AOModule,
+  "SQLite64": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
   "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
-  SQLite64: "z9iaKddl-rIBinPG7_3-oLAdgIujPPPCbUul5mBSIOk",
   "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
 };
 

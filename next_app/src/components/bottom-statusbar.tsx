@@ -38,13 +38,15 @@ export default function BottomStatusbar() {
     if (autoconnect) {
       if (!window.arweaveWallet)
         {toast.error("No Arweave wallet found, please install ArConnect and try again");return}
-      if (!mounted) 
-        window.arweaveWallet.getActiveAddress().then((addr: string) => {
-          connectWallet()
-          setMounted(true);
-        }).catch(() => {
-          setAutoconnect(false);
-        });
+      if (!mounted)
+        setTimeout(() => {
+          window.arweaveWallet.getActiveAddress().then((addr: string) => {
+            connectWallet()
+            setMounted(true);
+          }).catch(() => {
+            setAutoconnect(false);
+          });
+        }, 150);
     }
     else {
       disconnectWallet();

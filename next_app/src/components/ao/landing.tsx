@@ -92,11 +92,13 @@ export default function AOLanding() {
     }
     useEffect(() => {
         if (autoconnect) {
-            window.arweaveWallet.getActiveAddress().then((addr: string) => {
-                connectWallet()
-            }).catch(() => {
-                setAutoconnect(false);
-            });
+            setTimeout(() => {
+                window.arweaveWallet.getActiveAddress().then((addr: string) => {
+                    connectWallet()
+                }).catch(() => {
+                    setAutoconnect(false);
+                });
+            }, 150);
         }
         else {
             disconnectWallet();
