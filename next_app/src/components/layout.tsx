@@ -563,7 +563,7 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
           )}
         </div>
       ) : (
-        <div className="text-btr-grey-1 h-full flex items-center">
+        <div className="flex w-full h-full">
           <div>
             {globalState.activeMode == "AO" ? <AOLanding /> : <WarpLanding />}
           </div>
@@ -692,9 +692,9 @@ export default function Layout() {
                   />
                 )}
               </ResizablePanel>
-              <ResizableHandle />
+            {<ResizableHandle data-hidden={globalState.activeProject ? false : true} className="data-[hidden=true]:invisible data-[hidden=true]:pointer-actions-none"/>}
 
-              <ResizablePanel
+            <ResizablePanel
                 ref={bottombarRef}
                 onCollapse={() => setBottombarCollapsed(true)}
                 onExpand={() => setBottombarCollapsed(false)}
@@ -703,9 +703,10 @@ export default function Layout() {
                 minSize={15}
                 defaultSize={35}
                 id="terminal-panel"
-                className="relative flex"
+                data-hidden={globalState.activeProject ? false : true}
+              className="relative flex data-[hidden=true]:invisible"
               >
-                <BottomTabBar
+              <BottomTabBar
                   collapsed={bottombarCollapsed}
                   fullscreen={topbarCollapsed}
                   toggle={toggleBottombar}

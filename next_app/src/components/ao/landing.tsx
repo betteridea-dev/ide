@@ -107,9 +107,12 @@ export default function AOLanding() {
     }, [autoconnect]);
 
     return <>
-        <section className="container text-foreground/90 p-5 overflow-scroll grid grid-cols-1 min-w-[85vw] md:grid-cols-2 md:gap-5">
-            <div className="absolute bottom-2 mx-auto w-fit ring-1 ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={()=>setShowUpdates(true)} onMouseLeave={()=>setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
-            {showUpdates && <div className="absolute left-0 top-0 right-0 m-1 backdrop-blur bg-background/50 flex flex-col gap-5 font-bold text-lg items-center justify-center pointer-events-none bottom-11">
+        <section className="text-foreground/90 p-5 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full min-w-[100vw] md:pl-20">
+            
+            <div className="absolute bottom-0 z-[100] mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
+            {showUpdates && <div className="absolute left-0 top-0 right-0 bottom-0 m-1 bg-background/20 gap-5 font-bold pointer-events-none w-1/2 mx-auto">
+                <div className="absolute bottom-10 left-0 right-0 w-fit bg-destructive p-3 text-sm rounded-md mx-auto ring- ring-destructive-foreground flex flex-col items-start justify-center gap-2">
+                
                 <div className="flex gap-2 items-center text-destructive-foreground"><div>
                     <AlertTriangleIcon />
                 </div> If you had notebook files which have become normal files now, please change their filename to .luanb extension</div>
@@ -117,9 +120,11 @@ export default function AOLanding() {
                     <AlertTriangleIcon />
                 </div> Old processes must perform a security update (settings &gt; patch 6-5-24): only for processes spawned prior to AOS 1.11.0</div>
                 <div className="flex gap-2 items-center"><div><PartyPopper/></div> All new processes will be spawned with WASM64 support!</div>
+                </div>
             
             </div>}
-            <div className="flex flex-col gap-5 items-start mt-10 md:mt-0">
+
+            <div className="flex flex-col gap-5 items-start md:h-2/3 my-auto">
                 <h1 className="text-6xl font-bold" suppressHydrationWarning>BetterIDEa</h1>
 
                 <p className="text-lg">
@@ -157,7 +162,7 @@ export default function AOLanding() {
                     <ContentItem title="BetterIDEa graphs" desc="Fetch and plot live crypto prices data using 0rbit oracle and BetterIDEa graphs" link="https://ide.betteridea.dev/import?id=2voE0ERMT6CCPRVEkTsotDR-dmHgfoSH6dvucL9rSQc"/>
                 </div> */}
             </div>
-            <div className="p-5 flex flex-col gap-4 md:gap-10 overflow-scroll mb-10 md:mb-0">
+            <div className="p-5 flex flex-col gap-4 md:gap-10 overflow-scroll h-fit my-auto">
                 <details open>
                     <summary className="font-medium mb-2">Recent Projects</summary>
                     <div className="pl-5">
