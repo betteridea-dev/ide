@@ -56,10 +56,10 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
     };
 
     return (
-        <div data-collapsed={collapsed} className="absolute py-2 flex flex-col truncate justify-center left-0 z-50 transition-all duration-200 bg-background w-[50px] data-[collapsed=false]:w-[250px] border-r h-[calc(100vh-89px)]"
+        <div data-collapsed={collapsed} className="absolute py-2 flex flex-col gap-1 truncate justify-center left-0 z-50 transition-all duration-200 w-[50px] data-[collapsed=false]:w-[250px] border-r border-border/40 bg-[#ececef] h-[calc(100vh-89px)]"
             onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
             {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} setCollapsed={setCollapsed} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
-            <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div>
+            {/* <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div> */}
             <Button
                 data-active={globalState.activeFile == "AllProjects"}
                 variant="ghost" id="all-projects"
@@ -78,7 +78,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                 <Icons.package className="" />
                 {!collapsed && <span className="ml-2">Packages</span>}
             </Button>
-            <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div>
+            {/* <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div> */}
 
             <div className="overflow-scroll flex flex-col grow">
                 {mounted &&
@@ -134,7 +134,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                         //         {pname}
                                         //     </div>
                                         // </div>
-                                        <details open className="w-fit cursor-pointer" onClick={(e)=>e.stopPropagation()}>
+                                        <details open className="w-full cursor-pointer" onClick={(e)=>e.stopPropagation()}>
                                             <summary className="truncate max-w-[195px]"> {pname} </summary>
                                             {active && !collapsed && (
                                                 <div className="flex flex-col items-center justify-center mb-3 -ml-7">

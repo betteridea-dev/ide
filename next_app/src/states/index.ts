@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { specialFileTabs } from "@/lib/utils";
 
 interface State {
   activeMode: "AO" | "WARP";
@@ -21,7 +22,7 @@ export const useGlobalState = create<State>((set) => ({
   openedFiles: [],
   setActiveMode: (mode: "AO" | "WARP") => set((state) => ({ activeMode: mode, activeProject: "", openedFiles: [], activeFile: "" })),
   setActiveProject: (projectName: string) => set((state) => ({ activeProject: projectName, openedFiles: [], activeFile: "" })),
-  setActiveFile: (fileName: string) => set((state) => ({ activeFile: fileName, openedFiles: state.openedFiles.includes(fileName) ? state.openedFiles : [...state.openedFiles, fileName] })),
+  setActiveFile: (fileName: string) => set((state) => ({ activeFile: fileName, openedFiles: !specialFileTabs.includes(fileName)? state.openedFiles.includes(fileName) ? state.openedFiles : [...state.openedFiles, fileName]: state.openedFiles})),
   clearFiles: () => set((state) => ({ openedFiles: [] })),
   fileDeleted: (fileName: string) => set((state) => ({ openedFiles: state.openedFiles.filter((file) => file !== fileName), activeFile: state.activeFile === fileName ? "" : state.activeFile })),
   projectDeleted: (projectName: string) => set((state) => ({ activeProject: state.activeProject === projectName ? "" : state.activeProject, activeFile: state.activeProject === projectName ? "" : state.activeFile, openedFiles: state.activeProject === projectName ? [] : state.openedFiles })),

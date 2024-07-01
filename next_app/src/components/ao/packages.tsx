@@ -242,7 +242,7 @@ export default function Packages() {
         }
     }, [search])
 
-    return <div className="flex gap-2 h-full max-h-[80vh] w-full p-2">
+    return <div className="flex gap-2 h-full w-full p-2">
         <div className="flex flex-col gap-1 w-[269px]">
             <div>
                 <Input placeholder="search packages" className="focus:!ring-transparent" onChange={(e) => setDebounceVal(e.target.value)} />

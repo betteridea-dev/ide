@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+export const specialFileTabs = ["Settings", "AllProjects", "Packages"]
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

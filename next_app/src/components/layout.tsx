@@ -47,6 +47,7 @@ import { generateContext } from "@/lib/ai";
 import { CompletionFormatter } from "@/lib/ai-completion-formatter";
 import AllProjects from "./ao/all-projects";
 import Packages from "./ao/packages";
+import { specialFileTabs } from "@/lib/utils";
 
 
 const Plot = dynamic(
@@ -57,8 +58,6 @@ const Plot = dynamic(
     loading: () => <>Loading Graph...</>,
   },
 );
-
-const specialFileTabs = ["Settings", "AllProjects", "Packages"]
 
 const monacoConfig: {
   [key: string]: editor.IStandaloneEditorConstructionOptions
@@ -840,7 +839,7 @@ export default function Layout() {
               id="editor-panel"
               className="flex relative flex-col items-start justify-start"
             >
-              <FileBar />
+             {!specialFileTabs.includes(globalState.activeFile)&& <FileBar />}
               {/* 
               {globalState.activeFile == "Settings" ? (
                 <SettingsTab />

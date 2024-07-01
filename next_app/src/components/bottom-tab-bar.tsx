@@ -119,8 +119,8 @@ export default function BottomTabBar({ collapsed, toggle, setFullScreen, fullscr
   function showFullMessage(_) { }
 
   return (
-    <Tabs defaultValue="" onChange={(e) => console.log(e)} className="pt-7 w-full h-full">
-      {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-7 bg-background z-30 w-full" onClick={() => { if (collapsed) toggle() }}>
+    <Tabs defaultValue="" onChange={(e) => console.log(e)} className="pt-7 w-full h-fit">
+      {globalState.activeProject && <TabsList className="border-b rounded-none flex justify-start p-0 absolute top-0 h-8 bg-background z-30 w-full" onClick={() => { if (collapsed) toggle() }}>
         {globalState.activeMode == "AO" && (
           <TabsTrigger value="inbox" className="rounded-none border-b data-[state=active]:border-primary" onClick={getInbox}>
             Inbox {loadingInbox ? <Image src={Icons.loadingSVG} alt="loading" width={20} height={20} className="animate-spin ml-1" /> : `(${inbox.length})`}
