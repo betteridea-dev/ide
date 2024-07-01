@@ -55,7 +55,7 @@ export default function BottomStatusbar() {
 
   return (
     <div className="h-[25px] flex items-center overflow-clip gap-0.5 px-0 text-xs border-t">
-      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary text-xs" onClick={connectWallet}>
+      <Button variant="ghost" data-connected={walletAddress.length > 0} className="p-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary text-xs" onClick={connectWallet} id="connect-btn">
         {walletAddress ? `Connected: ${walletAddress}` : "Connect"}
       </Button>
       {walletAddress.length > 0 && (

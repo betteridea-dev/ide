@@ -91,6 +91,7 @@ export default function AOLanding() {
         setAutoconnect(false);
         setWalletAddress("");
     }
+    
     useEffect(() => {
         if (autoconnect) {
             setTimeout(() => {
@@ -133,7 +134,7 @@ export default function AOLanding() {
                     }
                 </p>
 
-                {!walletAddress && <Button onClick={connectWallet}>Connect Wallet</Button>}
+                {!walletAddress && <Button onClick={()=>document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
                 <div className="flex flex-col text-left my-6 gap-1">
                     <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>

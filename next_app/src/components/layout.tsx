@@ -44,7 +44,7 @@ import { capOutputTo200Lines } from "@/lib/utils";
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from "ai";
 import { generateContext } from "@/lib/ai";
-import { useLocalStorage } from "usehooks-ts";
+import { CompletionFormatter } from "@/lib/ai-completion-formatter";
 
 
 const Plot = dynamic(
@@ -56,38 +56,13 @@ const Plot = dynamic(
   },
 );
 
-function makeLuaInlineCompletions(suggestion: string) {
-  return {
-    provideInlineCompletions: (model: any, position: any, context: any, token: any) => {
-      return {
-        items: [
-          {
-            range: {
-              // make the completion only available where it was triggered
-              startLineNumber: position.lineNumber,
-              startColumn: position.column - 1,
-              endLineNumber: position.lineNumber,
-              endColumn: position.column,
-            },
-            text: suggestion,
-            insertText: suggestion,
-            kind: 18,//18 is text
-            label: "AI Suggestion",
-            detail: "AI Suggestion",
-          },
-        ],
-      };
-    },
-    freeInlineCompletions: () => { }
-  }
-}
 
-let codes = {}
 const monacoConfig: {
   [key: string]: editor.IStandaloneEditorConstructionOptions
 } = {
   CodeCell: {
     fontSize: 14,
+    inlineSuggest: { enabled: true },
     fontFamily: "monospace",
     minimap: { enabled: false },
     // lineNumbers: "off",
@@ -123,12 +98,12 @@ const CodeCell = ({
   cellId: string;
   manager: ProjectManager;
   project: Project;
-    inferenceFunction?: (textBeforeCursor:string, textBeforeCursorOnCurrentLine: string, range: {
-      startLineNumber: number,
-      startColumn: number,
-      endLineNumber: number,
-      endColumn: number
-    }) => Promise<void>;
+  inferenceFunction?: (textBeforeCursor: string, textBeforeCursorOnCurrentLine: string, range: {
+    startLineNumber: number,
+    startColumn: number,
+    endLineNumber: number,
+    endColumn: number
+  }) => Promise<void>;
   aiSuggestions: AiSuggestion[]
 }) => {
   const [mouseHovered, setMouseHovered] = useState(false);
@@ -139,42 +114,63 @@ const CodeCell = ({
   const { theme } = useTheme();
   const monaco = useMonaco();
   const globalState = useGlobalState();
+  const thisEditor = useRef<editor.IStandaloneCodeEditor>()
+  const [active, setActive] = useState(false)
+  const [generating, setGenerating] = useState(false)
+
+  function generateAiSuggestions() {
+    if(!thisEditor.current) return
+    const val = thisEditor.current.getValue()
+    const model = thisEditor.current.getModel()
+    const position = thisEditor.current.getPosition()
+    const currentLine = model.getLineContent(position.lineNumber)
+    const offset = model.getOffsetAt(position)
+    const textBeforeCursor = val.substring(0, offset - currentLine.length)
+    const textBeforeCursorOnCurrentLine = currentLine.substring(0, position.column - 1)
+    if (!textBeforeCursor) return
+    setGenerating(true)
+    inferenceFunction(textBeforeCursor, textBeforeCursorOnCurrentLine, {
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column
+    })
+    setGenerating(false)
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (active) {
+        generateAiSuggestions()
+        setActive(false)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  },[active])
 
   useEffect(() => {
     console.log("aiSuggestions", aiSuggestions)
-    if (monaco && aiSuggestions.length > 0) {
-      const cmp = monaco.languages.registerInlineCompletionsProvider("lua", {
-        provideInlineCompletions(model, position, context, token) {
-          const suggestionItems = aiSuggestions.filter((suggestion) => {
-            const rangeText = model.getValueInRange(suggestion.range)
-            return suggestion.insertText.startsWith(rangeText)
-          }).map((suggestion) => {
-            return {
-              range: {
-                // make the completion only available where it was triggered
-                startLineNumber: position.lineNumber,
-                startColumn: position.column-1,
-                endLineNumber: position.lineNumber,
-                endColumn: position.column
-              },
-              text: suggestion.insertText,
-              insertText: suggestion.insertText,
-              kind: 18,//18 is text
-              label: "AI Suggestion",
-              detail: "AI Suggestion",
-            }
-          })
-          console.log(suggestionItems)
-          
-          return Promise.resolve({
-            items: suggestionItems
-          })
-        },
-        freeInlineCompletions() { },
-      })
-      return () => cmp.dispose()
-    }
-  }, [aiSuggestions])
+    if (!monaco && !(aiSuggestions.length > 0)) return
+    const cmp = monaco.languages.registerInlineCompletionsProvider("lua", {
+      provideInlineCompletions(model, position, context, token) {
+        const suggestionItems = aiSuggestions.filter(s => {
+          return s.insertText.startsWith(model.getValueInRange(s.range))
+        }).filter(s => {
+          return s.range.startLineNumber == position.lineNumber && s.range.startColumn >= position.column - 3
+        }).map(s => {
+          return new CompletionFormatter(model, position).format(s.insertText, s.range)
+        })
+
+        console.log(suggestionItems)
+
+        return Promise.resolve({
+          items: suggestionItems
+        })
+      },
+      freeInlineCompletions() { },
+    })
+    return () => cmp.dispose()
+  }, [aiSuggestions, monaco])
 
   const runCellCode = async () => {
     // get file state, run code get output, read latest file state and add output
@@ -286,6 +282,7 @@ const CodeCell = ({
         <Editor
           data-cellId={cellId}
           onMount={(editor, monaco) => {
+            thisEditor.current = editor
             monaco.editor.defineTheme(
               "notebook",
               notebookTheme as editor.IStandaloneThemeData
@@ -305,20 +302,7 @@ const CodeCell = ({
                 runbtn?.click()
               } else if (e.ctrlKey && e.key == ".") {
                 e.preventDefault()
-                const val = editor.getValue()
-                const model = editor.getModel()
-                const position = editor.getPosition()
-                const currentLine =model.getLineContent(position.lineNumber)
-                const offset = model.getOffsetAt(position)
-                const textBeforeCursor = val.substring(0, offset - currentLine.length)
-                const textBeforeCursorOnCurrentLine = currentLine.substring(0, position.column-1)
-                if (!textBeforeCursor)return
-                inferenceFunction(textBeforeCursor, textBeforeCursorOnCurrentLine, {
-                  startLineNumber: position.lineNumber,
-                  startColumn: position.column,
-                  endLineNumber: position.lineNumber,
-                  endColumn: position.column
-                })
+                generateAiSuggestions()
               }
             })
 
@@ -328,6 +312,7 @@ const CodeCell = ({
             const newContent = { ...file.content };
             newContent.cells[cellId] = { ...cell, code: value };
             manager.updateFile(project, { file, content: newContent });
+            setActive(true)
           }}
           height={
             (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
