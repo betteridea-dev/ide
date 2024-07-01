@@ -49,6 +49,17 @@ import AllProjects from "./ao/all-projects";
 import Packages from "./ao/packages";
 import { specialFileTabs } from "@/lib/utils";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import Link from "next/link";
+
+
 
 const Plot = dynamic(
   () =>
@@ -822,9 +833,30 @@ export default function Layout() {
         <title>{`BetterIDEa ${globalState.activeProject && ("| " + globalState.activeProject)}`}</title>
       </Head>
 
-      <TopBar />
+      {/* <TopBar /> */}
+      <div className="h-[25px] border-b border-border/50 px-1 text-sm flex items-center overflow-clip">
+        {/* <Button variant="ghost" className="p-1.5">Project</Button>
+        <div className="grow"/>
+        <Button variant="ghost" className="p-1.5">Help</Button> */}
+        <Link href="/">
+          <Image src="/icon.svg" alt="BetterIDEa" width={15} height={15} className="mx-1 h-[20px]" />
+        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant="ghost" className="p-1.5">Project</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="ml-1 -mt-2">
+            <DropdownMenuLabel>{project.name || <span className="text-muted">No Project Selected</span>}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Share</DropdownMenuItem>
+            <DropdownMenuItem>Download</DropdownMenuItem>
+            <DropdownMenuItem>Load Blueprint</DropdownMenuItem>
+            <DropdownMenuItem onClick={()=>globalState.setActiveProject("")}>Close</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-      <main className="h-[calc(100vh-89px)] flex flex-row">
+      <main className="h-[calc(100vh-50px)] flex flex-row">
         {/* <div className="w-fit border-r"> */}
         <SideBar collapsed={sidebarCollapsed} manager={manager} setCollapsed={setSidebarCollapsed} />
         {/* </div> */}

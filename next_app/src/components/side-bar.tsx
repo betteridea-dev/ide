@@ -56,7 +56,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
     };
 
     return (
-        <div data-collapsed={collapsed} className="absolute py-2 flex flex-col gap-1 truncate justify-center left-0 z-50 transition-all duration-200 w-[50px] data-[collapsed=false]:w-[250px] border-r border-border/40 bg-[#ececef] h-[calc(100vh-89px)]"
+        <div data-collapsed={collapsed} className="absolute py-2 flex flex-col gap-1 truncate justify-center left-0 z-50 transition-all duration-200 w-[50px] data-[collapsed=false]:w-[250px] border-r border-border/40 bg-[#ececef] h-[calc(100vh-50px)]"
             onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
             {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} setCollapsed={setCollapsed} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
             {/* <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div> */}
