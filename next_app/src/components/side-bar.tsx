@@ -62,7 +62,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
             <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div>
             <Button
                 data-active={globalState.activeFile == "AllProjects"}
-                variant="ghost"
+                variant="ghost" id="all-projects"
                 className="rounded-none p-1  w-full data-[active=true]:bg-accent flex justify-start px-3 items-center"
                 onClick={()=>globalState.setActiveFile("AllProjects")}
             >
@@ -134,7 +134,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
                                         //         {pname}
                                         //     </div>
                                         // </div>
-                                        <details open className="w-fit">
+                                        <details open className="w-fit cursor-pointer" onClick={(e)=>e.stopPropagation()}>
                                             <summary className="truncate max-w-[195px]"> {pname} </summary>
                                             {active && !collapsed && (
                                                 <div className="flex flex-col items-center justify-center mb-3 -ml-7">

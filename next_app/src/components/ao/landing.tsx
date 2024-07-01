@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import Link from "next/link";
-import { AlertTriangleIcon, FileCodeIcon, FolderOpen, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react";
+import { AlertTriangleIcon, FileCodeIcon, FileStack, FolderOpen, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react";
 import { FaDiscord, FaTwitter, FaGithub } from "react-icons/fa"
 import Image from "next/image";
 import {
@@ -145,6 +145,9 @@ export default function AOLanding() {
                 {!walletAddress && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
                 <div className="flex flex-col text-left my-6 gap-1">
+                    <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("all-projects").click()}>
+                        <FileStack size={20} /> All Projects
+                    </Button>
                     <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>
                         <PlusSquare size={20} /> New Project
                     </Button>
@@ -220,7 +223,7 @@ export default function AOLanding() {
                     </div>
                 </details> */}
                 <details open className="-ml-5 mb-auto">
-                    <summary className="font-medium mb-4"><span className="ml-6">Freshly Published</span></summary>
+                    <summary className="font-medium mb-4 cursor-pointer"><span className="ml-6">Freshly Published</span></summary>
                     <div className="pl-8 flex flex-col gap-3 overflow-scroll">
                         {
                             published.map((post, i) =>
