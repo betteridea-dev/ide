@@ -116,7 +116,7 @@ export default function AOLanding() {
     }, [autoconnect]);
 
     return <>
-        <section className="text-foreground/90 p-5 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full min-w-[100vw] md:pl-20">
+        <section className="text-foreground/90 p-5 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full min-w-[100vw] md:pl-20 items-start justify-start">
 
             <div className="absolute bottom-0 z-[100] mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
             {showUpdates && <div className="absolute left-0 top-0 right-0 bottom-0 m-1 bg-background/20 gap-5 font-bold pointer-events-none w-1/2 mx-auto">
@@ -133,7 +133,7 @@ export default function AOLanding() {
 
             </div>}
 
-            <div className="flex flex-col gap-5 items-start md:h-2/3 my-auto">
+            <div className="flex flex-col gap-5 items-start md:h-2/3 my-auto md:ml-16">
                 <h1 className="text-6xl font-bold" suppressHydrationWarning>BetterIDEa</h1>
 
                 <p className="text-lg">
@@ -145,7 +145,7 @@ export default function AOLanding() {
                 {!walletAddress && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
                 <div className="flex flex-col text-left my-6 gap-1">
-                    <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>
+                    <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>
                         <PlusSquare size={20} /> New Project
                     </Button>
                     {/* <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" disabled>
@@ -154,8 +154,8 @@ export default function AOLanding() {
 
                     <TooltipProvider delayDuration={0}>
                         <Tooltip>
-                        <TooltipTrigger>
-                            <Button variant="link" disabled className="justify-start h-7 text-foreground/90 gap-1 px-0">
+                        <TooltipTrigger className=" w-fit">
+                            <Button variant="link" disabled className="justify-start items-start h-7 text-foreground/90 gap-1 px-0">
                                 <ImportIcon size={20} /> Import from Protocol.Land
                             </Button>
                         </TooltipTrigger>
@@ -167,7 +167,7 @@ export default function AOLanding() {
                         </Tooltip>
                     </TooltipProvider>
 
-                    <details open>
+                    <details open className="w-full">
                         <summary className="font-medium mt-5 my-3 cursor-pointer"><span className="pl-6">Recent Projects</span></summary>
                         <div className="pl-8">
                             {
@@ -204,7 +204,7 @@ export default function AOLanding() {
                     <ContentItem title="BetterIDEa graphs" desc="Fetch and plot live crypto prices data using 0rbit oracle and BetterIDEa graphs" link="https://ide.betteridea.dev/import?id=2voE0ERMT6CCPRVEkTsotDR-dmHgfoSH6dvucL9rSQc"/>
                 </div> */}
             </div>
-            <div className="p-5 flex flex-col gap-4 md:gap-10 overflow-scroll h-fit my-auto">
+            <div className="p-5  overflow-scroll md:h-1/2 my-auto justify-start items-start">
                 {/* <details open>
                     <summary className="font-medium mb-2"><span className="pl-4">Recent Projects</span></summary>
                     <div className="pl-5">
@@ -219,9 +219,9 @@ export default function AOLanding() {
                         {recents.length === 0 && <div className="text-sm text-foreground/60">No recent projects</div>}
                     </div>
                 </details> */}
-                <details open>
-                    <summary className="font-medium mb-2">Freshly Published</summary>
-                    <div className="pl-5 flex flex-col gap-3 overflow-scroll">
+                <details open className="-ml-5 mb-auto">
+                    <summary className="font-medium mb-4"><span className="ml-6">Freshly Published</span></summary>
+                    <div className="pl-8 flex flex-col gap-3 overflow-scroll">
                         {
                             published.map((post, i) =>
                                 <Link href={post.link} target="_blank" key={i}><Button variant="link" className="flex gap-2 px-1 justify-start text-foreground/90 tracking-wide">

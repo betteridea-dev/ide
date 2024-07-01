@@ -348,7 +348,7 @@ export function NewAOProjectDialog({ manager, collapsed, setCollapsed }: { manag
 
             setPopupOpen(e)
         }}>
-            <DialogTrigger data-collapsed={collapsed} id="new-proj-dialog" className="flex m-2 mx-auto w-[90%] hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
+            <DialogTrigger data-collapsed={collapsed} id="new-proj-dialog" className="flex mx-auto w-full hover:bg-accent gap-2 items-center data-[collapsed=false]:justify-start data-[collapsed=true]:justify-center p-2"
                 onClick={async (e) => {
                     e.preventDefault()
                     try {

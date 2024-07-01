@@ -12,7 +12,6 @@ import { useProjectManager } from "@/hooks";
 import { parseOutupt, runLua } from "@/lib/ao-vars";
 import { unescape } from "querystring";
 import Share from "./ao/share";
-import Packages from "./ao/packages";
 import { FileTextIcon as DownloadIcon } from "@radix-ui/react-icons";
 import JSZip from "jszip";
 
@@ -79,7 +78,6 @@ export default function TopBar() {
 
                         <Share />
                         {/* <Modules /> */}
-                        <Packages />
                         <Blueprints />
                     </>
                 }

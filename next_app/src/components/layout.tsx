@@ -45,6 +45,8 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from "ai";
 import { generateContext } from "@/lib/ai";
 import { CompletionFormatter } from "@/lib/ai-completion-formatter";
+import AllProjects from "./ao/all-projects";
+import Packages from "./ao/packages";
 
 
 const Plot = dynamic(
@@ -56,6 +58,7 @@ const Plot = dynamic(
   },
 );
 
+const specialFileTabs = ["Settings", "AllProjects", "Packages"]
 
 const monacoConfig: {
   [key: string]: editor.IStandaloneEditorConstructionOptions
@@ -796,12 +799,23 @@ export default function Layout() {
   const project =
     globalState.activeProject && manager.getProject(globalState.activeProject);
 
-  if (globalState.activeFile && globalState.activeFile != "Settings") {
+  if (globalState.activeFile && !specialFileTabs.includes( globalState.activeFile)) {
     var file = project.getFile(globalState.activeFile);
     var isNotebook = file && globalState.activeFile && file.name.endsWith(".luanb");
   }
 
-  // console.log(isNotebook);
+  function switchTab(tab: string) {
+    switch (tab) {
+      case "Settings":
+        return <SettingsTab />;
+      case "AllProjects":
+        return <AllProjects/>;
+      case "Packages":
+        return <Packages/>;
+      default:
+        return <EditorArea isNotebook={isNotebook} file={file} project={project} />;
+    }
+  }
 
   return (
     <>
@@ -815,7 +829,7 @@ export default function Layout() {
         {/* <div className="w-fit border-r"> */}
         <SideBar collapsed={sidebarCollapsed} manager={manager} setCollapsed={setSidebarCollapsed} />
         {/* </div> */}
-        <div className="flex flex-col grow h-full w-screen pl-[50px]">
+        <div className="flex flex-col justify-start items-start grow h-full w-screen pl-[50px]">
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel
               defaultSize={70}
@@ -824,9 +838,10 @@ export default function Layout() {
               onExpand={() => setTopbarCollapsed(false)}
               collapsible
               id="editor-panel"
-              className="flex relative flex-col items-center justify-center"
+              className="flex relative flex-col items-start justify-start"
             >
               <FileBar />
+              {/* 
               {globalState.activeFile == "Settings" ? (
                 <SettingsTab />
               ) : (
@@ -835,7 +850,12 @@ export default function Layout() {
                   file={file}
                   project={project}
                 />
-              )}
+              )} */}
+              {
+                // add a switch case to match Settings/AllProjects/Packages
+                switchTab(globalState.activeFile)
+
+              }
             </ResizablePanel>
             {<ResizableHandle data-hidden={globalState.activeProject ? false : true} className="data-[hidden=true]:invisible data-[hidden=true]:pointer-actions-none" />}
 

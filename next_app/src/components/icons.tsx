@@ -36,7 +36,10 @@ import {
   Play,
   SquarePlus,
   LucideProps,
-  LucideX
+  LucideX,
+  Package,
+  FilesIcon,
+  BookCopy
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
@@ -78,6 +81,9 @@ export const Icons = {
   play: Play,
   sqPlus: SquarePlus,
   close: LucideX,
+  package: Package,
+  files: FilesIcon,
+  book: BookCopy,
 
   golfFlag: ({ ...props }: LucideProps) => (
     <svg
