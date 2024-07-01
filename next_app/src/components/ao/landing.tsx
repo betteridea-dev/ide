@@ -4,8 +4,16 @@ import { Button } from "../ui/button"
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import Link from "next/link";
-import { AlertTriangleIcon, FileCodeIcon, FolderOpen, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react";
-import {FaDiscord, FaTwitter, FaGithub} from "react-icons/fa"
+import { AlertTriangleIcon, FileCodeIcon, FolderOpen, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react";
+import { FaDiscord, FaTwitter, FaGithub } from "react-icons/fa"
+import Image from "next/image";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 const words = [
     // "winston",
@@ -91,7 +99,7 @@ export default function AOLanding() {
         setAutoconnect(false);
         setWalletAddress("");
     }
-    
+
     useEffect(() => {
         if (autoconnect) {
             setTimeout(() => {
@@ -109,20 +117,20 @@ export default function AOLanding() {
 
     return <>
         <section className="text-foreground/90 p-5 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full min-w-[100vw] md:pl-20">
-            
+
             <div className="absolute bottom-0 z-[100] mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
             {showUpdates && <div className="absolute left-0 top-0 right-0 bottom-0 m-1 bg-background/20 gap-5 font-bold pointer-events-none w-1/2 mx-auto">
                 <div className="absolute bottom-10 left-0 right-0 w-fit bg-destructive p-3 text-sm rounded-md mx-auto ring- ring-destructive-foreground flex flex-col items-start justify-center gap-2">
-                
-                <div className="flex gap-2 items-center text-destructive-foreground"><div>
-                    <AlertTriangleIcon />
-                </div> If you had notebook files which have become normal files now, please change their filename to .luanb extension</div>
-                <div className="flex gap-2 items-center text-destructive-foreground"><div>
-                    <AlertTriangleIcon />
-                </div> Old processes must perform a security update (settings &gt; patch 6-5-24): only for processes spawned prior to AOS 1.11.0</div>
-                <div className="flex gap-2 items-center"><div><PartyPopper/></div> All new processes will be spawned with WASM64 support!</div>
+
+                    <div className="flex gap-2 items-center text-destructive-foreground"><div>
+                        <AlertTriangleIcon />
+                    </div> If you had notebook files which have become normal files now, please change their filename to .luanb extension</div>
+                    <div className="flex gap-2 items-center text-destructive-foreground"><div>
+                        <AlertTriangleIcon />
+                    </div> Old processes must perform a security update (settings &gt; patch 6-5-24): only for processes spawned prior to AOS 1.11.0</div>
+                    <div className="flex gap-2 items-center"><div><PartyPopper /></div> All new processes will be spawned with WASM64 support!</div>
                 </div>
-            
+
             </div>}
 
             <div className="flex flex-col gap-5 items-start md:h-2/3 my-auto">
@@ -134,27 +142,60 @@ export default function AOLanding() {
                     }
                 </p>
 
-                {!walletAddress && <Button onClick={()=>document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
+                {!walletAddress && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
                 <div className="flex flex-col text-left my-6 gap-1">
                     <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>
                         <PlusSquare size={20} /> New Project
                     </Button>
+                    {/* <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" disabled>
+                        <ImportIcon size={20} /> Import from Protocol.Land
+                    </Button> */}
+
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                        <TooltipTrigger>
+                            <Button variant="link" disabled className="justify-start h-7 text-foreground/90 gap-1 px-0">
+                                <ImportIcon size={20} /> Import from Protocol.Land
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-primary text-background font-medium">
+                            <div className="flex flex-col gap-2">
+                                <span className="text-sm">Coming soon...</span>
+                            </div>
+                        </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
+                    <details open>
+                        <summary className="font-medium mt-5 my-3 cursor-pointer"><span className="pl-6">Recent Projects</span></summary>
+                        <div className="pl-8">
+                            {
+                                recents.toReversed().map((pname, i) => <Button key={i} variant="link" className="flex h-7 gap-2 px-1 justify-start text-foreground/90 tracking-wide"
+                                    onClick={() => document.getElementById(pname)?.click()}
+                                >
+                                    <FileCodeIcon size={18} />
+                                    <span className="">{pname}</span>
+                                </Button>)
+                            }
+                            {recents.length === 0 && <div className="text-sm text-foreground/60">No recent projects</div>}
+                        </div>
+                    </details>
                     {/* <Button variant="link" className="justify-start h-7 ring-1 text-foreground/90 gap-1 px-0">
                         <FolderOpen size={20} /> Open Existing
                     </Button> */}
                 </div>
-                <div className=" flex gap-5">
-                    <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="hover:scale-150">
+                {/* <div className="md:absolute bottom-20 flex gap-5">
+                    <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="hover:scale-150 transition-all duration-150">
                         <FaDiscord size={25} />
                     </Link>
-                    <Link href="https://x.com/betteridea_dev" target="_blank" className="hover:scale-150">
+                    <Link href="https://x.com/betteridea_dev" target="_blank" className="hover:scale-150 transition-all duration-150">
                         <FaTwitter size={25} />
                     </Link>
-                    <Link href="https://github.com/betteridea-dev" target="_blank" className="hover:scale-150">
+                    <Link href="https://github.com/betteridea-dev" target="_blank" className="hover:scale-150 transition-all duration-150">
                         <FaGithub size={25} />
                     </Link>
-                </div>
+                </div> */}
                 {/* <div>Latest content</div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <ContentItem title="Installing Packages" desc="Learn how to use APM and install packages on processes" link="https://mirror.xyz/0xCf673b87aFBed6091617331cC895376209d3b923/M4XoQFFCAKBH54bwIsCFT3Frxd575-plCg2o4H1Tujs" />
@@ -164,8 +205,8 @@ export default function AOLanding() {
                 </div> */}
             </div>
             <div className="p-5 flex flex-col gap-4 md:gap-10 overflow-scroll h-fit my-auto">
-                <details open>
-                    <summary className="font-medium mb-2">Recent Projects</summary>
+                {/* <details open>
+                    <summary className="font-medium mb-2"><span className="pl-4">Recent Projects</span></summary>
                     <div className="pl-5">
                         {
                             recents.toReversed().map((pname, i) => <Button key={i} variant="link" className="flex h-7 gap-2 px-1 justify-start text-foreground/90 tracking-wide"
@@ -177,7 +218,7 @@ export default function AOLanding() {
                         }
                         {recents.length === 0 && <div className="text-sm text-foreground/60">No recent projects</div>}
                     </div>
-                </details>
+                </details> */}
                 <details open>
                     <summary className="font-medium mb-2">Freshly Published</summary>
                     <div className="pl-5 flex flex-col gap-3 overflow-scroll">
