@@ -1,4 +1,4 @@
-import { useWallet } from "@/hooks"
+import { useGlobalState, useProjectManager, useWallet } from "@/hooks"
 import { TView } from "."
 import { toast } from "sonner"
 import Link from "next/link"
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { AlertTriangleIcon, FileCodeIcon, FileStack, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { pushToRecents } from "@/lib/utils"
 
 const words = [
     "(^･o･^)ﾉ' ",
@@ -51,59 +52,39 @@ const published = [
 
 function Home() {
     const wallet = useWallet()
-    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true })
+    const globalState = useGlobalState()
+    const manager = useProjectManager()
     const [recents, setRecents] = useLocalStorage("recents", [], { initializeWithValue: true });
     const [showUpdates, setShowUpdates] = useState(false);
 
-    async function connectWallet() {
-        if (!window.arweaveWallet) return toast.custom(() => <Link href="https://arconnect.io" target="_blank">Wallet not found\Click here to install ArConnect</Link>, {
-            id: "wallet-not-found",
-        })
-        await wallet.connect().then(() => {
-            console.log("connected to", wallet.address)
-            setAutoconnect(true)
-            toast.success(`Connected to ${wallet.shortAddress}`, { id: "connected" })
-        })
-    }
-
-    async function disconnectWallet() {
-        await wallet.disconnect()
-        setAutoconnect(false)
-    }
-
-    useEffect(() => {
-        if (autoconnect) {
-            setTimeout(async () => {
-                connectWallet()
-                    .then(() => {
-                        console.log("connected to", wallet.address)
-                        setAutoconnect(true)
-                    })
-                    .catch(() => {
-                        console.log("failed to connect")
-                        setAutoconnect(false)
-                    })
-            }, 150);
-        }
-        else {
-            disconnectWallet();
-        }
-    }, [autoconnect]);
-
     return <div className="p-5 text-foreground/90 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full items-start justify-start">
 
-        <div className="absolute bottom-6 z-[100] mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
+        <div className="absolute bottom-6 z-20 mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
 
         {showUpdates && <div className="absolute left-0 top-0 right-0 bottom-5 w-full m-1 bg-background/50 gap-5 font-bold pointer-events-none mx-auto">
             <div className="absolute bottom-10 left-0 right-0 w-1/2 bg-destructive p-3 text-sm rounded-md mx-auto ring- ring-destructive-foreground flex flex-col items-start justify-center gap-2">
-
-                <div className="flex gap-2 items-center text-destructive-foreground"><div>
+                <div className="flex gap-2 items-center text-destructive-foreground">
+                    <div>
+                        <AlertTriangleIcon />
+                    </div>
+                    We did a major codebase and UI overhaul. Please report any bugs you encounter on our discord server
+                </div>
+                <div className="flex gap-2 items-center text-destructive-foreground">
+                    <div>
+                        <AlertTriangleIcon />
+                    </div>
+                    If you had notebook files which have become normal files now, please change their filename to .luanb extension
+                </div>
+                {/* <div className="flex gap-2 items-center text-destructive-foreground">
+                    <div>
                     <AlertTriangleIcon />
-                </div> If you had notebook files which have become normal files now, please change their filename to .luanb extension</div>
-                <div className="flex gap-2 items-center text-destructive-foreground"><div>
-                    <AlertTriangleIcon />
-                </div> Old processes must perform a security update (settings &gt; patch 6-5-24): only for processes spawned prior to AOS 1.11.0</div>
-                <div className="flex gap-2 items-center"><div><PartyPopper /></div> All new processes will be spawned with WASM64 support!</div>
+                    </div>
+                    Old processes must perform a security update (settings &gt; patch 6-5-24): only for processes spawned prior to AOS 1.11.0
+                </div> */}
+                <div className="flex gap-2 items-center">
+                    <div><PartyPopper /></div>
+                    All new processes will be spawned with WASM64 support!
+                </div>
             </div>
 
         </div>}
@@ -120,10 +101,10 @@ function Home() {
             {!wallet.isConnected && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
             <div className="flex flex-col text-left my-6 gap-1">
-                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("all-projects").click()}>
+                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("all-projects")?.click()}>
                     <FileStack size={20} /> All Projects
                 </Button>
-                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-proj-dialog").click()}>
+                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-project")?.click()}>
                     <PlusSquare size={20} /> New Project
                 </Button>
                 {/* <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" disabled>
@@ -150,7 +131,12 @@ function Home() {
                     <div className="pl-8">
                         {
                             recents.toReversed().map((pname, i) => <Button key={i} variant="link" className="flex h-7 gap-2 px-1 justify-start text-foreground/90 tracking-wide"
-                                onClick={() => document.getElementById(pname)?.click()}
+                                onClick={() => {
+                                    globalState.setActiveProject(pname)
+                                    globalState.setActiveFile(Object.keys(manager.projects[pname].files)[0])
+                                    globalState.setActiveView("EDITOR")
+                                    pushToRecents(pname)
+                                }}
                             >
                                 <FileCodeIcon size={18} />
                                 <span className="">{pname}</span>

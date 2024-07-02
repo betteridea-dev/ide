@@ -30,8 +30,10 @@ function FileList() {
             <p className="text-center text-sm my-2">Open a project to view files</p>
 
             <Button variant="ghost" className="rounded-none m-4 bg-primary min-w-fit text-white"
-                onClick={()=>globalState.setActiveSidebarItem("ALL_PROJECTS")}
-            >View your projects</Button>
+                onClick={() => {
+                    document.getElementById("all-projects")?.click()
+                }}
+            >View all projects</Button>
         </div>
     }
 

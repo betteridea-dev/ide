@@ -1,6 +1,7 @@
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { TDrawerItem } from "."
 import { Button } from "@/components/ui/button";
+import { pushToRecents } from "@/lib/utils";
 
 function ProjectList() {
     const globalState = useGlobalState();
@@ -20,6 +21,7 @@ function ProjectList() {
                             const files = Object.keys(projects[pname].files);
                             globalState.setActiveFile(files[0]);
                             globalState.setActiveView("EDITOR");
+                            pushToRecents(pname);
                         }}
                     >{pname}</Button>
                 ))

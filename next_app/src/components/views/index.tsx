@@ -1,5 +1,5 @@
 import { useGlobalState } from "@/hooks"
-import viewItems from "./items"
+import viewItems from "./components"
 
 export default function View() {
     const globalState = useGlobalState();

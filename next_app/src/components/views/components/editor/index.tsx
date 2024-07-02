@@ -101,7 +101,7 @@ function Editor() {
                     }
                 </div>
                 {
-                    globalState.activeFile.endsWith(".lua") && <div className="bg-background static right-0 top-0 h-[39px] border-l flex items-center justify-center ml-auto">
+                    globalState.activeFile&& globalState.activeFile.endsWith(".lua") && <div className="bg-background static right-0 top-0 h-[39px] border-l flex items-center justify-center ml-auto">
                         <Button variant="ghost" className="rounded-none h-[39px] w-[39px] p-0 bg-primary/20" onClick={runLuaFile}>
                             {running ?
                                 <LoaderIcon size={20} className="p-0 animate-spin text-primary" />

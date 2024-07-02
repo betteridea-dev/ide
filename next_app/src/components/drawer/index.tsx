@@ -1,6 +1,5 @@
 import { useGlobalState } from "@/hooks"
-import drawerItems from "./items"
-import { useEffect } from "react"
+import drawerItems from "./components"
 
 export default function SidebarDrawer() {
     const globalState = useGlobalState()

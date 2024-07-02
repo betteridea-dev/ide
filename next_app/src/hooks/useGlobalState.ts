@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { TSidebarOptions } from "@/components/sidebar/items";// available options = ["a","b","c"], create a type from this
-import { TViewOptions } from "@/components/views/items";
+import { TSidebarOptions } from "@/components/sidebar/components";// available options = ["a","b","c"], create a type from this
+import { TViewOptions } from "@/components/views/components";
 
 
 interface State {

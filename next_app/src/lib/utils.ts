@@ -3,6 +3,22 @@ import { twMerge } from "tailwind-merge";
 
 export const specialFileTabs = ["Settings", "AllProjects", "Packages"]
 
+export function pushToRecents(pname: string) {
+  const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];
+  if (!recents.includes(pname) && recents.length < 5) {
+    recents.push(pname);
+    localStorage.setItem("recents", JSON.stringify(recents));
+  } else if (!recents.includes(pname) && recents.length >= 5) {
+    recents.shift();
+    recents.push(pname);
+    localStorage.setItem("recents", JSON.stringify(recents));
+  } else if (recents.includes(pname)) {
+    recents.splice(recents.indexOf(pname), 1);
+    recents.push(pname);
+    localStorage.setItem("recents", JSON.stringify(recents));
+  }
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

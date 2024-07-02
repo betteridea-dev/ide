@@ -9,6 +9,8 @@ import { useEffect, useRef } from "react";
 import { useGlobalState } from "@/hooks";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import View from "./views";
+import Statusbar from "./statusbar";
+import Menubar from "./menubar";
 
 
 export default function Layout() {
@@ -29,7 +31,7 @@ export default function Layout() {
     // }, [globalState.activeSidebarItem, sidebarDrawerRef])
 
     return <div className="flex flex-col h-screen">
-        <div className="border-b h-[20px] text-sm flex">top menubar</div>
+        <Menubar/>
         <div className="flex h-full">
             <Sidebar drawerRef={sidebarDrawerRef} />
             <ResizablePanelGroup direction="horizontal">
@@ -42,6 +44,6 @@ export default function Layout() {
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>
-        <div className="border-t h-[20px] text-sm">bottom status</div>
+        <Statusbar/>
     </div>;
 }

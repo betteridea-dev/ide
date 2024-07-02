@@ -1,6 +1,6 @@
 import { Settings } from "lucide-react"
 import { Button } from "../ui/button"
-import sidebarItems, { TSidebarOptions } from "./items"
+import sidebarItems, { TSidebarOptions } from "./components"
 import { useGlobalState } from "@/hooks"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { MutableRefObject } from "react"

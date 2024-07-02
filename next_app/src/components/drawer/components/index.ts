@@ -1,4 +1,4 @@
-import { TSidebarOptions } from "@/components/sidebar/items";
+import { TSidebarOptions } from "@/components/sidebar/components";
 import FileList from "./file-list";
 import ProjectList from "./project-list";
 import PackageList from "./package-list";

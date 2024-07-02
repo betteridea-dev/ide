@@ -2,7 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { TView } from "."
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes"
-import { LoaderIcon, MoonIcon, SunIcon } from "lucide-react";
+import { ArrowLeft, LoaderIcon, MoonIcon, SunIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -101,6 +101,9 @@ function Settings() {
     }
 
     return <div className="p-10 max-w-4xl mx-auto">
+        <Button variant="link" className="mb-5 text-sm text-muted p-0" onClick={()=>globalState.setActiveView(null)}>
+            <ArrowLeft size={15} className=" inline-block mr-2" /> home
+        </Button>
         <Title title="CURRENT PROJECT" />
         {
             project ? <div className="my-8 grid grid-cols-3 items-center">
