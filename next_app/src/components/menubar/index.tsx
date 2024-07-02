@@ -49,6 +49,7 @@ export default function Menubar() {
                     </MenubarLabel>
                     <MenubarSeparator />
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
+                    <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project}>Rename</MenubarItem>
                     <MenubarItem disabled={!project}>Duplicate</MenubarItem>
