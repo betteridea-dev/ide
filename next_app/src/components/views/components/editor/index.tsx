@@ -11,6 +11,7 @@ import runIcon from "@/assets/icons/run.svg";
 import { toast } from "sonner";
 import { runLua } from "@/lib/ao-vars";
 import { sendGAEvent } from "@next/third-parties/google";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 function Editor() {
     const globalState = useGlobalState();
@@ -118,13 +119,25 @@ function Editor() {
         <ResizableHandle />
         <ResizablePanel defaultSize={20} minSize={5} collapsible>
             {/* BOTTOM BAR */}
-            <div className="h-[30px]">files</div>
-            <div className="h-[calc(100%-30px)] overflow-scroll ring-1">
-                {/* {switchFileType()} */}
-                {
-                    Array(10).fill(0).map((_, i) => <div key={i}>File {i}</div>)
-                }
+            <div className="h-[30px]">
+                <Tabs className="h-[30px]" defaultValue="terminal">
+                    <TabsList className="h-[30px] ring-1 rounded-none w-full justify-start overflow-clip bg-transparent">
+                        <TabsTrigger value="terminal" className="rounded-none">Terminal</TabsTrigger>
+                        <TabsTrigger value="inbox" className="rounded-none">Inbox</TabsTrigger>
+                        <TabsTrigger value="output" className="rounded-none">Output</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="terminal" className="ring-1 p-0 h-[calc(100%-30px)] overflow-scroll">
+                        {
+                            Array(10).fill(0).map((_, i) => <div key={i}>Terminal {i}</div>)
+                        }
+                    </TabsContent>
+                    <TabsContent value="inbox">inbox</TabsContent>
+                    <TabsContent value="output">output</TabsContent>
+                </Tabs>
             </div>
+            {/* <div className="h-[calc(100%-30px)] overflow-scroll ring-1">
+
+            </div> */}
         </ResizablePanel>
     </ResizablePanelGroup>
 }
