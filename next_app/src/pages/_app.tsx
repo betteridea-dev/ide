@@ -14,7 +14,7 @@ declare global {
     arweaveWallet: {
       connect: Function;
       disconnect: Function;
-      getActiveAddress: Function;
+      getActiveAddress:()=> Promise<string>;
       signDataItem: Function;
     };
   }

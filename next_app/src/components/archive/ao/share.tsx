@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Icons from "@/assets/icons";
-import { Icons as LucidIcons } from "@/components/icons"
+import Icons from "@/components/archive/icons/index";
+import { Icons as LucidIcons } from "@/components/archive/icons"
 import { useGlobalState } from "@/states";
 import {toast} from "sonner"
 import { useState } from "react";
-import { Combobox } from "../ui/combo-box";
+import { Combobox } from "../../ui/combo-box";
 import { useProjectManager } from "@/hooks";
 import { runLua, parseOutupt } from "@/lib/ao-vars";
 import { ReloadIcon } from "@radix-ui/react-icons"

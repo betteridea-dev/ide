@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useProjectManager } from "@/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Icons from "@/assets/icons";
+import Icons from "@/components/archive/icons/index";
 import Head from 'next/head';
 
 

@@ -31,7 +31,6 @@ export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?
   }
   tags = name ? [...tags, { name: "Name", value: name }] : tags;
 
-  console.log(window.arweaveWallet);
   const result = await ao.spawn({
     module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,

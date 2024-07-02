@@ -1,11 +1,11 @@
 import { useRouter } from "next/navigation";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
-import { Input } from "./ui/input";
-import { Separator } from "./ui/separator";
-import { Checkbox } from "./ui/checkbox";
-import { Label } from "./ui/label";
-import { ScrollArea } from "./ui/scroll-area";
+import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
+import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
 import { MoonIcon, ReloadIcon, SunIcon } from "@radix-ui/react-icons"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Combobox } from "./ui/combo-box";
+import { Combobox } from "../ui/combo-box";
 import { useEffect, useState } from "react";
 import { GraphQLClient, gql } from "graphql-request";
 import { AOModule, runLua, spawnProcess } from "@/lib/ao-vars";

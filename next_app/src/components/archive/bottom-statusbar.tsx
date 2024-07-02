@@ -1,8 +1,8 @@
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import {toast} from "sonner"
 import { useLocalStorage } from "usehooks-ts";
-import Icons from "@/assets/icons";
+import Icons from "@/components/archive/icons/index";
 import Image from "next/image";
 import { useProjectManager } from "@/hooks";
 import { useGlobalState } from "@/states";

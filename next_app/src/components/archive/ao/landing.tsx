@@ -1,6 +1,6 @@
 
 import { toast } from "sonner"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import Link from "next/link";

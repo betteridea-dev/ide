@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { runLua, spawnProcess, getResults, parseOutupt } from "@/lib/ao-vars";
 import Image from "next/image";
-import Icons from "@/assets/icons";
+import Icons from "@/components/archive/icons/index";
 import { Editor } from "@monaco-editor/react";
 import notebookTheme from "@/monaco-themes/notebook.json";
 import { editor } from "monaco-editor";

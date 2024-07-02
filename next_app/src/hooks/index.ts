@@ -1,3 +1,5 @@
 import useProjectManager from "./useProjectManager";
+import { useGlobalState } from "./useGlobalState";
+import { useWallet } from "./useWallet";
 
-export { useProjectManager };
+export { useProjectManager, useGlobalState, useWallet };

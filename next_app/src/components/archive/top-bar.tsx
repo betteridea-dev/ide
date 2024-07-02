@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import Icons from "@/assets/icons";
+import Icons from "@/components/archive/icons/index";
 import { SwitchCustom } from "@/components/ui/custom/switch";
 import { useRouter } from "next/navigation";
 import { useGlobalState } from "@/states";

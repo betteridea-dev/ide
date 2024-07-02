@@ -1,16 +1,15 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/icons";
+import { Icons } from "@/components/archive/icons";
 import { ProjectManager } from "@/hooks/useProjectManager";
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { useGlobalState } from "@/states";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { NewAOProjectDialog } from "@/components/ao/new-ao-project-dialog";
-import { NewWarpProjectDialog } from "@/components/warp/new-wrap-project-dialog";
-import { NewFileDialog } from "@/components/new-file-dialog";
+import { NewAOProjectDialog } from "@/components/archive/ao/new-ao-project-dialog";
+import { NewFileDialog } from "@/components/archive/new-file-dialog";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 export default function SideBar({ collapsed, setCollapsed, manager }: { collapsed: boolean; setCollapsed: Dispatch<SetStateAction<boolean>>; manager: ProjectManager }) {
     const globalState = useGlobalState();
@@ -58,7 +57,7 @@ export default function SideBar({ collapsed, setCollapsed, manager }: { collapse
     return (
         <div data-collapsed={collapsed} className="absolute py-2 flex flex-col gap-1 truncate justify-center left-0 z-50 transition-all duration-200 w-[50px] data-[collapsed=false]:w-[250px] border-r border-border/40 bg-[#ececef] h-[calc(100vh-50px)]"
             onMouseEnter={() => setCollapsed(false)} onMouseLeave={() => setCollapsed(true)}>
-            {globalState.activeMode == "AO" ? <NewAOProjectDialog collapsed={collapsed} manager={manager} setCollapsed={setCollapsed} /> : <NewWarpProjectDialog collapsed={collapsed} manager={manager} />}
+ <NewAOProjectDialog collapsed={collapsed} manager={manager} setCollapsed={setCollapsed} />
             {/* <div className="h-[1px] w-[90%] my-2 bg-border mx-auto"></div> */}
             <Button
                 data-active={globalState.activeFile == "AllProjects"}

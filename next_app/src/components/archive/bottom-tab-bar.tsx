@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Image from "next/image";
-import Icons from "@/assets/icons";
+import Icons from "@/components/archive/icons/index";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
 import Ansi from "ansi-to-react";

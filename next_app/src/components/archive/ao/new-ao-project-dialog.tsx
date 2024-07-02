@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Combobox } from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
-import { Icons } from "@/components/icons";
+import { Icons } from "@/components/archive/icons";
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { GetAOTemplates } from "@/templates";
 import { modules as AOModules } from "@/lib/ao-vars";

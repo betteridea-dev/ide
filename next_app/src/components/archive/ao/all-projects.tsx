@@ -1,7 +1,7 @@
 import { useProjectManager } from "@/hooks"
 import { useGlobalState } from "@/states"
 import { Icons } from "../icons"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 
 export default function AllProjects() {
     const manager = useProjectManager()

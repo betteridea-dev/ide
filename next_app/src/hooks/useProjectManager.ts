@@ -9,7 +9,7 @@ export type TFileContent = {
   cells: { [cellId: string]: { code: string; output: string | any, type: "CODE" | "LATEX" | "MARKDOWN", editing: boolean } };
 };
 
-type TLanguages = "javascript" | "markdown" | "lua" | "plaintext" | "json";
+type TLanguages = "markdown" | "lua" | "plaintext" | "json";
 
 type TProjectStorage = {
   [name: string]: Project;
@@ -17,8 +17,6 @@ type TProjectStorage = {
 
 function extensionToLanguage(extension: string) {
   switch (extension) {
-    case "js":
-      return "javascript";
     case "json":
       return "json";
     case "md":
@@ -54,12 +52,12 @@ export class ProjectManager {
     this.saveProjects(this.projects);
   }
 
-  newProject({ name, mode, defaultFiletype, ownerWallet, files }: { name: string; mode: "AO" | "WARP"; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string; files?: { [name: string]: PFile } }) {
+  newProject({ name, defaultFiletype, ownerWallet, files }: { name: string; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string; files?: { [name: string]: PFile } }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
     if (Object.keys(this.projects).includes(name)) return this.getProject(name);
 
-    const proj = new Project({ name, mode, defaultFiletype, ownerWallet });
+    const proj = new Project({ name, defaultFiletype, ownerWallet });
     if (files) {
       proj.files = files;
     }
@@ -100,15 +98,13 @@ export class ProjectManager {
 
 export class Project {
   readonly name: string;
-  readonly mode: "AO" | "WARP";
   files: { [name: string]: PFile };
   process: string;
   defaultFiletype: "NORMAL" | "NOTEBOOK";
   ownerWallet: string;
 
-  constructor({ name, mode, files, defaultFiletype, process, ownerWallet }: { name: string; mode: "AO" | "WARP"; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK"; process?: string, ownerWallet: string }) {
+  constructor({ name, files, defaultFiletype, process, ownerWallet }: { name: string; files?: { [name: string]: PFile }; defaultFiletype?: "NORMAL" | "NOTEBOOK"; process?: string, ownerWallet: string }) {
     this.name = name;
-    this.mode = mode;
     this.files = files || {};
     this.defaultFiletype = defaultFiletype || "NORMAL";
     this.process = process;
@@ -116,8 +112,7 @@ export class Project {
   }
 
   _setProcess(process: string) {
-    if (this.mode == "AO") this.process = process;
-    else throw new Error("Cannot set process on WARP project");
+    this.process = process;
   }
 
   getFile(name: string) {

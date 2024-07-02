@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useGlobalState } from "@/states";
-import { Icons } from "@/components/icons";
+import { Icons } from "@/components/archive/icons";
 
 export default function FileBar() {
   const globalState = useGlobalState();

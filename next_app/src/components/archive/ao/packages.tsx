@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useGlobalState } from "@/states";
 import { useProjectManager } from "@/hooks";
 import { toast } from "sonner";
-import { Icons as LucidIcons } from "@/components/icons"
+import { Icons as LucidIcons } from "@/components/archive/icons"
 import Link from "next/link";
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { APM_ID, runLua } from "@/lib/ao-vars";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import Markdown from "react-markdown";
 import { createLoaderFunc } from "@/lib/utils";
