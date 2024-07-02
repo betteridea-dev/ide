@@ -5,19 +5,22 @@ import { Button } from "@/components/ui/button";
 import SingleFileEditor from "./components/single-file-editor";
 import NotebookEditor from "./components/notebook-editor";
 import { LoaderIcon, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import runIcon from "@/assets/icons/run.svg";
 import { toast } from "sonner";
 import { runLua } from "@/lib/ao-vars";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import AOTerminal from "./components/terminal";
 
 function Editor() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
     const wallet = useWallet();
     const [running, setRunning] = useState(false);
+    const [prompt, setPrompt] = useState("aos>");
+    const [commandOutputs, setCommandOutputs] = useState([]);
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject];
     const files = project && Object.keys(project.files);
@@ -92,6 +95,10 @@ function Editor() {
         sendGAEvent({ event: 'run_code', value: 'file' })
     }
 
+    useEffect(() => {
+        setCommandOutputs([]);
+    },[])
+
     return <ResizablePanelGroup direction="vertical">
         <ResizablePanel collapsible defaultSize={50} minSize={10} className="">
             {/* FILE BAR */}
@@ -119,20 +126,22 @@ function Editor() {
         <ResizableHandle />
         <ResizablePanel defaultSize={20} minSize={5} collapsible>
             {/* BOTTOM BAR */}
-            <div className="h-[30px]">
-                <Tabs className="h-[30px]" defaultValue="terminal">
-                    <TabsList className="h-[30px] ring-1 rounded-none w-full justify-start overflow-clip bg-transparent">
-                        <TabsTrigger value="terminal" className="rounded-none">Terminal</TabsTrigger>
-                        <TabsTrigger value="inbox" className="rounded-none">Inbox</TabsTrigger>
-                        <TabsTrigger value="output" className="rounded-none">Output</TabsTrigger>
+            <div className="h-full">
+                <Tabs className="h-full" defaultValue="output">
+                    <TabsList className="h-[29px] border-b rounded-none w-full justify-start overflow-clip bg-transparent px-0">
+                        <TabsTrigger value="terminal" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Terminal</TabsTrigger>
+                        <TabsTrigger value="inbox" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Inbox</TabsTrigger>
+                        <TabsTrigger value="output" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Output</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="terminal" className="ring-1 p-0 h-[calc(100%-30px)] overflow-scroll">
-                        {
-                            Array(10).fill(0).map((_, i) => <div key={i}>Terminal {i}</div>)
-                        }
+                    <TabsContent value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                        <AOTerminal prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
                     </TabsContent>
-                    <TabsContent value="inbox">inbox</TabsContent>
-                    <TabsContent value="output">output</TabsContent>
+                    <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                        inbox
+                    </TabsContent>
+                    <TabsContent value="output" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                        output
+                    </TabsContent>
                 </Tabs>
             </div>
             {/* <div className="h-[calc(100%-30px)] overflow-scroll ring-1">
