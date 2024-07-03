@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useProjectManager } from "@/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Icons from "@/components/archive/icons/index";
 import Head from 'next/head';
+import { LoaderIcon } from "lucide-react";
 
 
 export default function Import() {
@@ -36,7 +36,7 @@ export default function Import() {
                 if (!window.arweaveWallet)
                     owner = ""
                 else
-                    owner = window.arweaveWallet.getActiveAddress()
+                    owner = await window.arweaveWallet.getActiveAddress()
             }
             catch (e) {
                 await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"])
@@ -63,7 +63,8 @@ export default function Import() {
         </Head>
 
         <div className="w-screen h-screen flex flex-col gap-1 items-center justify-center">
-        <Image src={Icons.loadingSVG} alt="loading" width={50} height={50} className="animate-spin z-10" />
+        {/* <Image src={Icons.loadingSVG} alt="loading" width={50} height={50} className="animate-spin z-10" /> */}
+        <LoaderIcon size={50} className="animate-spin z-10" />
         <div>Loading Project</div>
         {/* <div className="text-sm text-btr-grey-1">You might need to connect your wallet</div> */}
 

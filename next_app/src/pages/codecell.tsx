@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { runLua, spawnProcess, getResults, parseOutupt } from "@/lib/ao-vars";
 import Image from "next/image";
-import Icons from "@/components/archive/icons/index";
 import { Editor } from "@monaco-editor/react";
 import notebookTheme from "@/monaco-themes/notebook.json";
 import { editor } from "monaco-editor";
@@ -15,6 +14,8 @@ import { useTheme } from "next-themes";
 import crypto from "crypto";
 import Link from "next/link";
 import Arweave from "arweave";
+import { LoaderIcon } from "lucide-react";
+import runIcon from "@/assets/icons/run.svg"
 
 var codeproxy = "";
 export default function CodeCell() {
@@ -372,7 +373,10 @@ export default function CodeCell() {
                 <>
                     <div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
                         <Button suppressHydrationWarning variant="ghost" className="p-5 block h-full rounded-l rounded-b-none rounded-r-none" onClick={runCellCode}>
-                            <Image suppressHydrationWarning src={running ? Icons.loadingSVG : Icons.runSVG} alt="Run" data-running={running} width={30} height={30} className="data-[running=true]:animate-spin bg-foreground/10  rounded-full p-1.5 block min-w-[30px]" />
+                            {/* <Image suppressHydrationWarning src={running ? Icons.loadingSVG : Icons.runSVG} alt="Run" data-running={running} width={30} height={30} className="data-[running=true]:animate-spin bg-foreground/10  rounded-full p-1.5 block min-w-[30px]" /> */}
+                            {
+                                running ? <LoaderIcon size={20} className="p-1 w-7 h-7 animate-spin text-primary bg-foreground/5 rounded-full" /> : <Image suppressHydrationWarning src={runIcon} alt="Run" width={25} height={25} className="p-1.5 w-7 h-7 rounded-full bg-foreground/5" />
+                            }
                         </Button>
                         <Editor
                             onMount={(editor, monaco) => {

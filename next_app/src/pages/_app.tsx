@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { useEffect, useState } from "react";
 // import { GoogleAnalytics } from "nextjs-google-analytics";
 
 declare global {
