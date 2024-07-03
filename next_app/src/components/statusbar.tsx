@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 import { Button } from "./ui/button";
 import { Unplug } from "lucide-react"
+import { getResults } from "@/lib/ao-vars";
+import { stripAnsiCodes } from "@/lib/utils";
 
 export default function Statusbar() {
     const wallet = useWallet();
@@ -49,6 +51,28 @@ export default function Statusbar() {
             disconnectWallet();
         }
     }, [autoconnect, mounted]);
+
+    // INCOMING MESSAGS NOTIFICATION
+    useEffect(() => {
+        if (!project) return
+        if (!project.process) return
+        
+        const resultsInterval = setInterval(async () => {
+            const res = await getResults(project.process, localStorage.getItem("cursor")||"")
+            if (res.cursor) localStorage.setItem("cursor", res.cursor)
+                const { results } = res
+            if (results.length > 0) {
+                results.forEach((result) => {
+                    if (result.Output.print) {
+                        console.log(res)
+                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data)}</div>, {style:{borderRadius:"7px"}})
+                    }
+                    })
+            }
+        },2000)
+
+        return () => { clearInterval(resultsInterval) }
+    },[project])
 
     return <div className="border-t h-[20px] text-xs flex items-center overflow-clip gap-0.5 px-2">
         <Button variant="ghost" data-connected={wallet.isConnected} className="p-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary text-xs"

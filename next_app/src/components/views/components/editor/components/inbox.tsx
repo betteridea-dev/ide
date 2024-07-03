@@ -49,7 +49,7 @@ export default function Inbox() {
             <div className="flex flex-col p-2 border-b border-border/60 w-full items-start justify-start">
             <div className="text-sm text-muted">{new Date(item.Timestamp).toString()} {hasAction && <span className="text-md text-foreground">[{item.Action}]</span>}</div>
             {hasSender ? <div className="text-xs text-muted">from: {item.From}</div> : <div className="text-xs text-muted">unknown sender</div>}
-            {hasData ? <div className="text-md">{item.Data}</div>:<div className="text-sm text-muted">no data</div>}
+            {hasData ? <div className="text-md text-left truncate w-full">{item.Data}</div>:<div className="text-sm text-muted">no data</div>}
                 </div>
             </AlertDialogTrigger>
             <AlertDialogContent className="md:min-w-[50vw]">
