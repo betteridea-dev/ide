@@ -1,23 +1,27 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import {
-    Menubar as MenubarComponent,
-    MenubarContent,
-    MenubarItem,
-    MenubarLabel,
-    MenubarMenu,
-    MenubarSeparator,
-    MenubarShortcut,
-    MenubarSub,
-    MenubarSubContent,
-    MenubarSubTrigger,
-    MenubarTrigger,
-} from "@/components/ui/menubar"
+import { Menubar as MenubarComponent, MenubarContent, MenubarItem, MenubarLabel, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger, } from "@/components/ui/menubar"
 import { useGlobalState, useProjectManager } from "@/hooks"
 import NewProject from "./components/new-project"
 import NewFile from "./components/new-file"
 import AllProjectsBtn from "./components/all-projects"
+import Share from "./components/share"
+import Blueprints from "./components/blueprint"
+import Download from "./components/download"
+import DeleteProject from "./components/delete-project"
 
+const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
+const blueprints = [
+    "apm.lua",
+    "arena.lua",
+    "arns.lua",
+    "chat.lua",
+    "chatroom.lua",
+    "credUtils.lua",
+    "staking.lua",
+    "token.lua",
+    "voting.lua"
+]
 
 export default function Menubar() {
     const globalState = useGlobalState()
@@ -53,20 +57,11 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem disabled={!project}>Rename</MenubarItem>
                     <MenubarItem disabled={!project}>Duplicate</MenubarItem>
-                    <MenubarItem disabled={!project}>Share</MenubarItem>
-                    <MenubarItem disabled={!project}>Download zip</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("share")?.click()}>Share</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("blueprints")?.click()}>Load Blueprint</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("download")?.click()}>Download zip</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarSub>
-                        <MenubarSubTrigger disabled={!project}>Load blueprint</MenubarSubTrigger>
-                        <MenubarSubContent>
-                            <MenubarItem>a</MenubarItem>
-                            <MenubarItem>b</MenubarItem>
-                            <MenubarItem>c</MenubarItem>
-                            <MenubarItem>d</MenubarItem>
-                        </MenubarSubContent>
-                    </MenubarSub>
-                    <MenubarSeparator />
-                    <MenubarItem disabled={!project} onClick={() => { }} className="!text-destructive-foreground hover:!bg-destructive">Delete Project</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("delete")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete Project</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => globalState.closeProject()}>Close Project</MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
@@ -88,9 +83,17 @@ export default function Menubar() {
                 </MenubarContent>
             </MenubarMenu>
         </MenubarComponent>
+        
         <div className="grow" />
-        <NewProject />
-        <NewFile />
+
         <AllProjectsBtn />
+        <NewProject />
+        <DeleteProject />
+        
+        <Share />
+        <Blueprints />
+        <Download />
+        
+        <NewFile />
     </div>
 }
