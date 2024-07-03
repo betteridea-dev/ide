@@ -4,11 +4,13 @@ import { TViewOptions } from "@/components/views/components";
 
 
 interface State {
-    activeSidebarItem: TSidebarOptions; 
+    activeSidebarItem: TSidebarOptions;
     activeView: TViewOptions;
     activeProject: null | string;
     activeFile: null | string;
     openedFiles: string[];
+    lastOutput: string;
+    setLastOutput: (output: string) => void;
     setActiveSidebarItem: (item: TSidebarOptions) => void;
     setActiveView: (view: TViewOptions) => void;
     setActiveProject: (project: string) => void;
@@ -26,30 +28,33 @@ export const useGlobalState = create<State>((set) => ({
     activeView: null,
     activeFile: null,
     openedFiles: [],
+    lastOutput: "",
+    setLastOutput: (output: string) => set({ lastOutput: output }),
     setActiveSidebarItem: (item: TSidebarOptions) => set({ activeSidebarItem: item }),
     setActiveView: (view: TViewOptions) => set({ activeView: view }),
     setActiveProject: (project: string) => set({
         activeProject: project,
         activeFile: null,
-        openedFiles: []
+        openedFiles: [],
+        lastOutput: ""
     }),
-    setActiveFile: (file: string) => set((state)=>({
+    setActiveFile: (file: string) => set((state) => ({
         activeFile: file,
         openedFiles: state.openedFiles.includes(file) ? [...state.openedFiles] : [...state.openedFiles, file]
     })),
 
     addOpenedFile: (file: string) => set((state) => ({
-        openedFiles: state.openedFiles.includes(file)?[...state.openedFiles]: [...state.openedFiles, file]
+        openedFiles: state.openedFiles.includes(file) ? [...state.openedFiles] : [...state.openedFiles, file]
     })),
     closeOpenedFile: (file: string) => set((state) => ({
         openedFiles: state.openedFiles.filter((f) => f !== file),
         // set active file to the file to the left of the closed file or if it was the last file, set it to the file to the right
         activeFile: state.openedFiles.length > 0 ?
-            state.activeFile == file ?    
+            state.activeFile == file ?
                 state.openedFiles[state.openedFiles.indexOf(file) - 1] || state.openedFiles[state.openedFiles.indexOf(file) + 1]
                 : state.activeFile
-            : null 
+            : null
     })),
 
-    closeProject: () => set({ activeProject: null, activeFile: null, openedFiles: [] }),
+    closeProject: () => set({ activeProject: null, activeFile: null, openedFiles: [], lastOutput: "" }),
 }));

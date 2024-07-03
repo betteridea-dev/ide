@@ -21,7 +21,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
     const globalState = useGlobalState()
     const projectManager = useProjectManager()
     const [running, setRunning] = useState(false)
-    // const [prompt, setPrompt] = useState("aos> ")
+    const project = projectManager.getProject(globalState.activeProject)
     const { theme } = useTheme()
     const [term, setTerm] = useState(new Terminal({
         cursorBlink: true,
@@ -39,23 +39,23 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         },
         allowTransparency: false,
         cols: 100,
-        rows: 10,
+        rows: 50,
         lineHeight: 1,
     }))
     const [rl, setRl] = useState(new Readline())
 
     const maxRows = 50;
-    const maxCols = 150;
+    const maxCols = 100;
+    const maxHistory = 100;
 
     useEffect(() => {
-        console.log(loaded)
         if (!loaded) return;
         term.focus()
         term.clear()
         rl.println("\r\x1b[K");
         commandOutputs.forEach((line) => {
             rl.println(line);
-            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+            term.resize(maxCols, term.buffer.normal.length >= maxRows ? maxRows : term.buffer.normal.length)
         })
         rl.print(prompt)
     }, [loaded, globalState.activeProject])
@@ -134,12 +134,16 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
 
         term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         if (text.trim().length == 0) {
-            setCommandOutputs(p => [...p, ">"]);
+            setCommandOutputs(p => {
+                if(p.length>=maxHistory) p.shift()
+                return [...p, ">"]
+            });
             return readLine(promptBuf);
         }
 
         if (text == "clear") {
             setCommandOutputs([]);
+            term.resize(maxCols, 10)
             return readLine(promptBuf);
 
         }
@@ -153,7 +157,10 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         if (result.Error) {
             console.log(result.Error);
 
-            setCommandOutputs(p => [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]);
+            setCommandOutputs(p => {
+                if (p.length >= maxHistory) p.shift()
+                return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
+            });
             // rl.println(result.Error);
         }
         if (result.Output) {
@@ -163,7 +170,10 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             if (result.Output.data.json != "undefined") {
                 console.log("json", result.Output.data.json);
                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);
-                setCommandOutputs(p => [...p, `> ${text}`, outputStr]);
+                setCommandOutputs(p => {
+                    if (p.length >= maxHistory) p.shift()
+                    return [...p, `> ${text}`, outputStr]
+                });
                 // outputStr.split("\n").forEach((line) => {
                 // rl.println(line);
                 // history.push(line);
@@ -172,7 +182,10 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 // rl.println(JSON.stringify(result.Output.data.json, null, 2));
             } else {
                 console.log("normal", result.Output.data.output);
-                setCommandOutputs(p => [...p, `> ${text}`, result.Output.data.output]);
+                setCommandOutputs(p => {
+                    if (p.length >= maxHistory) p.shift()
+                    return [...p, `> ${text}`, result.Output.data.output]
+                });
                 // rl.println(result.Output.data.output);
                 // console.log("normal out")
                 // const outputStr = `${result.Output.data.output}`;
@@ -192,7 +205,6 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
     if (!globalState.activeProject) {
         return <div className="w-full h-full flex items-center justify-center text-lg font-btr-code">No active project</div>
     }
-    const project = projectManager.getProject(globalState.activeProject)
 
-    return <div id="ao-terminal" className="h-[200px] w-full bg-transparent p-1 view-line font-btr-code"></div>
+    return <div id="ao-terminal" className="h-full w-full bg-transparent p-1 view-line font-btr-code"></div>
 }

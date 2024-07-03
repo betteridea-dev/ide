@@ -13,6 +13,8 @@ import { runLua } from "@/lib/ao-vars";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AOTerminal from "./components/terminal";
+import Inbox from "./components/inbox";
+import Output from "./components/output";
 
 function Editor() {
     const globalState = useGlobalState();
@@ -79,15 +81,18 @@ function Editor() {
         console.log(result);
         if (result.Error) {
             console.log(result.Error);
+            globalState.setLastOutput("\x1b[1;31m"+result.Error as string);
             fileContent.cells[0].output = result.Error;
         } else {
             const outputData = result.Output.data;
             if (outputData.output) {
                 console.log(outputData.output);
                 fileContent.cells[0].output = outputData.output;
+                globalState.setLastOutput(outputData.output);
             } else if (outputData.json) {
                 console.log(outputData.json);
                 fileContent.cells[0].output = JSON.stringify(outputData.json, null, 2);
+                globalState.setLastOutput(JSON.stringify(outputData.json, null, 2));
             }
         }
         manager.updateFile(p, { file, content: fileContent });
@@ -97,7 +102,7 @@ function Editor() {
 
     useEffect(() => {
         setCommandOutputs([]);
-    },[])
+    }, [])
 
     return <ResizablePanelGroup direction="vertical">
         <ResizablePanel collapsible defaultSize={50} minSize={10} className="">
@@ -109,11 +114,11 @@ function Editor() {
                     }
                 </div>
                 {
-                    globalState.activeFile&& globalState.activeFile.endsWith(".lua") && <div className="bg-background static right-0 top-0 h-[39px] border-l flex items-center justify-center ml-auto">
+                    globalState.activeFile && globalState.activeFile.endsWith(".lua") && <div className="bg-background static right-0 top-0 h-[39px] border-l flex items-center justify-center ml-auto">
                         <Button variant="ghost" className="rounded-none h-[39px] w-[39px] p-0 bg-primary/20" onClick={runLuaFile}>
                             {running ?
                                 <LoaderIcon size={20} className="p-0 animate-spin text-primary" />
-                            : <Image src={runIcon} alt="Run" width={20} height={20} className="p-0" />}
+                                : <Image src={runIcon} alt="Run" width={20} height={20} className="p-0" />}
                         </Button>
                     </div>
                 }
@@ -127,7 +132,7 @@ function Editor() {
         <ResizablePanel defaultSize={20} minSize={5} collapsible>
             {/* BOTTOM BAR */}
             <div className="h-full">
-                <Tabs className="h-full" defaultValue="output">
+                <Tabs className="h-full relative" defaultValue="output">
                     <TabsList className="h-[29px] border-b rounded-none w-full justify-start overflow-clip bg-transparent px-0">
                         <TabsTrigger value="terminal" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Terminal</TabsTrigger>
                         <TabsTrigger value="inbox" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Inbox</TabsTrigger>
@@ -137,10 +142,10 @@ function Editor() {
                         <AOTerminal prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
                     </TabsContent>
                     <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0">
-                        inbox
+                        <Inbox />
                     </TabsContent>
                     <TabsContent value="output" className="h-[calc(100%-30px)] overflow-scroll m-0">
-                        output
+                        <Output />
                     </TabsContent>
                 </Tabs>
             </div>

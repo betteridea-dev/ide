@@ -13,6 +13,8 @@ const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
     scrollBeyondLastLine: false,
 }
 
+// THE CODE RUNNER BUTTON IS INSIDE FILE BAR
+
 export default function SingleFileEditor() {
     const manager = useProjectManager();
     const globalState = useGlobalState();

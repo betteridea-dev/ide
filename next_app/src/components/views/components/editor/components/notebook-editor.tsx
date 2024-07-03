@@ -178,6 +178,7 @@ const CodeCell = ({
             console.log(result.Error || result.error);
             // @ts-ignore
             fileContent.cells[cellId].output = result.Error || result.error;
+            globalState.setLastOutput("\x1b[1;31m"+result.Error);
             // @ts-ignore
             // toast({ title: "Error", description: result.Error || result.error })
             toast.error(result.Error || result.error)
@@ -188,11 +189,13 @@ const CodeCell = ({
                 try {
                     const parsedData = JSON.parse(outputData.output);
                     fileContent.cells[cellId].output = parsedData;
+                    globalState.setLastOutput(outputData.output);
                     console.log(fileContent.cells[cellId].output)
                     setShowGfx(parsedData.__render_gfx);
                 }
                 catch {
                     fileContent.cells[cellId].output = outputData.output;
+                    globalState.setLastOutput(outputData.output);
                     setShowGfx(false);
                 }
             } else if (outputData.json) {
@@ -202,6 +205,7 @@ const CodeCell = ({
                     null,
                     2
                 );
+                globalState.setLastOutput(JSON.stringify(outputData.json, null, 2));
             }
         }
         manager.updateFile(project, { file, content: fileContent });
