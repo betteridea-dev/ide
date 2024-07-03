@@ -2,35 +2,32 @@ import { AlertDialog, AlertDialogTitle, AlertDialogTrigger, AlertDialogContent, 
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { useLocalStorage } from "usehooks-ts";
 
-export default function DeleteProject() {
+export default function DeleteFile() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const [recents, setRecents] = useLocalStorage<string[]>("recents", [], { initializeWithValue: true })
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
+    const file = globalState.activeFile && project.getFile(globalState.activeFile)
 
-    function deleteProject() {
-        if (project) {
-            const pname = project.name
-            globalState.setActiveProject(null)
-            globalState.setActiveFile(null)
-            globalState.setActiveView(null)
-            manager.deleteProject(pname)
-            setRecents(recents.filter((p) => p != pname))
+    function deleteFile() {
+        if (project && file) {
+            const fname = file.name
+            globalState.closeOpenedFile(fname)
+            manager.deleteFile(project, fname)
         }
     }
 
     return <AlertDialog>
-        <AlertDialogTrigger className="invisible" id="delete-project">delete project</AlertDialogTrigger>
+        <AlertDialogTrigger className="invisible" id="delete-file">delete file</AlertDialogTrigger>
         <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>You are about to delete this project</AlertDialogTitle>
+                <AlertDialogTitle>You are about to delete this this</AlertDialogTitle>
                 <AlertDialogDescription>This action is not reversible</AlertDialogDescription>
-                <AlertDialogDescription>This will delete: {project?.name}</AlertDialogDescription>
+                <AlertDialogDescription>This will delete: {file?.name}</AlertDialogDescription>
 
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={deleteProject}>Continue</AlertDialogAction>
+                <AlertDialogAction onClick={deleteFile}>Continue</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>

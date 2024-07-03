@@ -9,6 +9,8 @@ import Share from "./components/share"
 import Blueprints from "./components/blueprint"
 import Download from "./components/download"
 import DeleteProject from "./components/delete-project"
+import DeleteFile from "./components/delete-file"
+import DownloadFile from "./components/download-file"
 
 const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
 const blueprints = [
@@ -61,7 +63,7 @@ export default function Menubar() {
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("blueprints")?.click()}>Load Blueprint</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("download")?.click()}>Download zip</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project} onClick={() => document.getElementById("delete")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete Project</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("delete-project")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete Project</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => globalState.closeProject()}>Close Project</MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
@@ -76,9 +78,9 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem disabled={!project || !globalState.activeFile}>Rename</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile}>Duplicate</MenubarItem>
-                    <MenubarItem disabled={!project || !globalState.activeFile}>Download File</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("download-file")?.click()}>Download File</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => { }} className="!text-destructive-foreground hover:!bg-destructive">Delete File</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("delete-file")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete File</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => globalState.closeOpenedFile(globalState.activeFile)}>Close File</MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
@@ -95,5 +97,7 @@ export default function Menubar() {
         <Download />
         
         <NewFile />
+        <DeleteFile />
+        <DownloadFile/>
     </div>
 }
