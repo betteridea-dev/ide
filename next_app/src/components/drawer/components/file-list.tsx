@@ -11,7 +11,7 @@ function FileList() {
         return <div className="flex flex-col">
             <h1 className="text-center my-3">Files</h1>
             {
-                Object.keys(project.files).map((fname, i) => <Button key={i} variant="ghost"
+                Object.keys(project.files).toSorted().map((fname, i) => <Button key={i} variant="ghost"
                     data-active={globalState.activeFile == fname}
                     className="w-full mx-auto justify-start truncate rounded-none data-[active=true]:bg-foreground/20"
                     onClick={() => {

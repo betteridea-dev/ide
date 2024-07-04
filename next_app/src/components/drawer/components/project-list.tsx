@@ -12,7 +12,7 @@ function ProjectList() {
         <h1 className="text-center my-3">Your Projects</h1>
         <div className="grid grid-cols-1 overflow-scroll">
             {
-                Object.keys(projects).map((pname, i) => (
+                Object.keys(projects).toSorted().map((pname, i) => (
                     <Button variant="ghost" key={i} data-active={globalState.activeProject == pname}
                         className="rounded-none w-full mx-auto justify-start truncate data-[active=true]:bg-foreground/20"
                         onClick={() => {
