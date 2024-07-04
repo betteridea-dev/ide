@@ -53,7 +53,7 @@ export default function Menubar() {
         <MenubarComponent className="border-none m-0 p-0">
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">Project</MenubarTrigger>
-                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none">
+                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
                     <MenubarLabel className="text-muted-foreground">
                         {project ? "Project: " + project.name : "No Project Selected"}
                     </MenubarLabel>
@@ -73,7 +73,7 @@ export default function Menubar() {
             </MenubarMenu>
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">File</MenubarTrigger>
-                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none">
+                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
                     <MenubarLabel className="text-muted-foreground">
                         {globalState.activeFile || "No File Selected"}
                     </MenubarLabel>
