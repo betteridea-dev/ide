@@ -13,6 +13,8 @@ import DeleteFile from "./components/delete-file"
 import DownloadFile from "./components/download-file"
 import RenameFile from "./components/rename-file"
 import RenameProject from "./components/rename-project"
+import DuplicateProject from "./components/duplicate-project"
+import DuplicateFile from "./components/duplicate-file"
 
 const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
 const blueprints = [
@@ -60,7 +62,7 @@ export default function Menubar() {
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={()=>document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
-                    <MenubarItem disabled={!project}>Duplicate</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={()=>document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("share")?.click()}>Share</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("blueprints")?.click()}>Load Blueprint</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("download")?.click()}>Download zip</MenubarItem>
@@ -79,7 +81,7 @@ export default function Menubar() {
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("new-file")?.click()}>New File</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("rename-file")?.click()}>Rename</MenubarItem>
-                    <MenubarItem disabled={!project || !globalState.activeFile}>Duplicate</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("duplicate-file")?.click()}>Duplicate</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("download-file")?.click()}>Download File</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("delete-file")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete File</MenubarItem>
@@ -93,7 +95,8 @@ export default function Menubar() {
         <AllProjectsBtn />
 
         <NewProject />
-        <RenameProject/>
+        <RenameProject />
+        <DuplicateProject/>
         <DeleteProject />
         
         <Share />
@@ -104,5 +107,6 @@ export default function Menubar() {
         <RenameFile/>
         <DeleteFile />
         <DownloadFile />
+        <DuplicateFile/>
     </div>
 }

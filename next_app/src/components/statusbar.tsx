@@ -72,7 +72,15 @@ export default function Statusbar() {
         },2000)
 
         return () => { clearInterval(resultsInterval) }
-    },[project])
+    }, [project])
+    
+    // NOTIFICATION FOR WHEN THE CURRENT PROJECT OWNER WALLET AND CONNECTED WALLET ARE DIFFERENT
+    useEffect(() => {
+        if (!project || !wallet.isConnected) return
+        if (project.ownerWallet != wallet.address) {
+            toast.warning(`The active project uses a process owned by a different wallet address.\nPlease switch to ${wallet.shortAddress} to use this process`,{id:"wallet-mismatch"});
+        }
+    }, [project, wallet.address])
 
     return <div className="border-t h-[20px] text-xs flex items-center overflow-clip gap-0.5 px-2">
         <Button variant="ghost" data-connected={wallet.isConnected} className="p-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary text-xs"
