@@ -8,7 +8,7 @@ export default function DeleteFile() {
     const manager = useProjectManager()
     
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
-    const file = globalState.activeFile && project.getFile(globalState.activeFile)
+    const file = globalState.activeFile && globalState.activeProject && project?.getFile(globalState.activeFile)
     
     function deleteFile() {
         if (project && file) {

@@ -45,7 +45,8 @@ function PackageList() {
     useEffect(() => {
         if (activePackage) {
             globalState.addOpenedPackage(activePackage);
-            globalState.setActiveFile(`PKG: ${activePackage.Vendor!="@apm"?`${activePackage.Vendor}/`:""}${activePackage.Name}`);
+            globalState.setActiveView("EDITOR");
+            globalState.setActiveFile(`PKG: ${activePackage.Vendor}/${activePackage.Name}`);
         }
     },[activePackage])
 
