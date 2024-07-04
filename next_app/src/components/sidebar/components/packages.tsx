@@ -1,8 +1,8 @@
 import { TSidebarItem } from ".";
-import { Package } from "lucide-react"
+import { Blocks } from "lucide-react"
 
 const item:TSidebarItem = {
-    icon: Package,
+    icon: Blocks,
     label: "Packages",
     value: "PACKAGES"
 }

@@ -35,21 +35,12 @@ export default function Menubar() {
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
 
+    function logoClicked() {
+        
+    }
 
     return <div className="border-b h-[30px] text-xs flex items-center overflow-clip">
-        <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-0.5 w-12 h-[30px] cursor-pointer" />
-        {/* <Button variant="ghost" className="text-xs p-2">
-            Options
-        </Button>
-        <Button variant="ghost" className="text-xs p-2">
-            Download
-        </Button>
-        <Button variant="ghost" className="text-xs p-2">
-            Share
-        </Button>
-        <Button variant="ghost" className="text-xs p-2">
-            Load Blueprint
-        </Button> */}
+        <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 w-12 h-[30px] cursor-pointer" onClick={logoClicked} />
         <MenubarComponent className="border-none m-0 p-0">
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">Project</MenubarTrigger>

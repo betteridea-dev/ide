@@ -34,7 +34,7 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
                     <Button variant="ghost" data-active={globalState.activeSidebarItem == Item.value}
                         className="rounded-none h-12 w-12 flex items-center justify-center p-0 data-[active=true]:bg-primary"
                         onClick={sidebarButtonClicked(Item.value)}
-                        ><Item.icon data-active={globalState.activeSidebarItem == Item.value}
+                        ><Item.icon strokeWidth={1.5} data-active={globalState.activeSidebarItem == Item.value}
                                 className="data-[active=true]:text-white"
                             />
                         </Button>
@@ -52,7 +52,7 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
             <Tooltip>
                 <TooltipTrigger>
                     <Button variant="ghost" className="rounded-none" onClick={sidebarButtonClicked("SETTINGS")}>
-                        <Settings />
+                        <Settings strokeWidth={1.5} />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={-1}>Settings</TooltipContent>

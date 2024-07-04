@@ -1,9 +1,9 @@
 import { TSidebarItem } from ".";
-import { BookCopy } from "lucide-react"
+import { FolderIcon } from "lucide-react"
 
 const item:TSidebarItem = {
-    icon: BookCopy,
-    label: "All Projects",
+    icon: FolderIcon,
+    label: "Projects",
     value: "ALL_PROJECTS"
 }
 

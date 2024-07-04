@@ -1,9 +1,9 @@
 import { TSidebarItem } from ".";
-import { FileCode } from "lucide-react"
+import { Files } from "lucide-react"
 import { useGlobalState } from "@/hooks";
 
 const item:TSidebarItem = {
-    icon: FileCode,
+    icon: Files,
     label: "Files",
     value: "FILES"
 }
