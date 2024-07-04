@@ -41,14 +41,14 @@ function PackageList() {
             fetchPopular();
         }
     }, [open])
-
-    useEffect(() => {
-        if (activePackage) {
-            globalState.addOpenedPackage(activePackage);
-            globalState.setActiveView("EDITOR");
-            globalState.setActiveFile(`PKG: ${activePackage.Vendor}/${activePackage.Name}`);
-        }
-    },[activePackage])
+    
+    function viewPackage(pkg: TPackage) {
+        if (!pkg) return
+        setActivePackage(pkg);
+        globalState.addOpenedPackage(pkg);
+        globalState.setActiveView("EDITOR");
+        globalState.setActiveFile(`PKG: ${pkg.Vendor}/${pkg.Name}`);
+    }
 
 
 
@@ -56,8 +56,9 @@ function PackageList() {
         <h1 className="text-center my-3">Browse Packages</h1>
         <div className="grid grid-cols-1 overflow-scroll py-0.5">
             {
-                loading ? <><LoaderIcon className=" animate-spin mx-auto" /></> : packages.map((pkg: TPackage, _: number) => {
-                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 px-2 border-b first:border-t  border-border/30 cursor-pointer data-[active=true]:bg-foreground/5" onClick={() => setActivePackage(pkg)}>
+                loading ? <><LoaderIcon className=" animate-spin mx-auto" /></> :
+                    packages.map((pkg: TPackage, _: number) => {
+                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 px-2 border-b first:border-t  border-border/30 cursor-pointer data-[active=true]:bg-foreground/5" onClick={()=>viewPackage(pkg)}>
                         <div>{ pkg.Vendor!="@apm"&&`${pkg.Vendor}/`}{pkg.Name}</div>
                         <div className="truncate">{pkg.Description}</div>
                         <div className="text-xs text-right">{pkg.Installs} installs</div>
