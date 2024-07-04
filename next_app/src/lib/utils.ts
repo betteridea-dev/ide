@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export const specialFileTabs = ["Settings", "AllProjects", "Packages"]
+export const supportedExtensions = ["lua", "luanb", "md"];
 
 export function pushToRecents(pname: string) {
   const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];

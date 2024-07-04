@@ -11,6 +11,7 @@ import Download from "./components/download"
 import DeleteProject from "./components/delete-project"
 import DeleteFile from "./components/delete-file"
 import DownloadFile from "./components/download-file"
+import RenameFile from "./components/rename-file"
 
 const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
 const blueprints = [
@@ -76,7 +77,7 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("new-file")?.click()}>New File</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project || !globalState.activeFile}>Rename</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("rename-file")?.click()}>Rename</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile}>Duplicate</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("download-file")?.click()}>Download File</MenubarItem>
                     <MenubarSeparator />
@@ -97,7 +98,8 @@ export default function Menubar() {
         <Download />
         
         <NewFile />
+        <RenameFile/>
         <DeleteFile />
-        <DownloadFile/>
+        <DownloadFile />
     </div>
 }

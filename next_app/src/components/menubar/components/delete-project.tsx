@@ -1,4 +1,5 @@
 import { AlertDialog, AlertDialogTitle, AlertDialogTrigger, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -30,7 +31,9 @@ export default function DeleteProject() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={deleteProject}>Continue</AlertDialogAction>
+                <AlertDialogAction onClick={deleteProject} className="p-0">
+                    <Button variant="destructive">Delete</Button>
+                </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>

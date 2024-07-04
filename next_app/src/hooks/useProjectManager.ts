@@ -78,6 +78,7 @@ export class ProjectManager {
     project._newFile({ name, type, initialContent });
     this.projects[project.name] = project;
     this.saveProjects(this.projects);
+    return project.getFile(name);
   }
 
   deleteFile(project: Project, name: string) {

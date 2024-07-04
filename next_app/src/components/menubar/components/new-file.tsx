@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
-
-const supportedExtensions = ["lua", "luanb", "md"];
+import { supportedExtensions } from "@/lib/utils";
 
 export default function NewFile() {
     const globalState = useGlobalState();
