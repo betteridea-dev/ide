@@ -3,11 +3,13 @@ import { Input } from "@/components/ui/input";
 import { useGlobalState, useProjectManager } from "@/hooks"
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function RenameProject() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
     const [projectName, setProjectName] = useState<string>("")
+    const [recents, setRecents] = useLocalStorage<string[]>("recents", [], {initializeWithValue:true})
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
 
@@ -28,6 +30,7 @@ export default function RenameProject() {
             manager.deleteProject(oldProjectName)
             globalState.setActiveFile(Object.keys(oldFiles)[0])
             toast.success("Project renamed")
+            setRecents(recents.map(r => r === oldProjectName ? newProjectName : r))
         }
     }
 

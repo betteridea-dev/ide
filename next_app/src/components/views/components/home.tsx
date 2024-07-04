@@ -57,6 +57,20 @@ function Home() {
     const [recents, setRecents] = useLocalStorage("recents", [], { initializeWithValue: true });
     const [showUpdates, setShowUpdates] = useState(false);
 
+    function openRecent(pname: string) {
+        try {
+            globalState.setActiveProject(pname)
+            globalState.setActiveFile(Object.keys(manager.projects[pname].files)[0])
+            globalState.setActiveView("EDITOR")
+            pushToRecents(pname)
+        } catch (e) {
+            globalState.setActiveProject(null)
+            globalState.setActiveFile(null)
+            globalState.setActiveView(null)
+            toast.error("Project not found")
+        }
+    }
+
     return <div className="p-5 text-foreground/90 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full items-start justify-start">
 
         <div className="absolute bottom-6 z-20 mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
@@ -131,12 +145,7 @@ function Home() {
                     <div className="pl-8">
                         {
                             recents.toReversed().map((pname, i) => <Button key={i} variant="link" className="flex h-7 gap-2 px-1 justify-start text-foreground/90 tracking-wide"
-                                onClick={() => {
-                                    globalState.setActiveProject(pname)
-                                    globalState.setActiveFile(Object.keys(manager.projects[pname].files)[0])
-                                    globalState.setActiveView("EDITOR")
-                                    pushToRecents(pname)
-                                }}
+                                onClick={() => openRecent(pname)}
                             >
                                 <FileCodeIcon size={18} />
                                 <span className="">{pname}</span>
