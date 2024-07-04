@@ -78,7 +78,7 @@ export default function Statusbar() {
     useEffect(() => {
         if (!project || !wallet.isConnected) return
         if (project.ownerWallet != wallet.address) {
-            toast.warning(`The active project uses a process owned by a different wallet address.\nPlease switch to ${wallet.shortAddress} to use this process`,{id:"wallet-mismatch"});
+            toast.warning(`The active project uses a process owned by a different wallet address.\nPlease switch to ${wallet.shortAddress}\nor assign a new process.`,{id:"wallet-mismatch"});
         }
     }, [project, wallet.address])
 
