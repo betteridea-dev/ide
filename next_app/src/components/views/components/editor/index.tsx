@@ -134,7 +134,7 @@ function Editor() {
             </div>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={20} minSize={5} collapsible>
+        {globalState.activeProject&& <ResizablePanel defaultSize={20} minSize={5} collapsible>
             {/* BOTTOM BAR */}
             <div className="h-full">
                 <Tabs className="h-full relative" defaultValue="output">
@@ -157,7 +157,7 @@ function Editor() {
             {/* <div className="h-[calc(100%-30px)] overflow-scroll ring-1">
 
             </div> */}
-        </ResizablePanel>
+        </ResizablePanel>}
     </ResizablePanelGroup>
 }
 

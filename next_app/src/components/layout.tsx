@@ -14,9 +14,12 @@ export default function Layout() {
     const sidebarDrawerRef = useRef<ImperativePanelHandle>();
 
     function createTitle() {
-        let title = "BetterIDEa | "
+        let title=""
         if (globalState.activeProject && !globalState.activeFile) {
             return title + globalState.activeProject
+        }
+        if (globalState.activeFile&& globalState.activeFile.startsWith("PKG: ")) {
+            return title+globalState.activeFile.replace("PKG: ","")
         }
         if (globalState.activeView) {
             if (globalState.activeView == "EDITOR") {
@@ -47,7 +50,7 @@ export default function Layout() {
 
     return <div className="flex flex-col h-screen">
         <head>
-            <title>{createTitle()}</title>
+            <title>{createTitle()} | BetterIDEa</title>
         </head>
         <Menubar />
         <div className="flex h-full">

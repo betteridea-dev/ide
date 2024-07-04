@@ -50,14 +50,16 @@ export const useGlobalState = create<State>((set) => ({
         openedFiles: state.openedFiles.filter((f) => f !== file),
         // set active file to the file to the left of the closed file or if it was the last file, set it to the file to the right
         activeFile: state.openedFiles.length > 0 ?
-        state.activeFile == file ?
-        state.openedFiles[state.openedFiles.indexOf(file) - 1] || state.openedFiles[state.openedFiles.indexOf(file) + 1]
-        : state.activeFile
-        : null
+            state.activeFile == file ?
+                state.openedFiles[state.openedFiles.indexOf(file) - 1] || state.openedFiles[state.openedFiles.indexOf(file) + 1]
+                : state.activeFile
+            : null
     })),
     closeProject: () => set({ activeProject: null, activeFile: null, openedFiles: [], lastOutput: "" }),
     setLastOutput: (output: string) => set({ lastOutput: output }),
     addOpenedPackage: (pkg: TPackage) => set((state) => ({
-        openedPackages: state.openedPackages.includes(pkg) ? [...state.openedPackages] : [...state.openedPackages, pkg]
+        // if pkg doesnot exist in openedPackages, add it, else replace it with the new one
+        openedPackages: state.openedPackages.includes(pkg) ? state.openedPackages.filter((p) => p !== pkg).concat(pkg)
+            : [...state.openedPackages, pkg]
     }))
 }));
