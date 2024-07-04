@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AOTerminal from "./components/terminal";
 import Inbox from "./components/inbox";
 import Output from "./components/output";
+import PackageView from "./components/package";
 
 function Editor() {
     const globalState = useGlobalState();
@@ -50,12 +51,16 @@ function Editor() {
             globalState.setActiveView(null)
             return
         }
-        switch (globalState.activeFile.split(".").pop()) {
+        const activeFile = globalState.activeFile;
+        switch (activeFile.split(".").pop()) {
             case "lua":
                 return <SingleFileEditor />
             case "luanb":
                 return <NotebookEditor />
             default:
+                if (activeFile.startsWith("PKG: ")) {
+                    return <PackageView />
+                }
                 return <div>file</div>
         }
     }

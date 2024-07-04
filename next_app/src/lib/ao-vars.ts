@@ -19,9 +19,23 @@ const CommonTags = [
   { name: "App-Version", value: AppVersion },
 ];
 
-type Tags = { name: string; value: string }[];
+export type Tag = { name: string; value: string };
 
-export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?: string) {
+export type TPackage = {
+  Description: string;
+  Installs: number;
+  Name: string;
+  Owner: string;
+  PkgID: string;
+  RepositoryUrl: string;
+  Updated: number;
+  Vendor: string;
+  Version: string;
+  README: string;
+  Items: string;
+}
+
+export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule?: string) {
   const ao = connect();
 
   if (tags) {
@@ -41,7 +55,7 @@ export async function spawnProcess(name?: string, tags?: Tags, newProcessModule?
   return result;
 }
 
-export async function runLua(code: string, process: string, tags?: Tags) {
+export async function runLua(code: string, process: string, tags?: Tag[]) {
   const ao = connect();
 
   if (tags) {

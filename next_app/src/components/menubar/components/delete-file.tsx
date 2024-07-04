@@ -6,9 +6,10 @@ import { useLocalStorage } from "usehooks-ts";
 export default function DeleteFile() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
+    
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
     const file = globalState.activeFile && project.getFile(globalState.activeFile)
-
+    
     function deleteFile() {
         if (project && file) {
             const fname = file.name

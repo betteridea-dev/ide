@@ -10,10 +10,10 @@ export default function RenameFile() {
     const manager = useProjectManager()
     const [fileName, setFileName] = useState<string>("")
 
-    const project = globalState.activeProject && manager.getProject(globalState.activeProject)
-    const file = globalState.activeFile && project.getFile(globalState.activeFile)
-
+    
     function renameFile() {
+        const project = globalState.activeProject && manager.getProject(globalState.activeProject)
+        const file = globalState.activeFile && project.getFile(globalState.activeFile)
         if (project && file) {
             const oldFileName = file.name
             if (!fileName) return
