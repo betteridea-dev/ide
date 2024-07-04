@@ -25,7 +25,7 @@ interface State {
 
 export const useGlobalState = create<State>((set) => ({
     activeProject: null,
-    activeSidebarItem: "ALL_PROJECTS",
+    activeSidebarItem: "FILES",
     activeView: null,
     activeFile: null,
     openedFiles: [],
