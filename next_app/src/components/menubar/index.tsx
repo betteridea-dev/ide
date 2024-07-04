@@ -12,6 +12,7 @@ import DeleteProject from "./components/delete-project"
 import DeleteFile from "./components/delete-file"
 import DownloadFile from "./components/download-file"
 import RenameFile from "./components/rename-file"
+import RenameProject from "./components/rename-project"
 
 const rawBlueprintBase = "https://raw.githubusercontent.com/permaweb/aos/main/blueprints/"
 const blueprints = [
@@ -58,7 +59,7 @@ export default function Menubar() {
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project}>Rename</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={()=>document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
                     <MenubarItem disabled={!project}>Duplicate</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("share")?.click()}>Share</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("blueprints")?.click()}>Load Blueprint</MenubarItem>
@@ -90,7 +91,9 @@ export default function Menubar() {
         <div className="grow" />
 
         <AllProjectsBtn />
+
         <NewProject />
+        <RenameProject/>
         <DeleteProject />
         
         <Share />
