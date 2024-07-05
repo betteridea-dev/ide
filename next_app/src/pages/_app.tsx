@@ -8,17 +8,17 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 // import { GoogleAnalytics } from "nextjs-google-analytics";
 
-declare global {
-  interface Window {
-    arweaveWallet: {
-      connect: Function;
-      disconnect: Function;
-      getActiveAddress:()=> Promise<string>;
-      signDataItem: Function;
-      subscription: Function;
-    };
-  }
-}
+// declare global {
+//   interface Window {
+//     arweaveWallet: {
+//       connect: Function;
+//       disconnect: Function;
+//       getActiveAddress:()=> Promise<string>;
+//       signDataItem: Function;
+//       subscription: Function;
+//     };
+//   }
+// }
 
 export default function App({ Component, pageProps }: AppProps) {
 

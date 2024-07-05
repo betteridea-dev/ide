@@ -17,13 +17,15 @@ import DuplicateProject from "./components/duplicate-project"
 import DuplicateFile from "./components/duplicate-file"
 import { toast } from "sonner"
 import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
-import { Github } from "lucide-react"
 import Link from "next/link"
+import Arweave from "arweave"
+import { Tag } from "arweave/node/lib/transaction"
+import { AppVersion, BetterIDEaWallet, SponsorWebhookUrl } from "@/lib/ao-vars"
 
 export default function Menubar() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-
+    const arweave = new Arweave({ host: "arweave.net", port: 443, protocol: "https" })
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
 
     function logoClicked() {
@@ -40,16 +42,41 @@ export default function Menubar() {
             </div>
             <span className="my-2">Building a better developer experience on ao</span>
             <div>Feel free to support the development of our tools by sponsoring us or donating :)</div>
-        </div>, {position:"top-center", icon:"/icon.svg", duration:15000, style:{backgroundColor:"transparent", boxShadow:"none", color:"transparent"}})
+        </div>, { position: "top-center", icon: "/icon.svg", duration: 15000, style: { backgroundColor: "transparent", boxShadow: "none", color: "transparent" } })
     }
 
-
     async function oneTime(amount: number) {
+        const txn = await arweave.createTransaction({
+            target: BetterIDEaWallet,
+            quantity: arweave.ar.arToWinston(amount.toString()),
+        }, "use_wallet")
+        txn.addTag("App-Name", "BetterIDEa")
+        txn.addTag("BetterIDEa-Function", `Sponsor ${amount} $AR`)
+        txn.addTag("App-Version", AppVersion)
+
+        const res = await arweave.transactions.post(await window.arweaveWallet.sign(txn))
+        if (res.status === 200) {
+            await fetch(SponsorWebhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content:`\`\`\`\n${await window.arweaveWallet.getActiveAddress()} has sponsored ${amount} $AR! 🎉\n\`\`\``,
+                })
+            })
+            toast.success("Thank you for sponsoring us! 🎉", { position: "top-center" })
+        } else {
+            toast.error(res.statusText, { position: "top-center" })
+        }
+    }
+
+    async function subscribe(amount: number) {
         // connect to the extension
         await window.arweaveWallet.connect(["ACCESS_ALL_ADDRESSES"]);
 
-        // submit the subscription information
-        const subscription = await window.arweaveWallet.subscription({
+
+        const subscription = await (window.arweaveWallet as any)?.subscription({
             arweaveAccountAddress: "flBS223GKLwM0yiJGCk55BA_mdH_1QTLR5VFKejIi7c",
             applicationName: "BetterIDEa",
             subscriptionName: "BetterIDEa Sponsor",
@@ -67,7 +94,7 @@ export default function Menubar() {
 
     return <div className="border-b h-[30px] text-xs flex items-center overflow-clip">
         <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 min-w-12 h-[30px] cursor-pointer hover:bg-accent" onClick={logoClicked} />
-        <MenubarComponent className="border-none m-0 p-0 w-full">
+        <MenubarComponent className="border-none m-0 p-0 min-w-[calc(100vw-50px)]">
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">Project</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
@@ -78,8 +105,8 @@ export default function Menubar() {
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project} onClick={()=>document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
-                    <MenubarItem disabled={!project} onClick={()=>document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("share")?.click()}>Share</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("blueprints")?.click()}>Load Blueprint</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("download")?.click()}>Download zip</MenubarItem>
@@ -97,46 +124,66 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("new-file")?.click()}>New File</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("rename-file")?.click()}>Rename</MenubarItem>
-                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("duplicate-file")?.click()}>Duplicate</MenubarItem>
-                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={()=>document.getElementById("download-file")?.click()}>Download File</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("rename-file")?.click()}>Rename</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("duplicate-file")?.click()}>Duplicate</MenubarItem>
+                    <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("download-file")?.click()}>Download File</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("delete-file")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete File</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => globalState.closeOpenedFile(globalState.activeFile)}>Close File</MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
+            <div className="grow"></div>
             <MenubarMenu>
-                <MenubarTrigger className="rounded-none ml-auto absolute right-0">Sponsor Us</MenubarTrigger>
+                <MenubarTrigger className="rounded-none">More from us</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
+                    <MenubarLabel className="text-muted-foreground">Our products in the ecosystem</MenubarLabel>
+                    <MenubarSeparator />
+                    <Link href="https://learn.betteridea.dev" target="_blank"><MenubarItem>LearnAO</MenubarItem></Link>
+                    <Link href="https://www.npmjs.com/package/@betteridea/codecell" target="_blank"><MenubarItem>Portable Codecells</MenubarItem></Link>
+                    <Link href="https://apm.betteridea.dev" target="_blank"><MenubarItem>APM - ao Package Manager</MenubarItem></Link>
+                    <MenubarItem disabled>VSCode Extension (releasing soon)</MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarLabel className="text-muted-foreground">Socials</MenubarLabel>
+                    <MenubarSeparator />
+                    <Link href="https://discord.gg/nm6VKUQBrA" target="_blank"><MenubarItem>Chat with us on Discord</MenubarItem></Link>
+                    <Link href="https://x.com/twitter.com/betteridea_dev" target="_blank"><MenubarItem>Follow us on X (Twitter)</MenubarItem></Link>
+                </MenubarContent>
+            </MenubarMenu>
+            <MenubarMenu>
+                <MenubarTrigger className="rounded-none">Sponsor Us</MenubarTrigger>
+                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background max-w-sm">
                     <MenubarItem disabled>
-                        Sponsor a one time amount or a recurring amount (TODO)
+                        Sponsor a one time or recurring amount to support the development of BetterIDEa and all of its services (APM, LearnAO, Portable Codecell, VSCode extension)
                     </MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem onClick={() => oneTime(0.5)}>0.5 $AR (one time)</MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem onClick={() => subscribe(5)} disabled>0.5 $AR (monthly)</MenubarItem>
                     {/* <MenubarItem onClick={()=>oneTime(0.05)}>0.05 $AR (onetime)</MenubarItem>
                     <MenubarItem onClick={()=>oneTime(0.5)}>0.5 $AR (onetime)</MenubarItem>
                     <MenubarItem onClick={()=>oneTime(1)}>1 $AR (onetime)</MenubarItem>
-                    <MenubarSeparator/>
                     <MenubarItem disabled>$5 (monthly)</MenubarItem> */}
                 </MenubarContent>
             </MenubarMenu>
         </MenubarComponent>
-        
+
         <div className="grow" />
 
         <AllProjectsBtn />
 
         <NewProject />
         <RenameProject />
-        <DuplicateProject/>
+        <DuplicateProject />
         <DeleteProject />
-        
+
         <Share />
         <Blueprints />
         <Download />
-        
+
         <NewFile />
-        <RenameFile/>
+        <RenameFile />
         <DeleteFile />
         <DownloadFile />
-        <DuplicateFile/>
+        <DuplicateFile />
     </div>
 }
