@@ -51,7 +51,7 @@ function AllProjects() {
         </div>
         <h1 className=" mt-5 text-xl">All Projects</h1>
         <div className="relative">
-            <Search className="absolute left-4 top-3.5" size={17} />
+            <Search className="absolute left-4 top-3.5 text-border" size={17} />
             <Input placeholder="Search Projects" className="w-full max-w-[50vw] my-5 pl-10 py-6 bg-accent/50 border-none" onChange={(e) => setSearchInput(e.target.value)} />
         </div>
         <div className="flex flex-col gap-2 z-20 relative">
