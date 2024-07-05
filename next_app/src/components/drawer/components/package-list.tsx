@@ -96,7 +96,7 @@ function PackageList() {
             {
                 loading ? <><LoaderIcon className=" animate-spin mx-auto" /></> :
                     packages.map((pkg: TPackage, _: number) => {
-                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 rounded-md px-2 border  border-border/30 cursor-pointer data-[active=true]:bg-foreground/5" onClick={()=>viewPackage(pkg)}>
+                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 rounded-md px-2 border  border-border/30 cursor-pointer data-[active=true]:bg-accent hover:bg-accent/30" onClick={()=>viewPackage(pkg)}>
                         <div>{ pkg.Vendor!="@apm"&&`${pkg.Vendor}/`}{pkg.Name}</div>
                         <div className="truncate">{pkg.Description}</div>
                         <div className="text-xs text-right">{pkg.Installs} installs</div>
