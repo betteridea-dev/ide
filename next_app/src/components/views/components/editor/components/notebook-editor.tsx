@@ -430,7 +430,9 @@ const VisualCell = (
                 options={monacoConfig}
             />
         </div> : <div className="markdown m-5" onClick={checkDoubleClick}>
-            {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]}>{file.content.cells[cellId].code}</Markdown> :
+                {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} className="text-primary hover:underline" /> }}>
+                    {file.content.cells[cellId].code}
+                </Markdown> :
                 <Latex>{file.content.cells[cellId].code}</Latex>
             }
         </div>}
