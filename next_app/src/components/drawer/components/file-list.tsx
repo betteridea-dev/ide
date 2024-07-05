@@ -9,7 +9,7 @@ function FileList() {
     if (globalState.activeProject) {
         const project = manager.projects[globalState.activeProject];
         return <div className="flex flex-col">
-            <h1 className="text-center my-3">Files</h1>
+            <h1 className="text-left m-3 text-muted-foreground">FILE EXPLORER</h1>
             {
                 Object.keys(project.files).toSorted().map((fname, i) => <Button key={i} variant="ghost"
                     data-active={globalState.activeFile == fname}

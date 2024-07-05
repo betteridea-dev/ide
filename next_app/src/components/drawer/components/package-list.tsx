@@ -4,7 +4,7 @@ import { TPackage, APM_ID, Tag } from "@/lib/ao-vars";
 import { useEffect, useState } from "react";
 import { connect } from "@permaweb/aoconnect";
 import { toast } from "sonner";
-import { LoaderIcon } from "lucide-react";
+import { LoaderIcon, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 function PackageList() {
@@ -87,13 +87,16 @@ function PackageList() {
 
 
     return <div className="flex flex-col max-h-[calc(100vh-50px)]">
-        <h1 className="text-center my-3">Browse Packages</h1>
-        <Input placeholder="Search packages" className="rounded-none  border-y h-fit p-1" onChange={(e)=>setDebounceVal(e.target.value)} />
-        <div className="grid grid-cols-1 overflow-scroll py-0.5">
+        <h1 className="text-left m-3 text-muted-foreground">PACKAGES</h1>
+        <div className="px-2 relative">
+            <Search className="absolute left-3.5 text-border top-1.5" size={16} />
+            <Input placeholder="Search packages" className="rounded-md border border-border/30 h-fit p-1 pl-6" onChange={(e) => setDebounceVal(e.target.value)} />
+        </div>
+        <div className="grid grid-cols-1 overflow-scroll p-2 gap-2">
             {
                 loading ? <><LoaderIcon className=" animate-spin mx-auto" /></> :
                     packages.map((pkg: TPackage, _: number) => {
-                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 px-2 border-b first:border-t  border-border/30 cursor-pointer data-[active=true]:bg-foreground/5" onClick={()=>viewPackage(pkg)}>
+                    return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 rounded-md px-2 border  border-border/30 cursor-pointer data-[active=true]:bg-foreground/5" onClick={()=>viewPackage(pkg)}>
                         <div>{ pkg.Vendor!="@apm"&&`${pkg.Vendor}/`}{pkg.Name}</div>
                         <div className="truncate">{pkg.Description}</div>
                         <div className="text-xs text-right">{pkg.Installs} installs</div>

@@ -9,7 +9,7 @@ function ProjectList() {
     const projects = manager.projects;
 
     return <div className="flex flex-col max-h-[calc(100vh-40px)]">
-        <h1 className="text-center my-3">Your Projects</h1>
+        <h1 className="text-left text-muted-foreground m-3">PROJECTS</h1>
         <div className="grid grid-cols-1 overflow-scroll">
             {
                 Object.keys(projects).toSorted().map((pname, i) => (
