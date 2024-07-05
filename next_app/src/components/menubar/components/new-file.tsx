@@ -6,6 +6,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supportedExtensions } from "@/lib/utils";
 
+const initialContentFromExtension = {
+    "lua": "print('Hello AO!')",
+    "luanb": "print('Hello AO!')",
+    "md": "# Hello AO!"
+}
+
 export default function NewFile() {
     const globalState = useGlobalState();
     const manager = useProjectManager()
@@ -19,12 +25,13 @@ export default function NewFile() {
         // check if the filename has an extension if not add the default extension
         const newFilenameFixed = newFileName.split(".").length > 1 ? newFileName : `${newFileName}${proj.defaultFiletype == "NOTEBOOK" ? ".luanb" : ".lua"}`;
 
-        if (!supportedExtensions.includes(newFilenameFixed.split(".").pop()!)) return toast.error("Unsupported file extension")
-        // const newFilenameFixed = newFileName.split(".").length > 1 ? newFileName : newFileName + (globalState.activeMode == "AO" ? ".lua" : ".js");
+        const extension = newFilenameFixed.split(".").pop();
+        if (!supportedExtensions.includes(extension!)) return toast.error("Unsupported file extension")
+
         manager.newFile(proj, {
             name: newFilenameFixed,
             type: newFilenameFixed.endsWith(".luanb") ? "NOTEBOOK" : "NORMAL",
-            initialContent: "print('Hello AO!')",
+            initialContent: initialContentFromExtension[extension!] || "",
         });
         globalState.setActiveFile(newFilenameFixed);
         setPopupOpen(false);

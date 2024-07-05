@@ -53,15 +53,13 @@ function Editor() {
         }
         const activeFile = globalState.activeFile;
         switch (activeFile.split(".").pop()) {
-            case "lua":
-                return <SingleFileEditor />
             case "luanb":
                 return <NotebookEditor />
             default:
                 if (activeFile.startsWith("PKG: ")) {
                     return <PackageView />
                 }
-                return <div>file</div>
+                return <SingleFileEditor/>
         }
     }
 
