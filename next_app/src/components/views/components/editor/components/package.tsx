@@ -170,7 +170,9 @@ export default function PackageView() {
         </div>
         <hr className="my-3" />
             { fetching && <LoaderIcon className="animate-spin mx-auto" /> }
-        <Markdown remarkPlugins={[remarkGfm]} className="markdown">
+        <Markdown remarkPlugins={[remarkGfm]} className="markdown" components={{
+            a: ({node, ...props}) => <a {...props} className="text-primary hover:underline" />,
+        }}>
             {
                 Buffer.from(fullData?.README||"",'hex').toString()
             }
