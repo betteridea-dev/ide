@@ -6,6 +6,8 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Head from 'next/head';
 import { LoaderIcon } from "lucide-react";
+import { NextSeo } from "next-seo";
+import { Project } from "@/hooks/useProjectManager";
 
 
 export default function Import() {
@@ -28,7 +30,7 @@ export default function Import() {
             // console.log(r)
             console.log(decodeURIComponent(r.Messages[0].Data))
             setData(decodeURIComponent(r.Messages[0].Data))
-            const data = JSON.parse(`${decodeURIComponent(r.Messages[0].Data)}`)
+            const data:Project = JSON.parse(`${decodeURIComponent(r.Messages[0].Data)}`)
             console.log(data)
 
             let owner = ""
@@ -43,9 +45,17 @@ export default function Import() {
                 owner = await window.arweaveWallet.getActiveAddress()
             }
             data.ownerWallet = owner
-            projectManager.newProject(data)
+            let sharedProjName = data.name
+            let count = 0
+            while (projectManager.projects[sharedProjName]) {
+                if (count > 0) {
+                    sharedProjName = data.name  + ` (${count})`
+                }
+                count++
+            }
+            projectManager.newProject({...data, name:sharedProjName})
             setTimeout(() => {
-                window.location.href = "/?open=" + data.name
+                window.location.href = "/?open=" + sharedProjName
             }, 500)
         }
         fetchShared()
@@ -54,13 +64,38 @@ export default function Import() {
     // if (!id) return <div>loading...</div>
     return <>
         {/* OG META TAGS */}
-        <Head>
+        {/* <Head>
         <meta name="og:title" content={`Import Shared Project - BetterIDEa`} />
             <meta name="og:description" content={`Welcome to the intuitive web IDE for building powerful actor oriented applications.
             
             Shared by process: ${id}`} />
         <meta name="og:url" content={`https://ide.betteridea.dev/import?id=${id}`} />
-        </Head>
+        </Head> */}
+
+        <NextSeo
+            title={`Import Shared Project - BetterIDEa`}
+            description={`ao's development environment.
+            
+            Shared by process: ${id}`}
+            openGraph={{
+                title: `Import Shared Project - BetterIDEa`,
+                description: `ao's development environment.
+            
+                Shared by process: ${id}`,
+                url: `https://ide.betteridea.dev/import?id=${id}`,
+                siteName: `BetterIDEa`,
+                images: [
+                    {
+                        url: "https://ide.betteridea.dev/icon.svg",
+                        type: "image/svg",
+                        width: 100,
+                        height: 100,
+                    }
+                ],
+                type:"website"
+            }}
+            twitter={{handle:"@betteridea_dev"}}
+        />
 
         <div className="w-screen h-screen flex flex-col gap-1 items-center justify-center">
         {/* <Image src={Icons.loadingSVG} alt="loading" width={50} height={50} className="animate-spin z-10" /> */}
