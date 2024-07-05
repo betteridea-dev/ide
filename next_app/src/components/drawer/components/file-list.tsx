@@ -26,14 +26,23 @@ function FileList() {
         </div>
     } else {
         return <div className="flex flex-col">
-            <h1 className="text-center my-2">No Project opened</h1>
+            <h1 className="text-center my-4">No Project opened</h1>
             <p className="text-center text-sm my-2">Open a project to view files</p>
 
-            <Button variant="ghost" className="rounded-none m-4 bg-primary min-w-fit text-white"
+            <Button variant="ghost" className="rounded-none !mt-0 m-4 bg-primary min-w-fit text-white"
                 onClick={() => {
                     document.getElementById("all-projects")?.click()
                 }}
             >View all projects</Button>
+
+            
+            <p className="text-center text-sm my-2">Or create a new one</p>
+
+            <Button variant="ghost" className="rounded-none !mt-0 m-4 bg-primary min-w-fit text-white"
+                onClick={() => {
+                    document.getElementById("new-project")?.click()
+                }}
+            >Create New Project</Button>
         </div>
     }
 
