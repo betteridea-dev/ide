@@ -15,6 +15,7 @@ declare global {
       disconnect: Function;
       getActiveAddress:()=> Promise<string>;
       signDataItem: Function;
+      subscription: Function;
     };
   }
 }

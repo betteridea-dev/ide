@@ -43,9 +43,31 @@ export default function Menubar() {
         </div>, {position:"top-center", icon:"/icon.svg", duration:15000, style:{backgroundColor:"transparent", boxShadow:"none", color:"transparent"}})
     }
 
+
+    async function oneTime(amount: number) {
+        // connect to the extension
+        await window.arweaveWallet.connect(["ACCESS_ALL_ADDRESSES"]);
+
+        // submit the subscription information
+        const subscription = await window.arweaveWallet.subscription({
+            arweaveAccountAddress: "flBS223GKLwM0yiJGCk55BA_mdH_1QTLR5VFKejIi7c",
+            applicationName: "BetterIDEa",
+            subscriptionName: "BetterIDEa Sponsor",
+            subscriptionManagementUrl: "https://ide.betteridea.dev",
+            subscriptionFeeAmount: amount,
+            recurringPaymentFrequency: "Monthly",
+            // one day from today
+            subscriptionEndDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+            applicationIcon: "https://ide.betteridea.dev/icon.svg",
+        });
+
+        // Subscription will output the details and the initial payment txn
+        console.log("Subscription details with paymentHistory array:", subscription);
+    }
+
     return <div className="border-b h-[30px] text-xs flex items-center overflow-clip">
-        <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 w-12 h-[30px] cursor-pointer hover:bg-accent" onClick={logoClicked} />
-        <MenubarComponent className="border-none m-0 p-0">
+        <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 min-w-12 h-[30px] cursor-pointer hover:bg-accent" onClick={logoClicked} />
+        <MenubarComponent className="border-none m-0 p-0 w-full">
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">Project</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
@@ -81,6 +103,19 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => document.getElementById("delete-file")?.click()} className="!text-destructive-foreground hover:!bg-destructive">Delete File</MenubarItem>
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => globalState.closeOpenedFile(globalState.activeFile)}>Close File</MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
+            <MenubarMenu>
+                <MenubarTrigger className="rounded-none ml-auto absolute right-0">Sponsor Us</MenubarTrigger>
+                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
+                    <MenubarItem disabled>
+                        Sponsor a one time amount or a recurring amount (TODO)
+                    </MenubarItem>
+                    {/* <MenubarItem onClick={()=>oneTime(0.05)}>0.05 $AR (onetime)</MenubarItem>
+                    <MenubarItem onClick={()=>oneTime(0.5)}>0.5 $AR (onetime)</MenubarItem>
+                    <MenubarItem onClick={()=>oneTime(1)}>1 $AR (onetime)</MenubarItem>
+                    <MenubarSeparator/>
+                    <MenubarItem disabled>$5 (monthly)</MenubarItem> */}
                 </MenubarContent>
             </MenubarMenu>
         </MenubarComponent>
