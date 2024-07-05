@@ -115,11 +115,11 @@ function Home() {
             {!wallet.isConnected && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
             <div className="flex flex-col text-left my-6 gap-1">
-                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("all-projects")?.click()}>
-                    <FileStack size={20} /> All Projects
-                </Button>
                 <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-project")?.click()}>
                     <PlusSquare size={20} /> New Project
+                </Button>
+                <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("all-projects")?.click()}>
+                    <FileStack size={20} /> All Projects
                 </Button>
                 {/* <Button variant="link" className="justify-start h-7 text-foreground/90 gap-1 px-0" disabled>
                         <ImportIcon size={20} /> Import from Protocol.Land

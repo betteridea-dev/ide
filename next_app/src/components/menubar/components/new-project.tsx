@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LoaderIcon } from "lucide-react";
+import { pushToRecents } from "@/lib/utils";
 
 export default function NewProject() {
     const globalState = useGlobalState()
@@ -118,7 +119,6 @@ export default function NewProject() {
         //   default:
         //     initialContent = "print('Hello AO!')"
         // }
-        globalState.setActiveProject(newProjName);
         if (Object.keys(uploadedFiles).length > 0) {
             for (const file in uploadedFiles) {
                 // manager.newFile(p, {
@@ -138,32 +138,20 @@ export default function NewProject() {
                     });
                 }
             }
-            globalState.setActiveFile(Object.keys(uploadedFiles)[0]);
         } else {
             manager.newFile(p, {
                 name: defaultFiletype == "NOTEBOOK" ? "main.luanb" : "main.lua",
                 type: defaultFiletype,
                 initialContent,
             });
-            globalState.setActiveFile(defaultFiletype == "NOTEBOOK" ? "main.luanb" : "main.lua");
         }
         setLoadingProcess(false);
         setPopupOpen(false);
+        globalState.setActiveProject(newProjName);
+        globalState.setActiveFile(Object.keys(manager.projects[newProjName].files)[0]);
+        globalState.setActiveView("EDITOR");
 
-        const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];
-        const pname = newProjName;
-        if (!recents.includes(pname) && recents.length < 5) {
-            recents.push(pname);
-            localStorage.setItem("recents", JSON.stringify(recents));
-        } else if (!recents.includes(pname) && recents.length >= 5) {
-            recents.shift();
-            recents.push(pname);
-            localStorage.setItem("recents", JSON.stringify(recents));
-        } else if (recents.includes(pname)) {
-            recents.splice(recents.indexOf(pname), 1);
-            recents.push(pname);
-            localStorage.setItem("recents", JSON.stringify(recents));
-        }
+        pushToRecents(newProjName);
     }
 
     function handleFileDrop(e: any) {
