@@ -18,14 +18,11 @@ import DuplicateFile from "./components/duplicate-file"
 import { toast } from "sonner"
 import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
-import Arweave from "arweave"
-import { Tag } from "arweave/node/lib/transaction"
-import { AppVersion, BetterIDEaWallet, SponsorWebhookUrl } from "@/lib/ao-vars"
+import Sponsor from "./components/sponsor"
 
 export default function Menubar() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const arweave = new Arweave({ host: "arweave.net", port: 443, protocol: "https" })
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
 
     function logoClicked() {
@@ -43,53 +40,6 @@ export default function Menubar() {
             <span className="my-2">Building a better developer experience on ao</span>
             <div>Feel free to support the development of our tools by sponsoring us or donating :)</div>
         </div>, { position: "top-center", icon: "/icon.svg", duration: 15000, style: { backgroundColor: "transparent", boxShadow: "none", color: "transparent" } })
-    }
-
-    async function oneTime(amount: number) {
-        const txn = await arweave.createTransaction({
-            target: BetterIDEaWallet,
-            quantity: arweave.ar.arToWinston(amount.toString()),
-        }, "use_wallet")
-        txn.addTag("App-Name", "BetterIDEa")
-        txn.addTag("BetterIDEa-Function", `Sponsor ${amount} $AR`)
-        txn.addTag("App-Version", AppVersion)
-
-        const res = await arweave.transactions.post(await window.arweaveWallet.sign(txn))
-        if (res.status === 200) {
-            await fetch(SponsorWebhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    content:`\`\`\`\n${await window.arweaveWallet.getActiveAddress()} has sponsored ${amount} $AR! 🎉\n\`\`\``,
-                })
-            })
-            toast.success("Thank you for sponsoring us! 🎉", { position: "top-center" })
-        } else {
-            toast.error(res.statusText, { position: "top-center" })
-        }
-    }
-
-    async function subscribe(amount: number) {
-        // connect to the extension
-        await window.arweaveWallet.connect(["ACCESS_ALL_ADDRESSES"]);
-
-
-        const subscription = await (window.arweaveWallet as any)?.subscription({
-            arweaveAccountAddress: "flBS223GKLwM0yiJGCk55BA_mdH_1QTLR5VFKejIi7c",
-            applicationName: "BetterIDEa",
-            subscriptionName: "BetterIDEa Sponsor",
-            subscriptionManagementUrl: "https://ide.betteridea.dev",
-            subscriptionFeeAmount: amount,
-            recurringPaymentFrequency: "Monthly",
-            // one day from today
-            subscriptionEndDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-            applicationIcon: "https://ide.betteridea.dev/icon.svg",
-        });
-
-        // Subscription will output the details and the initial payment txn
-        console.log("Subscription details with paymentHistory array:", subscription);
     }
 
     return <div className="border-b h-[30px] text-xs flex items-center overflow-clip">
@@ -150,19 +100,12 @@ export default function Menubar() {
                 </MenubarContent>
             </MenubarMenu>
             <MenubarMenu>
-                <MenubarTrigger className="rounded-none">Sponsor Us</MenubarTrigger>
+                <MenubarTrigger className="rounded-none" onClick={()=>document.getElementById("sponsor-us")?.click()}>Sponsor Us</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background max-w-sm">
-                    <MenubarItem disabled>
-                        Sponsor a one time or recurring amount to support the development of BetterIDEa and all of its services (APM, LearnAO, Portable Codecell, VSCode extension)
-                    </MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarItem onClick={() => oneTime(0.5)}>0.5 $AR (one time)</MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarItem onClick={() => subscribe(5)} disabled>0.5 $AR (monthly)</MenubarItem>
-                    {/* <MenubarItem onClick={()=>oneTime(0.05)}>0.05 $AR (onetime)</MenubarItem>
-                    <MenubarItem onClick={()=>oneTime(0.5)}>0.5 $AR (onetime)</MenubarItem>
-                    <MenubarItem onClick={()=>oneTime(1)}>1 $AR (onetime)</MenubarItem>
-                    <MenubarItem disabled>$5 (monthly)</MenubarItem> */}
+                    <MenubarLabel className="text-muted-foreground">
+                        ♥️ Sponsor BetterIDEa
+                        so we can continue working on enhancing the developer experience on ao
+                    </MenubarLabel>
                 </MenubarContent>
             </MenubarMenu>
         </MenubarComponent>
@@ -185,5 +128,6 @@ export default function Menubar() {
         <DeleteFile />
         <DownloadFile />
         <DuplicateFile />
+        <Sponsor/>
     </div>
 }
