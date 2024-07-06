@@ -30,6 +30,7 @@ export default function Inbox() {
             { name: "BetterIDEa-Function", value: "Inbox" }
         ])
         setFetchingInbox(false)
+        console.log(res)
         const { Output: { data: { output } } } = res
         setInbox(JSON.parse(output))
         return JSON.parse(output)
