@@ -342,6 +342,7 @@ const VisualCell = (
     const [mouseHovered, setMouseHovered] = useState(false);
     const [editing, setEditing] = useState(file.content.cells[cellId].editing);
     const [clickCount, setClickCount] = useState(0);
+    const [expand, setExpand] = useState(false);
     const { theme } = useTheme();
 
     const cellType = file.content.cells[cellId].type
@@ -395,6 +396,11 @@ const VisualCell = (
                     {/* <Image src={Icons.deleteSVG} alt="Delete" width={20} height={20} className="invert dark:invert-0" /> */}
                     <Trash2 size={20} className="" />
                 </Button>
+                <Button variant="ghost" onClick={() => setExpand(!expand)}
+                    className="p-0 h-6 px-1 rounded-full">
+                    {expand ? <ChevronsDownUpIcon size={20} className="" /> :
+                        <ChevronsUpDown size={20} className="" />}
+                </Button>
             </div>
         )}
         {editing ? <div className="min-h-[69px]">
@@ -425,6 +431,7 @@ const VisualCell = (
                     manager.updateFile(project, { file, content: newContent });
                 }}
                 height={
+                    expand ? file.content.cells[cellId].code.split("\n").length * 20 :
                     (file.content.cells[cellId].code.split("\n").length > 15
                         ? 15
                         : file.content.cells[cellId].code.split("\n").length) * 20
