@@ -59,7 +59,6 @@ export const useGlobalState = create<State>((set) => ({
     setLastOutput: (output: string) => set({ lastOutput: output }),
     addOpenedPackage: (pkg: TPackage) => set((state) => ({
         // if pkg doesnot exist in openedPackages, add it, else replace it with the new one
-        openedPackages: state.openedPackages.includes(pkg) ? state.openedPackages.filter((p) => p !== pkg).concat(pkg)
-            : [...state.openedPackages, pkg]
+        openedPackages: state.openedPackages.find((p) => p.PkgID == pkg.PkgID) ? state.openedPackages.map((p) => p.PkgID == pkg.PkgID ? pkg : p) : [...state.openedPackages, pkg]
     }))
 }));

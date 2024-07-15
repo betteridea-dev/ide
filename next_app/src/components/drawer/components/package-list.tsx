@@ -79,6 +79,7 @@ function PackageList() {
     function viewPackage(pkg: TPackage) {
         if (!pkg) return
         setActivePackage(pkg);
+        if (!globalState.openedPackages.find((p) => p.PkgID == pkg.PkgID)) 
         globalState.addOpenedPackage(pkg);
         globalState.setActiveView("EDITOR");
         globalState.setActiveFile(`PKG: ${pkg.Vendor}/${pkg.Name}`);

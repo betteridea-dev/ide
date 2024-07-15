@@ -21,9 +21,11 @@ export default function PackageView() {
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
     const packageData = globalState.openedPackages.find((pkg) => `${pkg.Vendor}/${pkg.Name}` == globalState.activeFile.split("PKG: ")[1])
+    console.log(packageData)
 
     useEffect(() => {
-        if (!packageData) return
+        if (!packageData || !globalState.activeFile) return
+        if(!globalState.activeFile.startsWith("PKG:")) return
         if (packageData.PkgID) {
             setFullData(null)
             setFetching(true)
@@ -40,9 +42,10 @@ export default function PackageView() {
                 if (!msg) return toast.error("Error fetching package info", { description: "No info response found", id: "error" })
                 const data: TPackage = JSON.parse(msg.Data);
                 setFullData(data)
+                globalState.addOpenedPackage(data)
             }).finally(() => setFetching(false))
         }
-    }, [packageData])
+    }, [globalState.activeFile])
     
     async function loadapm() {
         if (!globalState.activeProject) return toast.error("No active project", { description: "You need to have an active project to use Packages", id: "error" })
@@ -169,12 +172,12 @@ export default function PackageView() {
             <Wallet size={16}/> <span> {packageData.Owner}</span> <PackageCheckIcon className="ml-5" size={16}/> <span> {packageData.PkgID}</span>
         </div>
         <hr className="my-3" />
-            { fetching && <LoaderIcon className="animate-spin mx-auto" /> }
+        {!packageData?.README && <LoaderIcon className="animate-spin mx-auto" /> }
         <Markdown remarkPlugins={[remarkGfm]} className="markdown" components={{
             a: ({node, ...props}) => <a {...props} className="text-primary hover:underline" />,
         }}>
             {
-                Buffer.from(fullData?.README||"",'hex').toString()
+                Buffer.from(packageData?.README||"",'hex').toString()
             }
         </Markdown>
     </div>
