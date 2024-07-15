@@ -6,6 +6,7 @@ import { AlertDialogCancel } from "@radix-ui/react-alert-dialog"
 import { LoaderIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+import { useSessionStorage } from "usehooks-ts"
 
 interface TInboxMessage {
     Data: string,
@@ -17,7 +18,7 @@ interface TInboxMessage {
 export default function Inbox() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const [inbox, setInbox] = useState<TInboxMessage[]>([])
+    const [inbox, setInbox] = useSessionStorage<TInboxMessage[]>("inbox-" + globalState.activeProject || "null",[],{initializeWithValue:true} )
     const [fetchingInbox, setFetchingInbox] = useState(false)
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject]
