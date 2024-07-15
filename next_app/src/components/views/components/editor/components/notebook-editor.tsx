@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Check, Edit, LoaderIcon, Play, SquareCheckBig, Trash2 } from "lucide-react";
+import { Check, ChevronsDownUpIcon, ChevronsUpDown, Edit, FoldVertical, LoaderIcon, Play, SquareCheckBig, Trash2, UnfoldVertical } from "lucide-react";
 import { capOutputTo200Lines } from "@/lib/utils";
 import Ansi from "ansi-to-react";
 import notebookTheme from "@/monaco-themes/notebook.json";
@@ -84,6 +84,7 @@ const CodeCell = ({
     const [mouseHovered, setMouseHovered] = useState(false);
     const [running, setRunning] = useState(false);
     const [showGfx, setShowGfx] = useState(false);
+    const [expand, setExpand] = useState(false);
     const cell = file.content.cells[cellId];
     const [code, setCode] = useState("");
     const { theme } = useTheme();
@@ -240,6 +241,11 @@ const CodeCell = ({
                         {/* <Image src={} alt="Delete" width={20} height={20} className="invert dark:invert-0" /> */}
                         <Trash2 size={20} className="" />
                     </Button>
+                    <Button variant="ghost" onClick={()=>setExpand(!expand)}
+                        className="p-0 h-6 px-1 rounded-full">
+                        {expand ? <ChevronsDownUpIcon size={20} className="" /> :
+                            <ChevronsUpDown size={20} className="" />}
+                    </Button>
                 </div>
             )}
             <div className="flex h-fit relative justify-start rounded-t-md border-b border-border/30 min-h-[69px] overflow-clip">
@@ -298,6 +304,7 @@ const CodeCell = ({
                         setActive(true)
                     }}
                     height={
+                        expand ? cell.code.split("\n").length * 20 :
                         (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
                     }
                     width="94%"
