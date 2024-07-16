@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
 import Sponsor from "./components/sponsor"
+import Upload from "./components/upload"
 
 export default function Menubar() {
     const globalState = useGlobalState()
@@ -82,6 +83,14 @@ export default function Menubar() {
                     <MenubarItem disabled={!project || !globalState.activeFile} onClick={() => globalState.closeOpenedFile(globalState.activeFile)}>Close File</MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
+            <MenubarMenu>
+                <MenubarTrigger className="rounded-none m-0">Utils</MenubarTrigger>
+                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
+                    {/* <MenubarLabel className="text-muted-foreground">Utilities</MenubarLabel> */}
+                    {/* <MenubarSeparator /> */}
+                    <MenubarItem onClick={() => document.getElementById("upload-file")?.click()}>Upload to Arweave</MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
             <div className="grow"></div>
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none">More from us</MenubarTrigger>
@@ -128,6 +137,9 @@ export default function Menubar() {
         <DeleteFile />
         <DownloadFile />
         <DuplicateFile />
+
+        <Upload/>
+
         <Sponsor/>
     </div>
 }
