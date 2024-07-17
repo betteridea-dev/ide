@@ -42,6 +42,7 @@ function SQLiteExplorer() {
 
     return <div className="flex flex-col max-h-[calc(100vh-40px)]">
         <h1 className="text-left text-muted-foreground m-3">SQLITE DB EXPLORER</h1>
+        <span className="text-xs truncate text-muted-foreground whitespace-normal px-2">will only with processes spawned with ao-sqlite module</span>
         {
             globalState.activeProject ? <div className="p-2">
                 <div className="flex gap-1"><Input placeholder="DB variable name" className="rounded-sm p-1 h-7" value={dbVarName} onChange={(e) => setDbVarName(e.target.value)} />
@@ -56,7 +57,7 @@ function SQLiteExplorer() {
         }
         <div className="grid grid-cols-1 overflow-scroll">
             {
-                tables.map((tname, i) => (
+                globalState.activeProject&&tables.map((tname, i) => (
                     <Button variant="ghost" key={i} data-active={false}
                         className="rounded-none w-full mx-auto justify-start truncate data-[active=true]:bg-foreground/20"
                         onClick={() => {
