@@ -16,6 +16,7 @@ import AOTerminal from "./components/terminal";
 import Inbox from "./components/inbox";
 import Output from "./components/output";
 import PackageView from "./components/package";
+import TableView from "./components/table";
 
 function Editor() {
     const globalState = useGlobalState();
@@ -56,10 +57,15 @@ function Editor() {
             case "luanb":
                 return <NotebookEditor />
             default:
-                if (activeFile.startsWith("PKG: ")) {
-                    return <PackageView />
+                const type = activeFile.split(":")[0];
+                switch (type) {
+                    case "PKG":
+                        return <PackageView />
+                    case "TBL":
+                        return <TableView />
+                    default:
+                        return <SingleFileEditor />
                 }
-                return <SingleFileEditor/>
         }
     }
 
@@ -84,7 +90,7 @@ function Editor() {
         console.log(result);
         if (result.Error) {
             console.log(result.Error);
-            globalState.setLastOutput("\x1b[1;31m"+result.Error as string);
+            globalState.setLastOutput("\x1b[1;31m" + result.Error as string);
             fileContent.cells[0].output = result.Error;
         } else {
             const outputData = result.Output.data;
@@ -132,7 +138,7 @@ function Editor() {
             </div>
         </ResizablePanel>
         <ResizableHandle />
-        {globalState.activeProject&& <ResizablePanel defaultSize={20} minSize={5} collapsible>
+        {globalState.activeProject && <ResizablePanel defaultSize={20} minSize={5} collapsible>
             {/* BOTTOM BAR */}
             <div className="h-full">
                 <Tabs className="h-full relative" defaultValue="output">

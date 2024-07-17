@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Column } from "./ao-vars";
 
 export const supportedExtensions = ["lua", "luanb", "md"];
 
@@ -17,6 +18,27 @@ export function pushToRecents(pname: string) {
     recents.push(pname);
     localStorage.setItem("recents", JSON.stringify(recents));
   }
+}
+
+export function parseCreateTableQuery(query:string) {
+  // Remove newlines and extra spaces
+  query = query.replace(/\s+/g, ' ').trim();
+
+  // Extract table name and column definitions
+  const match = query.match(/CREATE TABLE (\w+) \((.*)\)/i);
+  if (!match) {
+    throw new Error('Invalid CREATE TABLE query');
+  }
+
+  const [, tableName, columnDefinitions] = match;
+
+  // Split column definitions and parse each one
+  const columns = columnDefinitions.split(',').map(col => {
+    const [name, dataType] = col.trim().split(/\s+/);
+    return { name, dataType: dataType.toLowerCase() } as Column;
+  });
+
+  return columns;
 }
 
 export function cn(...inputs: ClassValue[]) {

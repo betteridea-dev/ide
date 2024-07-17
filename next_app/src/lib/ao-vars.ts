@@ -24,6 +24,12 @@ const CommonTags = [
 
 export type Tag = { name: string; value: string };
 
+// db parsed
+export type Column = {
+  name: string
+  dataType: string
+}
+
 export type TPackage = {
   Description: string;
   Installs: number;
