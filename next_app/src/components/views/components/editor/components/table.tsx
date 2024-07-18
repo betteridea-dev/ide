@@ -47,8 +47,9 @@ export default function TableView() {
 return require"json".encode(tables[1].sql)`
         const res = await runLua(query, project.process)
         const { Output } = res
-        setQuery(JSON.parse(Output.data.output))
-        setStructure(parseCreateTableQuery(JSON.parse(Output.data.output)))
+        const q = (JSON.parse(Output.data.output as string) as string).replace("(", " (")
+        setQuery(q)
+        setStructure(parseCreateTableQuery(q))
     }
 
     async function getTableRows() {
