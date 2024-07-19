@@ -20,59 +20,24 @@ export function pushToRecents(pname: string) {
   }
 }
 
-export function parseCreateTableQuery(query:string) {
-  // Remove newlines and extra spaces
-  query = query.replace(/\s+/g, ' ').trim();
+export function parseCreateTableQuery(query: string): Column[] {
+  const columns: Column[] = [];
+  const lines = query.split(/\n|,/);
 
-  // Extract table name and column definitions
-  const match = query.match(/CREATE TABLE (\w+) \((.*)\)/i);
-  if (!match) {
-    throw new Error('Invalid CREATE TABLE query');
+  for (const line of lines) {
+    if (line.trim().startsWith('CREATE TABLE') || line.trim().startsWith('FOREIGN KEY')) {
+      continue;
+    }
+
+    const columnMatch = line.match(/^\s*(\w+)\s+((?:\w+\s*\([^)]*\))|\w+)/);
+    if (columnMatch) {
+      const [, name, dataType] = columnMatch;
+      columns.push({ name, dataType });
+    }
   }
-
-  const [, tableName, columnDefinitions] = match;
-
-  // Split column definitions and parse each one
-  const columns = columnDefinitions.split(',').map(col => {
-    const [name, dataType] = col.trim().split(/\s+/);
-    return { name, dataType: dataType.toLowerCase() } as Column;
-  });
 
   return columns;
 }
-
-// export function parseCreateTableQuery(query:string) {
-//   // Remove newlines and extra spaces
-//   query = query.replace(/\s+/g, ' ').trim();
-
-//   // Extract table name and column definitions
-//   const match = query.match(/CREATE TABLE (\w+)\s*\((.*)\)/i);
-//   if (!match) {
-//     throw new Error('Invalid CREATE TABLE query');
-//   }
-
-//   const [, tableName, columnDefinitions] = match;
-
-//   // Split column definitions and parse each one
-//   const columns = columnDefinitions.split(',').map(col => {
-//     const parts = col.trim().split(/\s+/);
-//     console.log(parts);
-//     const name = parts[0];
-//     let dataType = parts[1].toLowerCase();
-
-//     // Handle cases where data type has a size specification
-//     if (dataType.includes('(')) {
-//       dataType = parts.slice(1, 3).join(' ').toLowerCase();
-//     }
-
-//     // Additional attributes
-//     const attributes = parts.slice(2).join(' ');
-
-//     return { name, dataType, attributes };
-//   });
-
-//   return columns;
-// }
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
