@@ -87,14 +87,14 @@ export default function Interact() {
                         }}>+ Add Tag</Button>
                 </div>
                 <span className="text-sm text-muted-foreground">Equivalent Lua code:</span>
-                <pre className="text-sm font-btr-code border rounded-md p-2 overflow-scroll">
+                <pre className="text-sm font-btr-code border border-border/40 rounded-none p-2 overflow-scroll">
                     {eqLua}
                 </pre>
             </div>
             <div>
                 <Button className="w-full rounded-none" disabled={sendingMessage}
                     onClick={sendMessage}>Send Message {sendingMessage&&<Loader size={18} className="animate-spin ml-1"/> }</Button>
-                <pre className="border my-2 overflow-scroll text-xs rounded-md p-2">
+                <pre className="border border-border/30 my-2 overflow-scroll text-xs rounded-none p-2">
                     {output}
                 </pre>
             </div>
