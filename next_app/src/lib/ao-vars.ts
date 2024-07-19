@@ -93,6 +93,7 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
 
   const result = await ao.result({ process, message });
   // console.log(result);
+  (result as any).id = message;
   return result;
 }
 

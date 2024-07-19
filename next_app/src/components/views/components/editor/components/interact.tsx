@@ -22,23 +22,27 @@ export default function Interact() {
     const [action, setAction] = useState<string>("")
     const [data, setData] = useState<string>("")
     const [inputTags, setInputTags] = useState<Tag[]>([])
-    const [output, setOutput] = useState<string>("")
+    const [output, setOutput] = useState<string>("...")
     const [eqLua, setEqLua] = useState<string>("")
     const [sendingMessage, setSendingMessage] = useState<boolean>(false)
+    const [id, setId] = useState<string>()
+    const [target, setTarget] = useState<string>()
     const project = globalState.activeProject && manager.projects[globalState.activeProject]
 
     useEffect(() => {
         if (!globalState.activeProject) return
         
         setEqLua(`Send({
-    Target = "${project.process}",${action?`\n\tAction = "${action}",`:""}${data?`\n\tData = "${data}",`:""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = "${tag.value}"`).join(",\n\t")}
+    Target = "${target||project?.process}",${action?`\n\tAction = "${action}",`:""}${data?`\n\tData = "${data}",`:""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = "${tag.value}"`).join(",\n\t")}
 })`)
-    }, [action, data, inputTags, project, globalState.activeProject])
+    }, [target,action, data, inputTags, project, globalState.activeProject])
 
     async function sendMessage() {
         setSendingMessage(true)
+        setOutput("...")
         const res = await runLua(eqLua, project.process)
         setSendingMessage(false)
+        setId((res as any).id)
         setOutput(JSON.stringify(res, null, 2))
     }
 
@@ -47,6 +51,7 @@ export default function Interact() {
         <div className="grid grid-cols-2 gap-2">
             <div>
                 {/* <div className="flex gap-2 mb-2"> */}
+                    <Input placeholder={`Target (${project?.process })`}  onChange={(e)=>setTarget(e.target.value)} className="rounded-none mb-2" />
                     <Input placeholder="Action" onChange={(e) => setAction(e.target.value)} className="rounded-none mb-2" />
                     <Input placeholder="Data" onChange={(e) => setData(e.target.value)} className="rounded-none mb-2" />
                 {/* </div> */}
@@ -77,6 +82,7 @@ export default function Interact() {
                         onClick={() => {
                             const name = (document.getElementById("input-tag-name") as HTMLInputElement)?.value
                             const value = (document.getElementById("input-tag-value") as HTMLInputElement)?.value
+                            console.log(name, value)
                             if (!name || !value) {
                                 toast.error("Name and Value are required")
                                 return
@@ -94,7 +100,8 @@ export default function Interact() {
             <div>
                 <Button className="w-full rounded-none" disabled={sendingMessage}
                     onClick={sendMessage}>Send Message {sendingMessage&&<Loader size={18} className="animate-spin ml-1"/> }</Button>
-                <pre className="border border-border/30 my-2 overflow-scroll text-xs rounded-none p-2">
+                <span className="text-sm text-muted-foreground mt-4">Result: <pre>{id}</pre></span>
+                <pre className="border border-border/30 overflow-scroll mb-2 text-xs rounded-none p-2">
                     {output}
                 </pre>
             </div>
