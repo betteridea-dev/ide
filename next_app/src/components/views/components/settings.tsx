@@ -76,7 +76,7 @@ function Settings() {
         if (processUsed === "NEW_PROCESS") {
             setSpawning(true);
             console.log(newProcessName);
-            const np = await spawnProcess(newProcessName || "", [], processUsed === "NEW_PROCESS" ? newProcessModule : AOModule);
+            const np = await spawnProcess(newProcessName || project.name, [], processUsed === "NEW_PROCESS" ? newProcessModule : AOModule);
             manager.setProjectProcess(p, np, activeWallet);
             setSpawning(false);
         } else {

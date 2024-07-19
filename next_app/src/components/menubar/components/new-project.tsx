@@ -101,7 +101,7 @@ export default function NewProject() {
         });
         console.log(processUsed);
         if (processUsed == "NEW_PROCESS") {
-            const newProcessId = await spawnProcess(newProcessName, [
+            const newProcessId = await spawnProcess(newProcessName || newProjName, [
                 { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
             ], processUsed == "NEW_PROCESS" ? newProcessModule : null);
             manager.setProjectProcess(p, newProcessId);
