@@ -2,7 +2,9 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTrigger 
 import { Button } from "@/components/ui/button"
 import { useGlobalState, useProjectManager } from "@/hooks"
 import { runLua } from "@/lib/ao-vars"
+import { stripAnsiCodes } from "@/lib/utils"
 import { AlertDialogCancel } from "@radix-ui/react-alert-dialog"
+import Ansi from "ansi-to-react"
 import { LoaderIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -18,7 +20,7 @@ interface TInboxMessage {
 export default function Inbox() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const [inbox, setInbox] = useSessionStorage<TInboxMessage[]>("inbox-" + globalState.activeProject || "null",[],{initializeWithValue:true} )
+    const [inbox, setInbox] = useSessionStorage<TInboxMessage[]>("inbox-" + globalState.activeProject || "null", [], { initializeWithValue: true })
     const [fetchingInbox, setFetchingInbox] = useState(false)
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject]
@@ -45,13 +47,13 @@ export default function Inbox() {
         const hasData = item.Data
         const hasAction = item.Action
         const hasSender = item.From
-        
+
         return <AlertDialog>
             <AlertDialogTrigger className="w-full">
-            <div className="flex flex-col p-2 border-b border-border/60 w-full items-start justify-start">
-            <div className="text-sm text-muted">{new Date(item.Timestamp).toString()} {hasAction && <span className="text-md text-foreground">[{item.Action}]</span>}</div>
-            {hasSender ? <div className="text-xs text-muted">from: {item.From}</div> : <div className="text-xs text-muted">unknown sender</div>}
-            {hasData ? <div className="text-md text-left truncate w-full">{item.Data}</div>:<div className="text-sm text-muted">no data</div>}
+                <div className="flex flex-col p-2 border-b border-border/60 w-full items-start justify-start">
+                    <div className="text-sm text-muted">{new Date(item.Timestamp).toString()} {hasAction && <span className="text-md text-foreground">[{item.Action}]</span>}</div>
+                    {hasSender ? <div className="text-xs text-muted">from: {item.From}</div> : <div className="text-xs text-muted">unknown sender</div>}
+                    {hasData ? <div className="text-md text-left truncate w-full"><Ansi>{item.Data}</Ansi></div> : <div className="text-sm text-muted">no data</div>}
                 </div>
             </AlertDialogTrigger>
             <AlertDialogContent className="md:min-w-[50vw]">
@@ -59,7 +61,7 @@ export default function Inbox() {
                     Viewing Inbox Message
                 </AlertDialogHeader>
                 <pre className="font-btr-code max-h-[50vh] overflow-scroll text-xs ring-1 ring-border rounded-md p-1">
-                    {JSON.stringify(item, null, 2)}
+                    <Ansi>{JSON.stringify(item, null, 2)}</Ansi>
                 </pre>
                 <AlertDialogCancel>close</AlertDialogCancel>
             </AlertDialogContent>
@@ -72,7 +74,7 @@ export default function Inbox() {
         {
             inbox.length > 0 ? inbox.toReversed().map((item, i) => <InboxItem key={i} item={item} />)
                 :
-                <>{!fetchInbox&&<div>No messages in inbox</div>}</>
+                <>{!fetchInbox && <div>No messages in inbox</div>}</>
         }
     </>
 }

@@ -63,7 +63,7 @@ export default function Layout() {
         <div className="flex h-full">
             <Sidebar drawerRef={sidebarDrawerRef} />
             <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel defaultSize={20} maxSize={25} minSize={5} collapsible ref={sidebarDrawerRef}>
+                <ResizablePanel defaultSize={20} maxSize={70} minSize={5} collapsible ref={sidebarDrawerRef}>
                     <SidebarDrawer />
                 </ResizablePanel>
                 <ResizableHandle />
