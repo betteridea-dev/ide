@@ -28,7 +28,7 @@
         --destructive: 0 70.2% 90%;
         --destructive-foreground: 0 100% 30%;
 
-        --border: 0 0% 50%;
+        --border: 0 0% 84%;
         --input: 240 5.9% 90%;
         --ring: 240 10% 3.9%;
 
@@ -62,7 +62,7 @@
         --destructive: 0 70% 15.6%;
         --destructive-foreground: 0 60% 60%;
 
-        --border: 0 0% 30%;
+        --border: 0 0% 16%;
         --input: 0 0% 16%;
         --ring: 240 4.9% 83.9%;
     }
@@ -117,3 +117,16 @@ pre {
     font-family: "DM Mono" !important;
      font-size: unset !important;
 } */
+
+button {
+    transition: all 0.1s;
+}
+
+button:hover {
+    scale: 1.005;
+}
+
+button:active {
+    opacity: 0.6;
+    scale: 0.98;
+}

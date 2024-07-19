@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useTimeout } from "usehooks-ts";
 import { GraphQLClient, gql } from "graphql-request";
 
-export function Combobox({ className = "", placeholder, options, onChange, onOpen = () => { }, disabled = false, onSearchChange = (e) => { } }: { className?: string; placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen?: () => void; disabled?: boolean; onSearchChange?: (e: string) => void }) {
+export function Combobox({ triggerClassName = "", className = "", placeholder, options, onChange, onOpen = () => { }, disabled = false, onSearchChange = (e) => { } }: { triggerClassName?: string, className?: string; placeholder: string, options: { label: string; value: string }[]; onChange: (val: string) => void; onOpen?: () => void; disabled?: boolean; onSearchChange?: (e: string) => void }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
@@ -20,7 +20,7 @@ export function Combobox({ className = "", placeholder, options, onChange, onOpe
         onOpen();
       }}
     >
-      <PopoverTrigger asChild disabled={disabled}>
+      <PopoverTrigger asChild disabled={disabled} className={triggerClassName}>
         <Button variant="outline" role="combobox" aria-expanded={open} className="w-full mx-auto overflow-clip truncate justify-between border-border/60">
           {value ? value : <span className="text-muted-foreground">{placeholder}</span>}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

@@ -147,7 +147,7 @@ function Editor() {
                         <TabsTrigger value="terminal" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Terminal</TabsTrigger>
                         <TabsTrigger value="inbox" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Inbox</TabsTrigger>
                         <TabsTrigger value="output" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Output</TabsTrigger>
-                        <TabsTrigger value="interact" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Interact</TabsTrigger>
+                        {/* <TabsTrigger value="interact" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Interact</TabsTrigger> */}
                     </TabsList>
                     <TabsContent value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <AOTerminal prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
@@ -158,9 +158,9 @@ function Editor() {
                     <TabsContent value="output" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <Output />
                     </TabsContent>
-                    <TabsContent value="interact" className="h-[calc(100%-30px)] overflow-scroll m-0">
-                        <Interact/>
-                    </TabsContent>
+                    {/* <TabsContent value="interact" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                        <Interact />
+                    </TabsContent> */}
                 </Tabs>
             </div>
             {/* <div className="h-[calc(100%-30px)] overflow-scroll ring-1">

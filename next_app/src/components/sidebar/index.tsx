@@ -20,22 +20,24 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
                 default:
                     if (globalState.activeSidebarItem == sidebarValue)
                         drawerRef.current.isCollapsed() ? drawerRef.current.expand() : drawerRef.current.collapse()
-                    else{drawerRef.current.expand()
-                    globalState.setActiveSidebarItem(sidebarValue)}
+                    else {
+                        drawerRef.current.expand()
+                        globalState.setActiveSidebarItem(sidebarValue)
+                    }
             }
         }
     }
 
-    return <div className="w-[50px] border-r flex flex-col items-center justify-start overflow-x-clip overflow-y-scroll">
+    return <div className="w-[50px] border-r flex flex-col items-center justify-start overflow-x-clip overflow-y-scroll bg-foreground/[3%]">
         {
             sidebarItems.map((Item, i) => <TooltipProvider key={i} delayDuration={0}>
                 <Tooltip>
                     <TooltipTrigger>
-                    <Button variant="ghost" data-active={globalState.activeSidebarItem == Item.value}
-                        className="rounded-none h-12 w-12 flex items-center justify-center p-0 data-[active=true]:bg-primary"
-                        onClick={sidebarButtonClicked(Item.value)}
+                        <Button variant="ghost" data-active={globalState.activeSidebarItem == Item.value}
+                            className="rounded-none h-12 w-12 flex items-center justify-center p-0 data-[active=true]:bg-primary"
+                            onClick={sidebarButtonClicked(Item.value)}
                         ><Item.icon strokeWidth={1.5} data-active={globalState.activeSidebarItem == Item.value}
-                                className="data-[active=true]:text-white"
+                            className="data-[active=true]:text-white"
                             />
                         </Button>
                     </TooltipTrigger>
