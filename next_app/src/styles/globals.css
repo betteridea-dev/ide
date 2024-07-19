@@ -122,11 +122,11 @@ button {
     transition: all 0.1s;
 }
 
-button:hover {
-    scale: 1.005;
-}
+/* button:hover { */
+/* scale: 1.005; */
+/* } */
 
 button:active {
     opacity: 0.6;
-    scale: 0.98;
+    scale: 0.99;
 }

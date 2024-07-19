@@ -236,25 +236,25 @@ export default function NewProject() {
 
             <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-            <Combobox placeholder="Select Process (or search with ID)" options={usingManualProcessId.length==43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
+            <Combobox placeholder="Select Process (or search with ID)" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
 
             <details>
-                <summary>All Options</summary>
-                
-                {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName || "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
+                <summary className="text-muted-foreground">All Options</summary>
+                <div className="flex flex-col gap-3 mt-2">
+                    {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName || "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
 
-                <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(AOTemplates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
-                    onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
+                    <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(AOTemplates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
+                        onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
 
-                <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module (default: WASM64)" options={usingManualModuleId.length == 43 ? [{ label: `Module ID: ${usingManualModuleId}`, value: `${usingManualModuleId}` }] : Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setUsingManualModuleId(e)} />
-                <input id="projext-zip" type="file" accept=".zip" placeholder="Upload project zip" hidden onChange={handleFileDrop} />
-                <label htmlFor="projext-zip" className="text-center" onDragOver={handleFileDragOver} onDrop={handleFileDrop} onDragLeave={() => setFileDragOver(false)}>
-                    <div data-draggedover={fileDragOver} className="border border-dashed data-[draggedover=true]:border-primary rounded-lg p-4">{Object.keys(uploadedFiles).length > 0 ? `Found ${Object.keys(uploadedFiles).length} files` : "Upload project zip"}</div>
-                </label>
-
+                    <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module (default: WASM64)" options={usingManualModuleId.length == 43 ? [{ label: `Module ID: ${usingManualModuleId}`, value: `${usingManualModuleId}` }] : Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setUsingManualModuleId(e)} />
+                    <input id="projext-zip" type="file" accept=".zip" placeholder="Upload project zip" hidden onChange={handleFileDrop} />
+                    <label htmlFor="projext-zip" className="text-center" onDragOver={handleFileDragOver} onDrop={handleFileDrop} onDragLeave={() => setFileDragOver(false)}>
+                        <div data-draggedover={fileDragOver} className="border border-dashed data-[draggedover=true]:border-primary rounded-lg p-4">{Object.keys(uploadedFiles).length > 0 ? `Found ${Object.keys(uploadedFiles).length} files` : "Upload project zip"}</div>
+                    </label>
+                </div>
             </details>
-            
-            
+
+
 
 
             <RadioGroup defaultValue="NOTEBOOK" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>

@@ -70,7 +70,7 @@ export default function Inbox() {
 
     return <>
         <Button variant="link" onClick={fetchInbox}
-            className="absolute top-8 right-1 rounded-none bg-background text-foreground">{fetchingInbox ? <><LoaderIcon className="w-5 h-5 mr-1 animate-spin" /> Fetching...</> : "refresh"}</Button>
+            className="absolute top-8 right-1 !z-20 rounded-none bg-background text-foreground">{fetchingInbox ? <><LoaderIcon className="w-5 h-5 mr-1 animate-spin" /> Fetching...</> : "refresh"}</Button>
         {
             inbox.length > 0 ? inbox.toReversed().map((item, i) => <InboxItem key={i} item={item} />)
                 :
