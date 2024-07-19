@@ -5,6 +5,7 @@ import { useGlobalState, useProjectManager } from "@/hooks"
 import { runLua, Tag } from "@/lib/ao-vars"
 import { AlertDialogCancel } from "@radix-ui/react-alert-dialog"
 import { Loader, LoaderIcon } from "lucide-react"
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { useSessionStorage } from "usehooks-ts"
@@ -31,15 +32,16 @@ export default function Interact() {
 
     useEffect(() => {
         if (!globalState.activeProject) return
-        
+
         setEqLua(`Send({
-    Target = "${target||project?.process}",${action?`\n\tAction = "${action}",`:""}${data?`\n\tData = "${data}",`:""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = "${tag.value}"`).join(",\n\t")}
+    Target = "${target || project?.process}",${action ? `\n\tAction = "${action}",` : ""}${data ? `\n\tData = "${data}",` : ""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = "${tag.value}"`).join(",\n\t")}
 })`)
-    }, [target,action, data, inputTags, project, globalState.activeProject])
+    }, [target, action, data, inputTags, project, globalState.activeProject])
 
     async function sendMessage() {
         setSendingMessage(true)
         setOutput("...")
+        setId("...")
         const res = await runLua(eqLua, project.process)
         setSendingMessage(false)
         setId((res as any).id)
@@ -51,9 +53,9 @@ export default function Interact() {
         <div className="grid grid-cols-2 gap-2">
             <div>
                 {/* <div className="flex gap-2 mb-2"> */}
-                    <Input placeholder={`Target (${project?.process })`}  onChange={(e)=>setTarget(e.target.value)} className="rounded-none mb-2" />
-                    <Input placeholder="Action" onChange={(e) => setAction(e.target.value)} className="rounded-none mb-2" />
-                    <Input placeholder="Data" onChange={(e) => setData(e.target.value)} className="rounded-none mb-2" />
+                <Input placeholder={`Target (${project?.process})`} onChange={(e) => setTarget(e.target.value)} className="rounded-none mb-2" />
+                <Input placeholder="Action" onChange={(e) => setAction(e.target.value)} className="rounded-none mb-2" />
+                <Input placeholder="Data" onChange={(e) => setData(e.target.value)} className="rounded-none mb-2" />
                 {/* </div> */}
                 {
                     inputTags.map((tag, i) => <div key={i} className="flex gap-2 mb-2">
@@ -99,8 +101,8 @@ export default function Interact() {
             </div>
             <div>
                 <Button className="w-full rounded-none" disabled={sendingMessage}
-                    onClick={sendMessage}>Send Message {sendingMessage&&<Loader size={18} className="animate-spin ml-1"/> }</Button>
-                <span className="text-sm text-muted-foreground mt-4">Result: <pre>{id}</pre></span>
+                    onClick={sendMessage}>Send Message {sendingMessage && <Loader size={18} className="animate-spin ml-1" />}</Button>
+                <span className="text-sm text-muted-foreground">Result: {id && id != "..." && <Link className="text-primary" href={`https://www.ao.link/#/message/${id}`} target="_blank">View on ao.link</Link>} <pre className="overflow-scroll">{id || "..."}</pre></span>
                 <pre className="border border-border/30 overflow-scroll mb-2 text-xs rounded-none p-2">
                     {output}
                 </pre>
