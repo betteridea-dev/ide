@@ -70,11 +70,9 @@ jobs:
       - name: install permaweb-deploy
         run: npm install -g permaweb-deploy
       - name: rename build folder
-        working-directory: next_app
-        run: ./out ./dist
+        run: cd /home/runner/work/ide/next_app && mv out dist
       - name: deploy to permaweb
-        working-directory: next_app
-        run: permaweb-deploy -a $ANT_PROCESS
+        run: cd /home/runner/work/ide/next_app && permaweb-deploy -a $ANT_PROCESS
         env:
           ANT_PROCESS: ${{ secrets.ANT_PROCESS }}
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
