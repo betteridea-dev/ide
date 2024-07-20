@@ -63,19 +63,19 @@ jobs:
         with:
           path: next_app/out
   
-  permaweb-deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: install permaweb-deploy
-        run: npm install -g permaweb-deploy
-      - name: rename build folder
-        run: cd /home/runner/work/ide/next_app && mv out dist
-      - name: deploy to permaweb
-        run: cd /home/runner/work/ide/next_app && permaweb-deploy -a $ANT_PROCESS
-        env:
-          ANT_PROCESS: ${{ secrets.ANT_PROCESS }}
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+  # permaweb-deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: install permaweb-deploy
+  #       run: npm install -g permaweb-deploy
+  #     - name: rename build folder
+  #       run: cd /home/runner/work/ide/next_app && mv out dist
+  #     - name: deploy to permaweb
+  #       run: cd /home/runner/work/ide/next_app && permaweb-deploy -a $ANT_PROCESS
+  #       env:
+  #         ANT_PROCESS: ${{ secrets.ANT_PROCESS }}
+  #         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
       
 
   # Deployment job
