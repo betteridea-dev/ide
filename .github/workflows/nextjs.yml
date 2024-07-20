@@ -69,10 +69,11 @@ jobs:
     steps:
       - name: install permaweb-deploy
         run: npm install -g permaweb-deploy
-      - name: move to next_app
-        # run: cd next_app && mv ./out ./dist
-        run: mv ./out ./dist
+      - name: rename build folder
+        working-directory: next_app
+        run: ./out ./dist
       - name: deploy to permaweb
+        working-directory: next_app
         run: permaweb-deploy -a $ANT_PROCESS
         env:
           ANT_PROCESS: ${{ secrets.ANT_PROCESS }}
