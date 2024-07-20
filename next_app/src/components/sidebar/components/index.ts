@@ -5,6 +5,7 @@ import AllProjects from "./projects";
 import Packages from "./packages";
 import SQLite from "./sqlite-explorer"
 import Interact from "./interact"
+import Sam from "./sam"
 
 export type TSidebarItem = {
     icon: LucideIcon;
@@ -12,7 +13,7 @@ export type TSidebarItem = {
     value: TSidebarOptions;
 }
 
-const sidebarItems:TSidebarItem[] = [Files, AllProjects, Packages, SQLite, Interact]
+const sidebarItems: TSidebarItem[] = [Files, AllProjects, Packages, SQLite, Interact, Sam]
 
 export default sidebarItems;
-export type TSidebarOptions = null | "SETTINGS" | "FILES" | "ALL_PROJECTS" | "PACKAGES" | "SQLITE_EXPLORER" | "INTERACT";
+export type TSidebarOptions = null | "SETTINGS" | "FILES" | "ALL_PROJECTS" | "PACKAGES" | "SQLITE_EXPLORER" | "INTERACT" | "SAM";
