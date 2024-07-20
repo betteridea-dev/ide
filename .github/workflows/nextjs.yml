@@ -62,8 +62,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: next_app/out
-      - name: copy for permadeploy
-        run: cp -r next_app/out ../dist
   
   permaweb-deploy:
     runs-on: ubuntu-latest
@@ -71,6 +69,8 @@ jobs:
     steps:
       - name: install permaweb-deploy
         run: npm install -g permaweb-deploy
+      - name: move to next_app
+        run: cd next_app && mv ../$GITHUB_WORKSPACE/next_app/out ./dist
       - name: deploy to permaweb
         run: permaweb-deploy -a $ANT_PROCESS
         env:
