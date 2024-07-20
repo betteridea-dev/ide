@@ -70,7 +70,7 @@ jobs:
       - name: install permaweb-deploy
         run: npm install -g permaweb-deploy
       - name: move to next_app
-        run: cd next_app && mv ../$GITHUB_WORKSPACE/next_app/out ./dist
+        run: cd next_app && mv ./out ./dist
       - name: deploy to permaweb
         run: permaweb-deploy -a $ANT_PROCESS
         env:
