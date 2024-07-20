@@ -63,7 +63,7 @@ jobs:
         with:
           path: next_app/out
       - name: copy for permadeploy
-        run: cp -r next_app/out dist
+        run: cp -r next_app/out ../dist
   
   permaweb-deploy:
     runs-on: ubuntu-latest
