@@ -39,14 +39,23 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         },
         allowTransparency: false,
         cols: 100,
-        rows: 50,
+        rows: 10,
         lineHeight: 1,
     }))
     const [rl, setRl] = useState(new Readline())
 
-    const maxRows = 50;
+    const maxRows = 100;
     const maxCols = 100;
-    const maxHistory = 100;
+    const maxHistory = 30;
+
+    function scrollToBottom() {
+        term.scrollToBottom()
+        const aoTerm = document.getElementById('ao-terminal')
+        if (aoTerm) aoTerm.scrollTop = aoTerm.scrollHeight
+        const termContainer = document.getElementById("terminal-container");
+        if (termContainer) termContainer.scrollTop = termContainer.scrollHeight;
+
+    }
 
     useEffect(() => {
         if (!loaded) return;
@@ -59,7 +68,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         })
         console.log("prompt", globalState.prompt)
         globalState.prompt && rl.print(globalState.prompt)
-    }, [loaded, globalState.activeProject, globalState.prompt])
+        scrollToBottom()
+    }, [loaded, globalState.activeProject, globalState.prompt, term, rl, commandOutputs])
 
 
     useEffect(() => {
@@ -94,7 +104,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         readLine(globalState.prompt)
 
         setLoaded(true)
-    }, [termDiv])
+        scrollToBottom()
+    }, [globalState.prompt, loaded, readLine, rl, term, termDiv])
 
     useEffect(() => {
         if (!termDiv) return;
@@ -106,7 +117,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         })
         globalState.prompt && rl.print(globalState.prompt)
-    }, [commandOutputs, globalState.prompt])
+        scrollToBottom()
+    }, [commandOutputs, globalState.prompt, loaded, rl, term, termDiv])
 
     function readLine(newPrompt: string) {
         rl.read(newPrompt || prompt).then(processLine);
@@ -114,7 +126,6 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
 
     async function processLine(text: string) {
         // rl.println("you entered: " + text);
-
 
         if (!project)
             // return toast({
@@ -200,7 +211,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         }
         setRunning(false);
         sendGAEvent({ event: 'run_code', value: 'terminal' })
-
+        scrollToBottom()
         setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
     }
 
@@ -208,5 +219,5 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         return <div className="w-full h-full flex items-center justify-center text-lg font-btr-code">No active project</div>
     }
 
-    return <div id="ao-terminal" className="h-full w-full bg-transparent p-1 view-line font-btr-code"></div>
+    return <div id="ao-terminal" className="flex flex-col-reverse w-full bg-transparent p-1 view-line font-btr-code"></div>
 }

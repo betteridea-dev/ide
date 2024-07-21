@@ -141,7 +141,12 @@ function Editor() {
             </div>
         </ResizablePanel>
         <ResizableHandle />
-        {globalState.activeProject && <ResizablePanel defaultSize={20} minSize={5} collapsible>
+        {globalState.activeProject && <ResizablePanel defaultSize={20} minSize={5} collapsible onResize={() => {
+            const termContainer = document.getElementById("terminal-container");
+            if (termContainer) {
+                termContainer.scrollTop = termContainer.scrollHeight;
+            }
+        }}>
             {/* BOTTOM BAR */}
             <div className="h-full">
                 <Tabs className="h-full relative" defaultValue="output">
@@ -151,7 +156,7 @@ function Editor() {
                         <TabsTrigger value="output" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Output</TabsTrigger>
                         {/* <TabsTrigger value="interact" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Interact</TabsTrigger> */}
                     </TabsList>
-                    <TabsContent value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                    <TabsContent id="terminal-container" value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <AOTerminal prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
                     </TabsContent>
                     <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0">
