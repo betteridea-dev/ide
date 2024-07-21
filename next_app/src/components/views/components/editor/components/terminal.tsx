@@ -57,8 +57,9 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             rl.println(line);
             term.resize(maxCols, term.buffer.normal.length >= maxRows ? maxRows : term.buffer.normal.length)
         })
+        console.log("prompt", globalState.prompt)
         globalState.prompt && rl.print(globalState.prompt)
-    }, [loaded, globalState.activeProject])
+    }, [loaded, globalState.activeProject, globalState.prompt])
 
 
     useEffect(() => {
