@@ -2,7 +2,7 @@ import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 export const AppVersion = "3.0.0";
-export const AOModule = "nI_jcZgPd0rcsnjaHtaaJPpMCW847ou-3RGA5_W3aZg";
+export const AOModule = "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo";
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
 export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4";

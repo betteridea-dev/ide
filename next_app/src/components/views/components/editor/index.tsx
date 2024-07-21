@@ -89,6 +89,7 @@ function Editor() {
             { name: "File-Type", value: "Normal" }
         ]);
         console.log(result);
+        globalState.setPrompt(result.Output.data!.prompt!)
         if (result.Error) {
             console.log(result.Error);
             globalState.setLastOutput("\x1b[1;31m" + result.Error as string);
@@ -112,6 +113,7 @@ function Editor() {
 
     useEffect(() => {
         setCommandOutputs([]);
+        globalState.setSetTerminalOutputsFunction(setCommandOutputs);
     }, [])
 
     return <ResizablePanelGroup direction="vertical">

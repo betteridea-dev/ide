@@ -4,18 +4,18 @@ import { Terminal } from "@xterm/xterm";
 import { Readline } from "xterm-readline";
 import { sendGAEvent } from "@next/third-parties/google";
 import { getResults, runLua } from "@/lib/ao-vars";
-import { useGlobalState ,useProjectManager } from "@/hooks";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import { toast } from "sonner"
 import { useTheme } from "next-themes";
 import { stripAnsiCodes } from "@/lib/utils";
 
 
-let promptBuf = ""
+// let promptBuf = ""
 export default function AOTerminal({ prompt, setPrompt, commandOutputs, setCommandOutputs }: {
     prompt: string, setPrompt: Dispatch<SetStateAction<string>>,
     commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
 }) {
-    promptBuf = prompt
+    // promptBuf = prompt
     const [termDiv, setTermDiv] = useState<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState(false)
     const globalState = useGlobalState()
@@ -57,7 +57,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             rl.println(line);
             term.resize(maxCols, term.buffer.normal.length >= maxRows ? maxRows : term.buffer.normal.length)
         })
-        rl.print(prompt)
+        globalState.prompt && rl.print(globalState.prompt)
     }, [loaded, globalState.activeProject])
 
 
@@ -90,7 +90,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             return true;
         });
 
-        readLine(prompt)
+        readLine(globalState.prompt)
 
         setLoaded(true)
     }, [termDiv])
@@ -104,8 +104,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             rl.println(line);
             term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         })
-        rl.print(prompt)
-    }, [commandOutputs, prompt])
+        globalState.prompt && rl.print(globalState.prompt)
+    }, [commandOutputs, globalState.prompt])
 
     function readLine(newPrompt: string) {
         rl.read(newPrompt || prompt).then(processLine);
@@ -135,16 +135,16 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
         if (text.trim().length == 0) {
             setCommandOutputs(p => {
-                if(p.length>=maxHistory) p.shift()
+                if (p.length >= maxHistory) p.shift()
                 return [...p, ">"]
             });
-            return readLine(promptBuf);
+            return readLine(globalState.prompt);
         }
 
         if (text == "clear") {
             setCommandOutputs([]);
             term.resize(maxCols, 10)
-            return readLine(promptBuf);
+            return readLine(globalState.prompt);
 
         }
         console.log("running", text);
@@ -165,7 +165,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         }
         if (result.Output) {
             console.log(result.Output);
-            setPrompt(result.Output.data.prompt)
+            // setPrompt(result.Output.data.prompt)
+            globalState.setPrompt(result.Output.data.prompt)
             console.log(result.Output.data.prompt)
             if (result.Output.data.json != "undefined") {
                 console.log("json", result.Output.data.json);

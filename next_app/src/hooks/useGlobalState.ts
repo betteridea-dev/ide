@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { TSidebarOptions } from "@/components/sidebar/components";// available options = ["a","b","c"], create a type from this
 import { TViewOptions } from "@/components/views/components";
 import { TPackage } from "@/lib/ao-vars";
+import { Dispatch, SetStateAction } from "react";
 
 
 interface State {
@@ -12,6 +13,8 @@ interface State {
     openedFiles: string[];
     lastOutput: string;
     openedPackages: TPackage[];
+    prompt: string;
+    setTerminalOutputs: Dispatch<SetStateAction<string[]>>;
     setActiveSidebarItem: (item: TSidebarOptions) => void;
     setActiveView: (view: TViewOptions) => void;
     setActiveProject: (project: string) => void;
@@ -21,6 +24,8 @@ interface State {
     closeProject: () => void;
     setLastOutput: (output: string) => void;
     addOpenedPackage: (pkg: TPackage) => void;
+    setPrompt: (prompt: string) => void;
+    setSetTerminalOutputsFunction: (func: Dispatch<SetStateAction<string[]>>) => void;
 }
 
 export const useGlobalState = create<State>((set) => ({
@@ -31,6 +36,8 @@ export const useGlobalState = create<State>((set) => ({
     openedFiles: [],
     lastOutput: "",
     openedPackages: [],
+    prompt: "aos> ",
+    setTerminalOutputs: null,
     setActiveSidebarItem: (item: TSidebarOptions) => set({ activeSidebarItem: item }),
     setActiveView: (view: TViewOptions) => set({ activeView: view }),
     setActiveProject: (project: string) => set({
@@ -60,5 +67,7 @@ export const useGlobalState = create<State>((set) => ({
     addOpenedPackage: (pkg: TPackage) => set((state) => ({
         // if pkg doesnot exist in openedPackages, add it, else replace it with the new one
         openedPackages: state.openedPackages.find((p) => p.PkgID == pkg.PkgID) ? state.openedPackages.map((p) => p.PkgID == pkg.PkgID ? pkg : p) : [...state.openedPackages, pkg]
-    }))
+    })),
+    setPrompt: (prompt: string) => set({ prompt }),
+    setSetTerminalOutputsFunction: (func: Dispatch<SetStateAction<string[]>>) => set({ setTerminalOutputs: func })
 }));

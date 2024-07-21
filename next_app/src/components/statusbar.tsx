@@ -56,29 +56,31 @@ export default function Statusbar() {
     useEffect(() => {
         if (!project) return
         if (!project.process) return
-        
+
         const resultsInterval = setInterval(async () => {
-            const res = await getResults(project.process, localStorage.getItem("cursor")||"")
+            const res = await getResults(project.process, localStorage.getItem("cursor") || "")
             if (res.cursor) localStorage.setItem("cursor", res.cursor)
-                const { results } = res
+            const { results } = res
             if (results.length > 0) {
                 results.forEach((result) => {
+                    globalState.setPrompt(result.Output.data!.prompt!)
                     if (result.Output.print) {
                         console.log(res)
-                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data)}</div>, {style:{borderRadius:"7px"}})
+                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data)}</div>, { style: { borderRadius: "7px" } })
+                        globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, result.Output.data!])
                     }
-                    })
+                })
             }
-        },2000)
+        }, 2000)
 
         return () => { clearInterval(resultsInterval) }
     }, [project])
-    
+
     // NOTIFICATION FOR WHEN THE CURRENT PROJECT OWNER WALLET AND CONNECTED WALLET ARE DIFFERENT
     useEffect(() => {
         if (!project || !wallet.isConnected) return
         if (project.ownerWallet != wallet.address) {
-            toast.warning(`The active project uses a process owned by a different wallet address.\nPlease switch to ${wallet.shortAddress}\nor assign a new process.`,{id:"wallet-mismatch"});
+            toast.warning(`The active project uses a process owned by a different wallet address.\nPlease switch to ${wallet.shortAddress}\nor assign a new process.`, { id: "wallet-mismatch" });
         }
     }, [project, wallet.address])
 

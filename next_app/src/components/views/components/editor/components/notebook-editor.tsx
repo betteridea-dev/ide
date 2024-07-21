@@ -136,7 +136,7 @@ const CodeCell = ({
                 }).map(s => {
                     return new CompletionFormatter(model, position).format(s.insertText, s.range)
                 })
-                if(suggestionItems.length>0)console.log(suggestionItems)
+                if (suggestionItems.length > 0) console.log(suggestionItems)
 
                 return Promise.resolve({
                     items: suggestionItems
@@ -170,6 +170,8 @@ const CodeCell = ({
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);
+        globalState.setPrompt(result.Output.data!.prompt!)
+
         // const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
 
 
@@ -179,7 +181,7 @@ const CodeCell = ({
             console.log(result.Error || result.error);
             // @ts-ignore
             fileContent.cells[cellId].output = result.Error || result.error;
-            globalState.setLastOutput("\x1b[1;31m"+result.Error);
+            globalState.setLastOutput("\x1b[1;31m" + result.Error);
             // @ts-ignore
             // toast({ title: "Error", description: result.Error || result.error })
             toast.error(result.Error || result.error)
@@ -241,7 +243,7 @@ const CodeCell = ({
                         {/* <Image src={} alt="Delete" width={20} height={20} className="invert dark:invert-0" /> */}
                         <Trash2 size={20} className="" />
                     </Button>
-                    <Button variant="ghost" onClick={()=>setExpand(!expand)}
+                    <Button variant="ghost" onClick={() => setExpand(!expand)}
                         className="p-0 h-6 px-1 rounded-full">
                         {expand ? <ChevronsDownUpIcon size={20} className="" /> :
                             <ChevronsUpDown size={20} className="" />}
@@ -305,7 +307,7 @@ const CodeCell = ({
                     }}
                     height={
                         expand ? cell.code.split("\n").length * 20 :
-                        (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
+                            (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
                     }
                     width="94%"
                     className="min-h-[70px] py-0 font-btr-code overflow-y-clip"
@@ -432,9 +434,9 @@ const VisualCell = (
                 }}
                 height={
                     expand ? file.content.cells[cellId].code.split("\n").length * 20 :
-                    (file.content.cells[cellId].code.split("\n").length > 15
-                        ? 15
-                        : file.content.cells[cellId].code.split("\n").length) * 20
+                        (file.content.cells[cellId].code.split("\n").length > 15
+                            ? 15
+                            : file.content.cells[cellId].code.split("\n").length) * 20
                 }
                 width="100%"
                 className="min-h-[69px] block p-1 font-btr-code"
@@ -444,9 +446,9 @@ const VisualCell = (
                 options={monacoConfig}
             />
         </div> : <div className="markdown m-5" onClick={checkDoubleClick}>
-                {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} className="text-primary hover:underline" /> }}>
-                    {file.content.cells[cellId].code}
-                </Markdown> :
+            {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} className="text-primary hover:underline" /> }}>
+                {file.content.cells[cellId].code}
+            </Markdown> :
                 <Latex>{file.content.cells[cellId].code}</Latex>
             }
         </div>}
@@ -567,6 +569,6 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                     />}
             </>
         })}
-        <CellUtilButtons position={file.content.cellOrder.length} addNewCell={addNewCell} defaultVisible/>
+        <CellUtilButtons position={file.content.cellOrder.length} addNewCell={addNewCell} defaultVisible />
     </div>
 }

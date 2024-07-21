@@ -14,6 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LoaderIcon } from "lucide-react";
 import { pushToRecents } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+
+type possibleUnits = "seconds" | "minutes" | "hours" | "blocks"
+const cronUnits = ["seconds", "minutes", "hours", "blocks"]
 
 export default function NewProject() {
     const globalState = useGlobalState()
@@ -35,6 +40,9 @@ export default function NewProject() {
     const [fileDragOver, setFileDragOver] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState<{ [foo: string]: PFile | string }>({});
     const [processes, setProcesses] = useState([{ label: "+ Create New Process", value: "NEW_PROCESS" }]);
+    const [isCron, setIsCron] = useState(false);
+    const [cronInterval, setCronInterval] = useState(1);
+    const [cronUnit, setCronUnit] = useState<possibleUnits>("minutes");
 
     async function fetchProcesses() {
         if (!window.arweaveWallet) return;
@@ -101,15 +109,28 @@ export default function NewProject() {
         });
         console.log(processUsed);
         if (processUsed == "NEW_PROCESS") {
-            const newProcessId = await spawnProcess(newProcessName || newProjName, [
-                { name: "File-Type", value: defaultFiletype == "NOTEBOOK" ? "Notebook" : "Normal" }
-            ], processUsed == "NEW_PROCESS" ? newProcessModule : null);
+            const tags = [{ name: "Name", value: newProcessName || newProjName }];
+            if (isCron) {
+                tags.push({ name: "Cron-Interval", value: `${cronInterval}-${cronUnit}` })
+                tags.push({ name: "Cron-Tag-Action", value: "Cron" })
+            }
+            const newProcessId = await spawnProcess(newProcessName || newProjName, tags, processUsed == "NEW_PROCESS" ? newProcessModule : null);
             manager.setProjectProcess(p, newProcessId);
         } else {
             manager.setProjectProcess(p, processUsed);
         }
         var initialContent = "print('Hello AO!')";
-        initialContent = AOTemplates[selectedTemplate];
+        if (isCron) {
+            initialContent = `-- Add this handler to process cron messages
+Handlers.add(
+  "CronTick", -- handler name
+  Handlers.utils.hasMatchingTag("Action", "Cron"), -- handler pattern to identify cron message
+  function (msg) -- handler task to execute on cron message
+    print("Cron ticked at " .. msg.Timestamp) -- do something
+  end
+)`
+        }
+        initialContent = selectedTemplate ? AOTemplates[selectedTemplate] : initialContent;
         // switch (selectedTemplate) {
         //   case "THE_GRID_BOT":
         //     initialContent = aoBot
@@ -213,7 +234,9 @@ export default function NewProject() {
         setNewProcessModule("");
         setUsingManualProcessId("");
         setFileDragOver(false);
-
+        setIsCron(false)
+        setCronInterval(1);
+        setCronUnit("minutes")
         setPopupOpen(e)
     }
     }>
@@ -228,7 +251,7 @@ export default function NewProject() {
             new project
         </DialogTrigger>
 
-        <DialogContent className="min-w-fit">
+        <DialogContent className="min-w-fit max-h-[90vh] overflow-scroll">
             <DialogHeader>
                 <DialogTitle>Create a project</DialogTitle>
                 <DialogDescription>Add details of your project.</DialogDescription>
@@ -238,15 +261,58 @@ export default function NewProject() {
 
             <Combobox placeholder="Select Process (or search with ID)" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
 
+            <RadioGroup defaultValue="NOTEBOOK" className="" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
+                <div>
+                    Default file type?
+                    {/* <span className="text-sm text-muted">(can be changed later)</span> */}
+                </div>
+
+                <div className="flex gap-2 items-center justify-center pl-4">
+                    <div className="flex flex-col items-start justify-start w-full">
+                        <div className="flex gap-2 items-center">
+                            <RadioGroupItem value="NOTEBOOK" id="option-one" className="" />
+                            <Label data-selected={defaultFiletype == "NOTEBOOK"} className="data-[selected=true]:text-primary py-2" htmlFor="option-one">
+                                Notebook (.luanb)
+                            </Label>
+                        </div>
+
+                        <Label className="text-sm pl-6 text-muted-foreground" htmlFor="option-one">Split code in cells</Label>
+                    </div>
+
+                    <div className="flex flex-col  w-full">
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="NORMAL" id="option-two" />
+                            <Label data-selected={defaultFiletype == "NORMAL"} className="data-[selected=true]:text-primary py-2" htmlFor="option-two">
+                                Regular (.lua)
+                            </Label>
+                        </div>
+
+                        <Label className="text-sm pl-6 text-muted-foreground" htmlFor="option-two">Simple file based</Label>
+                    </div>
+
+                </div>
+            </RadioGroup>
+
             <details>
-                <summary className="text-muted-foreground">All Options</summary>
+                <summary className="text-muted-foreground">More Options</summary>
                 <div className="flex flex-col gap-3 mt-2">
                     {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName || "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
+
+                    <div className="flex gap-2 items-center">
+                        <Switch disabled={!(processUsed == "NEW_PROCESS")} id="is-cron" onCheckedChange={b => setIsCron(b as boolean)} />
+                        <label htmlFor="is-cron">Cron</label>
+
+                        <Input disabled={!isCron} type="number" min="1" max="30" placeholder="interval" value={cronInterval} defaultValue={cronInterval} onChange={e => setCronInterval(Math.abs(parseInt(e.target.value)))} />
+                        <Combobox disabled={!isCron} placeholder="Units" defaultValue={cronUnit} options={cronUnits.map(u => { return { label: u, value: u } })} onChange={(e) => setCronUnit(e as possibleUnits)} />
+
+                    </div>
 
                     <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(AOTemplates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
                         onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
 
                     <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module (default: WASM64)" options={usingManualModuleId.length == 43 ? [{ label: `Module ID: ${usingManualModuleId}`, value: `${usingManualModuleId}` }] : Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setUsingManualModuleId(e)} />
+
+
                     <input id="projext-zip" type="file" accept=".zip" placeholder="Upload project zip" hidden onChange={handleFileDrop} />
                     <label htmlFor="projext-zip" className="text-center" onDragOver={handleFileDragOver} onDrop={handleFileDrop} onDragLeave={() => setFileDragOver(false)}>
                         <div data-draggedover={fileDragOver} className="border border-dashed data-[draggedover=true]:border-primary rounded-lg p-4">{Object.keys(uploadedFiles).length > 0 ? `Found ${Object.keys(uploadedFiles).length} files` : "Upload project zip"}</div>
@@ -257,36 +323,6 @@ export default function NewProject() {
 
 
 
-            <RadioGroup defaultValue="NOTEBOOK" className="py-2" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
-                <div>
-                    What type of files do you want to use? <span className="text-sm text-muted">(can be changed later)</span>
-                </div>
-
-                <div className="flex flex-col gap-2 items-center justify-center">
-                    <div className="flex flex-row gap-0 items-center justify-between w-full">
-                        <div className="flex items-center space-x-2 p-2">
-                            <RadioGroupItem value="NOTEBOOK" id="option-one" className="" />
-                            <Label data-selected={defaultFiletype == "NOTEBOOK"} className="data-[selected=true]:text-primary" htmlFor="option-one">
-                                Notebook
-                            </Label>
-                        </div>
-
-                        <div className="text-sm  col-span-2 text-right">Split code in cells</div>
-                    </div>
-
-                    <div className="flex flex-row items-center gap-4 justify-between w-full">
-                        <div className="flex items-center space-x-2 p-2">
-                            <RadioGroupItem value="NORMAL" id="option-two" />
-                            <Label data-selected={defaultFiletype == "NORMAL"} className="data-[selected=true]:text-primary" htmlFor="option-two">
-                                Regular
-                            </Label>
-                        </div>
-
-                        <div className="text-sm  col-span-2">Write code line by line</div>
-                    </div>
-
-                </div>
-            </RadioGroup>
 
             <Button disabled={loadingProcess} className="bg-primary" onClick={createProject}>
                 {loadingProcess && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}

@@ -35,6 +35,7 @@ export default function Inbox() {
         setFetchingInbox(false)
         console.log(res)
         const { Output: { data: { output } } } = res
+        globalState.setPrompt(res.Output.data!.prompt!)
         setInbox(JSON.parse(output))
         return JSON.parse(output)
     }
