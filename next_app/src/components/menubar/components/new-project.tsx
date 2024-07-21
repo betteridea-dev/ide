@@ -26,7 +26,7 @@ export default function NewProject() {
     const wallet = useWallet()
     const [popupOpen, setPopupOpen] = useState(false);
     const [newProjName, setNewProjName] = useState("");
-    const [processUsed, setProcessUsed] = useState("");
+    const [processUsed, setProcessUsed] = useState("NEW_PROCESS");
     const [newProcessName, setNewProcessName] = useState("");
     const [defaultFiletype, setDefaultFiletype] = useState<"NORMAL" | "NOTEBOOK">("NOTEBOOK");
     const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -99,6 +99,8 @@ export default function NewProject() {
             return toast.error("Process options not set", {
                 description: "You must choose wether to create a new process or use an existing one", id: "error"
             })
+        if (cronInterval <= 0) return toast.error("Cron interval must be greater than 0", { id: "error" })
+        if (!cronUnit) return toast.error("Cron unit not set", { id: "error" })
 
         const ownerWallet = await window.arweaveWallet.getActiveAddress();
         setLoadingProcess(true);
@@ -120,8 +122,9 @@ export default function NewProject() {
             manager.setProjectProcess(p, processUsed);
         }
         var initialContent = "print('Hello AO!')";
+        initialContent = selectedTemplate ? AOTemplates[selectedTemplate] : initialContent;
         if (isCron) {
-            initialContent = `-- Add this handler to process cron messages
+            initialContent += `\n\n-- Add this handler to process cron messages
 Handlers.add(
   "CronTick", -- handler name
   Handlers.utils.hasMatchingTag("Action", "Cron"), -- handler pattern to identify cron message
@@ -130,7 +133,6 @@ Handlers.add(
   end
 )`
         }
-        initialContent = selectedTemplate ? AOTemplates[selectedTemplate] : initialContent;
         // switch (selectedTemplate) {
         //   case "THE_GRID_BOT":
         //     initialContent = aoBot
@@ -226,8 +228,9 @@ Handlers.add(
     }
 
     return <Dialog open={popupOpen} onOpenChange={(e) => {
+        setDefaultFiletype("NOTEBOOK");
         setSelectedTemplate("");
-        setProcessUsed("");
+        setProcessUsed("NEW_PROCESS");
         setUploadedFiles({});
         setNewProjName("");
         setNewProcessName("");
@@ -259,10 +262,9 @@ Handlers.add(
 
             <Input type="text" placeholder="Project Name" onChange={(e) => setNewProjName(e.target.value)} />
 
-            <Combobox placeholder="Select Process (or search with ID)" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
 
             <RadioGroup defaultValue="NOTEBOOK" className="" onValueChange={(e) => setDefaultFiletype(e as "NORMAL" | "NOTEBOOK")}>
-                <div>
+                <div className="text-muted-foreground">
                     Default file type?
                     {/* <span className="text-sm text-muted">(can be changed later)</span> */}
                 </div>
@@ -294,9 +296,11 @@ Handlers.add(
             </RadioGroup>
 
             <details>
-                <summary className="text-muted-foreground">More Options</summary>
+                <summary className="text-muted-foreground text-sm w-fit cursor-pointer"><span className="pl-2">More Options</span></summary>
                 <div className="flex flex-col gap-3 mt-2">
-                    {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName || "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
+                    <Combobox placeholder="Select Process (or search with ID)" defaultValue="+ Create New Process" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
+
+                    {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName ? "default: " + newProjName : "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
 
                     <div className="flex gap-2 items-center">
                         <Switch disabled={!(processUsed == "NEW_PROCESS")} id="is-cron" onCheckedChange={b => setIsCron(b as boolean)} />

@@ -28,7 +28,7 @@ function Sam() {
         } else {
             file.content.cellOrder.forEach(cellId => {
                 if (file.content.cells[cellId].type == "CODE") {
-                    code += file.content.cells[cellId].code;
+                    code += file.content.cells[cellId].code + "\n";
                 }
             })
         }
