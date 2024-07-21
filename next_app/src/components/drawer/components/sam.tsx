@@ -95,9 +95,9 @@ function AnalyticFileItem({ filename, analysis, visibleSeverity }: { filename: s
                 </div>
                 <div className="flex justify-between w-full gap-10">
                     <div>{filename}
-                        {low > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-yellow-500/40">low {low}</span>}
-                        {medium > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-orange-500/40">medium: {medium}</span>}
-                        {high > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-red-500/40">high: {high}</span>}
+                        {low > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-yellow-500/40">Low: {low}</span>}
+                        {medium > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-orange-500/40">Medium: {medium}</span>}
+                        {high > 0 && <span className="mx-1 rounded-full text-xs px-1.5 bg-red-500/40">High: {high}</span>}
                     </div>
                 </div>
             </span>
@@ -109,7 +109,12 @@ function AnalyticFileItem({ filename, analysis, visibleSeverity }: { filename: s
                 </div>
             }
             {
-                Object.keys(analysis).map((key, index) => <AnalyticItem key={index} analysis={analysis[key]} visibleSeverity={visibleSeverity} />)
+                Object.keys(analysis).toSorted((a, b) => {
+                    if (analysis[a].severity == Severity.LOW) return -1;
+                    if (analysis[a].severity == Severity.MEDIUM && analysis[b].severity == Severity.HIGH) return -1;
+                    if (analysis[a].severity == Severity.HIGH) return 1;
+                    return 0;
+                }).map((key, index) => <AnalyticItem key={index} analysis={analysis[key]} visibleSeverity={visibleSeverity} />)
             }
         </div>
     </details>
@@ -133,10 +138,6 @@ function Sam() {
     const [totalLow, setTotalLow] = useState(0);
     const [totalMedium, setTotalMedium] = useState(0);
     const [totalHigh, setTotalHigh] = useState(0);
-
-    useEffect(() => {
-        setCompactAnal({});
-    }, [globalState.activeProject])
 
     useEffect(() => {
         if (!project) return;
