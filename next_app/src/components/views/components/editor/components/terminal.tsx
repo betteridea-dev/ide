@@ -167,8 +167,8 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         if (result.Output) {
             console.log(result.Output);
             // setPrompt(result.Output.data.prompt)
-            globalState.setPrompt(result.Output.data.prompt)
-            console.log(result.Output.data.prompt)
+            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
+            console.log(result.Output.prompt || result.Output.data.prompt)
             if (result.Output.data.json != "undefined") {
                 console.log("json", result.Output.data.json);
                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);

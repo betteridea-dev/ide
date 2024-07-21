@@ -170,7 +170,7 @@ const CodeCell = ({
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);
-        globalState.setPrompt(result.Output.data!.prompt!)
+        globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
 
         // const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
 
