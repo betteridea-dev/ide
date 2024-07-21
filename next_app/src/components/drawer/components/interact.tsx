@@ -14,6 +14,7 @@ function Interact() {
     const globalState = useGlobalState();
     const wallet = useWallet()
     const project = globalState.activeProject ? manager.projects[globalState.activeProject] : null;
+    const [options, setOptions] = useState<{ label: string, value: string }[]>(Object.keys(manager.projects).filter(pid => { return manager.projects[pid].process }).map(pid => ({ label: `${pid}: ${manager.projects[pid].process}`, value: manager.projects[pid].process })));
     const [target, setTarget] = useState<string>(project?.process || "");
     const [inputTags, setInputTags] = useState<Tag[]>([]);
     const [output, setOutput] = useState<string>("");
@@ -49,7 +50,18 @@ function Interact() {
         <h1 className="text-left p-3 text-muted-foreground">INTERACT</h1>
         {globalState.activeProject ? <div className="overflow-scroll p-2 pt-0.5 flex flex-col gap-2">
             {/* <Input placeholder={`Target (${project?.process})`} onChange={(e) => setTarget(e.target.value)} className="bg-foreground/5 rounded" /> */}
-            <Combobox triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target}`} onChange={(e) => { if (e) { setTarget(e) } else { setTarget(project.process) } }} options={Object.keys(manager.projects).filter(pid => { return manager.projects[pid].process }).map(pid => ({ label: `${pid}: ${manager.projects[pid].process}`, value: manager.projects[pid].process }))} />
+            <Combobox triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target}`}
+                onChange={(e) => { if (e) { setTarget(e) } else { setTarget(project.process) } }}
+                options={options}
+                onSearchChange={(e) => {
+                    if (e.length == 43) {
+                        setOptions(p => {
+                            const newOptions = (p.find(o => o.value == e)) ? p : [{ label: e, value: e }, ...p];
+                            return newOptions;
+                        })
+                    }
+                }}
+            />
             <Input placeholder="Action" onChange={(e) => setAction(e.target.value)} className="bg-foreground/5 rounded" />
             <Input placeholder="Data" onChange={(e) => setData(e.target.value)} className="bg-foreground/5 rounded" />
             <hr className="my-3" />
