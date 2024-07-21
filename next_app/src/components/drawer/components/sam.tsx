@@ -284,7 +284,7 @@ function Sam() {
                 Object.keys(compactAnal).map((filename, index) => <AnalyticFileItem key={index} filename={filename} analysis={compactAnal[filename]} visibleSeverity={visibleSeverity} />)
             }
         </div>
-        <div className="absolute bottom-0 p-2 text-muted-foreground text-sm w-full">Powered by <Link href="https://sam-support.arweave.net/" target="_blank" className="text-primary inline-flex gap-1">SAM <ExternalLink size={14} /></Link></div>
+        <div className="absolute bottom-0 p-2 text-muted-foreground text-center text-sm w-full bg-[#f2f2f2] dark:bg-[#191919]">Powered by <Link href="https://sam-support.arweave.net/" target="_blank" className="text-primary inline-flex gap-1">SAM <ExternalLink size={14} /></Link> (beta)</div>
     </div>
 }
 
