@@ -167,7 +167,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                     // rl.println(`\r\x1b[K\x1b[34mMonitored: ${res}\x1b[0m`);
                     setCommandOutputs(p => {
                         if (p.length >= maxHistory) p.shift()
-                        return [...p, `> ${text}`, `Monitored: \x1b[34m${res}\x1b[0m`]
+                        return [...p, `Monitored: \x1b[34m${res}\x1b[0m`]
                     })
                 } catch (e) {
                     rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
@@ -178,7 +178,11 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 rl.println(`\r\x1b[K\x1b[34mUnmonitoring Process... \x1b[0m`);
                 try {
                     const res = await unmonitor(project.process);
-                    rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
+                    // rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `Unmonitored: \x1b[34m${res}\x1b[0m`]
+                    })
                 } catch (e) {
                     rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
                 } finally {
