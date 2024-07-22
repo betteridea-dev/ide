@@ -170,7 +170,6 @@ const CodeCell = ({
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);
-        globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
 
         // const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
 
@@ -186,6 +185,7 @@ const CodeCell = ({
             // toast({ title: "Error", description: result.Error || result.error })
             toast.error(result.Error || result.error)
         } else {
+            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt || globalState.prompt)
             const outputData = result.Output.data;
             if (outputData.output) {
                 console.log(outputData.output);
