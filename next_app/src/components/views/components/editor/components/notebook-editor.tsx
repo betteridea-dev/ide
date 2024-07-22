@@ -297,6 +297,24 @@ const CodeCell = ({
                             }
                         })
 
+                        editor.addAction({
+                            id: "format-code",
+                            label: "Format Code",
+                            contextMenuGroupId: "navigation",
+                            run: async function (editor) {
+                                const luamin = require('lua-format')
+                                const input = editor.getValue()
+                                console.log("formatting code")
+                                const output: string = luamin.Beautify(input, {
+                                    RenameVariables: false,
+                                    RenameGlobals: false,
+                                    SolveMath: true
+
+                                })
+                                // remove source first line
+                                editor.setValue(output.split("\n").slice(1).join("\n").trimStart())
+                            },
+                        })
                     }}
                     onChange={(value) => {
                         // console.log(value);

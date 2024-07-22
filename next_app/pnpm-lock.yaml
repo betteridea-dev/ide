@@ -122,6 +122,9 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      lua-format:
+        specifier: ^1.4.1
+        version: 1.4.1
       lucide-react:
         specifier: ^0.372.0
         version: 0.372.0(react@18.2.0)
@@ -3004,6 +3007,9 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lua-format@1.4.1:
+    resolution: {integrity: sha512-+szXHscQq0y88HvWvRqou31sZxmpHeaqpXFBwqGmOLLN7QUh3oSKEPDkWubglK/M0Kn6N8Op+gzvFXeo5MEBsw==}
 
   lucide-react@0.372.0:
     resolution: {integrity: sha512-0cKdqmilHXWUwWAWnf6CrrjHD8YaqPMtLrmEHXolZusNTr9epULCsiJwIOHk2q1yFxdEwd96D4zShlAj67UJdA==}
@@ -7489,6 +7495,8 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lua-format@1.4.1: {}
 
   lucide-react@0.372.0(react@18.2.0):
     dependencies:
