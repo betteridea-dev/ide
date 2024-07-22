@@ -18,7 +18,7 @@ const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
 export default function SingleFileEditor() {
     const manager = useProjectManager();
     const globalState = useGlobalState();
-    const {theme} = useTheme();
+    const { theme } = useTheme();
 
     const project = manager.getProject(globalState.activeProject);
     const file = project.getFile(globalState.activeFile);
@@ -44,6 +44,25 @@ export default function SingleFileEditor() {
                 editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
                     // runNormalCode();
                 });
+
+                editor.addAction({
+                    id: "format-code",
+                    label: "Format Code",
+                    contextMenuGroupId: "navigation",
+                    run: async function (editor) {
+                        const luamin = require('lua-format')
+                        const input = editor.getValue()
+                        console.log("formatting code")
+                        const output: string = luamin.Beautify(input, {
+                            RenameVariables: false,
+                            RenameGlobals: false,
+                            SolveMath: true
+
+                        })
+                        // remove source first line
+                        editor.setValue(output.split("\n").slice(1).join("\n").trimStart())
+                    },
+                })
             }}
             value={file ? file.content.cells[file.content.cellOrder[0]].code : ""}
             onChange={(value) => {
