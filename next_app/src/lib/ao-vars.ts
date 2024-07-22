@@ -116,6 +116,28 @@ export async function getResults(process: string, cursor = "") {
   }
 }
 
+export async function monitor(process: string) {
+  const ao = connect();
+
+  const r = await ao.monitor({
+    process,
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+  });
+
+  return r;
+}
+
+export async function unmonitor(process: string) {
+  const ao = connect();
+
+  const r = await ao.unmonitor({
+    process,
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+  });
+
+  return r;
+}
+
 export function parseOutupt(out: any) {
   if (!out.Output) return out;
   const data = out.Output.data;

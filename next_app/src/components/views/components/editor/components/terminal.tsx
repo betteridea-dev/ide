@@ -3,11 +3,12 @@ import { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "@xterm/addon-fit";
 import { Readline } from "xterm-readline";
 import { sendGAEvent } from "@next/third-parties/google";
-import { getResults, runLua } from "@/lib/ao-vars";
+import { getResults, monitor, runLua, unmonitor } from "@/lib/ao-vars";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { toast } from "sonner"
 import { useTheme } from "next-themes";
 import { stripAnsiCodes } from "@/lib/utils";
+import { connect } from "@permaweb/aoconnect";
 
 
 // let promptBuf = ""
@@ -16,6 +17,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
     commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
 }) {
     // promptBuf = prompt
+    const ao = connect()
     const [termDiv, setTermDiv] = useState<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState(false)
     const globalState = useGlobalState()
@@ -153,66 +155,78 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             return readLine(globalState.prompt);
         }
 
-        if (text == "clear") {
-            setCommandOutputs([]);
-            term.resize(maxCols, 10)
-            return readLine(globalState.prompt);
+        switch (text) {
+            case "clear":
+                setCommandOutputs([]);
+                term.resize(maxCols, 10)
+                return readLine(globalState.prompt);
+            case ".monitor":
+                rl.println(`\r\x1b[K\x1b[34mMonitoring Process... \x1b[0m`);
+                try {
+                    const res = await monitor(project.process);
+                    // rl.println(`\r\x1b[K\x1b[34mMonitored: ${res}\x1b[0m`);
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `> ${text}`, `Monitored: \x1b[34m${res}\x1b[0m`]
+                    })
+                } catch (e) {
+                    rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
+                } finally {
+                    return readLine(globalState.prompt);
+                }
+            case ".unmonitor":
+                rl.println(`\r\x1b[K\x1b[34mUnmonitoring Process... \x1b[0m`);
+                try {
+                    const res = await unmonitor(project.process);
+                    rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
+                } catch (e) {
+                    rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
+                } finally {
+                    return readLine(globalState.prompt);
+                }
+            default:
+                console.log("running", text);
+                setRunning(true);
+                // print a line that says computing
+                rl.println(`\r\x1b[K\x1b[34mComputing State Transformations... \x1b[0m`);
+                const result = await runLua(text, project.process, [
+                    { name: "File-Type", value: "Terminal" }
+                ]);
+                if (result.Error) {
+                    console.log(result.Error);
 
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
+                    });
+                    // rl.println(result.Error);
+                }
+                if (result.Output) {
+                    console.log(result.Output);
+                    // setPrompt(result.Output.data.prompt)
+                    globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
+                    console.log(result.Output.prompt || result.Output.data.prompt)
+                    if (result.Output.data.json != "undefined") {
+                        console.log("json", result.Output.data.json);
+                        const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `> ${text}`, outputStr]
+                        });
+                    } else {
+                        console.log("normal", result.Output.data.output);
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `> ${text}`, result.Output.data.output]
+                        });
+                    }
+                }
+                setRunning(false);
+                sendGAEvent({ event: 'run_code', value: 'terminal' })
+                scrollToBottom()
+                setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
+                break;
         }
-        console.log("running", text);
-        setRunning(true);
-        // print a line that says computing
-        rl.println(`\r\x1b[K\x1b[34mComputing State Transformations... \x1b[0m`);
-        const result = await runLua(text, project.process, [
-            { name: "File-Type", value: "Terminal" }
-        ]);
-        if (result.Error) {
-            console.log(result.Error);
-
-            setCommandOutputs(p => {
-                if (p.length >= maxHistory) p.shift()
-                return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
-            });
-            // rl.println(result.Error);
-        }
-        if (result.Output) {
-            console.log(result.Output);
-            // setPrompt(result.Output.data.prompt)
-            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
-            console.log(result.Output.prompt || result.Output.data.prompt)
-            if (result.Output.data.json != "undefined") {
-                console.log("json", result.Output.data.json);
-                const outputStr = JSON.stringify(result.Output.data.json, null, 2);
-                setCommandOutputs(p => {
-                    if (p.length >= maxHistory) p.shift()
-                    return [...p, `> ${text}`, outputStr]
-                });
-                // outputStr.split("\n").forEach((line) => {
-                // rl.println(line);
-                // history.push(line);
-                // term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-                // })
-                // rl.println(JSON.stringify(result.Output.data.json, null, 2));
-            } else {
-                console.log("normal", result.Output.data.output);
-                setCommandOutputs(p => {
-                    if (p.length >= maxHistory) p.shift()
-                    return [...p, `> ${text}`, result.Output.data.output]
-                });
-                // rl.println(result.Output.data.output);
-                // console.log("normal out")
-                // const outputStr = `${result.Output.data.output}`;
-                // outputStr.split("\n").forEach((line) => {
-                //     rl.println(line);
-                //     history.push(line);
-                //     term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length + 1)
-                // });
-            }
-        }
-        setRunning(false);
-        sendGAEvent({ event: 'run_code', value: 'terminal' })
-        scrollToBottom()
-        setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
     }
 
     if (!globalState.activeProject) {
