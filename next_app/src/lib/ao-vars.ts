@@ -26,8 +26,11 @@ export type Tag = { name: string; value: string };
 
 // db parsed
 export type Column = {
-  name: string
-  dataType: string
+  name: string;
+  pk: number;
+  cid: number;
+  notnull: number;
+  type: string;
 }
 
 export type TPackage = {

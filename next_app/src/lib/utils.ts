@@ -20,24 +20,25 @@ export function pushToRecents(pname: string) {
   }
 }
 
-export function parseCreateTableQuery(query: string): Column[] {
-  const columns: Column[] = [];
-  const lines = query.split(/\n|,/);
+// export function parseCreateTableQuery(query: string): Column[] {
+//   const columns: Column[] = [];
+//   const lines = query.split(/\n|,/);
 
-  for (const line of lines) {
-    if (line.trim().startsWith('CREATE TABLE') || line.trim().startsWith('FOREIGN KEY')) {
-      continue;
-    }
+//   for (const line of lines) {
+//     if (line.trim().startsWith('CREATE TABLE') || line.trim().startsWith('FOREIGN KEY')) {
+//       continue;
+//     }
 
-    const columnMatch = line.match(/^\s*(\w+)\s+((?:\w+\s*\([^)]*\))|\w+)/);
-    if (columnMatch) {
-      const [, name, dataType] = columnMatch;
-      columns.push({ name, dataType });
-    }
-  }
+//     const columnMatch = line.match(/^\s*(\w+)\s*(\w*)/);
+//     if (columnMatch) {
+//       const [, name, dataType] = columnMatch;
+//       columns.push({ });
+//     }
+//   }
 
-  return columns;
-}
+//   return columns;
+// }
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -48,7 +49,7 @@ export function tsToDate(ts: number) {
   return `${d.toDateString()} ${d.toTimeString()}`;
 }
 
-export function getRelativeTime(timestamp:number) {
+export function getRelativeTime(timestamp: number) {
   const now = new Date() as any;
   const past = new Date(timestamp) as any;
   const diffInSeconds = Math.floor((now - past) / 1000);
@@ -85,7 +86,7 @@ export const capOutputTo200Lines = (str: string): string => {
   return lines.slice(0, 100).join("\n") + "\n\x1b[31m... output has been capped at 200 lines ...\x1b[0m\n" + lines.slice(-100).join("\n");
 }
 
-export function createLoaderFunc(name:string, src:string){
+export function createLoaderFunc(name: string, src: string) {
 
   return `local func, err = load([[
         local function _load()

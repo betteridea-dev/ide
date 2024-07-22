@@ -10,7 +10,7 @@ import Markdown from "react-markdown"
 import { toast } from "sonner"
 import { dryrun } from "@permaweb/aoconnect"
 import remarkGfm from "remark-gfm"
-import { getRelativeTime, parseCreateTableQuery } from "@/lib/utils"
+import { getRelativeTime } from "@/lib/utils"
 import { useSessionStorage } from "usehooks-ts"
 import { Input } from "@/components/ui/input"
 
@@ -44,12 +44,19 @@ export default function TableView() {
     for row in ${dbName}:nrows("select * from sqlite_schema where name = '${tableName}'") do
         table.insert(tables, row)
     end
-return require"json".encode(tables[1].sql)`
+    local cols = {}
+    for row in ${dbName}:nrows("PRAGMA table_info(${tableName});") do
+        table.insert(cols, row)
+    end
+return require"json".encode({
+        cols = cols,
+        sql = tables[1].sql
+})`
         const res = await runLua(query, project.process)
         const { Output } = res
-        const q = (JSON.parse(Output.data.output as string) as string).replace("(", " (")
-        setQuery(q)
-        setStructure(parseCreateTableQuery(q))
+        const q: { cols: Column[], sql: string } = JSON.parse(Output.data.output as string)
+        setQuery(q.sql)
+        setStructure(q.cols)
     }
 
     async function getTableRows() {
@@ -183,7 +190,7 @@ return require"json".encode(tables)`
                                 <th className="!w-fit">{loadingRows && <Loader size={15} className="animate-spin mx-auto w-fit" />}</th>
                                 {/* {Object.keys(rows[0]).map((key:string, i) => <th key={i} className="border border-primary/20 p-2">{key}</th>)} */}
                                 {
-                                    structure.map((col, i) => col&& <th key={i} className="border border-primary/20 p-2">{col.name}</th>)
+                                    structure.map((col, i) => col && <th key={i} className="border border-primary/20 p-2">{col.name}</th>)
                                 }
                             </tr>
                         </thead>
