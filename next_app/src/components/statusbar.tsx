@@ -66,8 +66,8 @@ export default function Statusbar() {
                     globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
                     if (result.Output.print) {
                         console.log(res)
-                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data)}</div>, { style: { borderRadius: "7px" } })
-                        globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, result.Output.data!])
+                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data! as string)}</div>, { style: { borderRadius: "7px" } })
+                        globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, result.Output.data! as string])
                     }
                 })
             }
