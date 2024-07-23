@@ -62,12 +62,14 @@ export default function Statusbar() {
             if (res.cursor) localStorage.setItem("cursor", res.cursor)
             const { results } = res
             if (results.length > 0) {
+                console.log(res)
                 results.forEach((result) => {
-                    globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
-                    if (result.Output.print) {
-                        console.log(res)
-                        toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(result.Output.data! as string)}</div>, { style: { borderRadius: "7px" } })
-                        globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, result.Output.data! as string])
+                    if (typeof result.Output == "object") {
+                        // globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
+                        if (result.Output.print) {
+                            toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(`${result.Output.data}`)}</div>, { style: { borderRadius: "7px" } })
+                            globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
+                        }
                     }
                 })
             }
