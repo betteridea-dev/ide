@@ -88,7 +88,7 @@ return require"json".encode(tables)`
 
     async function deleteRow(row: { [foo: string]: string }) {
         console.log('deleting', row)
-        const query = `local res = db:exec([[DELETE FROM ${tableName} WHERE ${Object.keys(row).map(k => `${k} = ${typeof row[k] == "string" ? `"${row[k]}"` : row[k]}`).join(" AND ")}]])
+        const query = `local res = ${tableName}:exec([[DELETE FROM ${tableName} WHERE ${Object.keys(row).map(k => `${k} = ${typeof row[k] == "string" ? `"${row[k]}"` : row[k]}`).join(" AND ")}]])
 return res`
         console.log(query)
         setDeletingRow(true)
