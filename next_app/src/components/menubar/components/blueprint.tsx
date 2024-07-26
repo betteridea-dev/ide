@@ -73,6 +73,7 @@ export default function Blueprints() {
                         { name: "BetterIDEa-Function", value: "load-Blueprint" }
                     ]);
                     console.log(res);
+                    if (res.Error) return toast.error(res.Error);
                     const output = parseOutupt(res);
                     console.log(output);
                     setLoading(false);

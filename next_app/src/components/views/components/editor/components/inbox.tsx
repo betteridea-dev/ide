@@ -34,10 +34,13 @@ export default function Inbox() {
         ])
         setFetchingInbox(false)
         console.log(res)
-        const { Output: { data: { output } } } = res
-        globalState.setPrompt(res.Output.prompt || res.Output.data.prompt)
-        setInbox(JSON.parse(output))
-        return JSON.parse(output)
+        if (res.Error) toast.error(res.Error);
+        else {
+            const { Output: { data: { output } } } = res
+            globalState.setPrompt(res.Output.prompt || res.Output.data.prompt)
+            setInbox(JSON.parse(output))
+            return JSON.parse(output)
+        }
     }
 
     useEffect(() => {

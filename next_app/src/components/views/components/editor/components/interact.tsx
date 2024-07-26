@@ -43,6 +43,7 @@ export default function Interact() {
         setOutput("...")
         setId("...")
         const res = await runLua(eqLua, project.process)
+        if (res.Error) return toast.error(res.Error);
         setSendingMessage(false)
         setId((res as any).id)
         setOutput(JSON.stringify(res, null, 2))

@@ -94,6 +94,7 @@ function Editor() {
             console.log(result.Error);
             globalState.setLastOutput("\x1b[1;31m" + result.Error as string);
             fileContent.cells[0].output = result.Error;
+            toast.error(result.Error);
         } else {
             const outputData = result.Output.data;
             if (outputData.output) {

@@ -295,6 +295,7 @@ export default function CodeCell() {
             { name: "File-Type", value: "External-Code-Cell" },
         ]);
         const out = parseOutupt(r);
+        if (r.Error) return toast.error(r.Error);
         console.log(out);
         setOutput(out);
         setRunning(false);

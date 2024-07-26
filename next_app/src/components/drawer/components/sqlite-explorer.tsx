@@ -13,9 +13,9 @@ function SQLiteExplorer() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
     const project = globalState.activeProject && manager.projects[globalState.activeProject];
-    const [dbVarName, setDbVarName] = useSessionStorage<string>("db-var-name","", {initializeWithValue:true});
+    const [dbVarName, setDbVarName] = useSessionStorage<string>("db-var-name", "", { initializeWithValue: true });
     const [fetchingTables, setFetchingTables] = useState(false);
-    const [tables, setTables] = useSessionStorage<string[]>('db-tables',[],{initializeWithValue:true});
+    const [tables, setTables] = useSessionStorage<string[]>('db-tables', [], { initializeWithValue: true });
 
     async function fetchTables() {
         if (!dbVarName) return toast.error("DB variable name is required");
@@ -29,6 +29,7 @@ function SQLiteExplorer() {
     return require('json').encode(tables)`
             const res = await runLua(query, project.process);
             console.log(res);
+            if (res.Error) return toast.error(res.Error);
             const { Output } = res
             const output = JSON.parse(Output.data.output);
             setTables(output);
@@ -57,7 +58,7 @@ function SQLiteExplorer() {
         }
         <div className="grid grid-cols-1 overflow-scroll">
             {
-                globalState.activeProject&&tables.map((tname, i) => (
+                globalState.activeProject && tables.map((tname, i) => (
                     <Button variant="ghost" key={i} data-active={false}
                         className="rounded-none w-full mx-auto justify-start truncate data-[active=true]:bg-foreground/20"
                         onClick={() => {

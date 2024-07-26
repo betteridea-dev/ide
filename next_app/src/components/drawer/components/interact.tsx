@@ -37,6 +37,7 @@ function Interact() {
         try {
             const res = await runLua(eqLua, project?.process || wallet.address);
             console.log(res);
+            if (res.Error) return toast.error(res.Error);
             setId((res as any).id);
             setSendingMessage(false);
             setOutput(JSON.stringify(res, null, 2));
