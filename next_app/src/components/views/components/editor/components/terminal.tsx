@@ -56,10 +56,10 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         if (aoTerm) aoTerm.scrollTop = aoTerm.scrollHeight
         const termContainer = document.getElementById("terminal-container");
         if (termContainer) termContainer.scrollTop = termContainer.scrollHeight;
-
     }
 
     useEffect(() => {
+        if (!termDiv) return;
         if (!loaded) return;
         term.focus()
         term.clear()
@@ -108,19 +108,6 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
         setLoaded(true)
         scrollToBottom()
     }, [globalState.prompt, loaded, readLine, rl, term, termDiv])
-
-    useEffect(() => {
-        if (!termDiv) return;
-        if (!loaded) return;
-        term.clear()
-        rl.println("\r\x1b[K");
-        commandOutputs.forEach((line) => {
-            rl.println(line);
-            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-        })
-        globalState.prompt && rl.print(globalState.prompt)
-        scrollToBottom()
-    }, [commandOutputs, globalState.prompt, loaded, rl, term, termDiv])
 
     function readLine(newPrompt: string) {
         rl.read(newPrompt || prompt).then(processLine);

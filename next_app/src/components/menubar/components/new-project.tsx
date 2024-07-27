@@ -83,19 +83,13 @@ export default function NewProject() {
     }
 
     async function createProject() {
+        if (!window.arweaveWallet) return toast.error("Cant find ArConnect wallet extension. Install from arconnect.io")
+        if (!wallet.isConnected) return toast.error("Connect wallet before creating a project")
         if (!newProjName)
-            // return toast({
-            //   title: "Need a project name 😑",
-            //   description: "A new project always needs a name",
-            // });
             return toast.error("Need a project name 😑", {
                 description: "A new project always needs a name", id: "error"
             })
         if (!processUsed)
-            // return toast({
-            //   title: "Process options not set",
-            //   description: "You must choose wether to create a new process or use an existing one",
-            // });
             return toast.error("Process options not set", {
                 description: "You must choose wether to create a new process or use an existing one", id: "error"
             })
