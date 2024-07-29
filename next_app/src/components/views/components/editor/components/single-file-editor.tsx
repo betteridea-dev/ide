@@ -43,6 +43,7 @@ export default function SingleFileEditor() {
                 // run function on shift+enter
                 editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
                     // runNormalCode();
+                    document.getElementById("run-code-btn")?.click();
                 });
 
                 editor.addAction({

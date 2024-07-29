@@ -32,6 +32,7 @@ function Settings() {
     const [newProcessModule, setNewProcessModule] = useState("");
     const [spawning, setSpawning] = useState(false);
     const [manualPid, setManualPid] = useState("");
+    const [manualModule, setManualModule] = useState("");
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
 
@@ -101,7 +102,7 @@ function Settings() {
     }
 
     return <div className="p-10 max-w-4xl mx-auto">
-        <Button variant="link" className="mb-5 text-sm text-muted p-0" onClick={()=>globalState.setActiveView(null)}>
+        <Button variant="link" className="mb-5 text-sm text-muted p-0" onClick={() => globalState.setActiveView(null)}>
             <ArrowLeft size={15} className=" inline-block mr-2" /> home
         </Button>
         <Title title="CURRENT PROJECT" />
@@ -120,13 +121,13 @@ function Settings() {
                     <Combobox placeholder="Select Process" disabled={spawning} options={manualPid.length == 43 ? [{ label: `Process ID: ${manualPid}`, value: manualPid }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setManualPid(e)} />
                     {processUsed == "NEW_PROCESS" && <>
                         <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-full" onChange={(e) => { setNewProcessName(e.target.value) }} />
-                        <Combobox placeholder="Select AO Process Module" disabled={spawning} options={Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} />
+                        <Combobox placeholder="Select AO Process Module" disabled={spawning} options={manualModule.length == 43 ? [{ label: `Module ID: ${manualModule}`, value: manualModule }] : Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setManualModule(e)} />
                     </>}
                     <Button size="sm"
                         className="text-white"
                         disabled={
-                        processUsed === "" || spawning
-                    } onClick={setProcess}>
+                            processUsed === "" || spawning
+                        } onClick={setProcess}>
                         {spawning && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
                         Confirm
                     </Button>

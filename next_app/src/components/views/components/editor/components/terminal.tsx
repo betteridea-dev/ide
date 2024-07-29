@@ -11,7 +11,7 @@ import { stripAnsiCodes } from "@/lib/utils";
 import { connect } from "@permaweb/aoconnect";
 
 
-// let promptBuf = ""
+let promptBuf = ""
 export default function AOTerminal({ prompt, setPrompt, commandOutputs, setCommandOutputs }: {
     prompt: string, setPrompt: Dispatch<SetStateAction<string>>,
     commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
@@ -195,22 +195,35 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 if (result.Output) {
                     console.log(result.Output);
                     // setPrompt(result.Output.data.prompt)
-                    globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
+                    result.Output.prompt && globalState.setPrompt(result.Output.prompt)
+                    result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
+
                     console.log(result.Output.prompt || result.Output.data.prompt)
-                    if (result.Output.data.json != "undefined") {
-                        console.log("json", result.Output.data.json);
-                        const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                    const outputData = result.Output.data;
+                    console.log("outputData", outputData);
+                    if (typeof outputData == "string" || typeof outputData == "number") {
+                        console.log(outputData);
+                        // fileContent.cells[cellId].output = outputData;
+                        // globalState.setLastOutput(outputData as string);
                         setCommandOutputs(p => {
                             if (p.length >= maxHistory) p.shift()
-                            return [...p, `> ${text}`, outputStr]
+                            return [...p, `> ${text}`, outputData.toString()]
                         });
-                    } else {
-                        console.log("normal", result.Output.data.output);
-                        setCommandOutputs(p => {
-                            if (p.length >= maxHistory) p.shift()
-                            return [...p, `> ${text}`, result.Output.data.output]
-                        });
-                    }
+                    } else
+                        if (result.Output.data.json != "undefined") {
+                            console.log("json", result.Output.data.json);
+                            const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `> ${text}`, outputStr]
+                            });
+                        } else {
+                            console.log("normal", result.Output.data.output);
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `> ${text}`, result.Output.data.output]
+                            });
+                        }
                 }
                 setRunning(false);
                 sendGAEvent({ event: 'run_code', value: 'terminal' })

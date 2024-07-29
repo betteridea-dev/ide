@@ -89,7 +89,6 @@ function Editor() {
             { name: "File-Type", value: "Normal" }
         ]);
         console.log(result);
-        globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
         if (result.Error) {
             console.log(result.Error);
             globalState.setLastOutput("\x1b[1;31m" + result.Error as string);
@@ -97,7 +96,13 @@ function Editor() {
             toast.error(result.Error);
         } else {
             const outputData = result.Output.data;
-            if (outputData.output) {
+            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
+            if (typeof outputData == "string" || typeof outputData == "number") {
+                console.log(outputData);
+                fileContent.cells[0].output = outputData;
+                globalState.setLastOutput(outputData as string);
+            }
+            else if (outputData.output) {
                 console.log(outputData.output);
                 fileContent.cells[0].output = outputData.output;
                 globalState.setLastOutput(outputData.output);
@@ -128,7 +133,7 @@ function Editor() {
                 </div>
                 {
                     globalState.activeFile && globalState.activeFile.endsWith(".lua") && <div className="bg-background static right-0 top-0 h-[39px] border-l flex items-center justify-center ml-auto">
-                        <Button variant="ghost" className="rounded-none h-[39px] w-[39px] p-0 bg-primary/20" onClick={runLuaFile}>
+                        <Button variant="ghost" id="run-code-btn" className="rounded-none h-[39px] w-[39px] p-0 bg-primary/20" onClick={runLuaFile}>
                             {running ?
                                 <LoaderIcon size={20} className="p-0 animate-spin text-primary" />
                                 : <Image src={runIcon} alt="Run" width={20} height={20} className="p-0" />}
@@ -155,6 +160,7 @@ function Editor() {
                         <TabsTrigger value="terminal" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Terminal</TabsTrigger>
                         <TabsTrigger value="inbox" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Inbox</TabsTrigger>
                         <TabsTrigger value="output" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Output</TabsTrigger>
+                        <TabsTrigger value="history" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">History</TabsTrigger>
                         {/* <TabsTrigger value="interact" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Interact</TabsTrigger> */}
                     </TabsList>
                     <TabsContent id="terminal-container" value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
@@ -165,6 +171,9 @@ function Editor() {
                     </TabsContent>
                     <TabsContent value="output" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <Output />
+                    </TabsContent>
+                    <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0">
+                        Command History
                     </TabsContent>
                     {/* <TabsContent value="interact" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <Interact />

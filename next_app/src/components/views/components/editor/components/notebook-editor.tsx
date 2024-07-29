@@ -187,7 +187,11 @@ const CodeCell = ({
         } else {
             globalState.setPrompt(result.Output.prompt || result.Output.data.prompt || globalState.prompt)
             const outputData = result.Output.data;
-            if (outputData.output) {
+            if (typeof outputData == "string" || typeof outputData == "number") {
+                console.log(outputData);
+                fileContent.cells[cellId].output = outputData;
+                globalState.setLastOutput(outputData as string);
+            } else if (outputData.output) {
                 console.log(outputData.output);
                 try {
                     const parsedData = JSON.parse(outputData.output);

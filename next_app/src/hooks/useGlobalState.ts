@@ -36,7 +36,7 @@ export const useGlobalState = create<State>((set) => ({
     openedFiles: [],
     lastOutput: "",
     openedPackages: [],
-    prompt: "aos> ",
+    prompt: "",
     setTerminalOutputs: null,
     setActiveSidebarItem: (item: TSidebarOptions) => set({ activeSidebarItem: item }),
     setActiveView: (view: TViewOptions) => set({ activeView: view }),
