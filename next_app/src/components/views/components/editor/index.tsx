@@ -24,7 +24,7 @@ function Editor() {
     const manager = useProjectManager();
     const wallet = useWallet();
     const [running, setRunning] = useState(false);
-    const [prompt, setPrompt] = useState("aos>");
+    // const [prompt, setPrompt] = useState("");
     const [commandOutputs, setCommandOutputs] = useState([]);
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject];
@@ -164,7 +164,7 @@ function Editor() {
                         {/* <TabsTrigger value="interact" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-white">Interact</TabsTrigger> */}
                     </TabsList>
                     <TabsContent id="terminal-container" value="terminal" className="h-[calc(100%-30px)] overflow-scroll m-0">
-                        <AOTerminal prompt={prompt} setPrompt={setPrompt} commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
+                        <AOTerminal commandOutputs={commandOutputs} setCommandOutputs={setCommandOutputs} />
                     </TabsContent>
                     <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <Inbox />

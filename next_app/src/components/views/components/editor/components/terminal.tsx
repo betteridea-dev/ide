@@ -12,8 +12,7 @@ import { connect } from "@permaweb/aoconnect";
 
 
 let promptBuf = ""
-export default function AOTerminal({ prompt, setPrompt, commandOutputs, setCommandOutputs }: {
-    prompt: string, setPrompt: Dispatch<SetStateAction<string>>,
+export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
     commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
 }) {
     // promptBuf = prompt
@@ -59,6 +58,17 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
     }
 
     useEffect(() => {
+        if (!globalState.prompt)
+            runLua("return Prompt()", project.process).then((res) => {
+                if (res.Error) return toast.error(res.Error)
+                globalState.setPrompt(res.Output.prompt || res.Output.data.prompt)
+                promptBuf = res.Output.prompt || res.Output.data.prompt
+            })
+        else
+            promptBuf = globalState.prompt
+    }, [globalState.prompt, project.process])
+
+    useEffect(() => {
         if (!termDiv) return;
         if (!loaded) return;
         term.focus()
@@ -69,7 +79,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             term.resize(maxCols, term.buffer.normal.length >= maxRows ? maxRows : term.buffer.normal.length)
         })
         console.log("prompt", globalState.prompt)
-        globalState.prompt && rl.print(globalState.prompt)
+        rl.print(promptBuf)
         scrollToBottom()
     }, [loaded, globalState.activeProject, globalState.prompt, term, rl, commandOutputs])
 
@@ -103,14 +113,14 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
             return true;
         });
 
-        readLine(globalState.prompt)
+        readLine(promptBuf)
 
         setLoaded(true)
         scrollToBottom()
     }, [globalState.prompt, loaded, readLine, rl, term, termDiv])
 
     function readLine(newPrompt: string) {
-        rl.read(newPrompt || prompt).then(processLine);
+        rl.read(newPrompt).then(processLine);
     }
 
     async function processLine(text: string) {
@@ -139,14 +149,14 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 if (p.length >= maxHistory) p.shift()
                 return [...p, ">"]
             });
-            return readLine(globalState.prompt);
+            return readLine(promptBuf);
         }
 
         switch (text) {
             case "clear":
                 setCommandOutputs([]);
                 term.resize(maxCols, 10)
-                return readLine(globalState.prompt);
+                return readLine(promptBuf);
             case ".monitor":
                 rl.println(`\r\x1b[K\x1b[34mMonitoring Process... \x1b[0m`);
                 try {
@@ -159,7 +169,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 } catch (e) {
                     rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
                 } finally {
-                    return readLine(globalState.prompt);
+                    return readLine(promptBuf);
                 }
             case ".unmonitor":
                 rl.println(`\r\x1b[K\x1b[34mUnmonitoring Process... \x1b[0m`);
@@ -173,7 +183,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 } catch (e) {
                     rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
                 } finally {
-                    return readLine(globalState.prompt);
+                    return readLine(promptBuf);
                 }
             default:
                 console.log("running", text);
@@ -228,7 +238,7 @@ export default function AOTerminal({ prompt, setPrompt, commandOutputs, setComma
                 setRunning(false);
                 sendGAEvent({ event: 'run_code', value: 'terminal' })
                 scrollToBottom()
-                setTimeout(() => readLine(result?.Output?.data?.prompt || prompt), 100);
+                setTimeout(() => readLine(promptBuf), 100);
                 break;
         }
     }
