@@ -30,7 +30,7 @@ export default function History() {
                                 <div className="text-xs">{msg.id}</div>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <pre className="text-xs max-h-[200px] overflow-scroll">&gt; {msg.code}</pre>
+                                <pre className="text-xs max-h-[200px] overflow-scroll border-l-4 border-muted pl-1">{msg.code}</pre>
                                 <pre className="text-xs max-h-[200px] overflow-scroll text-green-400"><Ansi>{typeof msg.output == "object" ? (msg.output as any).output : msg.output}</Ansi></pre>
                             </div>
                         </div>
