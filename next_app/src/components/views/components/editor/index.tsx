@@ -18,6 +18,7 @@ import Output from "./components/output";
 import PackageView from "./components/package";
 import TableView from "./components/table";
 import Interact from "./components/interact";
+import History from "./components/history";
 
 function Editor() {
     const globalState = useGlobalState();
@@ -173,7 +174,7 @@ function Editor() {
                         <Output />
                     </TabsContent>
                     <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0">
-                        Command History
+                        <History />
                     </TabsContent>
                     {/* <TabsContent value="interact" className="h-[calc(100%-30px)] overflow-scroll m-0">
                         <Interact />

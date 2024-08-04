@@ -4,6 +4,11 @@ import { TViewOptions } from "@/components/views/components";
 import { TPackage } from "@/lib/ao-vars";
 import { Dispatch, SetStateAction } from "react";
 
+export interface MsgHistory {
+    code: string;
+    id: string;
+    timestamp: number;
+}
 
 interface State {
     activeSidebarItem: TSidebarOptions;
@@ -15,6 +20,7 @@ interface State {
     openedPackages: TPackage[];
     prompt: string;
     setTerminalOutputs: Dispatch<SetStateAction<string[]>>;
+    history: { [pname: string]: MsgHistory[] };
     setActiveSidebarItem: (item: TSidebarOptions) => void;
     setActiveView: (view: TViewOptions) => void;
     setActiveProject: (project: string) => void;
@@ -26,6 +32,7 @@ interface State {
     addOpenedPackage: (pkg: TPackage) => void;
     setPrompt: (prompt: string) => void;
     setSetTerminalOutputsFunction: (func: Dispatch<SetStateAction<string[]>>) => void;
+    appendHistory: (pname: string, msg: MsgHistory) => void;
 }
 
 export const useGlobalState = create<State>((set) => ({
@@ -38,6 +45,7 @@ export const useGlobalState = create<State>((set) => ({
     openedPackages: [],
     prompt: "",
     setTerminalOutputs: null,
+    history: {},
     setActiveSidebarItem: (item: TSidebarOptions) => set({ activeSidebarItem: item }),
     setActiveView: (view: TViewOptions) => set({ activeView: view }),
     setActiveProject: (project: string) => set({
@@ -69,5 +77,11 @@ export const useGlobalState = create<State>((set) => ({
         openedPackages: state.openedPackages.find((p) => p.PkgID == pkg.PkgID) ? state.openedPackages.map((p) => p.PkgID == pkg.PkgID ? pkg : p) : [...state.openedPackages, pkg]
     })),
     setPrompt: (prompt: string) => set({ prompt }),
-    setSetTerminalOutputsFunction: (func: Dispatch<SetStateAction<string[]>>) => set({ setTerminalOutputs: func })
+    setSetTerminalOutputsFunction: (func: Dispatch<SetStateAction<string[]>>) => set({ setTerminalOutputs: func }),
+    appendHistory: (pname: string, msg: MsgHistory) => set((state) => ({
+        history: {
+            ...state.history,
+            [pname]: state.history[pname] ? [...state.history[pname], msg] : [msg]
+        }
+    }))
 }));
