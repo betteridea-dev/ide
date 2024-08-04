@@ -166,7 +166,7 @@ const CodeCell = ({
         console.log("running", cell.code);
         setRunning(true);
         const fileContent = { ...file.content };
-        const result = await runLua(cell.code, p.process, [
+        const result = await runLua(cell.code, file.process || p.process, [
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);

@@ -85,7 +85,7 @@ function Editor() {
 
         setRunning(true);
         const fileContent = { ...file.content };
-        const result = await runLua(fileContent.cells[0].code, p.process, [
+        const result = await runLua(fileContent.cells[0].code, file.process || p.process, [
             { name: "File-Type", value: "Normal" }
         ]);
         console.log(result);

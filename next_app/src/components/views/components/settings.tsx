@@ -2,7 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { TView } from "."
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes"
-import { ArrowLeft, LoaderIcon, MoonIcon, SunIcon } from "lucide-react";
+import { ArrowLeft, Edit, File, Loader, LoaderIcon, MoonIcon, Plus, SunIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import { Combobox } from "@/components/ui/combo-box";
 import { modules as AOModules, AOModule, runLua, spawnProcess } from "@/lib/ao-vars";
 import { useState } from "react";
 import { GraphQLClient, gql } from "graphql-request";
+import { PFile } from "@/hooks/useProjectManager";
 
 function Title({ title }: { title: string }) {
     return (
@@ -20,6 +21,90 @@ function Title({ title }: { title: string }) {
             <Separator className="" />
         </div>
     );
+}
+
+function EditFileProcess({ fileName, processes, fetchProcessesFunc }: {
+    fileName: string,
+    processes: { label: string, value: string }[],
+    fetchProcessesFunc: () => void
+}) {
+    const manager = useProjectManager();
+    const globalState = useGlobalState();
+    const [editing, setEditing] = useState(false);
+    const [process, setProcess] = useState("");
+    const [spawning, setSpawning] = useState(false);
+    const [newProcessName, setNewProcessName] = useState("");
+    const [newProcessModule, setNewProcessModule] = useState("");
+    const [manualPid, setManualPid] = useState("");
+    const [manualModule, setManualModule] = useState("");
+    const p = manager.getProject(globalState.activeProject);
+    const file = p.getFile(fileName);
+    console.log(file);
+
+    function setDefault() {
+        manager.setFileProcess(p, file, "");
+        file.process = "";
+        p.files[fileName] = file;
+        manager.projects[globalState.activeProject] = p;
+        manager.saveProjects(manager.projects);
+        setEditing(false);
+        toast.success("Process Updated");
+    }
+
+    return <div className="grid grid-cols-3 border-b last:border-none py-2.5">
+        <div className="col-span-1"><File size={15} className="inline" /> {fileName}</div>
+        {editing ? <>
+            <div className="col-span-2 flex gap-2 items-center">
+                <div className="flex flex-col gap-2 w-full">
+                    <Combobox placeholder="Select Process" options={
+                        manualPid.length == 43 ? [{ label: `Process ID: ${manualPid}`, value: manualPid }] :
+                            processes} onOpen={fetchProcessesFunc} onChange={(e) => setProcess(e)} onSearchChange={(e) => setManualPid(e)} />
+                    {
+                        process === "NEW_PROCESS" && <>
+                            <Input type="text" placeholder="Enter new process name" onChange={(e) => { setNewProcessName(e.target.value) }} />
+                            <Combobox placeholder="Select AO Process Module"
+                                options={manualModule.length == 43 ? [{ label: `Module ID: ${manualModule}`, value: manualModule }] :
+                                    Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setManualModule(e)} />
+                        </>
+                    }
+
+                    <div className="flex items-center justify-center gap-2">
+                        <Button size="sm" disabled={spawning} onClick={async () => {
+                            setSpawning(true);
+                            if (process === "NEW_PROCESS") {
+                                const np = await spawnProcess(newProcessName || p.name + "-" + file.name, [], process === "NEW_PROCESS" ? newProcessModule : AOModule);
+                                manager.setFileProcess(p, file, np);
+                                file.process = np;
+                                p.files[fileName] = file;
+                                manager.projects[globalState.activeProject] = p;
+                                manager.saveProjects(manager.projects);
+                            } else {
+                                manager.setFileProcess(p, file, process);
+                                file.process = process;
+                                p.files[fileName] = file;
+                                manager.projects[globalState.activeProject] = p;
+                                manager.saveProjects(manager.projects);
+                            }
+                            toast.success("Process Updated");
+                            setEditing(false);
+                            setSpawning(false);
+                        }}>Confirm {spawning && <Loader size={16} className="animate-spin ml-2" />}</Button>
+                        <Button variant="destructive" onClick={() => setEditing(false)}>Cancel</Button>
+                        <Button variant="destructive" onClick={setDefault}>Reset default</Button>
+                    </div>
+                </div>
+            </div>
+        </> : <div className="flex items-center gap-2 whitespace-nowrap">{file.process
+            || <>default <span className="whitespace-nowrap text-muted">{p.process}</span></>
+        }
+            <Button variant="ghost" className="text-primary p-0 w-5 h-5" onClick={() => {
+                setEditing(true)
+                setProcess(null)
+                setManualModule("")
+                setManualPid("")
+            }}><Edit size={16} /></Button>
+        </div>}
+    </div>
 }
 
 function Settings() {
@@ -33,8 +118,12 @@ function Settings() {
     const [spawning, setSpawning] = useState(false);
     const [manualPid, setManualPid] = useState("");
     const [manualModule, setManualModule] = useState("");
+    const [changeDefaultProcessVisible, setChangeDefaultProcessVisible] = useState(false);
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
+    const files: { [name: string]: PFile } = project ? project.files : {};
+    const filesWithProcesses = Object.keys(files).filter((f) => files[f].process);
+    console.log(files, filesWithProcesses);
 
     async function fetchProcesses() {
         if (!window.arweaveWallet) return
@@ -86,6 +175,7 @@ function Settings() {
         setNewProcessName("");
         setProcessUsed("");
         setManualPid("");
+        setChangeDefaultProcessVisible(false);
         toast.success("Process Updated");
     }
 
@@ -107,31 +197,53 @@ function Settings() {
         </Button>
         <Title title="CURRENT PROJECT" />
         {
-            project ? <div className="my-8 grid grid-cols-3 items-center">
+            project ? <div className="my-8 grid grid-cols-3 gap-1 items-center">
                 <div>Owner Wallet</div>
                 <div className="col-span-2">{typeof project.ownerWallet == "string" ? project.ownerWallet : "NA"}</div>
-                <div>Current Process</div>
-                <div className="col-span-2">{project.process || "NA"}</div>
+                <div>Default Process</div>
+                <div className="col-span-2 flex items-center justify-start gap-2">{
+                    changeDefaultProcessVisible ? <>
+                        <div className="w-full flex flex-col gap-2 my-4 items-center">
+                            <Combobox placeholder="Select Process" disabled={spawning} options={manualPid.length == 43 ? [{ label: `Process ID: ${manualPid}`, value: manualPid }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setManualPid(e)} />
+                            {processUsed == "NEW_PROCESS" && <>
+                                <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-full" onChange={(e) => { setNewProcessName(e.target.value) }} />
+                                <Combobox placeholder="Select AO Process Module" disabled={spawning} options={manualModule.length == 43 ? [{ label: `Module ID: ${manualModule}`, value: manualModule }] : Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setManualModule(e)} />
+                            </>}
+                            <div className="flex gap-2 items-center justify-center">
+                                <Button size="sm"
+                                    className="text-white"
+                                    disabled={
+                                        processUsed === "" || spawning
+                                    } onClick={setProcess}>
+                                    {spawning && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
+                                    Confirm
+                                </Button>
+                                <Button variant="destructive" onClick={() => {
+                                    setChangeDefaultProcessVisible(false);
+                                    setProcessUsed("");
+                                    setManualPid("");
+                                    setManualModule("");
+                                }}>Cancel</Button>
+                            </div>
+                        </div>
+
+                    </> : <>{project.process || "NA"}</>
+                } <Button variant="ghost" className="h-5 w-5 p-0 text-primary" onClick={(e) => setChangeDefaultProcessVisible(!changeDefaultProcessVisible)}>{changeDefaultProcessVisible ? <></> : <Edit size={16} />}</Button></div>
                 <div>Default Filetype</div>
                 <div className="col-span-2">{project.defaultFiletype || "NA"}</div>
-                <div className="col-span-3 h-5"></div>
-                <div>Change Process</div>
 
-                <div className="col-span-2 flex flex-col gap-1 items-center">
-                    <Combobox placeholder="Select Process" disabled={spawning} options={manualPid.length == 43 ? [{ label: `Process ID: ${manualPid}`, value: manualPid }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setManualPid(e)} />
-                    {processUsed == "NEW_PROCESS" && <>
-                        <Input disabled={spawning} type="text" placeholder="Enter new process name" className="w-full" onChange={(e) => { setNewProcessName(e.target.value) }} />
-                        <Combobox placeholder="Select AO Process Module" disabled={spawning} options={manualModule.length == 43 ? [{ label: `Module ID: ${manualModule}`, value: manualModule }] : Object.keys(AOModules).map((k) => ({ label: `${k} (${AOModules[k]})`, value: AOModules[k] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setManualModule(e)} />
-                    </>}
-                    <Button size="sm"
-                        className="text-white"
-                        disabled={
-                            processUsed === "" || spawning
-                        } onClick={setProcess}>
-                        {spawning && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
-                        Confirm
-                    </Button>
-                </div>
+                <details className="col-span-3">
+                    <summary className="-ml-6"><span className="pl-2 cursor-pointer">File Processes</span></summary>
+                    <div className="">
+                        <p className="text-muted text-center">Now it is possible to have a different process for each file in the same project</p>
+                        <div className="flex flex-col">
+                            {
+
+                                Object.keys(files).map((f) => <EditFileProcess key={f} fileName={f} processes={processes} fetchProcessesFunc={fetchProcesses} />)
+                            }
+                        </div>
+                    </div>
+                </details>
             </div> : <div className="text-center text-muted mb-10">No active project</div>
         }
 
@@ -146,7 +258,7 @@ function Settings() {
                 <span className="sr-only">Toggle theme</span>
             </Button>
             <details className="col-span-3">
-                <summary className="mb-5 cursor-pointer"><span className="pl-5">experimental</span></summary>
+                <summary className="-ml-6"><span className="pl-2 cursor-pointer">Experimental</span></summary>
                 <div className="grid grid-cols-3 gap-y-5">
                     <div>
                         Gemini AI code suggestions (beta)<br />

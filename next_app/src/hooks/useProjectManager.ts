@@ -52,6 +52,12 @@ export class ProjectManager {
     this.saveProjects(this.projects);
   }
 
+  setFileProcess(proj: Project, file: PFile, processId: string) {
+    file._setProcess(processId);
+    this.projects[proj.name] = proj;
+    this.saveProjects(this.projects);
+  }
+
   newProject({ name, defaultFiletype, ownerWallet, files }: { name: string; defaultFiletype: "NORMAL" | "NOTEBOOK", ownerWallet: string; files?: { [name: string]: PFile } }) {
     if (typeof window == "undefined") return;
     if (!this.projects) this.saveProjects({});
@@ -123,7 +129,7 @@ export class Project {
 
   _newFile({ name, type, initialContent }: { name: string; type?: "NORMAL" | "NOTEBOOK"; initialContent?: string }) {
     if (Object.keys(this.files).includes(name)) return;
-    const file: PFile = new PFile({ name, type: type || this.defaultFiletype, initialContent });
+    const file: PFile = new PFile({ name, type: type || this.defaultFiletype, initialContent, process: "" });
     this.files[name] = file;
   }
 
@@ -143,9 +149,10 @@ export class PFile {
   readonly name: string;
   readonly language: TLanguages;
   readonly type: "NORMAL" | "NOTEBOOK";
+  process: string;
   content: TFileContent;
 
-  constructor({ name, type = "NORMAL", initialContent, content }: { name: string; type?: "NORMAL" | "NOTEBOOK"; initialContent?: string; content?: TFileContent }) {
+  constructor({ name, type = "NORMAL", initialContent, content, process }: { name: string; type?: "NORMAL" | "NOTEBOOK"; initialContent?: string; content?: TFileContent, process: string }) {
     this.name = name;
     this.content = {
       cellOrder: [],
@@ -162,10 +169,17 @@ export class PFile {
     if (content) {
       this.content = content;
     }
+    if (process) {
+      this.process = process;
+    }
   }
 
   updateContent(content: TFileContent) {
     this.content = content;
+  }
+
+  _setProcess(process: string) {
+    this.process = process;
   }
 }
 
