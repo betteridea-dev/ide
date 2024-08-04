@@ -1,5 +1,6 @@
 import { useGlobalState } from "@/hooks";
 import { MsgHistory } from "@/hooks/useGlobalState";
+import Ansi from "ansi-to-react";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -28,7 +29,10 @@ export default function History() {
                                 </div>
                                 <div className="text-xs">{msg.id}</div>
                             </div>
-                            <pre className="text-xs max-h-[200px] overflow-scroll">{msg.code}</pre>
+                            <div className="flex flex-col gap-2">
+                                <pre className="text-xs max-h-[200px] overflow-scroll">&gt; {msg.code}</pre>
+                                <pre className="text-xs max-h-[200px] overflow-scroll text-green-400"><Ansi>{typeof msg.output == "object" ? (msg.output as any).output : msg.output}</Ansi></pre>
+                            </div>
                         </div>
                     )
                 })

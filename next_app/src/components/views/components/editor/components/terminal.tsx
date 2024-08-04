@@ -193,6 +193,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                 const result = await runLua(text, project.process, [
                     { name: "File-Type", value: "Terminal" }
                 ]);
+                globalState.appendHistory(project.name, { id: (result as any).id!, code: text, timestamp: Date.now(), output: result.Output.data });
                 if (result.Error) {
                     console.log(result.Error);
 

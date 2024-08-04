@@ -90,6 +90,7 @@ function Editor() {
             { name: "File-Type", value: "Normal" }
         ]);
         console.log(result);
+        globalState.appendHistory(project.name, { id: (result as any).id!, code: code, timestamp: Date.now(), output: result.Output.data });
         if (result.Error) {
             console.log(result.Error);
             globalState.setLastOutput("\x1b[1;31m" + result.Error as string);

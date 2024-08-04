@@ -8,6 +8,7 @@ export interface MsgHistory {
     code: string;
     id: string;
     timestamp: number;
+    output: string;
 }
 
 interface State {

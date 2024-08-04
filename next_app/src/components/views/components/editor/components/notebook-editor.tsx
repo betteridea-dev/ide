@@ -170,7 +170,7 @@ const CodeCell = ({
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);
-        globalState.appendHistory(project.name, { id: (result as any).id!, code: cell.code, timestamp: Date.now() })
+        globalState.appendHistory(project.name, { id: (result as any).id!, code: cell.code, timestamp: Date.now(), output: result.Output.data });
 
         // const fileContent = {...manager.getProject(project.name).getFile(file.name).content};
 
