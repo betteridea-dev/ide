@@ -56,6 +56,7 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
     tags = CommonTags;
   }
   tags = name ? [...tags, { name: "Name", value: name }] : tags;
+  tags = [...tags, { name: 'Authority', value: 'fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY' }];
 
   const result = await ao.spawn({
     module: newProcessModule ? newProcessModule : AOModule,
