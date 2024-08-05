@@ -1,5 +1,6 @@
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Combobox } from "@/components/ui/combo-box"
 import { useGlobalState, useProjectManager } from "@/hooks"
 import { runLua } from "@/lib/ao-vars"
 import { stripAnsiCodes } from "@/lib/utils"
@@ -22,14 +23,16 @@ export default function Inbox() {
     const manager = useProjectManager()
     const [inbox, setInbox] = useSessionStorage<TInboxMessage[]>("inbox-" + globalState.activeProject || "null", [], { initializeWithValue: true })
     const [fetchingInbox, setFetchingInbox] = useState(false)
+    const [selectedInboxProcess, setSelectedInboxProcess] = useState("")
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject]
+    const processes = project ? Object.values(project.files).map(f => { return { name: f.name, process: f.process } }) : []
 
     async function fetchInbox(): Promise<TInboxMessage[]> {
         if (!project) return
         if (!project.process) { toast.error("No process found. Please assign one from settings"); return }
         setFetchingInbox(true)
-        const res = await runLua(`return require("json").encode(Inbox)`, project.process, [
+        const res = await runLua(`return require("json").encode(Inbox)`, selectedInboxProcess || project.process, [
             { name: "BetterIDEa-Function", value: "Inbox" }
         ])
         setFetchingInbox(false)
@@ -45,7 +48,7 @@ export default function Inbox() {
 
     useEffect(() => {
         fetchInbox()
-    }, [project.process])
+    }, [project.process, selectedInboxProcess])
 
     function InboxItem({ item }: { item: TInboxMessage }) {
         const hasData = item.Data
@@ -73,8 +76,13 @@ export default function Inbox() {
     }
 
     return <>
-        <Button variant="link" onClick={fetchInbox}
-            className="absolute top-8 right-1 !z-20 rounded-none bg-background text-foreground">{fetchingInbox ? <><LoaderIcon className="w-5 h-5 mr-1 animate-spin" /> Fetching...</> : "refresh"}</Button>
+        <div className="flex p-1">
+            <Combobox triggerClassName="" defaultValue={`${processes[0].name} - ${processes[0].process || "Default"}`} options={processes.map(p => { return { label: `${p.name} - ${p.process || "Default"}`, value: p.process } })} onChange={e => setSelectedInboxProcess(e)} className="w-full" placeholder="Showing Inbox for default process" />
+            <Button variant="link" onClick={() => fetchInbox()}
+                className=" !z-20 rounded-none bg-background text-foreground">
+                {fetchingInbox ? <><LoaderIcon className="w-5 h-5 mr-1 animate-spin" /> Fetching...</> : "refresh"}
+            </Button>
+        </div>
         {
             inbox.length > 0 ? inbox.toReversed().map((item, i) => <InboxItem key={i} item={item} />)
                 :

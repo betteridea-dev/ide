@@ -154,6 +154,8 @@ const CodeCell = ({
         const file = p.files[globalState.activeFile];
         if (!file) return
         const cell = file.content.cells[cellId];
+        const prc = file.process || p.process;
+        const isFileProcess = prc == file.process
 
         console.log(p);
         if (!p.process)
@@ -166,7 +168,7 @@ const CodeCell = ({
         console.log("running", cell.code);
         setRunning(true);
         const fileContent = { ...file.content };
-        const result = await runLua(cell.code, file.process || p.process, [
+        const result = await runLua(cell.code, prc, [
             { name: "File-Type", value: "Notebook" }
         ]);
         console.log(result);
@@ -186,7 +188,7 @@ const CodeCell = ({
             // toast({ title: "Error", description: result.Error || result.error })
             toast.error(result.Error || result.error)
         } else {
-            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt || globalState.prompt)
+            !isFileProcess && globalState.setPrompt(result.Output.prompt || result.Output.data.prompt || globalState.prompt)
             const outputData = result.Output.data;
             if (typeof outputData == "string" || typeof outputData == "number") {
                 console.log(outputData);
@@ -272,7 +274,7 @@ const CodeCell = ({
                     /> */}
                     {running ? <LoaderIcon size={30} className="bg-foreground/15 rounded-full p-1.5 block min-w-[30px] animate-spin text-primary" /> :
                         // <Play size={30} className="block min-w-[30px]" />
-                        <div><Image src={runIcon} alt="Run" width={30} height={30} className="block min-w-[25px] bg-foreground/10 rounded-full p-1.5" /></div>
+                        <div><Image draggable={false} src={runIcon} alt="Run" width={30} height={30} className="block min-w-[25px] bg-foreground/10 rounded-full p-1.5" /></div>
                     }
                 </Button>
                 <Editor

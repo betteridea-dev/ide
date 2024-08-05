@@ -81,12 +81,14 @@ function Editor() {
 
         const file = project.files[globalState.activeFile];
         if (!file) return;
+        const prc = file.process || p.process
+        const isFileProcess = prc == file.process;
         const code = file.content.cells[0].code;
         console.log(code)
 
         setRunning(true);
         const fileContent = { ...file.content };
-        const result = await runLua(fileContent.cells[0].code, file.process || p.process, [
+        const result = await runLua(fileContent.cells[0].code, prc, [
             { name: "File-Type", value: "Normal" }
         ]);
         console.log(result);
@@ -98,7 +100,7 @@ function Editor() {
             toast.error(result.Error);
         } else {
             const outputData = result.Output.data;
-            globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
+            !isFileProcess && globalState.setPrompt(result.Output.prompt || result.Output.data.prompt)
             if (typeof outputData == "string" || typeof outputData == "number") {
                 console.log(outputData);
                 fileContent.cells[0].output = outputData;

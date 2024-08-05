@@ -25,13 +25,13 @@ export default function History() {
                             <div className="flex flex-col gap-1">
                                 <div className="flex gap-2 items-center">
                                     <div className="text-sm text-gray-400 ">{new Date(msg.timestamp).toLocaleString()}</div>
-                                    <Link href={`https://www.ao.link/#/message/${msg.id}`} target="_blank" className="flex items-center text-primary text-sm">ao.link <ExternalLink size={16} className="ml-1" /></Link>
+                                    <Link href={`https://www.ao.link/#/message/${msg.id}`} target="_blank" className="flex items-center text-primary text-sm hover:underline underline-offset-4">ao.link <ExternalLink size={16} className="ml-1" /></Link>
                                 </div>
-                                <div className="text-xs">{msg.id}</div>
+                                <div className="text-xs text-muted">MID: {msg.id}</div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <pre className="text-xs max-h-[200px] overflow-scroll border-l-4 border-muted pl-1">{msg.code}</pre>
-                                <pre className="text-xs max-h-[200px] overflow-scroll text-green-400"><Ansi>{typeof msg.output == "object" ? (msg.output as any).output : msg.output}</Ansi></pre>
+                                <pre className="text-xs max-h-[200px] overflow-scroll text-green-400"><Ansi>{`${typeof msg.output == "object" ? (msg.output as any).output : msg.output}`}</Ansi></pre>
                             </div>
                         </div>
                     )

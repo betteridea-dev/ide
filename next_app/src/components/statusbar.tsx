@@ -55,23 +55,32 @@ export default function Statusbar() {
     // INCOMING MESSAGS NOTIFICATION
     useEffect(() => {
         if (!project) return
-        if (!project.process) return
+
+        const processes = []
+        if (project.process) processes.push(project.process)
+        Object.values(project.files).forEach((file) => {
+            if (file.process && !processes.includes(file.process)) processes.push(file.process)
+        })
+
+        if (processes.length == 0) return
 
         const resultsInterval = setInterval(async () => {
-            const res = await getResults(project.process, localStorage.getItem("cursor") || "")
-            if (res.cursor) localStorage.setItem("cursor", res.cursor)
-            const { results } = res
-            if (results.length > 0) {
-                console.log(res)
-                results.forEach((result) => {
-                    if (typeof result.Output == "object") {
-                        // globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
-                        if (result.Output.print) {
-                            toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(`${result.Output.data}`)}</div>, { style: { borderRadius: "7px" } })
-                            globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
+            for (const process of processes) {
+                const res = await getResults(process, localStorage.getItem("cursor") || "")
+                if (res.cursor) localStorage.setItem("cursor", res.cursor)
+                const { results } = res
+                if (results.length > 0) {
+                    console.log(res)
+                    results.forEach((result) => {
+                        if (typeof result.Output == "object") {
+                            // globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
+                            if (result.Output.print) {
+                                toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(`${result.Output.data}`)}</div>, { style: { borderRadius: "7px" } })
+                                globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
+                            }
                         }
-                    }
-                })
+                    })
+                }
             }
         }, 2000)
 

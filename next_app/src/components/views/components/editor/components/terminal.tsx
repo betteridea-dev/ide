@@ -248,5 +248,5 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
         return <div className="w-full h-full flex items-center justify-center text-lg font-btr-code">No active project</div>
     }
 
-    return <div id="ao-terminal" className="flex flex-col-reverse w-full bg-transparent p-1 view-line font-btr-code"></div>
+    return <div id="ao-terminal" className="flex flex-col-reverse w-full bg-white dark:bg-black p-1 view-line font-btr-code"></div>
 }
