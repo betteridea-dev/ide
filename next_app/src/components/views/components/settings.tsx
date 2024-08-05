@@ -191,7 +191,7 @@ function Settings() {
         input.value = "*".repeat(key.length)
     }
 
-    return <div className="p-10 max-w-4xl mx-auto">
+    return <div className="p-10 max-w-4xl mx-auto max-h-[calc(100vh-55px)] overflow-scroll">
         <Button variant="link" className="mb-5 text-sm text-muted p-0" onClick={() => globalState.setActiveView(null)}>
             <ArrowLeft size={15} className=" inline-block mr-2" /> home
         </Button>
