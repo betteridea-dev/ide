@@ -7,13 +7,13 @@ import View from "./views";
 import Statusbar from "./statusbar";
 import Menubar from "./menubar";
 import { useGlobalState, useProjectManager } from "@/hooks";
-import {NextSeo} from "next-seo"
+import { NextSeo } from "next-seo"
 import { useSearchParams } from "next/navigation";
 
 
 export default function Layout() {
     const globalState = useGlobalState()
-    const manager= useProjectManager()
+    const manager = useProjectManager()
     const sidebarDrawerRef = useRef<ImperativePanelHandle>();
     const searchParams = useSearchParams()
 
@@ -27,15 +27,31 @@ export default function Layout() {
             urlParams.delete("open")
             window.history.replaceState({}, document.title, window.location.pathname + "?" + urlParams.toString());
         }
-    },[searchParams])
+    }, [searchParams])
+
+    useEffect(() => {
+        function onCtrlS(e: KeyboardEvent) {
+            //check ctrl s pressed
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                e.preventDefault()
+                // create new event
+                document.dispatchEvent(new Event("save"))
+                console.log("Ctrl + S pressed")
+            }
+        }
+
+        document.addEventListener("keydown", onCtrlS)
+
+        return () => document.removeEventListener("keydown", onCtrlS)
+    }, [])
 
     function createTitle() {
-        let title=""
+        let title = ""
         if (globalState.activeProject && !globalState.activeFile) {
             return title + globalState.activeProject
         }
-        if (globalState.activeFile&& globalState.activeFile.startsWith("PKG: ")) {
-            return title+globalState.activeFile.replace("PKG: ","")
+        if (globalState.activeFile && globalState.activeFile.startsWith("PKG: ")) {
+            return title + globalState.activeFile.replace("PKG: ", "")
         }
         if (globalState.activeView) {
             if (globalState.activeView == "EDITOR") {

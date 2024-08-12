@@ -8,7 +8,7 @@ function ProjectList() {
     const manager = useProjectManager();
     const projects = manager.projects;
 
-    return <div className="flex flex-col max-h-[calc(100vh-40px)]">
+    return <div className="flex flex-col max-h-[calc(100vh-50px)]">
         <h1 className="text-left text-muted-foreground m-3">PROJECTS</h1>
         <div className="grid grid-cols-1 overflow-scroll">
             {

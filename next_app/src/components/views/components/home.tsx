@@ -73,7 +73,7 @@ function Home() {
 
     return <div className="p-5 text-foreground/90 overflow-scroll grid grid-cols-1 md:grid-cols-2 md:gap-5 ring-foreground h-full w-full items-start justify-start">
 
-        <div className="absolute bottom-6 z-20 mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div>
+        {/* <div className="absolute bottom-6 z-20 mx-auto w-fit ring-destructive-foreground bg-destructive text-destructive-foreground p-1 px-3 rounded-md left-0 right-0 flex gap-2 items-center cursor-pointer" onMouseOver={() => setShowUpdates(true)} onMouseLeave={() => setShowUpdates(false)}><InfoIcon size={17} />UPDATES</div> */}
 
         {showUpdates && <div className="absolute left-0 top-0 right-0 bottom-5 w-full m-1 bg-background/50 gap-5 font-bold pointer-events-none mx-auto">
             <div className="absolute bottom-10 left-0 right-0 w-1/2 bg-destructive p-3 text-sm rounded-md mx-auto ring- ring-destructive-foreground flex flex-col items-start justify-center gap-2">

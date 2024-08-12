@@ -5,8 +5,9 @@ import PackageList from "./package-list";
 import SQLite from "./sqlite-explorer"
 import Interact from "./interact"
 import Sam from "./sam"
+import Templates from "./marketplace"
 
-const drawerItems: TDrawerItem[] = [FileList, ProjectList, PackageList, SQLite, Interact, Sam]
+const drawerItems: TDrawerItem[] = [FileList, ProjectList, PackageList, SQLite, Interact, Sam, Templates];
 
 export default drawerItems;
 

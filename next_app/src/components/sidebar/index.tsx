@@ -3,12 +3,16 @@ import { Button } from "../ui/button"
 import sidebarItems, { TSidebarOptions } from "./components"
 import { useGlobalState } from "@/hooks"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { MutableRefObject } from "react"
+import { MutableRefObject, useEffect } from "react"
 import { ImperativePanelHandle } from "react-resizable-panels"
 
 
 export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<ImperativePanelHandle> }) {
     const globalState = useGlobalState()
+
+    useEffect(() => {
+        if (!globalState.activeSidebarItem) drawerRef.current.collapse()
+    }, [globalState.activeSidebarItem, drawerRef])
 
     // common handler for all sidebar buttons
     function sidebarButtonClicked(sidebarValue: TSidebarOptions) {
@@ -17,6 +21,10 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
                 case "SETTINGS":
                     globalState.setActiveView("SETTINGS")
                     break;
+                // above: donot toggle sidebar drawer
+                // below: toggle sidebar drawer
+                case "MARKETPLACE":
+                    globalState.setActiveView("MARKETPLACE")
                 default:
                     if (globalState.activeSidebarItem == sidebarValue)
                         drawerRef.current.isCollapsed() ? drawerRef.current.expand() : drawerRef.current.collapse()
