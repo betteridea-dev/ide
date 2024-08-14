@@ -4,6 +4,7 @@ import { useGlobalState, useProjectManager } from "@/hooks"
 import notebookTheme from "@/monaco-themes/notebook.json";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
 
 const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
     fontFamily: "monospace",
@@ -12,6 +13,11 @@ const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
     lineNumbersMinChars: 3,
     scrollBeyondLastLine: false,
 }
+
+// Example usage:
+const luaCode = `
+// Your provided Lua code here
+`;
 
 // THE CODE RUNNER BUTTON IS INSIDE FILE BAR
 

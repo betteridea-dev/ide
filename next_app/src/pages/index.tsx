@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout";
 import Mobile from "@/components/mobile";
+import { useRouter } from "next/router";
 
 export default function Home() {
     const [isMobile, setIsMobile] = useState(false);
@@ -14,6 +15,8 @@ export default function Home() {
             setIsMobile(isMobile);
         }
     }, []);
-    return isMobile ? <Mobile/> : <Layout />
+    return isMobile ? <Mobile /> : <Layout />
+
+
 
 }

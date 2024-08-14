@@ -15,6 +15,7 @@ import RenameFile from "./components/rename-file"
 import RenameProject from "./components/rename-project"
 import DuplicateProject from "./components/duplicate-project"
 import DuplicateFile from "./components/duplicate-file"
+import PublishBoilerplateBtn from "./components/publish-boilerplate"
 import { toast } from "sonner"
 import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
@@ -55,6 +56,8 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem onClick={() => document.getElementById("publish-boilerplate")?.click()} >Publish Boilerpalte (coming soon)</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
@@ -109,7 +112,7 @@ export default function Menubar() {
                 </MenubarContent>
             </MenubarMenu>
             <MenubarMenu>
-                <MenubarTrigger className="rounded-none" onClick={()=>document.getElementById("sponsor-us")?.click()}>Sponsor Us</MenubarTrigger>
+                <MenubarTrigger className="rounded-none" onClick={() => document.getElementById("sponsor-us")?.click()}>Sponsor Us</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background max-w-sm">
                     <MenubarLabel className="text-muted-foreground">
                         ♥️ Sponsor BetterIDEa
@@ -127,6 +130,7 @@ export default function Menubar() {
         <RenameProject />
         <DuplicateProject />
         <DeleteProject />
+        <PublishBoilerplateBtn />
 
         <Share />
         <Blueprints />
@@ -138,8 +142,8 @@ export default function Menubar() {
         <DownloadFile />
         <DuplicateFile />
 
-        <Upload/>
+        <Upload />
 
-        <Sponsor/>
+        <Sponsor />
     </div>
 }

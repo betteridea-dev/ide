@@ -10,6 +10,8 @@ export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4";
 export const BetterIDEaWallet = "MnZ8JrR5SoswAwWtX-HTnl4Kq5k6Kx1Y7vPxmlAyl_g"
 export const SponsorWebhookUrl = "https://discord.com/api/webhooks/1258731411033030726/T6rl7Ciuw8cgiR30MOVeOsbEcvAEWM45IRpc37TqAoXBbH3ZQDoxQzLAW0bmgcsxnCI9"
 
+export const BAZAR_PROFILE_REGISTRY = "SNy4m-DrqxWl01YqGM4sxI8qCni-58re8uuJLvZPypY"
+
 export const modules = {
   "Default (WASM64)": AOModule,
   "SQLite64": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
@@ -153,5 +155,36 @@ export function parseOutupt(out: any) {
     return JSON.parse(output);
   } catch (e) {
     return output;
+  }
+}
+
+export async function readHandler(args: {
+  processId: string;
+  action: string;
+  tags?: Tag[];
+  data?: any;
+}): Promise<any> {
+  const ao = connect();
+  const tags = [{ name: 'Action', value: args.action }];
+  if (args.tags) tags.push(...args.tags);
+  let data = JSON.stringify(args.data || {});
+
+  const response = await ao.dryrun({
+    process: args.processId,
+    tags: tags,
+    data: data,
+  });
+
+  if (response.Messages && response.Messages.length) {
+    if (response.Messages[0].Data) {
+      return JSON.parse(response.Messages[0].Data);
+    } else {
+      if (response.Messages[0].Tags) {
+        return response.Messages[0].Tags.reduce((acc: any, item: any) => {
+          acc[item.name] = item.value;
+          return acc;
+        }, {});
+      }
+    }
   }
 }
