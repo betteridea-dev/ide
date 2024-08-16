@@ -14,11 +14,13 @@
 <details>
 <summary>View screenshots</summary>
 
-![ao-landing](https://docs.betteridea.dev/_next/static/media/ao-landing.48470057.png)
+![1](./images/1.png)
 
-![ao-notebook](https://docs.betteridea.dev/_next/static/media/nb-interface.7fd5a62f.png)
+![2](./images/2.png)
 
-![file-editor](https://docs.betteridea.dev/_next/static/media/file-interface.79dcb8e5.png)
+![3](./images/3.png)
+
+![4](./images/4.png)
 
 </details>
 
