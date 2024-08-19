@@ -152,11 +152,107 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
             return readLine(promptBuf);
         }
 
-        switch (text) {
+        switch (text.trim().split(" ")[0]) {
             case "clear":
+            case ".clear":
                 setCommandOutputs([]);
                 term.resize(maxCols, 10)
                 return readLine(promptBuf);
+            case ".help":
+                setCommandOutputs(p => {
+                    if (p.length >= maxHistory) p.shift()
+                    return [...p, `> ${text}`, `Client commands:
+
+  .load [file]                  Loads local Lua file into the process
+  .monitor                      Starts monitoring cron messages for this process
+  .unmonitor                    Stops monitoring cron messages for this process
+  .help                         Print this help screen
+  
+  clear                         Clear the terminal screen
+  ls                            List files in the current project
+`]
+                });
+                return readLine(promptBuf);
+            case "ls":
+                const files = Object.keys(project.files).map((f) => project.files[f].name);
+                setCommandOutputs(p => {
+                    if (p.length >= maxHistory) p.shift()
+                    return [...p, `> ${text}`, files.join("\n")]
+                });
+                return readLine(promptBuf);
+            case ".load":
+                const command = text.trim().split(" ");
+                if (command.length > 1) {
+                    const filename = command[1];
+                    if (!filename.endsWith(".lua")) {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `> ${text}`, `Only .lua files can be loaded`]
+                        });
+                    }
+                    else {
+                        const project = projectManager.getProject(globalState.activeProject);
+                        const file = Object.keys(project.files).find((f) => project.files[f].name == filename);
+                        console.log("file", project.files[file]);
+                        const src = project.files[file].content.cells[0].code;
+                        console.log("src", src);
+
+                        setRunning(true);
+                        // print a line that says computing
+                        rl.println(`\r\x1b[K\x1b[34mLoading ${filename}... \x1b[0m`);
+                        const result = await runLua(src, project.process, [
+                            { name: "File-Type", value: "Terminal" }
+                        ]);
+
+                        if (result.Error) {
+                            console.log(result.Error);
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
+                            });
+                        }
+
+                        if (result.Output) {
+                            console.log(result.Output);
+                            result.Output.prompt && globalState.setPrompt(result.Output.prompt)
+                            result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
+
+                            console.log(result.Output.prompt || result.Output.data.prompt)
+                            const outputData = result.Output.data;
+                            console.log("outputData", outputData);
+                            if (typeof outputData == "string" || typeof outputData == "number") {
+                                console.log(outputData);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `> ${text}`, outputData.toString()]
+                                });
+                            } else
+                                if (result.Output.data.json != "undefined") {
+                                    console.log("json", result.Output.data.json);
+                                    const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                                    setCommandOutputs(p => {
+                                        if (p.length >= maxHistory) p.shift()
+                                        return [...p, `> ${text}`, outputStr]
+                                    });
+                                } else {
+                                    console.log("normal", result.Output.data.output);
+                                    setCommandOutputs(p => {
+                                        if (p.length >= maxHistory) p.shift()
+                                        return [...p, `> ${text}`, result.Output.data.output]
+                                    });
+                                }
+                        }
+                    }
+                    setRunning(false);
+                    sendGAEvent({ event: 'run_code', value: 'terminal' })
+                    scrollToBottom()
+                } else {
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `> ${text}`, `Please specify a file to load`]
+                    });
+                }
+                return setTimeout(() => readLine(promptBuf), 100);
             case ".monitor":
                 rl.println(`\r\x1b[K\x1b[34mMonitoring Process... \x1b[0m`);
                 try {

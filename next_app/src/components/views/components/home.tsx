@@ -4,13 +4,26 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { useLocalStorage } from "usehooks-ts"
 import { useEffect, useState } from "react"
-import { AlertTriangleIcon, FileCodeIcon, FileStack, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare, UserRound } from "lucide-react"
+import { AlertTriangleIcon, FileCodeIcon, FileStack, ImportIcon, InfoIcon, NewspaperIcon, PartyPopper, PlusSquare, UserRound, UserRoundPlus } from "lucide-react"
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { pushToRecents } from "@/lib/utils"
+import { pushToRecents, uploadToArweave } from "@/lib/utils"
 import { getProfileByWalletAddress } from "@/lib/bazar"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { BAZAR, runLua, spawnProcess } from "@/lib/ao-vars"
 
 const words = [
     "(^･o･^)ﾉ' ",
@@ -53,6 +66,206 @@ const published = [
     }
 ]
 
+function ProfileComponent() {
+    const [open, setOpen] = useState(false)
+    const [displayName, setDisplayName] = useState("")
+    const [username, setUsername] = useState("")
+    const [description, setDescription] = useState("")
+    const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
+
+    async function createProfile() {
+        if (!displayName || !username) return toast.error("Name and username are required")
+
+        const data: any = {
+            DisplayName: displayName,
+            UserName: username,
+        };
+
+        if (profilePhoto) {
+            console.log(profilePhoto)
+            const pfpTxn = await uploadToArweave(profilePhoto)
+            console.log("Profile image uploaded", pfpTxn)
+            data.ProfileImage = pfpTxn
+        }
+
+        if (description) {
+            data.Description = description;
+        }
+
+        let profileSrc = null;
+        const profileSrcFetch = await fetch(`https://arweave.net/${BAZAR.profileSrc}`)
+        if (profileSrcFetch.ok) {
+            profileSrc = await profileSrcFetch.text()
+
+            const dateTime = new Date().getTime().toString();
+
+            const profileTags: { name: string; value: string }[] = [
+                { name: 'Date-Created', value: dateTime },
+                { name: 'Action', value: 'CreateProfile' },
+            ];
+
+            console.log('Spawning profile process...');
+            const processId = await spawnProcess(null, profileTags);
+
+            console.log(`Process Id -`, processId);
+
+            let attempts = 0;
+            let maxAttempts = 30;
+            while (attempts < maxAttempts) {
+                try {
+                    const evalSrc = await runLua(profileSrc, processId)
+                    if (evalSrc) {
+                        console.log(`Evaluated profile src -`, evalSrc);
+                        break;
+                    }
+                } catch (e) {
+                    attempts++;
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                }
+            }
+
+
+            console.log('Updating profile data...');
+            console.log(data, JSON.stringify(data));
+            let updateResponse = await runLua(JSON.stringify(data), processId, [
+                { name: 'Action', value: 'Update-Profile' }
+            ])
+            console.log(updateResponse);
+        }
+
+        setOpen(false)
+
+    }
+
+    return <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger>
+            <Button className="h-5">Create Profile</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Create a Bazar Profile</DialogTitle>
+                <DialogDescription>
+                    Create a profile to publish boilerplates to the marketplace. Name and username can be changed from <Link href="https://ao-bazar.arweave.net" target="_blank" className="text-primary hover:underline underline-offset-4"> ao-bazar</Link>
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 grid-cols-4">
+                <div className="flex flex-col items-center justify-center">
+                    {profilePhoto ? <Image src={profilePhoto ? URL.createObjectURL(profilePhoto) : "/default-avatar.png"} alt="profile-picture" className="rounded-full aspect-square" width={69} height={69} /> : <UserRound className="bg-muted rounded-full p-0.5" size={50} />}
+                    {profilePhoto ? <Button variant="link" className="h-5 p-0 text-xs block" onClick={() => {
+                        setProfilePhoto(null);
+                        (document.getElementById("profile-photo") as HTMLInputElement).value = "";
+                    }}>Clear</Button> : <Button variant="link" className="h-5 p-0 text-xs block mt-2" onClick={() => (document.getElementById("profile-photo") as HTMLInputElement).click()}>Upload</Button>}
+                    <Input type="file" accept="image/*" id="profile-photo" className="hidden" onChange={(e) => {
+                        if (e.target.files && e.target.files[0])
+                            setProfilePhoto(e.target.files[0])
+                    }} />
+                </div>
+                <div className="col-span-3 flex flex-col gap-2">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            placeholder="Cool Buildoor"
+                            className="col-span-3"
+                            onChange={(e) => setDisplayName(e.target.value)}
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="username" className="text-right">
+                            Username
+                        </Label>
+                        <Input
+                            id="username"
+                            placeholder="@coolbuildoor69"
+                            className="col-span-3"
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right">
+                            Bio
+                        </Label>
+                        <Input
+                            id="description"
+                            placeholder="I'm a cool buildoor"
+                            className="col-span-3"
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+            {/* <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+
+                    <div className="flex items-center gap-2 col-span-4">
+                        <div className="relative">
+                            <Image src={profilePhoto ? URL.createObjectURL(profilePhoto) : "/default-avatar.png"} alt="profile-picture" className="rounded-full aspect-square" width={69} height={69} />
+                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0" onChange={(e) => {
+                                if (e.target.files && e.target.files[0])
+                                    setProfilePhoto(e.target.files[0])
+                            }} />
+                        </div>
+                        <div>
+                            <Button variant="link" className="h-5 p-0 text-xs" onClick={() => {
+                                setProfilePhoto(null);
+                                (document.getElementById("profile-photo") as HTMLInputElement).value = "";
+                            }}>clear</Button>
+                            <Input
+                                id="profile-photo"
+                                type="file"
+                                accept="image/*"
+                                className="col-span-3"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0])
+                                        setProfilePhoto(e.target.files[0])
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                        Name
+                    </Label>
+                    <Input
+                        id="name"
+                        placeholder="Cool Buildoor"
+                        className="col-span-3"
+                        onChange={(e) => setDisplayName(e.target.value)}
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="username" className="text-right">
+                        Username
+                    </Label>
+                    <Input
+                        id="username"
+                        placeholder="@coolbuildoor69"
+                        className="col-span-3"
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="description" className="text-right">
+                        Bio
+                    </Label>
+                    <Input
+                        id="description"
+                        placeholder="I'm a cool buildoor"
+                        className="col-span-3"
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </div>
+            </div> */}
+            <DialogFooter>
+                <Button type="submit" onClick={createProfile}>Done!</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+}
+
 function Home() {
     const wallet = useWallet()
     const globalState = useGlobalState()
@@ -60,6 +273,7 @@ function Home() {
     const profile = useProfile()
     const [recents, setRecents] = useLocalStorage("recents", [], { initializeWithValue: true });
     const [showUpdates, setShowUpdates] = useState(false);
+
 
     useEffect(() => {
         profile.setLoading(true)
@@ -177,7 +391,7 @@ function Home() {
                     {(profile.avatar && profile.avatar != "None") ? <Image src={`https://arweave.net/${profile.avatar}`} alt="profile-picture" className="rounded-full aspect-square" width={69} height={69} /> : <UserRound size={60} className="block bg-muted/20 rounded-full p-2" />}
                     <div>
                         <div className="text-2xl">gm<span className="font-bold text-3xl">{profile.displayName && " " + profile.displayName}</span><i>!</i></div>
-                        <div className="mt-1">How are you doing today?</div>
+                        {profile.id ? <div className="mt-1">How are you doing today?</div> : <ProfileComponent />}
                         {/* <Button variant="link" className="h-5 p-0 text-xs">{profile.displayName ? "Edit Profile" : "Create Profile"}</Button> */}
                     </div>
                 </div>}

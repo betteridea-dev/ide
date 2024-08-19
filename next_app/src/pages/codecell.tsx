@@ -16,6 +16,7 @@ import Link from "next/link";
 import Arweave from "arweave";
 import { LoaderIcon } from "lucide-react";
 import runIcon from "@/assets/icons/run.svg"
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 
 var codeproxy = "";
 export default function CodeCell() {
@@ -370,6 +371,7 @@ export default function CodeCell() {
 
     return (
         <div suppressHydrationWarning className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 bg-foreground/5">
+            <GoogleTagManager gtmId="GTM-TSKD74RX" />
             {aosProcess && (
                 <>
                     <div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">

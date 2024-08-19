@@ -1,4 +1,4 @@
-import { BAZAR_PROFILE_REGISTRY, readHandler } from "./ao-vars";
+import { BAZAR, readHandler } from "./ao-vars";
 
 export type AOProfileType = {
     id: string;
@@ -34,7 +34,7 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
 
     try {
         const profileLookup = await readHandler({
-            processId: BAZAR_PROFILE_REGISTRY,
+            processId: BAZAR.profileRegistry,
             action: 'Get-Profiles-By-Delegate',
             data: { Address: args.address },
         });

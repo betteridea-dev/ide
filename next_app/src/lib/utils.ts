@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Column } from "./ao-vars";
+import { AppVersion, Column } from "./ao-vars";
+import Arweave from "arweave";
 
 export const supportedExtensions = ["lua", "luanb", "md"];
 
@@ -102,4 +103,36 @@ export function createLoaderFunc(name: string, src: string) {
 
     func()
     return "Loaded ${name} module"`
+}
+
+export function uploadToArweave(file: File) {
+  const ar = Arweave.init({
+    host: 'arweave.net',
+    port: 443,
+    protocol: 'https',
+  });
+
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+
+  return new Promise((resolve, reject) => {
+    reader.onload = async () => {
+      const buffer = new Uint8Array(await file.arrayBuffer());
+      const txn = await ar.createTransaction({ data: buffer }, "use_wallet");
+      txn.addTag("App-Name", "BetterIDEa")
+      txn.addTag("App-Version", AppVersion)
+      txn.addTag("Content-Type", file.type || "application/octet-stream");
+      txn.addTag("BetterIDEa-Function", "Create-Profile");
+      txn.addTag("File-Name", file.name || "unknown");
+      await ar.transactions.sign(txn, "use_wallet");
+      try {
+        await ar.transactions.post(txn);
+        resolve(txn.id);
+      } catch (e) {
+        throw new Error(e);
+      }
+    }
+
+    reader.onerror = (err) => reject(err);
+  });
 }
