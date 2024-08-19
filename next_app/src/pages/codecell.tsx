@@ -371,6 +371,7 @@ export default function CodeCell() {
 
     return (
         <div suppressHydrationWarning className="relative h-screen w-screen overflow-clip flex flex-col justify-start p-0 bg-foreground/5">
+            <GoogleAnalytics gaId="G-DJTRS37CPQ" />
             <GoogleTagManager gtmId="GTM-TSKD74RX" />
             {aosProcess && (
                 <>
