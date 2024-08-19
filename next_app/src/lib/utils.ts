@@ -5,6 +5,25 @@ import Arweave from "arweave";
 
 export const supportedExtensions = ["lua", "luanb", "md"];
 
+export const ANSI = {
+  CLEARLINE: "\x1b[2K",
+  GREEN: "\x1b[32m",
+  RED: "\x1b[31m",
+  YELLOW: "\x1b[33m",
+  BLUE: "\x1b[34m",
+  MAGENTA: "\x1b[35m",
+  CYAN: "\x1b[36m",
+  WHITE: "\x1b[37m",
+  LIGHTGREEN: "\x1b[92m",
+  LIGHTRED: "\x1b[91m",
+  LIGHTYELLOW: "\x1b[93m",
+  LIGHTBLUE: "\x1b[94m",
+  LIGHTMAGENTA: "\x1b[95m",
+  LIGHTCYAN: "\x1b[96m",
+  LIGHTWHITE: "\x1b[97m",
+  RESET: "\x1b[0m",
+}
+
 export function pushToRecents(pname: string) {
   const recents = JSON.parse(localStorage.getItem("recents") || "[]") as string[];
   if (!recents.includes(pname) && recents.length < 5) {

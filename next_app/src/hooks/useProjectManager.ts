@@ -11,7 +11,7 @@ export type TFileContent = {
 
 type TLanguages = "markdown" | "lua" | "plaintext" | "json";
 
-type TProjectStorage = {
+export type TProjectStorage = {
   [name: string]: Project;
 };
 

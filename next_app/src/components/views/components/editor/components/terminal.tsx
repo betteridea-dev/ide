@@ -7,16 +7,31 @@ import { getResults, monitor, runLua, unmonitor } from "@/lib/ao-vars";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { toast } from "sonner"
 import { useTheme } from "next-themes";
-import { stripAnsiCodes } from "@/lib/utils";
+import { ANSI, stripAnsiCodes } from "@/lib/utils";
 import { connect } from "@permaweb/aoconnect";
+import { useLocalStorage } from "usehooks-ts";
+import { TProjectStorage } from "@/hooks/useProjectManager";
 
+const helpText = `Available Commands:
+
+    ${ANSI.LIGHTGREEN}help${ANSI.RESET}                          Print this help screen
+    ${ANSI.LIGHTGREEN}clear${ANSI.RESET}                         Clear the terminal screen
+    ${ANSI.LIGHTGREEN}ls${ANSI.RESET}                            List files in the current project
+
+    ${ANSI.LIGHTGREEN}.list-process${ANSI.RESET}                 List all processes in the current project
+    ${ANSI.LIGHTGREEN}.set-default [process_id]${ANSI.RESET}     Change the default process for this project
+    ${ANSI.LIGHTGREEN}.load [file]${ANSI.RESET}                  Loads local Lua file into the process
+    ${ANSI.LIGHTGREEN}.load-blueprint [name]${ANSI.RESET}        Loads a blueprint into the process
+    ${ANSI.LIGHTGREEN}.monitor${ANSI.RESET}                      Starts monitoring cron messages for this process
+    ${ANSI.LIGHTGREEN}.unmonitor${ANSI.RESET}                    Stops monitoring cron messages for this process
+`
 
 let promptBuf = ""
 export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
     commandOutputs: string[], setCommandOutputs: Dispatch<SetStateAction<string[]>>
 }) {
     // promptBuf = prompt
-    const ao = connect()
+    // const [projects, _] = useLocalStorage<TProjectStorage>("projects", {}, { initializeWithValue: true })
     const [termDiv, setTermDiv] = useState<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState(false)
     const globalState = useGlobalState()
@@ -40,14 +55,14 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
         },
         allowTransparency: false,
         cols: 100,
-        rows: 10,
+        rows: 100,
         lineHeight: 1,
     }))
     const [rl, setRl] = useState(new Readline())
 
     const maxRows = 100;
     const maxCols = 100;
-    const maxHistory = 30;
+    const maxHistory = 100;
 
     function scrollToBottom() {
         term.scrollToBottom()
@@ -113,232 +128,296 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
             return true;
         });
 
-        readLine(promptBuf)
+
 
         setLoaded(true)
         scrollToBottom()
-    }, [globalState.prompt, loaded, readLine, rl, term, termDiv])
+    }, [globalState, globalState.prompt, loaded, project, projectManager, project.files, rl, setCommandOutputs, term, termDiv])
+
+    useEffect(() => {
+        setCommandOutputs(Array.from({ length: 100 }, () => ""));
+        term.resize(maxCols, 100)
+    }, [])
+
 
     function readLine(newPrompt: string) {
-        rl.read(newPrompt).then(processLine);
-    }
 
-    async function processLine(text: string) {
-        // rl.println("you entered: " + text);
 
-        if (!project)
-            // return toast({
-            //     title: "Select a project to run code in",
-            // });
-            return toast.error("Select a project to run code in", { id: "error" })
-        if (!project.process)
-            // return toast({
-            //     title: "No process for this project :(",
-            //     description: "Please assign a process id from project settings before trying to run Lua code",
-            // });
-            return toast.error("No process for this project :(", { description: "Please assign a process id from project settings before trying to run Lua code", id: "error" })
-        const ownerAddress = project.ownerWallet;
-        const activeAddress = await window.arweaveWallet.getActiveAddress();
-        const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
-        // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
-        if (ownerAddress != activeAddress) return toast.error("The owner wallet for this project is differnet", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" })
+        async function processLine(text: string) {
+            // rl.println("you entered: " + text);
 
-        term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
-        if (text.trim().length == 0) {
-            setCommandOutputs(p => {
-                if (p.length >= maxHistory) p.shift()
-                return [...p, ">"]
-            });
-            return readLine(promptBuf);
-        }
+            if (!project)
+                // return toast({
+                //     title: "Select a project to run code in",
+                // });
+                return toast.error("Select a project to run code in", { id: "error" })
+            if (!project.process)
+                // return toast({
+                //     title: "No process for this project :(",
+                //     description: "Please assign a process id from project settings before trying to run Lua code",
+                // });
+                return toast.error("No process for this project :(", { description: "Please assign a process id from project settings before trying to run Lua code", id: "error" })
+            const ownerAddress = project.ownerWallet;
+            const activeAddress = await window.arweaveWallet.getActiveAddress();
+            const shortAddress = ownerAddress.slice(0, 5) + "..." + ownerAddress.slice(-5);
+            // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
+            if (ownerAddress != activeAddress) return toast.error("The owner wallet for this project is differnet", { description: `It was created with ${shortAddress}.\nSome things might be broken`, id: "error" })
 
-        switch (text.trim().split(" ")[0]) {
-            case "clear":
-            case ".clear":
-                setCommandOutputs([]);
-                term.resize(maxCols, 10)
-                return readLine(promptBuf);
-            case ".help":
+            term.resize(maxCols, term.buffer.normal.length > maxRows ? maxRows : term.buffer.normal.length)
+            if (text.trim().length == 0) {
                 setCommandOutputs(p => {
                     if (p.length >= maxHistory) p.shift()
-                    return [...p, `> ${text}`, `Client commands:
+                    return [...p, ">"]
+                });
+                return readLine(promptBuf);
+            }
+            const command = text.trim().split(" ");
+            switch (text.trim().split(" ")[0]) {
+                case "clear":
+                case ".clear":
+                    setCommandOutputs(Array.from({ length: 100 }, () => ""));
+                    term.resize(maxCols, 100)
+                    break;
+                case ".help":
+                case "help":
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, helpText]
+                    });
+                    break;
+                case ".list-process":
+                    let processes = [];
+                    for (const f in project.files) {
+                        const file = project.files[f];
+                        if (file.process)
+                            processes.push({ file: file.name, process: file.process })
+                    }
+                    let outString = "Processes:\n";
+                    outString += "Default\t\t" + ANSI.LIGHTGREEN + project.process + ANSI.RESET + "\n\n"
 
-  .load [file]                  Loads local Lua file into the process
-  .monitor                      Starts monitoring cron messages for this process
-  .unmonitor                    Stops monitoring cron messages for this process
-  .help                         Print this help screen
-  
-  clear                         Clear the terminal screen
-  ls                            List files in the current project
-`]
-                });
-                return readLine(promptBuf);
-            case "ls":
-                const files = Object.keys(project.files).map((f) => project.files[f].name);
-                setCommandOutputs(p => {
-                    if (p.length >= maxHistory) p.shift()
-                    return [...p, `> ${text}`, files.join("\n")]
-                });
-                return readLine(promptBuf);
-            case ".load":
-                const command = text.trim().split(" ");
-                if (command.length > 1) {
-                    const filename = command[1];
-                    if (!filename.endsWith(".lua")) {
+                    const table = processes.map((p) => {
+                        return [p.file, p.process]
+                    })
+
+                    const maxColWidth = table.reduce((acc, val) => {
+                        return val[0].length > acc ? val[0].length : acc
+                    }, 0)
+
+                    const tableString = table.map((row) => {
+                        return `${ANSI.BLUE}${row[0]}`.padEnd(maxColWidth) + "\t" + `${ANSI.LIGHTGREEN}${row[1]}${ANSI.RESET}`
+                    }).join("\n")
+
+                    outString += tableString
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outString]
+                    });
+
+                    break;
+                case ".set-default":
+                    if (command.length < 2) {
                         setCommandOutputs(p => {
                             if (p.length >= maxHistory) p.shift()
-                            return [...p, `> ${text}`, `Only .lua files can be loaded`]
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Please specify a process id${ANSI.RESET}`]
                         });
+                        break;
                     }
-                    else {
-                        const project = projectManager.getProject(globalState.activeProject);
-                        const file = Object.keys(project.files).find((f) => project.files[f].name == filename);
-                        console.log("file", project.files[file]);
-                        const src = project.files[file].content.cells[0].code;
-                        console.log("src", src);
+                    const processId = command[1];
+                    rl.println("TODO")
 
-                        setRunning(true);
-                        // print a line that says computing
-                        rl.println(`\r\x1b[K\x1b[34mLoading ${filename}... \x1b[0m`);
-                        const result = await runLua(src, project.process, [
-                            { name: "File-Type", value: "Terminal" }
-                        ]);
+                    break;
+                case ".load-blueprint":
+                    if (command.length < 2) {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Please specify a blueprint name${ANSI.RESET}`]
+                        });
+                        break;
+                    }
+                    const blueprintName = command[1];
+                    rl.println("TODO")
 
-                        if (result.Error) {
-                            console.log(result.Error);
+                    break;
+                case "ls":
+                    const project_ = projectManager.projects[globalState.activeProject]
+                    // const project_ = projects[globalState.activeProject];
+
+                    const files = Object.keys(project_.files).map((f) => project_.files[f].name);
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.LIGHTBLUE}`, files.join("\n") + ANSI.RESET]
+                    });
+                    break;
+                case ".load":
+                    if (command.length > 1) {
+                        const filename = command[1];
+                        if (!filename.endsWith(".lua")) {
                             setCommandOutputs(p => {
                                 if (p.length >= maxHistory) p.shift()
-                                return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
+                                return [...p, `${ANSI.LIGHTRED}> ${text}`, `Only .lua files can be loaded${ANSI.RESET}`]
                             });
+                            break;
                         }
-
-                        if (result.Output) {
-                            console.log(result.Output);
-                            result.Output.prompt && globalState.setPrompt(result.Output.prompt)
-                            result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
-
-                            console.log(result.Output.prompt || result.Output.data.prompt)
-                            const outputData = result.Output.data;
-                            console.log("outputData", outputData);
-                            if (typeof outputData == "string" || typeof outputData == "number") {
-                                console.log(outputData);
+                        else {
+                            const project_ = projectManager.getProject(globalState.activeProject);
+                            // const project_ = projects[globalState.activeProject];
+                            const file = Object.keys(project_.files).find((f) => project_.files[f].name == filename);
+                            if (!file) {
                                 setCommandOutputs(p => {
                                     if (p.length >= maxHistory) p.shift()
-                                    return [...p, `> ${text}`, outputData.toString()]
+                                    return [...p, `${ANSI.LIGHTRED}> ${text}`, `File ${filename} not found${ANSI.RESET}`]
                                 });
-                            } else
-                                if (result.Output.data.json != "undefined") {
-                                    console.log("json", result.Output.data.json);
-                                    const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                                break;
+                            }
+                            console.log("file", project_.files[file]);
+                            const src = project_.files[file].content.cells[0].code;
+                            console.log("src", src);
+
+                            setRunning(true);
+                            // print a line that says computing
+                            rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTYELLOW}Loading ${filename}...${ANSI.RESET}`);
+                            const result = await runLua(src, project_.process, [
+                                { name: "File-Type", value: "Terminal" }
+                            ]);
+
+                            if (result.Error) {
+                                console.log(result.Error);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `${ANSI.LIGHTRED}> ${text}`, result.Error, ANSI.RESET]
+                                });
+                            }
+
+                            if (result.Output) {
+                                console.log(result.Output);
+                                result.Output.prompt && globalState.setPrompt(result.Output.prompt)
+                                result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
+
+                                console.log(result.Output.prompt || result.Output.data.prompt)
+                                const outputData = result.Output.data;
+                                console.log("outputData", outputData);
+                                if (typeof outputData == "string" || typeof outputData == "number") {
+                                    console.log(outputData);
                                     setCommandOutputs(p => {
                                         if (p.length >= maxHistory) p.shift()
-                                        return [...p, `> ${text}`, outputStr]
+                                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
                                     });
-                                } else {
-                                    console.log("normal", result.Output.data.output);
-                                    setCommandOutputs(p => {
-                                        if (p.length >= maxHistory) p.shift()
-                                        return [...p, `> ${text}`, result.Output.data.output]
-                                    });
-                                }
+                                } else
+                                    if (result.Output.data.json != "undefined") {
+                                        console.log("json", result.Output.data.json);
+                                        const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                                        setCommandOutputs(p => {
+                                            if (p.length >= maxHistory) p.shift()
+                                            return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputStr]
+                                        });
+                                    } else {
+                                        console.log("normal", result.Output.data.output);
+                                        setCommandOutputs(p => {
+                                            if (p.length >= maxHistory) p.shift()
+                                            return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
+                                        });
+                                    }
+                            }
+                            setRunning(false);
+                            sendGAEvent({ event: 'run_code', value: 'terminal' })
                         }
+                        scrollToBottom()
+                    } else {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Please specify a file to load${ANSI.RESET}`]
+                        });
+                    }
+                    break;
+                case ".monitor":
+                    rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTBLUE}Monitoring Process...${ANSI.RESET}`);
+                    try {
+                        const res = await monitor(project.process);
+                        // rl.println(`\r\x1b[K\x1b[34mMonitored: ${res}\x1b[0m`);
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `Monitored: ${ANSI.LIGHTGREEN}${res}${ANSI.RESET}`]
+                        })
+                    } catch (e) {
+                        rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTRED}Error: ${e.message}${ANSI.RESET}`);
+                    }
+                    break;
+                case ".unmonitor":
+                    rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTBLUE}Unmonitoring Process...${ANSI.RESET}`);
+                    try {
+                        const res = await unmonitor(project.process);
+                        // rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `Unmonitored:  ${ANSI.LIGHTGREEN}${res}${ANSI.RESET}`]
+                        })
+                    } catch (e) {
+                        rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTRED}Error: ${e.message}${ANSI.RESET}`);
+                    }
+                    break;
+                default:
+                    console.log("running", text);
+                    setRunning(true);
+                    // print a line that says computing
+                    rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTBLUE}Computing State Transformations... ${ANSI.RESET}`);
+                    const result = await runLua(text, project.process, [
+                        { name: "File-Type", value: "Terminal" }
+                    ]);
+                    globalState.appendHistory(project.name, { id: (result as any).id!, code: text, timestamp: Date.now(), output: result.Output.data });
+                    if (result.Error) {
+                        console.log(result.Error);
+
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, result.Error + ANSI.RESET]
+                        });
+                        // rl.println(result.Error);
+                    }
+                    if (result.Output) {
+                        console.log(result.Output);
+                        // setPrompt(result.Output.data.prompt)
+                        result.Output.prompt && globalState.setPrompt(result.Output.prompt)
+                        result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
+
+                        console.log(result.Output.prompt || result.Output.data.prompt)
+                        const outputData = result.Output.data;
+                        console.log("outputData", outputData);
+                        if (typeof outputData == "string" || typeof outputData == "number") {
+                            console.log(outputData);
+                            // fileContent.cells[cellId].output = outputData;
+                            // globalState.setLastOutput(outputData as string);
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
+                            });
+                        } else
+                            if (result.Output.data.json != "undefined") {
+                                console.log("json", result.Output.data.json);
+                                const outputStr = JSON.stringify(result.Output.data.json, null, 2);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputStr]
+                                });
+                            } else {
+                                console.log("normal", result.Output.data.output);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
+                                });
+                            }
                     }
                     setRunning(false);
                     sendGAEvent({ event: 'run_code', value: 'terminal' })
                     scrollToBottom()
-                } else {
-                    setCommandOutputs(p => {
-                        if (p.length >= maxHistory) p.shift()
-                        return [...p, `> ${text}`, `Please specify a file to load`]
-                    });
-                }
-                return setTimeout(() => readLine(promptBuf), 100);
-            case ".monitor":
-                rl.println(`\r\x1b[K\x1b[34mMonitoring Process... \x1b[0m`);
-                try {
-                    const res = await monitor(project.process);
-                    // rl.println(`\r\x1b[K\x1b[34mMonitored: ${res}\x1b[0m`);
-                    setCommandOutputs(p => {
-                        if (p.length >= maxHistory) p.shift()
-                        return [...p, `Monitored: \x1b[34m${res}\x1b[0m`]
-                    })
-                } catch (e) {
-                    rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
-                } finally {
-                    return readLine(promptBuf);
-                }
-            case ".unmonitor":
-                rl.println(`\r\x1b[K\x1b[34mUnmonitoring Process... \x1b[0m`);
-                try {
-                    const res = await unmonitor(project.process);
-                    // rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
-                    setCommandOutputs(p => {
-                        if (p.length >= maxHistory) p.shift()
-                        return [...p, `Unmonitored: \x1b[34m${res}\x1b[0m`]
-                    })
-                } catch (e) {
-                    rl.println(`\r\x1b[K\x1b[31mError: ${e.message}\x1b[0m`);
-                } finally {
-                    return readLine(promptBuf);
-                }
-            default:
-                console.log("running", text);
-                setRunning(true);
-                // print a line that says computing
-                rl.println(`\r\x1b[K\x1b[34mComputing State Transformations... \x1b[0m`);
-                const result = await runLua(text, project.process, [
-                    { name: "File-Type", value: "Terminal" }
-                ]);
-                globalState.appendHistory(project.name, { id: (result as any).id!, code: text, timestamp: Date.now(), output: result.Output.data });
-                if (result.Error) {
-                    console.log(result.Error);
-
-                    setCommandOutputs(p => {
-                        if (p.length >= maxHistory) p.shift()
-                        return [...p, `\x1b[31m> ${text} \x1b[0m`, result.Error]
-                    });
-                    // rl.println(result.Error);
-                }
-                if (result.Output) {
-                    console.log(result.Output);
-                    // setPrompt(result.Output.data.prompt)
-                    result.Output.prompt && globalState.setPrompt(result.Output.prompt)
-                    result.Output.data.prompt && globalState.setPrompt(result.Output.data.prompt)
-
-                    console.log(result.Output.prompt || result.Output.data.prompt)
-                    const outputData = result.Output.data;
-                    console.log("outputData", outputData);
-                    if (typeof outputData == "string" || typeof outputData == "number") {
-                        console.log(outputData);
-                        // fileContent.cells[cellId].output = outputData;
-                        // globalState.setLastOutput(outputData as string);
-                        setCommandOutputs(p => {
-                            if (p.length >= maxHistory) p.shift()
-                            return [...p, `> ${text}`, outputData.toString()]
-                        });
-                    } else
-                        if (result.Output.data.json != "undefined") {
-                            console.log("json", result.Output.data.json);
-                            const outputStr = JSON.stringify(result.Output.data.json, null, 2);
-                            setCommandOutputs(p => {
-                                if (p.length >= maxHistory) p.shift()
-                                return [...p, `> ${text}`, outputStr]
-                            });
-                        } else {
-                            console.log("normal", result.Output.data.output);
-                            setCommandOutputs(p => {
-                                if (p.length >= maxHistory) p.shift()
-                                return [...p, `> ${text}`, result.Output.data.output]
-                            });
-                        }
-                }
-                setRunning(false);
-                sendGAEvent({ event: 'run_code', value: 'terminal' })
-                scrollToBottom()
-                setTimeout(() => readLine(promptBuf), 100);
-                break;
+                    break;
+            }
+            setTimeout(() => readLine(promptBuf), 100);
         }
+
+        rl.read(newPrompt).then(processLine);
     }
+
+    readLine(promptBuf)
 
     if (!globalState.activeProject) {
         return <div className="w-full h-full flex items-center justify-center text-lg font-btr-code">No active project</div>
