@@ -50,11 +50,8 @@ app.post('/analytics', (req, res) => {
     const timestamp = new Date().toISOString();
     const body = req.body as TBody;
     const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(ipAddress)
-    const geoLocation = req.headers['cf-ipcountry'];
-    console.log(geoLocation)
-    const geoCity = req.headers['cf-ipcity'];
-    console.log(geoCity)
+
+    console.log(ipAddress, body)
 
     switch (body.action) {
         case "codecell_load":
