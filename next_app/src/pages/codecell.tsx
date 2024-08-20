@@ -49,6 +49,7 @@ export default function CodeCell() {
 
     async function sendAnalytics(data: TAnalyticsObj) {
         const BASE = "https://api.betteridea.dev";
+        // const BASE = "http://localhost:3001";
         const userId = localStorage.getItem('user-id') || "user-" + uuidv4();
         localStorage.setItem('user-id', userId);
 
