@@ -51,14 +51,12 @@ app.post('/analytics', (req, res) => {
     const body = req.body as TBody;
     const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    console.log(ipAddress, body)
+    console.log(timestamp, ipAddress, body)
 
     switch (body.action) {
         case "codecell_load":
-            db.run(codecell_load_table);
             break;
         case "codecell_run":
-            db.run(codecell_run_table);
             break;
         default:
             break;

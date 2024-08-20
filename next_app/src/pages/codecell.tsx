@@ -62,6 +62,7 @@ export default function CodeCell() {
             },
             body: JSON.stringify(body)
         });
+        console.log(userId);
     }
 
     useEffect(() => {
