@@ -17,6 +17,10 @@ import Arweave from "arweave";
 import { LoaderIcon } from "lucide-react";
 import runIcon from "@/assets/icons/run.svg"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { v4 as uuidv4 } from "uuid"
+import { cookies } from "next/headers";
+
+type TActions = "codecell_load" | "codecell_run";
 
 var codeproxy = "";
 export default function CodeCell() {
@@ -37,6 +41,32 @@ export default function CodeCell() {
     const [mounted, setMounted] = useState(false);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const { theme } = useTheme();
+
+    async function sendAnalytics(data: { action: TActions, messageId?: string }) {
+        const BASE = "http://localhost:8000";
+        const userId = localStorage.getItem('user-id') || "user-" + uuidv4();
+        localStorage.setItem('user-id', userId);
+
+        const body = {
+            ...data,
+            appname,
+            userId,
+            domain: window.parent.location.hostname,
+            path: window.parent.location.pathname,
+        }
+
+        await fetch(`${BASE}/analytics`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        });
+    }
+
+    useEffect(() => {
+        sendAnalytics({ action: "codecell_load" });
+    }, []);
 
     useEffect(() => {
         console.log("wallet proxied");
@@ -297,6 +327,7 @@ export default function CodeCell() {
         ]);
         const out = parseOutupt(r);
         if (r.Error) return toast.error(r.Error);
+        sendAnalytics({ action: "codecell_run", messageId: (r as any).id });
         console.log(out);
         setOutput(out);
         setRunning(false);

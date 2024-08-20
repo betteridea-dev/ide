@@ -4,8 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Dev() {
-  const devMode = typeof window == "undefined" ? true : window.location.hostname === "localhost";
-  const [inbox, setInbox] = useState<any>();
+    const devMode = typeof window == "undefined" ? true : window.location.hostname === "localhost";
+    const [inbox, setInbox] = useState<any>();
 
     return (
         <div className="flex flex-col items-center justify-center gap-5 p-5">
@@ -14,7 +14,7 @@ export default function Dev() {
                 cellId="1" // any unique cell id
                 appName="BetterIDEa" // Your unique app name
                 code="print('Portable code cell ftw!')" // initial code (optional)
-                // devMode={devMode}
+                devMode
                 nowallet
                 onNewMessage={(message) => {
                     message.forEach((m) => {
