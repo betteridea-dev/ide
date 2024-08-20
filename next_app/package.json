@@ -12,7 +12,7 @@
     "lint": "next lint",
     "deploy": "pnpm run build && gh-pages -d out",
     "backend:dev": "nodemon --watch backend --exec tsx backend/index.ts",
-    "backend:start": "tsx backend/index.ts"
+    "backend": "tsx backend/index.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.24",

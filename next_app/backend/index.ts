@@ -8,7 +8,7 @@ const db = new sqlite3.Database(':memory:');
 const app = express();
 app.use(express.json());
 app.use(cors());
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 3001;
 
 type TBody = {
     action: "codecell_load" | "codecell_run"
