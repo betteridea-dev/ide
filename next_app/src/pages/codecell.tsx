@@ -52,10 +52,11 @@ export default function CodeCell() {
         const userId = localStorage.getItem('user-id') || "user-" + uuidv4();
         localStorage.setItem('user-id', userId);
 
+        //this is in an iframe, get the parent websites domain and path
         const body = {
             ...data, userId,
-            domain: window.location.hostname,
-            path: window.location.pathname
+            domain: document.referrer,
+            path: window.parent.location.pathname
         };
 
         await fetch(`${BASE}/analytics`, {
