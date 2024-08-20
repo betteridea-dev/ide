@@ -55,8 +55,7 @@ export default function CodeCell() {
         //this is in an iframe, get the parent websites domain and path
         const body = {
             ...data, userId,
-            domain: document.referrer,
-            path: window.parent.location.pathname
+            referrer: document.referrer,
         };
 
         await fetch(`${BASE}/analytics`, {
@@ -70,10 +69,10 @@ export default function CodeCell() {
     }
 
     useEffect(() => {
-        console.log(sendAnalytics({
+        sendAnalytics({
             action: "codecell_load",
             appname: appname,
-        }))
+        }).then(console.log)
     }, [appname]);
 
     useEffect(() => {
@@ -335,7 +334,7 @@ export default function CodeCell() {
         ]);
         const out = parseOutupt(r);
         if (r.Error) return toast.error(r.Error);
-        console.log(sendAnalytics({ appname: appname, action: "codecell_run", messageId: (r as any).id }))
+        sendAnalytics({ appname: appname, action: "codecell_run", messageId: (r as any).id }).then(console.log);
         console.log(out);
         setOutput(out);
         setRunning(false);
