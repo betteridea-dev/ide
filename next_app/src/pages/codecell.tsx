@@ -21,6 +21,11 @@ import { v4 as uuidv4 } from "uuid"
 import { cookies } from "next/headers";
 
 type TActions = "codecell_load" | "codecell_run";
+type TAnalyticsObj = {
+    appname: string;
+    action: TActions;
+    messageId?: string;
+}
 
 var codeproxy = "";
 export default function CodeCell() {
@@ -42,18 +47,16 @@ export default function CodeCell() {
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const { theme } = useTheme();
 
-    async function sendAnalytics(data: { action: TActions, messageId?: string }) {
+    async function sendAnalytics(data: TAnalyticsObj) {
         const BASE = "https://api.betteridea.dev";
         const userId = localStorage.getItem('user-id') || "user-" + uuidv4();
         localStorage.setItem('user-id', userId);
 
         const body = {
-            ...data,
-            appname,
-            userId,
-            domain: window.parent.location.hostname,
-            path: window.parent.location.pathname,
-        }
+            ...data, userId,
+            domain: window.location.hostname,
+            path: window.location.pathname
+        };
 
         await fetch(`${BASE}/analytics`, {
             method: 'POST',
@@ -62,12 +65,15 @@ export default function CodeCell() {
             },
             body: JSON.stringify(body)
         });
-        console.log(userId);
+        return body
     }
 
     useEffect(() => {
-        sendAnalytics({ action: "codecell_load" });
-    }, []);
+        console.log(sendAnalytics({
+            action: "codecell_load",
+            appname: appname,
+        }))
+    }, [appname]);
 
     useEffect(() => {
         console.log("wallet proxied");
@@ -328,7 +334,7 @@ export default function CodeCell() {
         ]);
         const out = parseOutupt(r);
         if (r.Error) return toast.error(r.Error);
-        sendAnalytics({ action: "codecell_run", messageId: (r as any).id });
+        console.log(sendAnalytics({ appname: appname, action: "codecell_run", messageId: (r as any).id }))
         console.log(out);
         setOutput(out);
         setRunning(false);
