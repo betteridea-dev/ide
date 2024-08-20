@@ -199,3 +199,26 @@ export async function readHandler(args: {
     }
   }
 }
+
+export async function getBlueprints(): Promise<string[] | undefined> {
+  const endpoint = "https://api.github.com/repos/permaweb/aos/contents/blueprints";
+
+  const res = await fetch(endpoint);
+  if (res.ok) {
+    const data = await res.json() as { name: string }[];
+    return data.map(d => d.name);
+  } else {
+    return undefined;
+  }
+}
+
+export async function getRawBlueprint(path: string) {
+  const endpoint = `https://raw.githubusercontent.com/permaweb/aos/main/blueprints/${path}`;
+
+  const res = await fetch(endpoint);
+  if (res.ok) {
+    return await res.text();
+  } else {
+    return undefined;
+  }
+}

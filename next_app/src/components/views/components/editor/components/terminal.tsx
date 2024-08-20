@@ -3,7 +3,7 @@ import { Terminal } from "@xterm/xterm";
 // import { FitAddon } from "@xterm/addon-fit";
 import { Readline } from "xterm-readline";
 import { sendGAEvent } from "@next/third-parties/google";
-import { getResults, monitor, runLua, unmonitor } from "@/lib/ao-vars";
+import { getBlueprints, getRawBlueprint, getResults, monitor, runLua, unmonitor } from "@/lib/ao-vars";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { toast } from "sonner"
 import { useTheme } from "next-themes";
@@ -14,16 +14,16 @@ import { TProjectStorage } from "@/hooks/useProjectManager";
 
 const helpText = `Available Commands:
 
-    ${ANSI.LIGHTGREEN}help${ANSI.RESET}                          Print this help screen
-    ${ANSI.LIGHTGREEN}clear${ANSI.RESET}                         Clear the terminal screen
-    ${ANSI.LIGHTGREEN}ls${ANSI.RESET}                            List files in the current project
+    ${ANSI.GREEN}help${ANSI.RESET}                          Print this help screen
+    ${ANSI.GREEN}clear${ANSI.RESET}                         Clear the terminal screen
+    ${ANSI.GREEN}ls${ANSI.RESET}                            List files and the processes they use
 
-    ${ANSI.LIGHTGREEN}.list-process${ANSI.RESET}                 List all processes in the current project
-    ${ANSI.LIGHTGREEN}.set-default [process_id]${ANSI.RESET}     Change the default process for this project
-    ${ANSI.LIGHTGREEN}.load [file]${ANSI.RESET}                  Loads local Lua file into the process
-    ${ANSI.LIGHTGREEN}.load-blueprint [name]${ANSI.RESET}        Loads a blueprint into the process
-    ${ANSI.LIGHTGREEN}.monitor${ANSI.RESET}                      Starts monitoring cron messages for this process
-    ${ANSI.LIGHTGREEN}.unmonitor${ANSI.RESET}                    Stops monitoring cron messages for this process
+    ${ANSI.GREEN}.set-default [process_id]${ANSI.RESET}     Change the default process for this project
+    ${ANSI.GREEN}.load [file]${ANSI.RESET}                  Loads local Lua file into the process
+    ${ANSI.GREEN}.blueprints${ANSI.RESET}                   Lists available blueprints
+    ${ANSI.GREEN}.load-blueprint [name]${ANSI.RESET}        Loads a blueprint into the process
+    ${ANSI.GREEN}.monitor${ANSI.RESET}                      Starts monitoring cron messages for this process
+    ${ANSI.GREEN}.unmonitor${ANSI.RESET}                    Stops monitoring cron messages for this process
 `
 
 let promptBuf = ""
@@ -59,6 +59,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
         lineHeight: 1,
     }))
     const [rl, setRl] = useState(new Readline())
+    const [blueprints, setBlueprints] = useState<string[] | undefined>([])
 
     const maxRows = 100;
     const maxCols = 100;
@@ -139,10 +140,14 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
         term.resize(maxCols, 100)
     }, [])
 
+    useEffect(() => {
+        const blueprints = getBlueprints();
+        blueprints.then((res) => {
+            setBlueprints(res)
+        })
+    }, [])
 
     function readLine(newPrompt: string) {
-
-
         async function processLine(text: string) {
             // rl.println("you entered: " + text);
 
@@ -172,6 +177,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                 return readLine(promptBuf);
             }
             const command = text.trim().split(" ");
+            const project_ = projectManager.getProject(globalState.activeProject);
             switch (text.trim().split(" ")[0]) {
                 case "clear":
                 case ".clear":
@@ -182,18 +188,18 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                 case "help":
                     setCommandOutputs(p => {
                         if (p.length >= maxHistory) p.shift()
-                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, helpText]
+                        return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, helpText]
                     });
                     break;
+                case "ls":
                 case ".list-process":
                     let processes = [];
                     for (const f in project.files) {
                         const file = project.files[f];
-                        if (file.process)
-                            processes.push({ file: file.name, process: file.process })
+                        processes.push({ file: file.name, process: file.process })
                     }
-                    let outString = "Processes:\n";
-                    outString += "Default\t\t" + ANSI.LIGHTGREEN + project.process + ANSI.RESET + "\n\n"
+                    let outString = "Files & Processes:\n";
+                    outString += ANSI.LIGHTBLUE + "Default\t\t" + ANSI.GREEN + project.process + ANSI.RESET + "\n\n"
 
                     const table = processes.map((p) => {
                         return [p.file, p.process]
@@ -204,13 +210,13 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                     }, 0)
 
                     const tableString = table.map((row) => {
-                        return `${ANSI.BLUE}${row[0]}`.padEnd(maxColWidth) + "\t" + `${ANSI.LIGHTGREEN}${row[1]}${ANSI.RESET}`
+                        return `${ANSI.LIGHTBLUE}${row[0]}`.padEnd(maxColWidth) + "\t" + `${row[1] ? ANSI.GREEN + row[1] + ANSI.RESET : ANSI.RESET + "default"}${ANSI.RESET}`
                     }).join("\n")
 
                     outString += tableString
                     setCommandOutputs(p => {
                         if (p.length >= maxHistory) p.shift()
-                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outString]
+                        return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outString]
                     });
 
                     break;
@@ -223,8 +229,37 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                         break;
                     }
                     const processId = command[1];
-                    rl.println("TODO")
+                    if (!(processId.length == 43)) {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Invalid process id${ANSI.RESET}`]
+                        });
+                        break;
+                    }
+                    project_._setProcess(processId);
+                    projectManager.projects[project_.name] = project_;
+                    projectManager.saveProjects(projectManager.projects);
+                    setCommandOutputs(p => {
+                        if (p.length >= maxHistory) p.shift()
+                        return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, `Default process set to ${processId}`]
+                    });
 
+                    break;
+                case ".blueprints":
+                    if (!blueprints) {
+                        await getBlueprints().then((res) => {
+                            setBlueprints(res)
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, `Available blueprints:\n${ANSI.LIGHTBLUE}${res.join("\n").replaceAll(".lua", "")}${ANSI.RESET}`]
+                            })
+                        })
+                    } else {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, `Available blueprints:\n${ANSI.LIGHTBLUE}${blueprints.join("\n").replaceAll(".lua", "")}${ANSI.RESET}`]
+                        });
+                    }
                     break;
                 case ".load-blueprint":
                     if (command.length < 2) {
@@ -234,19 +269,84 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                         });
                         break;
                     }
-                    const blueprintName = command[1];
-                    rl.println("TODO")
+                    const blueprintName = command[1] + ".lua";
+                    let blueprints_: string[];
+                    if (!blueprints) {
+                        blueprints_ = await getBlueprints();
+                        if (!blueprints_) {
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `${ANSI.LIGHTRED}> ${text}`, `Failed to fetch blueprints${ANSI.RESET}`]
+                            });
+                            break;
+                        }
+                        setBlueprints(blueprints_);
+                    } else {
+                        blueprints_ = blueprints;
+                    }
+                    if (!blueprints_.includes(blueprintName)) {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Blueprint ${blueprintName} not found${ANSI.RESET}`]
+                        });
+                        break;
+                    }
 
-                    break;
-                case "ls":
-                    const project_ = projectManager.projects[globalState.activeProject]
-                    // const project_ = projects[globalState.activeProject];
+                    const blueprintSrc = await getRawBlueprint(blueprintName);
+                    if (!blueprintSrc) {
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, `Failed to fetch blueprint${ANSI.RESET}`]
+                        });
+                        break;
+                    }
 
-                    const files = Object.keys(project_.files).map((f) => project_.files[f].name);
-                    setCommandOutputs(p => {
-                        if (p.length >= maxHistory) p.shift()
-                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.LIGHTBLUE}`, files.join("\n") + ANSI.RESET]
-                    });
+                    setRunning(true);
+                    // print a line that says computing
+                    rl.println(`${ANSI.CLEARLINE}${ANSI.YELLOW}Loading ${blueprintName}...${ANSI.RESET}`);
+                    const bluRes = await runLua(blueprintSrc, project_.process, [
+                        { name: "File-Type", value: "Terminal" }
+                    ]);
+
+                    if (bluRes.Error) {
+                        console.log(bluRes.Error);
+                        setCommandOutputs(p => {
+                            if (p.length >= maxHistory) p.shift()
+                            return [...p, `${ANSI.LIGHTRED}> ${text}`, bluRes.Error, ANSI.RESET]
+                        });
+                    } else {
+                        console.log(bluRes.Output);
+                        bluRes.Output.prompt && globalState.setPrompt(bluRes.Output.prompt)
+                        bluRes.Output.data.prompt && globalState.setPrompt(bluRes.Output.data.prompt)
+
+                        console.log(bluRes.Output.prompt || bluRes.Output.data.prompt)
+                        const outputData = bluRes.Output.data;
+                        console.log("outputData", outputData);
+                        if (typeof outputData == "string" || typeof outputData == "number") {
+                            console.log(outputData);
+                            setCommandOutputs(p => {
+                                if (p.length >= maxHistory) p.shift()
+                                return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
+                            });
+                        } else
+                            if (bluRes.Output.data.json != "undefined") {
+                                console.log("json", bluRes.Output.data.json);
+                                const outputStr = JSON.stringify(bluRes.Output.data.json, null, 2);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputStr]
+                                });
+                            } else {
+                                console.log("normal", bluRes.Output.data.output);
+                                setCommandOutputs(p => {
+                                    if (p.length >= maxHistory) p.shift()
+                                    return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, bluRes.Output.data.output]
+                                });
+                            }
+                    }
+
+
+
                     break;
                 case ".load":
                     if (command.length > 1) {
@@ -259,8 +359,6 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                             break;
                         }
                         else {
-                            const project_ = projectManager.getProject(globalState.activeProject);
-                            // const project_ = projects[globalState.activeProject];
                             const file = Object.keys(project_.files).find((f) => project_.files[f].name == filename);
                             if (!file) {
                                 setCommandOutputs(p => {
@@ -275,7 +373,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
 
                             setRunning(true);
                             // print a line that says computing
-                            rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTYELLOW}Loading ${filename}...${ANSI.RESET}`);
+                            rl.println(`${ANSI.CLEARLINE}${ANSI.YELLOW}Loading ${filename}...${ANSI.RESET}`);
                             const result = await runLua(src, project_.process, [
                                 { name: "File-Type", value: "Terminal" }
                             ]);
@@ -300,7 +398,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                                     console.log(outputData);
                                     setCommandOutputs(p => {
                                         if (p.length >= maxHistory) p.shift()
-                                        return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
+                                        return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
                                     });
                                 } else
                                     if (result.Output.data.json != "undefined") {
@@ -308,13 +406,13 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                                         const outputStr = JSON.stringify(result.Output.data.json, null, 2);
                                         setCommandOutputs(p => {
                                             if (p.length >= maxHistory) p.shift()
-                                            return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputStr]
+                                            return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputStr]
                                         });
                                     } else {
                                         console.log("normal", result.Output.data.output);
                                         setCommandOutputs(p => {
                                             if (p.length >= maxHistory) p.shift()
-                                            return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
+                                            return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
                                         });
                                     }
                             }
@@ -336,7 +434,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                         // rl.println(`\r\x1b[K\x1b[34mMonitored: ${res}\x1b[0m`);
                         setCommandOutputs(p => {
                             if (p.length >= maxHistory) p.shift()
-                            return [...p, `Monitored: ${ANSI.LIGHTGREEN}${res}${ANSI.RESET}`]
+                            return [...p, `Monitored: ${ANSI.GREEN}${res}${ANSI.RESET}`]
                         })
                     } catch (e) {
                         rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTRED}Error: ${e.message}${ANSI.RESET}`);
@@ -349,7 +447,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                         // rl.println(`\r\x1b[KUnmonitored: \x1b[34m${res}\x1b[0m`);
                         setCommandOutputs(p => {
                             if (p.length >= maxHistory) p.shift()
-                            return [...p, `Unmonitored:  ${ANSI.LIGHTGREEN}${res}${ANSI.RESET}`]
+                            return [...p, `Unmonitored:  ${ANSI.GREEN}${res}${ANSI.RESET}`]
                         })
                     } catch (e) {
                         rl.println(`${ANSI.CLEARLINE}${ANSI.LIGHTRED}Error: ${e.message}${ANSI.RESET}`);
@@ -388,7 +486,7 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                             // globalState.setLastOutput(outputData as string);
                             setCommandOutputs(p => {
                                 if (p.length >= maxHistory) p.shift()
-                                return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
+                                return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputData.toString()]
                             });
                         } else
                             if (result.Output.data.json != "undefined") {
@@ -396,13 +494,13 @@ export default function AOTerminal({ commandOutputs, setCommandOutputs }: {
                                 const outputStr = JSON.stringify(result.Output.data.json, null, 2);
                                 setCommandOutputs(p => {
                                     if (p.length >= maxHistory) p.shift()
-                                    return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, outputStr]
+                                    return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, outputStr]
                                 });
                             } else {
                                 console.log("normal", result.Output.data.output);
                                 setCommandOutputs(p => {
                                     if (p.length >= maxHistory) p.shift()
-                                    return [...p, `${ANSI.LIGHTGREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
+                                    return [...p, `${ANSI.GREEN}> ${text}${ANSI.RESET}`, result.Output.data.output]
                                 });
                             }
                     }
