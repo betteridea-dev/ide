@@ -198,7 +198,7 @@ function Marketplace() {
             globalState.setActiveView(null)
             globalState.setActiveSidebarItem(null)
         }}>
-            <ArrowLeft size={15} className=" inline-block mr-2" /> home
+            <ArrowLeft size={15} className="inline-block mr-2" /> home
         </Button>
         <div className="text-2xl">Template Marketplace (BETA)</div>
         <div className="relative my-8">
