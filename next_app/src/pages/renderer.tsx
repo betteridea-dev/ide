@@ -122,7 +122,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
                             }
                             {
                                 txData.files[activeFile].type == "NOTEBOOK" && <div className="flex flex-col gap-2">{txData.files[activeFile].content.cellOrder.map((cellId) => txData.files[activeFile].content.cells[cellId].code).map((code, _) => {
-                                    return <CodeCell code={code} appName="BetterIDEa-Renderer" cellId={_.toString()} nowallet={!!window.arweaveWallet} height="200px" />
+                                    return <CodeCell key={_} code={code} appName="BetterIDEa-Renderer" cellId={_.toString()} nowallet={!!window.arweaveWallet} height="200px" />
                                 })}</div>
                             }
                         </div> : <div className="text-center ring-1">Select a file to view its contents</div>
