@@ -68,3 +68,39 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
         throw new Error(e);
     }
 }
+
+export async function getProfileById(args: { profileId: string }): Promise<ProfileHeaderType | null> {
+    const emptyProfile = {
+        id: args.profileId,
+        walletAddress: null,
+        displayName: null,
+        username: null,
+        bio: null,
+        avatar: null,
+        banner: null,
+        version: null,
+    };
+
+    try {
+        const fetchedProfile = await readHandler({
+            processId: args.profileId,
+            action: 'Info',
+            data: null,
+        });
+
+        if (fetchedProfile) {
+            return {
+                id: args.profileId,
+                walletAddress: fetchedProfile.Owner || null,
+                displayName: fetchedProfile.Profile.DisplayName || null,
+                username: fetchedProfile.Profile.UserName || null,
+                bio: fetchedProfile.Profile.Description || null,
+                avatar: fetchedProfile.Profile.ProfileImage || null,
+                banner: fetchedProfile.Profile.CoverImage || null,
+                version: fetchedProfile.Profile.Version || null,
+            };
+        } else return emptyProfile;
+    } catch (e: any) {
+        throw new Error(e);
+    }
+}

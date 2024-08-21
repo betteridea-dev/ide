@@ -125,7 +125,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
                                     return <CodeCell key={_} code={code} appName="BetterIDEa-Renderer" cellId={_.toString()} nowallet={!!window.arweaveWallet} height="200px" />
                                 })}</div>
                             }
-                        </div> : <div className="text-center ring-1">Select a file to view its contents</div>
+                        </div> : <div className="text-center">Select a file to view its contents</div>
                     }
                 </div>
             </div>
