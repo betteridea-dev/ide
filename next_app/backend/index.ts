@@ -73,46 +73,6 @@ app.get('/', (req, res) => {
 
 
 app.get('/analytics', (req, res) => {
-    //count codecell_loads
-    // const r = db.all(`
-    //     SELECT COUNT(*) as total_loads FROM codecell_loads;
-    //     SELECT COUNT(*) as total_runs FROM codecell_runs;
-    //     SELECT COUNT(DISTINCT userId) as total_users FROM codecell_loads;
-    //     SELECT COUNT(DISTINCT appName) as total_apps FROM codecell_loads;
-    //     SELECT COUNT(DISTINCT referrer) as total_referrers FROM codecell_loads;
-
-    //     SELECT COUNT(*) as total_loads_today FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(*) as total_runs_today FROM codecell_runs WHERE timestamp > ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT userId) as total_users_today FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT appName) as total_apps_today FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT referrer) as total_referrers_today FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0)};
-
-    //     SELECT COUNT(*) as total_loads_yesterday FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 86400000} AND timestamp < ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(*) as total_runs_yesterday FROM codecell_runs WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 86400000} AND timestamp < ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT userId) as total_users_yesterday FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 86400000} AND timestamp < ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT appName) as total_apps_yesterday FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 86400000} AND timestamp < ${new Date().setHours(0, 0, 0, 0)};
-    //     SELECT COUNT(DISTINCT referrer) as total_referrers_yesterday FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 86400000} AND timestamp < ${new Date().setHours(0, 0, 0, 0)};
-
-    //     SELECT COUNT(*) as total_loads_lastweek FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 604800000};
-    //     SELECT COUNT(*) as total_runs_lastweek FROM codecell_runs WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 604800000};
-    //     SELECT COUNT(DISTINCT userId) as total_users_lastweek FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 604800000};
-    //     SELECT COUNT(DISTINCT appName) as total_apps_lastweek FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 604800000};
-    //     SELECT COUNT(DISTINCT referrer) as total_referrers_lastweek FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 604800000};
-
-    //     SELECT COUNT(*) as total_loads_lastmonth FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 2592000000};
-    //     SELECT COUNT(*) as total_runs_lastmonth FROM codecell_runs WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 2592000000};
-    //     SELECT COUNT(DISTINCT userId) as total_users_lastmonth FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 2592000000};
-    //     SELECT COUNT(DISTINCT appName) as total_apps_lastmonth FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 2592000000};
-    //     SELECT COUNT(DISTINCT referrer) as total_referrers_lastmonth FROM codecell_loads WHERE timestamp > ${new Date().setHours(0, 0, 0, 0) - 2592000000};
-    //     `, (err, rows) => {
-    //     if (err) {
-    //         console.log(err)
-    //         res.status(500).send(err);
-    //     } else {
-    //         res.status(200).send(rows);
-    //     }
-    // })
-
     const queries = [
         //total
         `SELECT COUNT(*) as total_loads FROM codecell_loads`,
@@ -243,9 +203,10 @@ app.get('/analytics/referrers', (req, res) => {
 app.post('/analytics', async (req, res) => {
     const date = (new Date());
     const body = req.body as TBody;
-    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    const ipApi = `http://ip-api.com/json/${ipAddress}`;
+    const ipApi = `http://ip-api.com/json/${ip}`;
+    const statusHook = "https://discord.com/api/webhooks/1275688569289310219/AqcOInJdVL3Vy8is9Y6fxEKv7zPaxKhrjNc6ATiGNdWWltlI4HpNZVXbFCh646SMO2h7";
 
     const ipdata = await fetch(ipApi);
     if (ipdata.ok) {
@@ -265,7 +226,16 @@ app.post('/analytics', async (req, res) => {
             }
         }
     }
-    console.log(`[${date.toLocaleString()}] - ${ipAddress} - ${body.geo.city || "NA"} - ${body.referrer}`)
+    console.log(`[${date.toUTCString()}] - ${ip} - ${body.geo.city || "NA"} - ${body.referrer}`)
+    await fetch(statusHook, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: `\`\`\`${date.toUTCString()}\n${ip} - ${body.geo.city || "NA"} - ${body.referrer}\`\`\``
+        })
+    })
 
     switch (body.action) {
         case "codecell_load":
