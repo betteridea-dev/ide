@@ -25,7 +25,7 @@ import { extractHandlerNames } from "@/lib/utils";
 import { AOProfileType, getProfileById } from "@/lib/bazar";
 import Image from "next/image";
 
-function Template({ pid }: { pid: string }) {
+function Template({ pid, search }: { pid: string, search: string }) {
     const [hovered, setHovered] = useState(false)
     const [txData, setTxData] = useState<TemplateAsset & { creator: string }>(null)
     const [assetTags, setAssetTags] = useState<{ [name: string]: string }>({
@@ -125,7 +125,6 @@ function Template({ pid }: { pid: string }) {
         if (!creator) return
 
         getProfileById({ profileId: creator }).then((profile) => {
-            console.log("profile", profile)
             setProfile(profile)
         })
     }, [assetTags])
@@ -141,6 +140,31 @@ function Template({ pid }: { pid: string }) {
     function handleClick(e: React.MouseEvent) {
         console.log("clicked")
     }
+
+    const search_ = search.trim().toLowerCase()
+
+    // if (assetTags['Title'].toLowerCase().includes(search.toLowerCase())
+    //     || assetTags['Description'].toLowerCase().includes(search.toLowerCase())
+    //     || pid.toLowerCase().includes(search.toLowerCase())
+    //     || profile?.displayName.toLowerCase().includes(search.toLowerCase())
+
+    // )
+
+    function compare(lhs: string, rhs: string) {
+        if (!lhs || !rhs) return false
+        return lhs.trim().toLowerCase().includes(rhs.trim().toLowerCase())
+    }
+
+    if (search_ && !(
+        compare(assetTags['Title'], search_)
+        || compare(assetTags['Description'], search_)
+        || compare(pid, search_)
+        || compare(profile?.displayName, search_)
+        || compare(profile?.username, search_)
+    )) {
+        return null
+    }
+
 
     return <Dialog>
         <DialogTrigger asChild>
@@ -192,6 +216,51 @@ function Template({ pid }: { pid: string }) {
 
 function Marketplace() {
     const globalState = useGlobalState();
+    const [assetIds, setAssetIds] = useState<string[]>([])
+    const [search, setSearch] = useState("")
+
+    useEffect(() => {
+        function fetchAssets() {
+            if (!search) return
+            if (search.length == 43) return
+
+            const gqlQuery = gql`query {
+  transactions(
+		tags:[{
+      name:"BetterIDEa-Template",
+      values:["BetterIDEa-Template"]
+    }]
+  ) {
+    edges {
+      node {
+        id
+        tags {
+          name
+          value
+        }
+      }
+    }
+  }
+}`
+            const client = new GraphQLClient("https://arweave.net/graphql")
+            client.request(gqlQuery).then((data) => {
+                const node = (data as any).transactions.edges.map((edge) => edge.node)
+                const ids = node.map((n) => n.id)
+                console.log(ids)
+                setAssetIds(ids)
+            }).catch((e) => {
+                console.error(e)
+                toast.error("Error fetching transaction data")
+            })
+        }
+        const t = setTimeout(fetchAssets, 500)
+
+        return () => clearTimeout(t)
+    }, [search])
+
+    useEffect(() => {
+        console.log(search)
+    }, [search])
 
     return <div className="p-10 overflow-scroll max-h-[calc(100vh-55px)]">
         <Button variant="link" className="mb-5 text-sm text-muted p-0" onClick={() => {
@@ -202,12 +271,23 @@ function Marketplace() {
         </Button>
         <div className="text-2xl">Template Marketplace (BETA)</div>
         <div className="relative my-8">
-            <Input placeholder="Search by name or asset id" className="pl-8" />
+            <Input placeholder="Search by name / asset id / description / username" className="pl-8" onChange={e => {
+                const v = e.target.value
+                if (v.length == 43) {
+                    setAssetIds([v])
+                    setSearch("")
+                }
+                else
+                    setSearch(e.target.value)
+            }} />
             <Search className="absolute top-1/2 left-2 transform -translate-y-1/2" size={18} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-3">
-            {Array.from({ length: 10 }).map((_, i) => <Template key={i} pid={"YWkoL2_Myf2r05dYUzGJNIMSd3leAYwTpvSaU6E8zQQ"} />)}
+            {/* {Array.from({ length: 10 }).map((_, i) => <Template key={i} pid={"YWkoL2_Myf2r05dYUzGJNIMSd3leAYwTpvSaU6E8zQQ"} />)} */}
+            {
+                assetIds.map((pid) => <Template key={pid} pid={pid} search={search} />)
+            }
         </div>
 
     </div>
