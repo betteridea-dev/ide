@@ -178,12 +178,6 @@ function Template({ pid }: { pid: string }) {
             </div>
         </DialogTrigger>
         <DialogContent className="max-h-[90vh] h-full min-w-[80vw] flex flex-col">
-            <DialogHeader>
-                <DialogTitle>Llama world: AI agent</DialogTitle>
-                <DialogDescription>
-                    Useful template to create agents. asdjadhjasdjh  asjhdjasdj  jhasdhjajhdajhd hdhadguwfiwbfib bsa bhabsfha fh
-                </DialogDescription>
-            </DialogHeader>
             <iframe src={`/renderer?tx=${pid}`} className="border w-full grow rounded"></iframe>
             <DialogFooter className="flex items-center !justify-between">
                 {/* view on bazar */}
@@ -206,9 +200,9 @@ function Marketplace() {
         }}>
             <ArrowLeft size={15} className=" inline-block mr-2" /> home
         </Button>
-        <div className="text-2xl">Template Marketplace</div>
+        <div className="text-2xl">Template Marketplace (BETA)</div>
         <div className="relative my-8">
-            <Input placeholder="Search" className="pl-8" />
+            <Input placeholder="Search by name or asset id" className="pl-8" />
             <Search className="absolute top-1/2 left-2 transform -translate-y-1/2" size={18} />
         </div>
 
