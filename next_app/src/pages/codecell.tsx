@@ -19,6 +19,7 @@ import runIcon from "@/assets/icons/run.svg"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { v4 as uuidv4 } from "uuid"
 import { cookies } from "next/headers";
+import { ANSI } from "@/lib/utils";
 
 type TActions = "codecell_load" | "codecell_run";
 type TAnalyticsObj = {
@@ -414,7 +415,7 @@ export default function CodeCell() {
             <GoogleTagManager gtmId="GTM-TSKD74RX" />
             {aosProcess && (
                 <>
-                    <div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-btr-grey-2/70 min-h-[69px] p-0 m-0">
+                    <div suppressHydrationWarning className="flex w-full h-full relative justify-start rounded-t-md border-b border-border min-h-[69px] p-0 m-0">
                         <Button suppressHydrationWarning variant="ghost" className="p-5 block h-full rounded-l rounded-b-none rounded-r-none" onClick={runCellCode}>
                             {/* <Image suppressHydrationWarning src={running ? Icons.loadingSVG : Icons.runSVG} alt="Run" data-running={running} width={30} height={30} className="data-[running=true]:animate-spin bg-foreground/10  rounded-full p-1.5 block min-w-[30px]" /> */}
                             {
@@ -455,6 +456,7 @@ export default function CodeCell() {
                             defaultValue={code}
                             language="lua"
                             options={{
+                                padding: { top: 5 },
                                 fontSize: 14,
                                 minimap: { enabled: false },
                                 // lineNumbers: "off",
@@ -467,7 +469,8 @@ export default function CodeCell() {
                         />
                     </div>
                     <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
-                        {<Ansi useClasses className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output}`}</Ansi>}
+                        {output == undefined && <span className="text-primary"></span>}
+                        {<Ansi className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output || ANSI.GREEN + ANSI.BOLD + "🧃 This is a live codecell! Interact with it! 💡"}`}</Ansi>}
                     </pre>
                 </>
             )}

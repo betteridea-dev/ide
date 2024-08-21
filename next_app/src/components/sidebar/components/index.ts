@@ -14,7 +14,7 @@ export type TSidebarItem = {
     value: TSidebarOptions;
 }
 
-const sidebarItems: TSidebarItem[] = [Files, AllProjects, Packages, SQLite, Interact, Sam];
+const sidebarItems: TSidebarItem[] = [Files, AllProjects, Packages, SQLite, Interact, Sam, Templates];
 
 export default sidebarItems;
 export type TSidebarOptions = null | "SETTINGS" | "FILES" | "ALL_PROJECTS" | "PACKAGES" | "SQLITE_EXPLORER" | "INTERACT" | "SAM" | "MARKETPLACE";

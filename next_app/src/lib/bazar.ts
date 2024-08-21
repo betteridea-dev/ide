@@ -60,7 +60,7 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
                     bio: fetchedProfile.Profile.Description || null,
                     avatar: fetchedProfile.Profile.ProfileImage || null,
                     banner: fetchedProfile.Profile.CoverImage || null,
-                    version: fetchedProfile.Profile.Version || null,
+                    version: fetchedProfile.Profile.Version || null
                 };
             } else return emptyProfile;
         } else return emptyProfile;

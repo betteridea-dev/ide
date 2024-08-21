@@ -250,10 +250,10 @@ function Settings() {
         <Title title="GLOBAL SETTINGS" />
         <div className="my-8 grid grid-cols-3 gap-y-5">
             <div>Theme</div>
-            <Button variant="outline" size="icon" className="col-span-2" onClick={() => {
+            <Button variant="outline" size="icon" className="col-span-2 relative" onClick={() => {
                 setTheme(theme === "dark" ? "light" : "dark")
             }}>
-                <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <SunIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
             </Button>

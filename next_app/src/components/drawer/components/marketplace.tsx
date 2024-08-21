@@ -6,18 +6,18 @@ import { ChevronRight } from "lucide-react";
 
 function TemplateMarketplace() {
     return <div className="max-h-[calc(100vh-50px)]">
-        <h1 className="text-left p-3 text-muted-foreground">BOILERPLATE MARKETPLACE</h1>
+        <h1 className="text-left p-3 text-muted-foreground">TEMPLATE MARKETPLACE</h1>
         <div className="whitespace-normal text-sm text-muted-foreground m-2 text-justify">
-            <div>Here you can find a variety of user submitted boilerplates to help you get started with your projects quickly.</div>
+            <div>Here you can find a variety of user submitted templates to help you get started with your projects quickly.</div>
             <br />
             <div>
-                Every boilerplate is an {" "}
+                Every Template is a {" "}
                 <Link href="https://cookbook.arweave.net/concepts/atomic-tokens.html" target="_blank" className="text-primary hover:underline underline-offset-2">Atomic Asset</Link>
                 {" "} on the <Link href="https://ao-bazar.arweave.net/" target="_blank" className="text-primary hover:underline underline-offset-2">ao-bazar</Link> marketplace which anyone can buy and trade.
             </div>
             <br />
             <div>
-                To publish your own boilerplate, simply use the <span className="text-primary inline-flex items-center">Project <ChevronRight className="inline p-0" size={15} /> Publish</span> Boilerplate option from the menu
+                To publish your own template, simply use the <span className="text-primary inline-flex items-center">Project <ChevronRight className="inline p-0" size={15} /> Publish</span> Template option from the menu
             </div>
         </div>
     </div>

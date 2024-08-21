@@ -15,7 +15,7 @@ import RenameFile from "./components/rename-file"
 import RenameProject from "./components/rename-project"
 import DuplicateProject from "./components/duplicate-project"
 import DuplicateFile from "./components/duplicate-file"
-import PublishBoilerplateBtn from "./components/publish-boilerplate"
+import PublishTemplateBtn from "./components/publish-template"
 import { toast } from "sonner"
 import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
@@ -57,7 +57,7 @@ export default function Menubar() {
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem onClick={() => document.getElementById("publish-boilerplate")?.click()} >Publish Boilerpalte (coming soon)</MenubarItem>
+                    <MenubarItem onClick={() => document.getElementById("publish-template")?.click()} >Publish Template (coming soon)</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
@@ -130,7 +130,7 @@ export default function Menubar() {
         <RenameProject />
         <DuplicateProject />
         <DeleteProject />
-        <PublishBoilerplateBtn />
+        <PublishTemplateBtn />
 
         <Share />
         <Blueprints />

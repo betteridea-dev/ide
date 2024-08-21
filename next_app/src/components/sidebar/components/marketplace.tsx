@@ -1,9 +1,9 @@
 import { TSidebarItem } from ".";
-import { LayoutTemplate } from "lucide-react"
+import { Library, LibraryBig, Warehouse } from "lucide-react"
 
 const item: TSidebarItem = {
-    icon: LayoutTemplate,
-    label: "Boilerplate Marketplace",
+    icon: LibraryBig,
+    label: "Template Marketplace",
     value: "MARKETPLACE"
 }
 
