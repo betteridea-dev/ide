@@ -12,6 +12,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import Arweave from "arweave";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -36,6 +45,7 @@ export default function PublishTemplateBtn() {
     const [tquantity, setTquantity] = useState<number>(1)
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const [license, setLicense] = useState<string | null>(null)
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
     const files = project && project.files
@@ -213,10 +223,36 @@ export default function PublishTemplateBtn() {
 
                 </div>
                 <div>
-
                     <Label htmlFor="quantity" className="px-2 text-lg">Number of copies</Label>
                     <Input id="quantity" placeholder="Enter the number of copies you want to mint" type="number" min={1} defaultValue={1} onChange={(e) => setTquantity(parseInt(e.target.value))} />
                 </div>
+
+            </div>
+            <div>
+                <Label htmlFor="license" className="px-2 text-lg">Licensing <span className="text-sm text-muted-foreground">(coming soon)</span></Label>
+                <Select disabled onValueChange={v => setLicense(v)}>
+                    <SelectTrigger className="">
+                        <SelectValue placeholder="Select a License" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="none">Unlicensed</SelectItem>
+                        </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>Universal Data License</SelectLabel>
+                            <SelectItem value="com-dev">Commercial Use + Derivations</SelectItem>
+                            <SelectItem value="non-com-dev">Non-Commercial Use + Derivations</SelectItem>
+                            <SelectItem value="non-com-non-dev">Non-Commercial Use + No Derivations</SelectItem>
+                        </SelectGroup>
+                        {/* <SelectGroup>
+                            <SelectLabel>OSS License</SelectLabel>
+                            <SelectItem value="mit">MIT</SelectItem>
+                            <SelectItem value="apache">Apache</SelectItem>
+                            <SelectItem value="gpl">GPL</SelectItem>
+                        </SelectGroup> */}
+                    </SelectContent>
+                </Select>
+
             </div>
 
             <div className="flex gap-4 px-2">
