@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { TView } from "."
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CircleUserRound, Files, Search, SquareFunction } from "lucide-react";
-import { useGlobalState } from "@/hooks";
+import { ArrowLeft, CircleUserRound, Files, Loader, LoaderIcon, Search, SquareFunction } from "lucide-react";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import WarpedAR from "@/components/ui/icons/war";
 import Link from "next/link";
 import BazarIcon from "@/components/ui/icons/bazar";
@@ -24,8 +24,12 @@ import { Tag } from "@/lib/ao-vars";
 import { extractHandlerNames } from "@/lib/utils";
 import { AOProfileType, getProfileById } from "@/lib/bazar";
 import Image from "next/image";
+import { useLocalStorage, useSessionStorage } from "usehooks-ts";
 
 function Template({ pid, search }: { pid: string, search: string }) {
+    const globalState = useGlobalState()
+    const manager = useProjectManager()
+    const [open, setOpen] = useState(false)
     const [hovered, setHovered] = useState(false)
     const [txData, setTxData] = useState<TemplateAsset & { creator: string }>(null)
     const [assetTags, setAssetTags] = useState<{ [name: string]: string }>({
@@ -46,6 +50,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
         banner: null,
         version: null,
     })
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         if (!pid) return
@@ -66,7 +71,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
   }
 }
 `
-
+        setLoading(true)
         const client = new GraphQLClient("https://arweave.net/graphql")
         client.request(gqlQuery).then((data) => {
             const dataTags: Tag[] = (data as any).transactions.edges[0].node.tags
@@ -93,6 +98,8 @@ function Template({ pid, search }: { pid: string, search: string }) {
         }).catch((e) => {
             console.error(e)
             toast.error("Error fetching transaction data")
+        }).finally(() => {
+            setLoading(false)
         })
     }, [pid])
 
@@ -102,6 +109,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
         const fileNames = Object.keys(txData.files);
         const sourceSummed = fileNames.map(fileName => {
             const file = txData.files[fileName];
+            if (!file) return "";
             if (file.type == "NORMAL")
                 return file.content.cells[0].code;
             else {
@@ -165,15 +173,52 @@ function Template({ pid, search }: { pid: string, search: string }) {
         return null
     }
 
+    function importIntoProj() {
+        if (!globalState.activeProject) return toast.error("No active project")
+        const proj = manager.getProject(globalState.activeProject)
+        if (!proj) return toast.error("Project not found")
+        if (!txData) return toast.error("No transaction data, try again")
 
-    return <Dialog>
-        <DialogTrigger asChild>
+        txData.files.forEach((file) => {
+            // if (proj.files[file.name])
+            //     file.name = file.name + " (1)"
+            let count = 0;
+            while (proj.files[file.name]) {
+                count++;
+                file.name = file.name.replace(/\s\(\d+\)/, "") + ` (${count})`;
+            }
+            if (file.type == "NORMAL") {
+                manager.newFile(proj, {
+                    name: file.name,
+                    initialContent: file.content.cells[0].code,
+                    type: file.type
+                })
+            } else {
+                const newfile = manager.newFile(proj, {
+                    name: file.name,
+                    initialContent: "",
+                    type: file.type
+                })
+                newfile.content = file.content;
+                proj.files[newfile.name] = newfile;
+                manager.projects[proj.name] = proj;
+                manager.saveProjects(manager.projects);
+            }
+        })
+
+        toast.success("Imported into active project")
+        globalState.setActiveSidebarItem("FILES")
+        setOpen(false)
+    }
+
+    return <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild disabled={loading}>
             <div data-hovered={hovered}
-                className="p-5 border rounded transition-all duration-200 cursor-pointer data-[hovered=true]:bg-muted/15"
+                className="p-5 border relative rounded transition-all duration-200 cursor-pointer data-[hovered=true]:bg-muted/15"
                 onMouseMove={handleMouseEnter} onMouseLeave={handleMouseLeave}
                 onClick={handleClick}
             >
-
+                {loading && <LoaderIcon className="animate-spin absolute bg-background rounded-full p-1 left-1 top-1" />}
                 <div className="grid grid-cols-5 items-start justify-between mb-5">
                     <div className="flex flex-col col-span-3">
                         <div className="text-lg font-semibold">{assetTags['Title']}</div>
@@ -208,7 +253,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
                 <Link href={`https://ao-bazar.arweave.net/#/asset/${pid}`} target="_blank" className="text-primary hover:underline underline-offset-4 flex items-center gap-1.5"
                     onClick={(e) => { e.stopPropagation() }}
                 ><BazarIcon /> View on bazar</Link>
-                <Button type="submit">Import Into current project</Button>
+                <Button disabled={!globalState.activeProject} type="submit" onClick={importIntoProj}>Import Into current project</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
@@ -216,12 +261,13 @@ function Template({ pid, search }: { pid: string, search: string }) {
 
 function Marketplace() {
     const globalState = useGlobalState();
-    const [assetIds, setAssetIds] = useState<string[]>([])
+    const [assetIds, setAssetIds] = useSessionStorage<string[]>("marketplace", [], { initializeWithValue: true })
     const [search, setSearch] = useState("")
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         function fetchAssets() {
-            if (!search) return
+            if (!search && assetIds.length > 0) return
             if (search.length == 43) return
 
             const gqlQuery = gql`query {
@@ -242,6 +288,7 @@ function Marketplace() {
     }
   }
 }`
+            setLoading(true)
             const client = new GraphQLClient("https://arweave.net/graphql")
             client.request(gqlQuery).then((data) => {
                 const node = (data as any).transactions.edges.map((edge) => edge.node)
@@ -252,14 +299,11 @@ function Marketplace() {
                 console.error(e)
                 toast.error("Error fetching transaction data")
             })
+            setLoading(false)
         }
         const t = setTimeout(fetchAssets, 500)
 
         return () => clearTimeout(t)
-    }, [search])
-
-    useEffect(() => {
-        console.log(search)
     }, [search])
 
     return <div className="p-10 overflow-scroll max-h-[calc(100vh-55px)]">
@@ -285,6 +329,7 @@ function Marketplace() {
 
         <div className="grid lg:grid-cols-2 gap-3">
             {/* {Array.from({ length: 10 }).map((_, i) => <Template key={i} pid={"YWkoL2_Myf2r05dYUzGJNIMSd3leAYwTpvSaU6E8zQQ"} />)} */}
+            {loading && <div className="text-center col-span-2 flex items-center justify-center"><LoaderIcon className="animate-spin" /></div>}
             {
                 assetIds.map((pid) => <Template key={pid} pid={pid} search={search} />)
             }

@@ -146,7 +146,7 @@ export class Project {
 ///// FILE /////
 
 export class PFile {
-  readonly name: string;
+  name: string;
   readonly language: TLanguages;
   readonly type: "NORMAL" | "NOTEBOOK";
   process: string;

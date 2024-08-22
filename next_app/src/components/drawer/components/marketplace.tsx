@@ -17,7 +17,7 @@ function TemplateMarketplace() {
             </div>
             <br />
             <div>
-                To publish your own template, simply use the <span className="text-primary inline-flex items-center">Project <ChevronRight className="inline p-0" size={15} /> Publish</span> Template option from the menu
+                To publish your own template, simply use the <span className="text-primary inline-flex items-center">Project <ChevronRight className="inline p-0" size={15} /> Publish Template</span> option from the menu
             </div>
         </div>
     </div>

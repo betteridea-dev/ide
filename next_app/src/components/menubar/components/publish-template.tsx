@@ -19,6 +19,7 @@ import { useState } from "react";
 import { extractHandlerNames } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { FileCode, LoaderIcon, SquareFunction } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type TemplateAsset = {
     name: string;
@@ -38,6 +39,8 @@ export default function PublishTemplateBtn() {
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
     const files = project && project.files
+    console.log(files)
+    const [selectedFiles, setSelectedFiles] = useState<string[]>(Object.keys(files || {}))
 
     async function publishTemplateHandler() {
         if (!globalState.activeProject) return toast.error("No active project")
@@ -58,12 +61,13 @@ export default function PublishTemplateBtn() {
 
         //strip process ids from project.files
         const templateFiles = Object.values(project.files).map((file) => {
-            return {
-                name: file.name,
-                content: file.content,
-                language: file.language,
-                type: file.type,
-            }
+            if (selectedFiles.includes(file.name))
+                return {
+                    name: file.name,
+                    content: file.content,
+                    language: file.language,
+                    type: file.type,
+                }
         })
 
         if (templateFiles.length === 0) return toast.error("Project must have at least one file to publish as a template")
@@ -172,12 +176,48 @@ export default function PublishTemplateBtn() {
                     This will publish your project as an atomic asset on the bazar marketplace
                 </DialogDescription>
             </DialogHeader>
-            <Label htmlFor="name" className="px-2">Template Name</Label>
+            <Label htmlFor="name" className="px-2 text-lg -mb-3">Name</Label>
             <Input id="name" placeholder="Enter a title for your template" onChange={(e) => setTname(e.target.value)} />
-            <Label htmlFor="description" className="px-2">Template Description</Label>
+            <Label htmlFor="description" className="px-2 text-lg -mb-3">Short Description</Label>
             <Textarea id="description" placeholder="Enter a description for your template" onChange={(e) => setTdescription(e.target.value)} />
-            <Label htmlFor="quantity" className="px-2">Number of copies</Label>
-            <Input id="quantity" placeholder="Enter the number of copies you want to mint" type="number" min={1} defaultValue={1} onChange={(e) => setTquantity(parseInt(e.target.value))} />
+            <div className="grid grid-cols-2">
+                <div>
+                    <Label htmlFor="quantity" className="px-2 text-lg">Select Files</Label>
+                    <Label htmlFor="select-all" className="inline-flex gap-1 items-center ml-2 text-muted-foreground">[ All<Checkbox
+                        id="select-all"
+                        className="scale-75 m-0 p-0"
+                        defaultChecked
+                        checked={selectedFiles.length === Object.keys(files || {}).length}
+                        onCheckedChange={(e) => {
+                            if (e) {
+                                setSelectedFiles(Object.keys(files))
+                            } else {
+                                setSelectedFiles([])
+                            }
+                        }} />]</Label>
+                    {
+                        files && Object.keys(files).map((fname) => {
+                            const file = files[fname]
+                            return <div key={fname} className="flex items-center gap-2 my-1 ml-3">
+                                <Checkbox id={fname} defaultChecked checked={selectedFiles.includes(fname)} onCheckedChange={(e) => {
+                                    if (e) {
+                                        setSelectedFiles([...selectedFiles, fname])
+                                    } else {
+                                        setSelectedFiles(selectedFiles.filter((f) => f !== fname))
+                                    }
+                                }} />
+                                <Label htmlFor={fname} data-selected={selectedFiles.includes(file.name)} className="text-muted data-[selected=true]:text-muted-foreground">{file.name}</Label>
+                            </div>
+                        })
+                    }
+
+                </div>
+                <div>
+
+                    <Label htmlFor="quantity" className="px-2 text-lg">Number of copies</Label>
+                    <Input id="quantity" placeholder="Enter the number of copies you want to mint" type="number" min={1} defaultValue={1} onChange={(e) => setTquantity(parseInt(e.target.value))} />
+                </div>
+            </div>
 
             <div className="flex gap-4 px-2">
                 <div className="flex gap-1 items-center">{`${files && Object.keys(files).length} Files`}<FileCode size={20} /></div>

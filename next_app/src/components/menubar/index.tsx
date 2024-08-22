@@ -17,7 +17,8 @@ import DuplicateProject from "./components/duplicate-project"
 import DuplicateFile from "./components/duplicate-file"
 import PublishTemplateBtn from "./components/publish-template"
 import { toast } from "sonner"
-import { GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
+import { DiscordLogoIcon, GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons"
+import { FaDiscord, FaSquareXTwitter, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link"
 import Sponsor from "./components/sponsor"
 import Upload from "./components/upload"
@@ -45,7 +46,7 @@ export default function Menubar() {
     }
 
     return <div className="border-b h-[30px] text-xs flex items-center overflow-clip">
-        <Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 min-w-12 h-[30px] cursor-pointer hover:bg-accent" onClick={logoClicked} />
+        <Link href="https://betteridea.dev" target="_blank"><Image src="/icon.svg" alt="Logo" width={40} height={40} className="py-1 min-w-12 h-[30px] cursor-pointer hover:bg-accent" /></Link>
         <MenubarComponent className="border-none m-0 p-0 min-w-[calc(100vw-50px)]">
             <MenubarMenu>
                 <MenubarTrigger className="rounded-none m-0">Project</MenubarTrigger>
@@ -57,7 +58,7 @@ export default function Menubar() {
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
                     <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
                     <MenubarSeparator />
-                    <MenubarItem onClick={() => document.getElementById("publish-template")?.click()} >Publish Template (coming soon)</MenubarItem>
+                    <MenubarItem disabled={!project} onClick={() => document.getElementById("publish-template")?.click()} >Publish Template (beta)</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("rename-project")?.click()}>Rename</MenubarItem>
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("duplicate-project")?.click()}>Duplicate</MenubarItem>
@@ -96,8 +97,10 @@ export default function Menubar() {
             </MenubarMenu>
             <div className="grow"></div>
             <MenubarMenu>
-                <MenubarTrigger className="rounded-none">More from us</MenubarTrigger>
-                <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
+                <Link href="https://x.com/betteridea_dev" target="_blank"><Button variant="ghost" className="rounded-none p-1.5"><FaXTwitter /></Button></Link>
+                <Link href="https://github.com/betteridea-dev" target="_blank"><Button variant="ghost" className="rounded-none p-1.5"><GitHubLogoIcon /></Button></Link>
+                <Link href="https://discord.gg/nm6VKUQBrA" target="_blank"><Button variant="ghost" className="rounded-none p-1.5"><FaDiscord /></Button></Link>
+                {/* <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background">
                     <MenubarLabel className="text-muted-foreground">Our products in the ecosystem</MenubarLabel>
                     <MenubarSeparator />
                     <Link href="https://learn.betteridea.dev" target="_blank"><MenubarItem>LearnAO</MenubarItem></Link>
@@ -109,9 +112,9 @@ export default function Menubar() {
                     <MenubarSeparator />
                     <Link href="https://discord.gg/nm6VKUQBrA" target="_blank"><MenubarItem>Chat with us on Discord</MenubarItem></Link>
                     <Link href="https://x.com/twitter.com/betteridea_dev" target="_blank"><MenubarItem>Follow us on X (Twitter)</MenubarItem></Link>
-                </MenubarContent>
+                </MenubarContent> */}
             </MenubarMenu>
-            <MenubarMenu>
+            {/* <MenubarMenu>
                 <MenubarTrigger className="rounded-none" onClick={() => document.getElementById("sponsor-us")?.click()}>Sponsor Us</MenubarTrigger>
                 <MenubarContent sideOffset={1} alignOffset={0} className="rounded-b-md rounded-t-none bg-background max-w-sm">
                     <MenubarLabel className="text-muted-foreground">
@@ -119,7 +122,8 @@ export default function Menubar() {
                         so we can continue working on enhancing the developer experience on ao
                     </MenubarLabel>
                 </MenubarContent>
-            </MenubarMenu>
+            </MenubarMenu> */}
+
         </MenubarComponent>
 
         <div className="grow" />

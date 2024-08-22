@@ -75,6 +75,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
             const fileNames = Object.keys(txData.files);
             const sourceSummed = fileNames.map(fileName => {
                 const file = txData.files[fileName];
+                if (!file) return ""
                 if (file.type == "NORMAL")
                     return file.content.cells[0].code;
                 else {
@@ -110,6 +111,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
                 <div className="">
                     {
                         txData?.files && txData.files.map((file, _) => {
+                            if (!file) return
                             return <div data-active={activeFile == _} className="p-0.5 px-1 m-0.5 overflow-scroll data-[active=true]:bg-muted/20 hover:!bg-muted/40 cursor-pointer rounded" key={_} onClick={e => setActiveFile(_)}>{file.name}</div>
                         })
                     }
