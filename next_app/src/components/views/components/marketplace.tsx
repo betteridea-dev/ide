@@ -235,14 +235,14 @@ function Template({ pid, search }: { pid: string, search: string }) {
 
                 </div>
                 <div data-hovered={hovered} className="flex text-sm gap-5 items-center transition-all duration-200">
-                    <Link href={`https://ao-bazar.arweave.net/#/profile/${profile ? profile.id : "#"}`} target="_blank" className="font-semibold text-primary hover:underline underline-offset-4 flex items-center gap-1"
+                    <Link href={`https://bazar.ar.io/#/profile/${profile ? profile.id : "#"}`} target="_blank" className="font-semibold text-primary hover:underline underline-offset-4 flex items-center gap-1"
                         onClick={(e) => { e.stopPropagation() }}
                     >
                         {profile?.avatar ? <Image src={`https://arweave.net/${profile.avatar}`} width={22} height={22} alt="profile-picture" className="rounded-full" /> : <CircleUserRound size={18} />}
                         {profile.displayName || profile.username}</Link>
                     <div className="grow"></div>
                     {/* <div className="flex gap-2 items-center font-semibold">$0.1 <WarpedAR /></div> */}
-                    <Link href={`https://ao-bazar.arweave.net/#/asset/${pid}`} target="_blank" className="text-primary hover:underline underline-offset-4 flex items-center gap-1.5"
+                    <Link href={`https://bazar.ar.io/#/asset/${pid}`} target="_blank" className="text-primary hover:underline underline-offset-4 flex items-center gap-1.5"
                         onClick={(e) => { e.stopPropagation() }}
                     >View on bazar <BazarIcon /></Link>
                     {/* <Label data-hovered={hovered} className="ml-auto text-sm text-muted/30 transition-all duration-200 opacity-0 data-[hovered=true]:opacity-100 cursor-pointer">click to preview</Label> */}
@@ -254,7 +254,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
             <iframe src={`/renderer?tx=${pid}`} className="border w-full grow rounded"></iframe>
             <DialogFooter className="flex items-center !justify-between">
                 {/* view on bazar */}
-                <Link href={`https://ao-bazar.arweave.net/#/asset/${pid}`} target="_blank" className="text-primary hover:underline underline-offset-4 flex items-center gap-1.5"
+                <Link href={`https://bazar.ar.io/#/asset/${pid}`} target="_blank" className="text-primary hover:underline underline-offset-4 flex items-center gap-1.5"
                     onClick={(e) => { e.stopPropagation() }}
                 ><BazarIcon /> View on bazar</Link>
                 <Button disabled={!globalState.activeProject} type="submit" onClick={importIntoProj}>Import Into current project</Button>

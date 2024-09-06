@@ -13,7 +13,7 @@ function TemplateMarketplace() {
             <div>
                 Every Template is a {" "}
                 <Link href="https://cookbook.arweave.net/concepts/atomic-tokens.html" target="_blank" className="text-primary hover:underline underline-offset-2">Atomic Asset</Link>
-                {" "} on the <Link href="https://ao-bazar.arweave.net/" target="_blank" className="text-primary hover:underline underline-offset-2">ao-bazar</Link> marketplace which anyone can buy and trade.
+                {" "} on the <Link href="https://bazar.ar.io/" target="_blank" className="text-primary hover:underline underline-offset-2">ao-bazar</Link> marketplace which anyone can buy and trade.
             </div>
             <br />
             <div>

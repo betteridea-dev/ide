@@ -145,7 +145,7 @@ function ProfileComponent() {
             <DialogHeader>
                 <DialogTitle>Create a Bazar Profile</DialogTitle>
                 <DialogDescription>
-                    Create a profile to publish templates to the marketplace. Name and username can be changed from <Link href="https://ao-bazar.arweave.net" target="_blank" className="text-primary hover:underline underline-offset-4"> ao-bazar</Link>
+                    Create a profile to publish templates to the marketplace. Name and username can be changed from <Link href="https://bazar.ar.io" target="_blank" className="text-primary hover:underline underline-offset-4"> ao-bazar</Link>
                 </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 grid-cols-4">
