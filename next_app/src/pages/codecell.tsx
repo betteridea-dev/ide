@@ -468,10 +468,35 @@ export default function CodeCell() {
                             }}
                         />
                     </div>
-                    <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll p-2 ml-20 rounded-b-md">
-                        {output == undefined && <span className="text-primary"></span>}
-                        {<Ansi className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output || ANSI.GREEN + ANSI.BOLD + "🧃 This is a live codecell! Interact with it! 💡"}`}</Ansi>}
-                    </pre>
+                    <div className="flex flex-row items-center justify-center">
+                        <Link href="https://ide.betteridea.dev" target="_blank" className="w-[72px] ring-primary max-w-20 h-[40px] hover:bg-[#97E771]/30 transition-all duration-200 flex items-center justify-center"
+                            onMouseEnter={() => setTooltipVisible(true)}
+                            onMouseLeave={() => setTooltipVisible(false)}
+                            onMouseMove={(e) => {
+                                const x = e.clientX;
+                                const y = e.clientY;
+                                const tooltip = document.getElementById("tooltip");
+
+                                // position tooltip to left of mouse
+                                // tooltip.style.left = `${x - tooltip.offsetWidth - 15}px`;
+                                // tooltip.style.top = `${y - tooltip.offsetHeight / 2}px`;
+
+                                // position tooltip to top right
+                                tooltip.style.left = `${x}px`;
+                                tooltip.style.top = `${y - tooltip.offsetHeight - 10}px`;
+                            }}>
+                            <Image src="/icon.svg" width={25} height={25} alt="logo" className="h-full w-full p-2.5" />
+                            {
+                                <div id="tooltip" data-visible={tooltipVisible} className="fixed left-0 top-0 z-50 text-black bg-[#97E771] ring-1 ring-black/50 m-0.5 p-1 px-2.5 rounded-sm text-sm opacity-0 data-[visible=true]:opacity-100">
+                                    <p className="font-btr-normal">Play with BetterIDEa</p>
+                                </div>
+                            }
+                        </Link>
+                        <pre suppressHydrationWarning className="w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-scroll rounded-b-md p-2">
+                            {output == undefined && <span className="text-primary"></span>}
+                            {<Ansi className="font-btr-code">{`${typeof output == "object" ? JSON.stringify(output, null, 2) : output || ANSI.GREEN + ANSI.BOLD + "🧃 This is a live codecell! Interact with it!"}`}</Ansi>}
+                        </pre>
+                    </div>
                 </>
             )}
             {autoconnect ? (
@@ -484,7 +509,7 @@ export default function CodeCell() {
                     </Button>
                 </div>
             )}
-            <Link href="https://ide.betteridea.dev" target="_blank" className="fixed right-0 top-0 bottom-0 bg-[#97E771] overflow-visible">
+            {/* <Link href="https://ide.betteridea.dev" target="_blank" className="fixed right-0 top-0 bottom-0 bg-[#97E771] overflow-visible">
                 <div
                     className="opacity-0 hover:opacity-100 cursor-pointer overflow-visible grow flex items-center justify-center h-full hover:p-1 w-2 hover:w-7 transition-all transition-duration-200"
                     onMouseEnter={() => setTooltipVisible(true)}
@@ -500,14 +525,13 @@ export default function CodeCell() {
                     }}
                 >
                     <Image src="/icon-black.svg" alt="Logo" width={15} height={15} />
-                    {/* tooltip that follows the mouse */}
                     {
                         <div id="tooltip" data-visible={tooltipVisible} className="fixed left-0 top-0 z-50 text-black bg-[#97E771] ring-1 ring-black m-0.5 p-1 px-2.5 rounded-sm text-sm ">
                             <p className="font-btr-normal">Play with BetterIDEa</p>
                         </div>
                     }
                 </div>
-            </Link>
+            </Link> */}
         </div>
     );
 }
