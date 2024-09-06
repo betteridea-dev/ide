@@ -26,6 +26,10 @@ import { AOProfileType, getProfileById } from "@/lib/bazar";
 import Image from "next/image";
 import { useLocalStorage, useSessionStorage } from "usehooks-ts";
 
+const featured = [
+    "LqpX1NRyjyx5gzzY4Fx-VqjjyOHCBl80Bf2-_uoZybM",
+]
+
 function Template({ pid, search }: { pid: string, search: string }) {
     const globalState = useGlobalState()
     const manager = useProjectManager()
@@ -214,7 +218,7 @@ function Template({ pid, search }: { pid: string, search: string }) {
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild disabled={loading}>
             <div data-hovered={hovered}
-                className="p-5 border relative rounded transition-all duration-200 cursor-pointer data-[hovered=true]:bg-muted/15"
+                className="p-5 border relative rounded transition-all duration-200 cursor-pointer data-[hovered=true]:bg-primary/10"
                 onMouseMove={handleMouseEnter} onMouseLeave={handleMouseLeave}
                 onClick={handleClick}
             >
@@ -266,9 +270,45 @@ function Marketplace() {
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
+        async function refresh() {
+            const gqlQuery = gql`query {
+  transactions(
+		tags:[{
+      name:"BetterIDEa-Template",
+      values:["BetterIDEa-Template"]
+    }]
+  ) {
+    edges {
+      node {
+        id
+        tags {
+          name
+          value
+        }
+      }
+    }
+  }
+}`
+
+            setLoading(true)
+            const client = new GraphQLClient("https://arweave.net/graphql")
+            client.request(gqlQuery).then((data) => {
+                const node = (data as any).transactions.edges.map((edge) => edge.node)
+                const ids = node.map((n) => n.id)
+                console.log(ids)
+                setAssetIds(ids)
+            }).catch((e) => {
+                console.error(e)
+                toast.error("Error fetching transaction data")
+            })
+            setLoading(false)
+        }
+        refresh()
+    }, [])
+
+    useEffect(() => {
         function fetchAssets() {
             if (!search && assetIds.length > 0) return
-            if (search.length == 43) return
 
             const gqlQuery = gql`query {
   transactions(
@@ -327,11 +367,23 @@ function Marketplace() {
             <Search className="absolute top-1/2 left-2 transform -translate-y-1/2" size={18} />
         </div>
 
+        <details open className="mb-10 text-muted open:text-foreground">
+            <summary className="mb-3 -ml-6 text-xl cursor-pointer"><span className="ml-2">Featured Templates</span></summary>
+            <div className="grid lg:grid-cols-2 gap-3">
+                {
+                    featured.map((pid) => <Template key={pid} pid={pid} search={search} />)
+                }
+            </div>
+            <hr className="mt-10" />
+        </details>
+
         <div className="grid lg:grid-cols-2 gap-3">
             {/* {Array.from({ length: 10 }).map((_, i) => <Template key={i} pid={"YWkoL2_Myf2r05dYUzGJNIMSd3leAYwTpvSaU6E8zQQ"} />)} */}
             {loading && <div className="text-center col-span-2 flex items-center justify-center"><LoaderIcon className="animate-spin" /></div>}
             {
-                assetIds.map((pid) => <Template key={pid} pid={pid} search={search} />)
+                assetIds
+                    .filter((pid) => !featured.includes(pid))
+                    .map((pid) => <Template key={pid} pid={pid} search={search} />)
             }
         </div>
 

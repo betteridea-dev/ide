@@ -97,7 +97,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
 
     return <div className="!bg-background ring-primary w-screen h-screen flex flex-col items-center justify-start">
         {((tx && tx.length != 43) || (id_ && id_.length != 43)) ? <div className="text-muted">Invalid Process ID</div> : <>
-            <div className="rounded grid grid-cols-4 w-[calc(100vw-0.5rem)] bg-muted/20 m-1 p-1">
+            <div className="rounded grid grid-cols-4 w-[calc(100vw-0.5rem)] bg-primary/20 m-1 p-1">
                 <div className="col-span-3">
                     <div className="font-semibold text-xl">{txData?.name}</div>
                     <div className="text-muted-foreground">{txData?.description}</div>
@@ -112,7 +112,7 @@ export default function TxRenderer({ id_ }: { id_: string }) {
                     {
                         txData?.files && txData.files.map((file, _) => {
                             if (!file) return
-                            return <div data-active={activeFile == _} className="p-0.5 px-1 m-0.5 overflow-scroll data-[active=true]:bg-muted/20 hover:!bg-muted/40 cursor-pointer rounded" key={_} onClick={e => setActiveFile(_)}>{file.name}</div>
+                            return <div data-active={activeFile == _} className="ring-1 ring-muted/40 p-0.5 px-1 m-1 overflow-scroll data-[active=true]:bg-primary/20 hover:!bg-muted/40 cursor-pointer rounded" key={_} onClick={e => setActiveFile(_)}>{file.name}</div>
                         })
                     }
                 </div>
