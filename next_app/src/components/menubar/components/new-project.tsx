@@ -292,7 +292,7 @@ Handlers.add(
             <details>
                 <summary className="text-muted-foreground text-sm w-fit cursor-pointer"><span className="pl-2">More Options</span></summary>
                 <div className="flex flex-col gap-3 mt-2">
-                    <Combobox placeholder="Select Process (or search with ID)" defaultValue="+ Create New Process" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
+                    <Combobox placeholder="Select Process (search with ID / paste custom ID)" defaultValue="+ Create New Process" options={usingManualProcessId.length == 43 ? [{ label: `Process ID: ${usingManualProcessId}`, value: usingManualProcessId }] : processes} onChange={(e) => setProcessUsed(e)} onOpen={fetchProcesses} onSearchChange={(e) => setUsingManualProcessId(e)} />
 
                     {processUsed == "NEW_PROCESS" && <Input type="text" placeholder={`Process Name (${newProjName ? "default: " + newProjName : "optional"})`} onChange={(e) => setNewProcessName(e.target.value)} />}
 
@@ -305,10 +305,10 @@ Handlers.add(
 
                     </div>
 
-                    <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(AOTemplates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
-                        onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} />
+                    {/* <Combobox placeholder="Select Template" disabled={Object.keys(uploadedFiles).length > 0} options={Object.keys(AOTemplates).map((key) => ({ label: key, value: key })).filter((e) => e.value != "")}
+                        onChange={(e) => setSelectedTemplate(e)} onOpen={() => { }} /> */}
 
-                    <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module (default: WASM64)" options={usingManualModuleId.length == 43 ? [{ label: `Module ID: ${usingManualModuleId}`, value: `${usingManualModuleId}` }] : Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setUsingManualModuleId(e)} />
+                    <Combobox disabled={processUsed != "NEW_PROCESS"} placeholder="AO Process Module (use default / paste custom ID)" options={usingManualModuleId.length == 43 ? [{ label: `Module ID: ${usingManualModuleId}`, value: `${usingManualModuleId}` }] : Object.keys(AOModules).map((key) => ({ label: `${key} (${AOModules[key]})`, value: AOModules[key] }))} onChange={(e) => setNewProcessModule(e)} onSearchChange={(e) => setUsingManualModuleId(e)} />
 
 
                     <input id="projext-zip" type="file" accept=".zip" placeholder="Upload project zip" hidden onChange={handleFileDrop} />

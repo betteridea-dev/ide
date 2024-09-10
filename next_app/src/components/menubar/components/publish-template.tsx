@@ -163,11 +163,12 @@ export default function PublishTemplateBtn() {
                 ])
                 console.log(addProfileRes)
                 if (addProfileRes.Error) {
-                    toast.error("Error adding asset to profile\n" + addProfileRes.Error)
+                    console.log("Error adding asset to profile\n" + addProfileRes.Error)
                 } else {
-                    toast.success("Template published successfully")
-                    setOpen(false)
+                    console.log("no errors")
                 }
+                toast.success("Template published successfully")
+                setOpen(false)
             }
         }
         setLoading(false)

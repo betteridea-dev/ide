@@ -215,6 +215,8 @@ function Template({ pid, search }: { pid: string, search: string }) {
         setOpen(false)
     }
 
+    if (parseInt(assetTags['Date-Created']) <= 1725350215227) return null
+
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild disabled={loading}>
             <div data-hovered={hovered}
