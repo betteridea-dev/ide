@@ -56,7 +56,7 @@ export default function NewFile() {
                     <DialogDescription>Enter the name of the file you want to create<br />(supported extensions: lua, luanb, md)</DialogDescription>
                 </DialogHeader>
                 <Input type="text" placeholder="File Name" onChange={(e) => setNewFileName(e.target.value)} onKeyDown={handleEnter} />
-                <div className="text-muted text-center rounded-md p-5 border border-dashed">
+                <div className="text-muted text-center rounded-md p-0">
                     {/* Upload File (coming soon...) */}
                     <Dropzone
                         accept={{ 'text/markdown': ['.md'], 'application/json': ['.json', '.luanb'], 'text/x-lua': ['.lua'] }}
@@ -86,15 +86,17 @@ export default function NewFile() {
                             }
                             reader.readAsText(file)
                         }}>
-                        {({ getRootProps, getInputProps }) => (
-                            <section>
-                                <div {...getRootProps()}>
-                                    <input {...getInputProps()} />
-                                    {/* <p>Drag 'n' drop some files here, or click to select files</p> */}
-                                    Upload File (.lua, .luanb, .md)
-                                </div>
-                            </section>
-                        )}
+                        {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => {
+                            return (
+                                <section data-active={isDragActive} className="text-center text-muted p-6 border rounded border-dashed data-[active=true]:border-primary">
+                                    <div {...getRootProps()}>
+                                        <input {...getInputProps()} />
+                                        {/* <p>Drag 'n' drop some files here, or click to select files</p> */}
+                                        Upload File (.lua, .luanb, .md)
+                                    </div>
+                                </section>
+                            )
+                        }}
                     </Dropzone>
                 </div>
                 <Button onClick={() => newFile()}>Create File</Button>
