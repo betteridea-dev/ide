@@ -9,7 +9,11 @@ function FileList() {
     if (globalState.activeProject) {
         const project = manager.projects[globalState.activeProject];
         return <div className="flex flex-col">
-            <h1 className="text-left m-3 text-muted-foreground">FILE EXPLORER</h1>
+            <h1 className="text-left m-3 text-muted-foreground flex items-center justify-between">FILE EXPLORER <Button variant="ghost" className="rounded-none hover:bg-primary w-fit h-6 my-2.5 text-muted-foreground hover:text-black ml-auto px-3"
+                onClick={() => {
+                    document.getElementById("new-file")?.click()
+                }}
+            >+ New File</Button></h1>
             {
                 Object.keys(project.files).toSorted().map((fname, i) => <Button key={i} variant="ghost"
                     data-active={globalState.activeFile == fname}
@@ -35,7 +39,7 @@ function FileList() {
                 }}
             >View all projects</Button>
 
-            
+
             <p className="text-center text-sm my-2">Or create a new one</p>
 
             <Button variant="ghost" className="rounded-none !mt-0 m-4 bg-primary min-w-fit text-white"
@@ -45,15 +49,9 @@ function FileList() {
             >Create New Project</Button>
         </div>
     }
-
-    return <div>
-        {
-            Array(10).fill(0).map((_, i) => <div key={i}>File {i}</div>)
-        }
-    </div>
 }
 
-const drawerItem:TDrawerItem = {
+const drawerItem: TDrawerItem = {
     component: FileList,
     label: "File List",
     value: "FILES"
