@@ -68,6 +68,7 @@ export default function NewFile() {
                                 console.log(reader.result)
                                 // add new file to project
                                 const proj = manager.getProject(globalState.activeProject);
+                                if (proj.files[file.name]) return toast.error("File already exists")
                                 const f = manager.newFile(proj, {
                                     name: file.name,
                                     type: file.name.endsWith(".luanb") ? "NOTEBOOK" : "NORMAL",
