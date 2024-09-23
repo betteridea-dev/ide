@@ -25,12 +25,13 @@ function PackageList() {
         setLoading(true);
         const pop = await ao.dryrun({
             process: APM_ID,
-            tags: [{ name: "Action", value: "APM.GetPopular" }],
+            tags: [{ name: "Action", value: "APM.Popular" }],
         })
         setLoading(false);
         if (pop.Error) return toast.error("Error fetching popular packages", { description: pop.Error, id: "error" })
         const { Messages } = pop;
-        const msg = Messages.find((msg) => msg.Tags.find((tag: Tag) => tag.name == "Action").value == "APM.GetPopularResponse")
+        console.log(Messages)
+        const msg = Messages.find((msg) => msg.Tags.find((tag: Tag) => tag.name == "Action").value == "APM.PopularResponse")
         if (!msg) return toast.error("Error fetching popular packages", { description: "No popular response found", id: "error" })
         const data = JSON.parse(msg.Data);
         setPackages(data);
@@ -102,7 +103,7 @@ function PackageList() {
                     return <div key={_} data-active={pkg.PkgID == activePackage?.PkgID} className="p-1 rounded-md px-2 border  border-border/30 cursor-pointer data-[active=true]:bg-accent hover:bg-accent/30" onClick={() => viewPackage(pkg)}>
                         <div>{pkg.Vendor != "@apm" && `${pkg.Vendor}/`}{pkg.Name}</div>
                         <div className="truncate">{pkg.Description}</div>
-                        <div className="text-xs text-right">{pkg.Installs} installs</div>
+                        <div className="text-xs text-right">{pkg.TotalInstalls} installs</div>
                     </div>
                 })
             }

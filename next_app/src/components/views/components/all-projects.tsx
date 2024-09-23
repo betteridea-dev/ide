@@ -67,7 +67,7 @@ function AllProjects() {
                 projectList.length == 0 && <div className="text-muted">No projects found</div>
             }
             {
-                projectList.sort()
+                projectList.sort((a, b) => a.localeCompare(b))
                     .map((project, id) => {
                         const item = <Button variant="ghost" className="bg-accent hover:bg-primary hover:text-white justify-start p-7 max-w-[50vw]"
                             key={id} onClick={() => {

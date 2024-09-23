@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useGlobalState, useProjectManager } from "@/hooks"
-import { APM_ID, runLua, TPackage } from "@/lib/ao-vars"
+import { APM_ID, runLua, Tag, TPackage } from "@/lib/ao-vars"
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { DownloadIcon, ExternalLink, Loader, LoaderIcon, PackageCheckIcon, PackageOpen, Wallet } from "lucide-react"
 import Link from "next/link"
@@ -10,11 +10,14 @@ import { toast } from "sonner"
 import { dryrun } from "@permaweb/aoconnect"
 import remarkGfm from "remark-gfm"
 import { getRelativeTime } from "@/lib/utils"
+import { useLocalStorage } from "usehooks-ts"
 
 export default function PackageView() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
     const ao = connect()
+    const [installed, setInstalled] = useLocalStorage<{ [pname: string]: { [packageName: string]: string } }>("installed-packages", {}, { initializeWithValue: true })
+    // const [installed, setInstalled] = useState(false)
     const [fullData, setFullData] = useState<TPackage | null>(null)
     const [fetching, setFetching] = useState(false)
     const [installing, setInstalling] = useState(false)
@@ -23,9 +26,32 @@ export default function PackageView() {
     const packageData = globalState.openedPackages.find((pkg) => `${pkg.Vendor}/${pkg.Name}` == globalState.activeFile.split("PKG: ")[1])
     console.log(packageData)
 
+    async function checkInstalled() {
+        const res = await runLua(`return require("json").encode(apm.installed or {})`, project.process, [
+            { name: "BetterIDEa-Function", value: "Packages" }
+        ])
+        let { Output: { data: { output } } } = res
+        if (!output) output = res.Output.data
+        const installed = JSON.parse(output)
+        console.log("installed", installed)
+        if (installed[`${packageData.Vendor}/${packageData.Name}`]) {
+            setInstalled(p => {
+                if (!p[project.process]) p[project.process] = {}
+                p[project.process][`${packageData.Vendor}/${packageData.Name}`] = installed[`${packageData.Vendor}/${packageData.Name}`]
+                return p
+            })
+        }
+    }
+
     useEffect(() => {
         if (!packageData || !globalState.activeFile) return
-        if(!globalState.activeFile.startsWith("PKG:")) return
+        if (!globalState.activeFile.startsWith("PKG:")) return
+        checkInstalled()
+    }, [globalState.activeFile])
+
+    useEffect(() => {
+        if (!packageData || !globalState.activeFile) return
+        if (!globalState.activeFile.startsWith("PKG:")) return
         if (packageData.PkgID) {
             setFullData(null)
             setFetching(true)
@@ -46,23 +72,14 @@ export default function PackageView() {
             }).finally(() => setFetching(false))
         }
     }, [globalState.activeFile])
-    
+
     async function loadapm() {
         if (!globalState.activeProject) return toast.error("No active project", { description: "You need to have an active project to use Packages", id: "error" })
         const p = manager.getProject(globalState.activeProject);
-        //dryrun and check if apm is already installed
-        const dry = await ao.dryrun({
-            process: p.process,
-            tags: [
-                { name: "Action", value: "APM.UpdateNotice" }
-            ],
-            data: "CHECK"
-        })
-        if (dry.Output.data == "CHECK") return
         console.log("Installing apm")
-        const res = await fetch('https://raw.githubusercontent.com/ankushKun/ao-package-manager/main/client-tool.lua');
+        const res = await fetch('https://raw.githubusercontent.com/betteridea-dev/ao-package-manager/refs/heads/main/client/client.lua');
         const apmSource = await res.text();
-        const loadResp = await runLua(apmSource, p.process, [{name:"BetterIDEa-Function", value:"Load-APM"}])
+        const loadResp = await runLua(apmSource, p.process, [{ name: "BetterIDEa-Function", value: "Load-APM" }])
         console.log(loadResp)
         if (loadResp.Error) return toast.error("Error loading APM", { description: loadResp.Error, id: "error" })
     }
@@ -78,7 +95,7 @@ export default function PackageView() {
             tags: [
                 { name: "Action", value: "Eval" }
             ],
-            data: `APM.install("${packageData.Vendor}/${packageData.Name}")`,
+            data: `apm.install "${packageData.Vendor}/${packageData.Name}"`,
             signer: createDataItemSigner(window.arweaveWallet)
         })
         console.log("install request: ", m_id)
@@ -139,6 +156,19 @@ export default function PackageView() {
         // else
         //     toast.success("Package installed successfully", { description: `Now you can import it using require('${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}')` })
         setInstalling(false);
+        //parse through messages and find a tag with name "Result"
+        //if the value is "success" then package is installed
+        //if the value is "error" then package is not installed
+
+        const { Messages } = res
+        console.log("msgs", Messages)
+
+
+        // setInstalled(p => {
+        //     if (!p[project.process]) p[project.process] = {}
+        //     p[project.process][`${packageData.Vendor}/${packageData.Name}`] = "installed"
+        //     return p
+        // })
     }
 
     if (!packageData) {
@@ -154,7 +184,7 @@ export default function PackageView() {
             <div className="w-full">
                 <div className="font-medium text-2xl">{packageData?.Name}
                     <span className="mx-4 text-sm bg-accent px-1.5 rounded-md">v{packageData.Version}</span>
-                    <span className="text-sm bg-accent px-1.5 rounded-md">Updated { packageData.Updated==0?"NA":getRelativeTime(packageData.Updated)}</span>
+                    <span className="text-sm bg-accent px-1.5 rounded-md">Updated {packageData.Timestamp == 0 ? "NA" : getRelativeTime(packageData.Timestamp)}</span>
                 </div>
                 <div className="text-sm  flex gap-5 items-center">
                     <span>by {packageData.Vendor}</span> ·
@@ -162,22 +192,22 @@ export default function PackageView() {
                 </div>
                 <div className="text-sm my-2">{packageData.Description}</div>
                 <div className="flex gap-1.5">
-                    <Button variant="default" disabled={!globalState.activeProject || !project.process || installing} className="rounded-none h-6 p-3 text-white mr-auto" onClick={installPackage}>Install {installing&&<Loader className="animate-spin ml-2" size={16}/>}</Button>
-                    <Link href={`https://apm.betteridea.dev/pkg?name=${packageData.Vendor}/${packageData.Name}@${packageData.Version}`} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">APM <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
-                    <Link href={packageData.RepositoryUrl||"#"} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">Repository <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
+                    <Button variant="default" disabled={!globalState.activeProject || !project.process || installing} className="rounded-none h-6 p-3 text-white mr-auto" onClick={installPackage}>{installed[project.process][packageData.Vendor + "/" + packageData.Name] ? "Update" : "Install"} {installing && <Loader className="animate-spin ml-2" size={16} />}</Button>
+                    <Link href={`https://apm.betteridea.dev/pkg?name=${packageData.Vendor}/${packageData.Name}`} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">APM <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
+                    <Link href={packageData.Repository || "#"} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">Repository <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
                 </div>
             </div>
         </div>
         <div className="text-sm mt-3 flex gap-1 text-muted text-nowrap">
-            <Wallet size={16}/> <span> {packageData.Owner}</span> <PackageCheckIcon className="ml-5" size={16}/> <span> {packageData.PkgID}</span>
+            <Wallet size={16} /> <span> {packageData.Owner}</span> <PackageCheckIcon className="ml-5" size={16} /> <span> {packageData.PkgID}</span>
         </div>
         <hr className="my-3" />
-        {!packageData?.README && <LoaderIcon className="animate-spin mx-auto" /> }
+        {!packageData?.Readme && <LoaderIcon className="animate-spin mx-auto" />}
         <Markdown remarkPlugins={[remarkGfm]} className="markdown" components={{
-            a: ({node, ...props}) => <a {...props} className="text-primary hover:underline" />,
+            a: ({ node, ...props }) => <a {...props} className="text-primary hover:underline" />,
         }}>
             {
-                Buffer.from(packageData?.README||"",'hex').toString()
+                Buffer.from(packageData?.Readme || "", 'hex').toString()
             }
         </Markdown>
     </div>

@@ -110,19 +110,38 @@ export type Column = {
   notnull: number;
   type: string;
 }
-
+export type TDependencies = {
+  [key: string]: {
+    "version": string
+  }
+}
 export type TPackage = {
-  Description: string;
-  Installs: number;
-  Name: string;
-  Owner: string;
-  PkgID: string;
-  RepositoryUrl: string;
-  Updated: number;
-  Vendor: string;
-  Version: string;
-  README: string;
-  Items: string;
+  ID: string
+  Vendor: string
+  Name: string
+  Version: string
+  Versions?: string[]
+  Description: string
+  Owner: string
+  Readme: string
+  PkgID: string
+  Source: string
+  Authors: string[] | string
+  Dependencies: TDependencies | string
+  Repository: string
+  Timestamp: number
+  Installs: number
+  TotalInstalls: number
+  Keywords: string[]
+  IsFeatured: boolean
+  Warnings: {
+    modifiesGlobalState: boolean
+    installMessage: string
+  } | string
+  License: string
+  Main?: string
+  ////////////
+  installed: boolean
 }
 
 export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule?: string) {
