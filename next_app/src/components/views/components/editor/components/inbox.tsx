@@ -39,7 +39,8 @@ export default function Inbox() {
         console.log(res)
         if (res.Error) toast.error(res.Error);
         else {
-            const { Output: { data: { output } } } = res
+            let { Output: { data: { output } } } = res
+            if (!output) output = res.Output.data
             globalState.setPrompt(res.Output.prompt || res.Output.data.prompt)
             setInbox(JSON.parse(output))
             return JSON.parse(output)

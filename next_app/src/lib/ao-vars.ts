@@ -2,10 +2,10 @@ import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 export const AppVersion = "3.0.0";
-export const AOModule = "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo";
+export const AOModule = "bkjb55i07GUCUSWROtKK4HU1mBS_X0TyH3M5jMV6aPg"; // aos 2.0.0
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
-export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4";
+export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak";
 
 export const BetterIDEaWallet = "MnZ8JrR5SoswAwWtX-HTnl4Kq5k6Kx1Y7vPxmlAyl_g"
 export const SponsorWebhookUrl = "https://discord.com/api/webhooks/1258731411033030726/T6rl7Ciuw8cgiR30MOVeOsbEcvAEWM45IRpc37TqAoXBbH3ZQDoxQzLAW0bmgcsxnCI9"
@@ -88,7 +88,8 @@ export const BAZAR_TAGS = {
 };
 
 export const modules = {
-  "Default (WASM64)": AOModule,
+  "AOS 2.0.0 (Default)": AOModule,
+  "AOS 0.2.1": "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo",
   "SQLite64": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
   "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
   "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",

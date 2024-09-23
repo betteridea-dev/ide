@@ -56,7 +56,7 @@ export default function Menubar() {
                     </MenubarLabel>
                     <MenubarSeparator />
                     <MenubarItem onClick={() => document.getElementById("new-project")?.click()}>New Project</MenubarItem>
-                    <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>All Projects</MenubarItem>
+                    <MenubarItem onClick={() => document.getElementById("all-projects")?.click()}>Open Project</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem disabled={!project} onClick={() => document.getElementById("publish-template")?.click()} >Publish Template (beta)</MenubarItem>
                     <MenubarSeparator />

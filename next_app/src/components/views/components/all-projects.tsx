@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { TView } from "."
-import { ArrowLeft, Folder, PlusSquare, Search } from "lucide-react";
+import { ArrowLeft, EllipsisVertical, Folder, PlusSquare, Search } from "lucide-react";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -8,13 +8,21 @@ import Image from "next/image";
 import dinBharCode from "@/assets/din-bhar-code.png"
 import { useLocalStorage } from "usehooks-ts";
 import { pushToRecents } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 function AllProjects() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
     const [searchInput, setSearchInput] = useState("")
-    const [recents, setRecents] = useLocalStorage<string[]>("recents", [], {initializeWithValue:true})
+    const [recents, setRecents] = useLocalStorage<string[]>("recents", [], { initializeWithValue: true })
 
     const projectList = Object.keys(manager.projects)
 
@@ -24,23 +32,23 @@ function AllProjects() {
         </Button>
         {/* <Button variant="ghost" className="bg-accent hover:bg-primary hover:text-white p-7 gap-2" onClick={() => {}}><PlusSquare/> New Project</Button> */}
 
-        <div className="my-5 text-xl">Recently Opened Projects</div> 
+        <div className="my-5 text-xl">Recently Opened Projects</div>
         <div className="flex my-5 items-center justify-start gap-6 mb-14">
             {
                 recents.length == 0 && <div className="text-muted">No recent projects</div>
             }
             {
-                recents.toReversed().slice(0,3).map((project, id) => {
+                recents.toReversed().slice(0, 3).map((project, id) => {
                     return <Button variant="ghost" className="bg-accent hover:bg-primary hover:text-white p-6 md:p-10 lg:p-11 !aspect-video relative"
                         key={id} onClick={() => {
                             globalState.setActiveView("EDITOR")
-                            globalState.setActiveProject(project) 
+                            globalState.setActiveProject(project)
                             globalState.setActiveFile(Object.keys(manager.projects[project].files)[0])
                             pushToRecents(project)
                         }}>
-                        <Folder size={30} className="fill-accent-foreground/60" strokeWidth={0}/> 
-                        <div className="absolute text-foreground -bottom-5">{ project}</div>
-                        </Button>
+                        <Folder size={30} className="fill-accent-foreground/60" strokeWidth={0} />
+                        <div className="absolute text-foreground -bottom-5">{project}</div>
+                    </Button>
                 })
             }
             <Button variant="ghost" className="bg-accent text-accent-foreground/60 hover:bg-primary hover:text-white p-6 md:p-10 lg:p-11 aspect-video relative"
@@ -59,15 +67,43 @@ function AllProjects() {
                 projectList.length == 0 && <div className="text-muted">No projects found</div>
             }
             {
-                projectList.map((project, id) => {
-                    const item = <Button variant="ghost" className="bg-accent hover:bg-primary hover:text-white justify-start p-7 max-w-[50vw]"
-                        key={id} onClick={() => {
-                            globalState.setActiveView("EDITOR")
-                            globalState.setActiveProject(project) 
-                            globalState.setActiveFile(Object.keys(manager.projects[project].files)[0])
-                            pushToRecents(project)
-                        }}>{project}</Button>
-                    return searchInput ? project.includes(searchInput) && item:item})
+                projectList.sort()
+                    .map((project, id) => {
+                        const item = <Button variant="ghost" className="bg-accent hover:bg-primary hover:text-white justify-start p-7 max-w-[50vw]"
+                            key={id} onClick={() => {
+                                globalState.setActiveView("EDITOR")
+                                globalState.setActiveProject(project)
+                                globalState.setActiveFile(Object.keys(manager.projects[project].files)[0])
+                                pushToRecents(project)
+                            }}>{project}
+                            {/*  */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className="ml-auto hover:scale-110" ><EllipsisVertical size={20} /></DropdownMenuTrigger>
+                                <DropdownMenuContent onClick={(e) => e.stopPropagation()} className="bg-accent border border-muted/50">
+                                    <DropdownMenuLabel>{project}</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="p-0 my-1">
+                                        <Button className="w-full hover:bg-primary/20" variant="ghost" onClick={() => {
+                                            globalState.setActiveView("EDITOR")
+                                            globalState.setActiveProject(project)
+                                            globalState.setActiveFile(Object.keys(manager.projects[project].files)[0])
+                                            pushToRecents(project)
+                                        }}>Open</Button>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="p-0">
+                                        <Button className="w-full text-destructive-foreground hover:bg-destructive/50" variant="ghost" onClick={() => {
+                                            globalState.setActiveView(null)
+                                            globalState.setActiveProject(null)
+                                            manager.deleteProject(project)
+                                            setRecents(recents.filter(r => r != project))
+                                        }}>Delete</Button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                        </Button>
+                        return searchInput ? project.includes(searchInput) && item : item
+                    })
             }
         </div>
         <Image src={dinBharCode} width={350} height={150} className="absolute right-0 bottom-6 z-0" alt="din bhar code" draggable={false} />
