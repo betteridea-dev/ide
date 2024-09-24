@@ -26,7 +26,7 @@ function Interact() {
 
     useEffect(() => {
         setEqLua(`Send({
-    Target = "${target || project?.process}",${action ? `\n\tAction = "${action}",` : ""}${data ? `\n\tData = "${data}",` : ""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = "${tag.value}"`).join(",\n\t")}
+    Target = [[${target || project?.process}]],${action ? `\n\tAction = [[${action}]],` : ""}${data ? `\n\tData = [[${data}]],` : ""}${inputTags.length > 0 ? "\n\t" : ""}${inputTags.map(tag => `["${tag.name}"] = [[${tag.value}]]`).join(",\n\t")}
 })`);
     }, [target, action, data, inputTags, project, globalState.activeProject]);
 
@@ -49,9 +49,18 @@ function Interact() {
 
     return <div className="max-h-[calc(100vh-50px)]">
         <h1 className="text-left p-3 text-muted-foreground">INTERACT</h1>
+        <div className="p-2 flex items-center justify-between gap-1">
+            <Combobox triggerClassName="bg-foreground/5 p-1.5 h-6" className="bg-background" placeholder="Load saved interactions"
+                onChange={(e) => {
+                    console.log(e)
+                }}
+                options={[]}
+            />
+            <Button className="p-0 h-6 px-3">+</Button>
+        </div>
         {globalState.activeProject ? <div className="overflow-scroll p-2 pt-0.5 flex flex-col gap-2">
             {/* <Input placeholder={`Target (${project?.process})`} onChange={(e) => setTarget(e.target.value)} className="bg-foreground/5 rounded" /> */}
-            <Combobox triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target}`}
+            <Combobox triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target} or paste id`}
                 onChange={(e) => { if (e) { setTarget(e) } else { setTarget(project.process) } }}
                 options={options}
                 onSearchChange={(e) => {
@@ -103,7 +112,7 @@ function Interact() {
                 </div>)
             }
             <hr className="my-3" />
-            <details className="text-sm text-muted-foreground" open={false}>
+            <details className="text-sm text-muted-foreground" open={true}>
                 <summary><span className="inline-flex items-center gap-1.5 cursor-pointer mb-1.5">Lua Code <button><Copy size={15} className="cursor-pointer" onClick={() => { navigator.clipboard.writeText(eqLua); toast.info("Copied to clipboard") }} /></button></span></summary>
                 <pre className="text-xs bg-foreground/10 text-foreground font-btr-code overflow-scroll border border-border/40 p-2 rounded-md">{eqLua}</pre>
             </details>
