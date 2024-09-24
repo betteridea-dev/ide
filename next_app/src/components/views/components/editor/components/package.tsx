@@ -192,7 +192,7 @@ export default function PackageView() {
                 </div>
                 <div className="text-sm my-2">{packageData.Description}</div>
                 <div className="flex gap-1.5">
-                    <Button variant="default" disabled={!globalState.activeProject || !project.process || installing} className="rounded-none h-6 p-3 text-white mr-auto" onClick={installPackage}>{installed[project.process][packageData.Vendor + "/" + packageData.Name] ? "Update" : "Install"} {installing && <Loader className="animate-spin ml-2" size={16} />}</Button>
+                    <Button variant="default" disabled={!globalState.activeProject || !project.process || installing} className="rounded-none h-6 p-3 text-white mr-auto" onClick={installPackage}>{project && project.process && installed[project.process][packageData.Vendor + "/" + packageData.Name] ? "Update" : "Install"} {installing && <Loader className="animate-spin ml-2" size={16} />}</Button>
                     <Link href={`https://apm.betteridea.dev/pkg?name=${packageData.Vendor}/${packageData.Name}`} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">APM <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
                     <Link href={packageData.Repository || "#"} target="_blank"><Button variant="default" className="rounded-none h-6 p-3 text-white">Repository <ExternalLink size={16} className="ml-1 pb-0.5" /></Button></Link>
                 </div>
