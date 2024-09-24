@@ -8,6 +8,7 @@ import { ChevronsLeftRight, Copy, Delete, Loader, Minus, MinusCircle, Tag as Tag
 import { Combobox } from "@/components/ui/combo-box";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useLocalStorage } from "usehooks-ts";
 
 function Interact() {
     const manager = useProjectManager();
@@ -23,6 +24,26 @@ function Interact() {
     const [id, setId] = useState<string>();
     const [action, setAction] = useState<string>("");
     const [data, setData] = useState<string>("");
+    const [interactions, setInteractions] = useLocalStorage("interactions", {}, { initializeWithValue: true })
+
+    function saveInteraction() {
+        const confirm = window.confirm("Are you sure you want to save this interaction?");
+        if (!confirm) return;
+        const name = prompt("Enter a name for this interaction");
+        if (!name) return;
+        if (interactions[name]) {
+            const overwrite = window.confirm("An interaction with this name already exists. Do you want to overwrite it?");
+            if (!overwrite) return;
+        }
+        const interaction = {
+            target,
+            action,
+            data,
+            tags: inputTags
+        }
+        setInteractions({ ...interactions, [name]: interaction });
+        toast.success("Interaction saved")
+    }
 
     useEffect(() => {
         setEqLua(`Send({
@@ -49,18 +70,32 @@ function Interact() {
 
     return <div className="max-h-[calc(100vh-50px)]">
         <h1 className="text-left p-3 text-muted-foreground">INTERACT</h1>
-        <div className="p-2 flex items-center justify-between gap-1">
+        <div className="px-2 flex items-center justify-between gap-1">
             <Combobox triggerClassName="bg-foreground/5 p-1.5 h-6" className="bg-background" placeholder="Load saved interactions"
                 onChange={(e) => {
-                    console.log(e)
+                    if (e) {
+                        const interaction = interactions[e];
+                        setTarget(interaction.target);
+                        setAction(interaction.action);
+                        setData(interaction.data);
+                        setInputTags(interaction.tags);
+                    }
+                    else {
+                        setTarget(project?.process || "");
+                        setAction("");
+                        setData("");
+                        setInputTags([]);
+                    }
                 }}
-                options={[]}
+                options={Object.keys(interactions).map(name => ({ label: name, value: name }))}
             />
-            <Button className="p-0 h-6 px-3">+</Button>
+            <Button className="p-0 h-6 px-3" onClick={saveInteraction}>+</Button>
         </div>
-        {globalState.activeProject ? <div className="overflow-scroll p-2 pt-0.5 flex flex-col gap-2">
+        <hr className="my-4" />
+        {globalState.activeProject ? <div className="overflow-scroll p-2 pt-0 flex flex-col gap-2">
             {/* <Input placeholder={`Target (${project?.process})`} onChange={(e) => setTarget(e.target.value)} className="bg-foreground/5 rounded" /> */}
-            <Combobox triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target} or paste id`}
+            <Combobox
+                triggerClassName="bg-foreground/5 p-1.5" className="bg-background" placeholder={`Target: ${target} or paste id`}
                 onChange={(e) => { if (e) { setTarget(e) } else { setTarget(project.process) } }}
                 options={options}
                 onSearchChange={(e) => {
@@ -72,8 +107,8 @@ function Interact() {
                     }
                 }}
             />
-            <Input placeholder="Action" onChange={(e) => setAction(e.target.value)} className="bg-foreground/5 rounded" />
-            <Input placeholder="Data" onChange={(e) => setData(e.target.value)} className="bg-foreground/5 rounded" />
+            <Input placeholder="Action" value={action} onChange={(e) => setAction(e.target.value)} className="bg-foreground/5 rounded" />
+            <Input placeholder="Data" value={data} onChange={(e) => setData(e.target.value)} className="bg-foreground/5 rounded" />
             <hr className="my-3" />
             <span className="text-sm text-muted-foreground flex gap-1 items-center"><TagIcon size={16} />Tags</span>
             <div className="flex gap-2.5 my-4">
