@@ -11,6 +11,9 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 type TAnalysis = {
+    cell?: number;
+    code_cell?: string;
+    vulnerabilities?: TAnalysis[];
     name: string;
     description: string;
     pattern: string;
@@ -130,7 +133,7 @@ function Sam() {
     const files = Object.keys(project?.files || {})
     const [selectedFile, setSelectedFile] = useState<string | null>(null)
     const [analyzing, setAnalyzing] = useState(false);
-    const [code, setCode] = useState('');
+    const [code, setCode] = useState<string | string[]>('');
     // const [analysis, setAnalysis] = useSessionStorage<TAnalysis[]>("analysis", [], { initializeWithValue: true });
     const [analyzed, setAnalyzed] = useState(false);
     const [visibleSeverity, setVisibleSeverity] = useState<Severity[]>([Severity.MEDIUM, Severity.HIGH]);
@@ -148,17 +151,21 @@ function Sam() {
         console.log(file);
         setAnalyzed(false);
 
-        let code = ''
+        let code: string | string[];
         if (file.type == "NORMAL") {
-            code = file.content.cells[0].code;
+            code = file.content.cells[0].code as string
         } else {
+            code = [] as string[]
             file.content.cellOrder.forEach(cellId => {
                 if (file.content.cells[cellId].type == "CODE") {
-                    code += file.content.cells[cellId].code + "\n";
+                    // code += file.content.cells[cellId].code + "\n";
+                    (code as string[]).push(file.content.cells[cellId].code as string);
+                } else {
+                    (code as string[]).push("");
                 }
             })
         }
-        console.log(code);
+        // console.log(code);
         setCode(code);
     }, [globalState.activeFile, project, selectedFile])
 
@@ -186,13 +193,27 @@ function Sam() {
         if (!globalState.activeFile) return;
         if (!selectedFile) return;
 
-        let data = new FormData();
-        data.append('code', code);
+        // let data = new FormData();
+        // if (typeof code == "string") {
+        //     data.append('code', code);
+        // } else {
+        //     data.append('code_cells', JSON.stringify(code));
+        // }
+
+        const data = {}
+        if (typeof code == "string") {
+            data['code'] = code;
+        } else {
+            data['code_cells'] = code
+        }
+
+        console.log(data);
+
         setAnalyzing(true);
         try {
-            const res = await axios.postForm('https://sam-offchain-dbedazdhd2dugrdk.eastus-01.azurewebsites.net/analyze', data, {
+            const res = await axios.post(`https://sam-offchain-dbedazdhd2dugrdk.eastus-01.azurewebsites.net${typeof code == "string" ? "/analyze" : "/analyzecells"}`, data, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': typeof code == "string" ? 'application/x-www-form-urlencoded' : 'application/json'
                 }
             });
             console.log(res);
@@ -205,38 +226,69 @@ function Sam() {
             const cells = file.content.cells;
             const cellOrder = file.content.cellOrder;
 
-            analData.forEach(anal => {
-                if (file.type != "NOTEBOOK") {
+            console.log(analData);
+
+            analData.forEach((anal, idx) => {
+                if (anal.code_cell) {
+                    const vuln = anal.vulnerabilities;
+                    console.log(vuln);
+                    vuln.forEach((v) => {
+                        v.cell = idx + 1;
+                        console.log(v)
+                        if (!myCompactAnal[v.name]) {
+                            myCompactAnal[v.name] = v;
+                            myCompactAnal[v.name].lines = [`${v.cell}-${v.line}`];
+                        } else {
+                            if (myCompactAnal[v.name].lines.includes(`${v.cell}-${v.line}`)) return;
+                            myCompactAnal[v.name].lines.push(`${v.cell}-${v.line}`);
+                        }
+                    })
+                } else {
                     if (!myCompactAnal[anal.name]) {
                         myCompactAnal[anal.name] = anal;
                         myCompactAnal[anal.name].lines = [anal.line];
                     }
                     if (myCompactAnal[anal.name].lines.includes(anal.line)) return;
                     myCompactAnal[anal.name].lines.push(anal.line);
-                } else {
-                    let lineSum = 0;
-                    for (let i = 0; i < cellOrder.length; i++) {
-                        const cellId = cellOrder[i];
-                        const cell = cells[cellId];
-                        if (cell.type == "CODE") {
-                            lineSum += cell.code.split('\n').length;
-                            if (lineSum >= anal.line) {
-                                const lineItem = `${i + 1}-${anal.line - (lineSum - cell.code.split('\n').length)}`;
-                                if (!myCompactAnal[anal.name]) {
-                                    myCompactAnal[anal.name] = anal;
-                                    myCompactAnal[anal.name].lines = [lineItem];
-                                }
-                                if (myCompactAnal[anal.name].lines.includes(lineItem)) return;
-                                myCompactAnal[anal.name].lines.push(lineItem);
-                                break;
-                            }
-                        }
-                    }
                 }
             })
-            console.log(myCompactAnal);
-            // setCompactAnal(p => { return { ...p, [selectedFile]: compactAnal } });
+            console.log(myCompactAnal);;
             setCompactAnal(p => { return { ...p, [selectedFile]: myCompactAnal } });
+
+            // analData.forEach(anal => {
+            //     if (file.type != "NOTEBOOK") {
+            //         if (!myCompactAnal[anal.name]) {
+            //             myCompactAnal[anal.name] = anal;
+            //             myCompactAnal[anal.name].lines = [anal.line];
+            //         }
+            //         if (myCompactAnal[anal.name].lines.includes(anal.line)) return;
+            //         myCompactAnal[anal.name].lines.push(anal.line);
+            //     } else {
+            //         let lineSum = 0;
+            //         for (let i = 0; i < cellOrder.length; i++) {
+            //             const cellId = cellOrder[i];
+            //             const cell = cells[cellId];
+            //             if (cell.type == "CODE") {
+            //                 lineSum += cell.code.split('\n').length;
+            //                 if (lineSum >= anal.line) {
+            //                     const lineItem = `${i + 1}-${anal.line - (lineSum - cell.code.split('\n').length)}`;
+            //                     if (!myCompactAnal[anal.name]) {
+            //                         myCompactAnal[anal.name] = anal;
+            //                         myCompactAnal[anal.name].lines = [lineItem];
+            //                     }
+            //                     if (myCompactAnal[anal.name].lines.includes(lineItem)) return;
+            //                     myCompactAnal[anal.name].lines.push(lineItem);
+            //                     break;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // })
+            // console.log(myCompactAnal);
+            // // setCompactAnal(p => { return { ...p, [selectedFile]: compactAnal } });
+            // setCompactAnal(p => { return { ...p, [selectedFile]: myCompactAnal } });
+
+
         } catch (e) {
             console.error(e);
             setAnalyzing(false);
@@ -277,7 +329,7 @@ function Sam() {
             </div>
             {analyzing && <div className="flex flex-col gap-0 items-center justify-center text-sm text-muted-foreground my-2">
                 <div className="flex gap-2 items-center">
-                    <Loader className="animate-spin" size={17} /> Analyzing {code.split('\n').length} line(s) of code
+                    <Loader className="animate-spin" size={17} /> Analyzing {(typeof code == "string" ? code : code.join("\n")).split('\n').length} line(s) of code
                 </div><span className="text-xs text-muted">first run may take more time</span>
             </div>}
             {
