@@ -190,7 +190,7 @@ function Sam() {
         data.append('code', code);
         setAnalyzing(true);
         try {
-            const res = await axios.postForm('https://sam-api-ahqg.onrender.com/analyze', data, {
+            const res = await axios.postForm('https://sam-offchain-dbedazdhd2dugrdk.eastus-01.azurewebsites.net/analyze', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
