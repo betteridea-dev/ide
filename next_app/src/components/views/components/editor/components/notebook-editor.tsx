@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useGlobalState } from "@/hooks";
 import useProjectManager, { PFile, ProjectManager, Project } from "@/hooks/useProjectManager";
-import { CompletionFormatter } from "@/lib/ai-completion-formatter";
 import { runLua } from "@/lib/ao-vars";
 import { Editor, useMonaco } from "@monaco-editor/react";
 import { sendGAEvent } from "@next/third-parties/google";
@@ -18,11 +17,14 @@ import Markdown from "react-markdown";
 import Latex from "react-latex-next";
 import remarkGfm from "remark-gfm";
 import { v4 } from "uuid";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
-import { generateContext } from "@/lib/ai";
 import dynamic from "next/dynamic";
 import runIcon from "@/assets/icons/run.svg";
+
+// AI AUTOCOMPLETE (PERMAHACKS BOUNTY)
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText } from "ai";
+import { CompletionFormatter } from "@/lib/ai-completion-formatter";
+import { generateContext } from "@/lib/ai";
 
 const Plot = dynamic(
     () =>
