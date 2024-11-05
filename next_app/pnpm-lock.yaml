@@ -128,6 +128,9 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      lodash.debounce:
+        specifier: ^4.0.8
+        version: 4.0.8
       lua-format:
         specifier: ^1.4.1
         version: 1.4.1
