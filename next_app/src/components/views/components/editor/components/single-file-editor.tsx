@@ -15,11 +15,6 @@ const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
   scrollBeyondLastLine: false,
 };
 
-// Example usage:
-const luaCode = `
-// Your provided Lua code here
-`;
-
 async function fetchGroqSuggestions(
   previous_lines: string,
   current_line: string,
@@ -161,7 +156,7 @@ const debouncedFetchSuggestions = debounce(
   async (previous_lines: string, current_line: string, offset: number) => {
     await fetchGroqSuggestions(previous_lines, current_line, offset);
   },
-  500
+  600
 );
 
 export default function SingleFileEditor() {
