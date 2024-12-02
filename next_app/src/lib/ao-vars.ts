@@ -2,7 +2,7 @@ import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 export const AppVersion = "3.0.0";
-export const AOModule = "bkjb55i07GUCUSWROtKK4HU1mBS_X0TyH3M5jMV6aPg"; // aos 2.0.0
+export const AOModule = "Do_Uc2Sju_ffp6Ev0AnLVdPtot15rvMjP-a9VVaA5fM"; // aos 2.0.1
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
 export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak";
@@ -79,21 +79,20 @@ export const BAZAR_TAGS = {
     followDataProtocol: 'Follow',
     license: 'dE0rmDfl9_OWjkDznNEXHaSO_JohJkRolvMzaCroUdw',
     licenseCurrency: 'xU9zFkq3X2ZQ6olwNVvr1vUWIjc3kXTWr7xKQD6dh10',
-    profileVersions: {
-      '1': 'Account-0.3',
-    },
+    profileVersions: { '1': 'Account-0.3' },
     ticker: 'ATOMIC ASSET',
     title: (title: string) => `${title}`,
   },
 };
 
 export const modules = {
-  "AOS 2.0.0 (Default)": AOModule,
-  "AOS 0.2.1": "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo",
-  "SQLite64": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
+  "AOS 2 (Default)": AOModule,
+  // "AOS 0.2.1": "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo",
+  "SQLite64 (AOS 2)": "2qIQBC_mo5ywHZcTbC3Z-OTqyzserEhHAXscCjqOc1k",
+  "SQLite64 (AOS 1)": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
   "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
   "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
-};
+}
 
 const CommonTags = [
   { name: "App-Name", value: "BetterIDEa" },
