@@ -241,6 +241,7 @@ export async function unmonitor(process: string) {
 export function parseOutupt(out: any) {
   if (!out.Output) return out;
   const data = out.Output.data;
+  if (typeof data == "string") return data;
   const { json, output } = data;
   if (json != "undefined") {
     return json;
