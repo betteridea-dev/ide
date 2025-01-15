@@ -31,7 +31,7 @@ function SQLiteExplorer() {
             console.log(res);
             if (res.Error) return toast.error(res.Error);
             const { Output } = res
-            const output = JSON.parse(Output.data.output);
+            const output = JSON.parse(Output.data.output || Output.data || "[]");
             setTables(output);
         } catch (error) {
             console.error(error);
