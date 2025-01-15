@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useGlobalState, useProjectManager } from "@/hooks"
-import { APM_ID, Column, runLua, TPackage } from "@/lib/ao-vars"
+import { APM_ID, Column, parseOutupt, runLua, TPackage } from "@/lib/ao-vars"
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Columns3, Database, Loader, Plus, Rows3, Table2, Trash2 } from "lucide-react"
@@ -30,7 +30,6 @@ export default function TableView() {
     const [customQueryOutput, setCustomQueryOutput] = useState("")
     const [structure, setStructure] = useSessionStorage<Column[]>(`${dbTbl}-structure`, [], { initializeWithValue: true })
     const [newRowData, setNewRowData] = useState({})
-    const ao = connect()
 
     const dbName = dbTbl.split(".")[0]
     const tableName = dbTbl.split(".")[1]
@@ -53,8 +52,9 @@ return require"json".encode({
         sql = tables[1].sql
 })`
         const res = await runLua(query, project.process)
-        const { Output } = res
-        const q: { cols: Column[], sql: string } = JSON.parse(Output.data.output as string)
+        console.log(parseOutupt(res))
+        // const q: { cols: Column[], sql: string } = JSON.parse(Output.data.output as string)
+        const q: { cols: Column[], sql: string } = parseOutupt(res)
         setQuery(q.sql)
         setStructure(q.cols)
     }
@@ -72,9 +72,8 @@ return require"json".encode(tables)`
         setLoadingRows(true)
         const res = await runLua(query, project.process)
         setLoadingRows(false)
-        const { Output } = res
-        console.log(JSON.parse(Output.data.output))
-        setRows(JSON.parse(Output.data.output))
+        console.log(parseOutupt(res))
+        setRows(parseOutupt(res))
     }
 
     useEffect(() => {
@@ -94,11 +93,12 @@ return res`
         setDeletingRow(true)
         setDeletedRow(row)
         const res = await runLua(query, project.process)
-        const { Output: { data: output } } = res
+        // const { Output: { data: output } } = res
+        const output = parseOutupt(res)
         console.log(output)
         setDeletingRow(false)
         setDeletedRow({})
-        output.output == 0 && toast.info(`Deleted row(s)`)
+        output == 0 && toast.info(`Deleted row(s)`)
         console.log(res)
         getTableRows()
     }
@@ -119,10 +119,11 @@ return res`
         setAddingNewRow(true)
         const res = await runLua(query, project.process)
         console.log(res)
-        const { Output: { data: output } } = res
+        // const { Output: { data: output } } = res
+        const output = parseOutupt(res)
         await getTableRows()
-        output.output == 0 && toast.info(`Added new row`)
-        output.output != 0 && toast.error(`Error ${output.output}`)
+        output == 0 && toast.info(`Added new row`)
+        output != 0 && toast.error(`Error ${output}`)
         setNewRowData({})
         setAddingNewRow(false)
     }
@@ -141,7 +142,7 @@ return require"json".encode(tables)`
         setCustomQueryRunning(false)
         const { Output } = res
         console.log(Output)
-        setCustomQueryOutput(JSON.stringify(JSON.parse(Output.data.output), null, 2))
+        setCustomQueryOutput(JSON.stringify(parseOutupt(res), null, 2))
 
     }
 
@@ -172,7 +173,7 @@ return require"json".encode(tables)`
                         </DialogContent>
                     </Dialog>
                     <div className="flex gap-2 items-center">
-                        <Columns3 scale={18} strokeWidth={1} className="w-7" /> {structure.length} Attributes  <Rows3 scale={18} strokeWidth={1} className="w-7" /> {rows.length} Entries
+                        <Columns3 scale={18} strokeWidth={1} className="w-7" /> {structure ? structure.length : "NA"} Attributes  <Rows3 scale={18} strokeWidth={1} className="w-7" /> {rows ? rows.length : "NA"} Entries
                     </div>
                 </div>
                 <div className="ml-auto max-w-[50%]">
@@ -183,41 +184,46 @@ return require"json".encode(tables)`
                 </div>
             </div>
             <div>
-                {
+                {structure && rows && (
                     <><table className="w-full border-collapse border border-primary/20 my-4">
                         <thead>
                             <tr className="bg-primary/20">
                                 <th className="!w-fit">{loadingRows && <Loader size={15} className="animate-spin mx-auto w-fit" />}</th>
-                                {/* {Object.keys(rows[0]).map((key:string, i) => <th key={i} className="border border-primary/20 p-2">{key}</th>)} */}
-                                {
-                                    structure.map((col, i) => col && <th key={i} className="border border-primary/20 p-2">{col.name}</th>)
-                                }
+                                {structure.map((col, i) => col && <th key={i} className="border border-primary/20 p-2">{col.name}</th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.length == 0 && <tr><td colSpan={structure.length + 1} className="text-center text-muted">No Rows</td></tr>}
+                            {rows.length === 0 && <tr><td colSpan={(structure?.length || 0) + 1} className="text-center text-muted">No Rows</td></tr>}
                             {rows.map((row, i) => <tr key={i} className="bg-muted/10 even:bg-muted/20">
                                 <td className="border border-primary/20 w-10">
-                                    {/* options */}
-                                    <Button variant="ghost" disabled={deletingRow} className="rounded-none w-10 p-0" onClick={() => deleteRow(row)}>{deletingRow && Object.values(deletedRow).toSorted().join("_") == Object.values(row).toSorted().join("_") ? <Loader className="animate-spin" size={18} /> : <Trash2 className="text-destructive-foreground" size={18} />}</Button>
+                                    <Button variant="ghost" disabled={deletingRow} className="rounded-none w-10 p-0" onClick={() => deleteRow(row)}>
+                                        {deletingRow && Object.values(deletedRow).toSorted().join("_") === Object.values(row).toSorted().join("_")
+                                            ? <Loader className="animate-spin" size={18} />
+                                            : <Trash2 className="text-destructive-foreground" size={18} />}
+                                    </Button>
                                 </td>
-                                {/* {Object.values(row).map((val:string, j) => <td key={j} className="border border-primary/20 p-2">{val}</td>)} */}
-                                {
-                                    structure.map((col, i) => <td key={i} className="border border-primary/20 px-2">{row[col.name]}</td>)
-                                }
+                                {structure.map((col, i) => (
+                                    <td key={i} className="border border-primary/20 px-2">{row[col.name]}</td>
+                                ))}
                             </tr>)}
                             {/* add row options */}
                             <tr className="bg-primary/20">
-                                <td className=" w-10 ">
-                                    <Button disabled={addingNewRow} variant="ghost" className="rounded-none w-10 p-0" onClick={addNewRow}>{addingNewRow ? <Loader size={18} className="animate-spin" /> : <Plus size={18} />}</Button>
+                                <td className="w-10">
+                                    <Button disabled={addingNewRow} variant="ghost" className="rounded-none w-10 p-0" onClick={addNewRow}>
+                                        {addingNewRow ? <Loader size={18} className="animate-spin" /> : <Plus size={18} />}
+                                    </Button>
                                 </td>
-                                {
-                                    structure.map((col, i) => <td key={i} className="border border-primary/20 p-0">
-                                        <Input type="text" className="bg-transparent rounded-none ring-0 border-none" value={newRowData[col.name] || ""} placeholder={col.name} onChange={(e) => {
-                                            setNewRowData({ ...newRowData, [col.name]: e.target.value })
-                                        }} />
-                                    </td>)
-                                }
+                                {structure.map((col, i) => (
+                                    <td key={i} className="border border-primary/20 p-0">
+                                        <Input
+                                            type="text"
+                                            className="bg-transparent rounded-none ring-0 border-none"
+                                            value={newRowData[col.name] || ""}
+                                            placeholder={col.name}
+                                            onChange={(e) => setNewRowData({ ...newRowData, [col.name]: e.target.value })}
+                                        />
+                                    </td>
+                                ))}
                             </tr>
                         </tbody>
                     </table>
@@ -226,7 +232,7 @@ return require"json".encode(tables)`
                             <pre className="font-btr-code m-2 p-4 rounded-md border text-xs">{JSON.stringify(rows, null, 2)}</pre>
                         </details>
                     </>
-                }
+                )}
             </div>
         </div>}
     </div>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { runLua } from "@/lib/ao-vars";
+import { parseOutupt, runLua } from "@/lib/ao-vars";
 import { useSessionStorage } from "usehooks-ts";
 
 function SQLiteExplorer() {
@@ -30,13 +30,14 @@ function SQLiteExplorer() {
             const res = await runLua(query, project.process);
             console.log(res);
             if (res.Error) return toast.error(res.Error);
-            const { Output } = res
-            const output = JSON.parse(Output.data.output || Output.data || "[]");
+            const output = parseOutupt(res)
+            console.log(output)
             setTables(output);
         } catch (error) {
             console.error(error);
             toast.error(error);
             setDbVarName("");
+            setTables([]);
         }
         setFetchingTables(false);
     }
@@ -58,7 +59,7 @@ function SQLiteExplorer() {
         }
         <div className="grid grid-cols-1 overflow-scroll">
             {
-                globalState.activeProject && tables.map((tname, i) => (
+                globalState.activeProject && tables && tables.map((tname, i) => (
                     <Button variant="ghost" key={i} data-active={false}
                         className="rounded-none w-full mx-auto justify-start truncate data-[active=true]:bg-foreground/20"
                         onClick={() => {

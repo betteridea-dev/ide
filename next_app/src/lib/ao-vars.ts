@@ -240,17 +240,24 @@ export async function unmonitor(process: string) {
 
 export function parseOutupt(out: any) {
   if (!out.Output) return out;
-  const data = out.Output.data;
-  if (typeof data == "string") return data;
-  const { json, output } = data;
-  if (json != "undefined") {
-    return json;
+  const data_ = out.Output.data;
+  if (typeof data_ == "string") {
+    try {
+      return JSON.parse(data_);
+    } catch (e) {
+      return data_;
+    }
   }
-  try {
-    return JSON.parse(output);
-  } catch (e) {
-    return output;
-  }
+  // const { json, output, data } = data_;
+  // if (data) return data;
+  // if (json != "undefined") {
+  //   return json;
+  // }
+  // try {
+  //   return JSON.parse(output);
+  // } catch (e) {
+  //   return output;
+  // }
 }
 
 export async function readHandler(args: {
