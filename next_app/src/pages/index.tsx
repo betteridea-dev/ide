@@ -3,11 +3,12 @@ import Layout from "@/components/layout";
 import Mobile from "@/components/mobile";
 import { useRouter } from "next/router";
 import TxRenderer from "@/pages/renderer";
-
+import { useKeyBinds } from "@/utils/keybinds";
 export default function Home() {
     const [isMobile, setIsMobile] = useState(false);
     const router = useRouter()
     const { tx } = router.query
+    useKeyBinds()
 
     useEffect(() => {
         if (typeof window !== "undefined") {

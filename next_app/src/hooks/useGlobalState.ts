@@ -22,6 +22,9 @@ interface State {
     prompt: string;
     setTerminalOutputs: Dispatch<SetStateAction<string[]>>;
     history: { [pname: string]: MsgHistory[] };
+    isAiPanelOpen: boolean;
+    setIsAiPanelOpen: (open: boolean) => void;
+
     setActiveSidebarItem: (item: TSidebarOptions) => void;
     setActiveView: (view: TViewOptions) => void;
     setActiveProject: (project: string) => void;
@@ -47,6 +50,8 @@ export const useGlobalState = create<State>((set) => ({
     prompt: "",
     setTerminalOutputs: null,
     history: {},
+    isAiPanelOpen: false,
+    setIsAiPanelOpen: (open: boolean) => set({ isAiPanelOpen: open }),
     setActiveSidebarItem: (item: TSidebarOptions) => set({ activeSidebarItem: item }),
     setActiveView: (view: TViewOptions) => set({ activeView: view }),
     setActiveProject: (project: string) => set({

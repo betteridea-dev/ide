@@ -1,7 +1,7 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import Sidebar from "./sidebar";
 import SidebarDrawer from "./drawer";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import View from "./views";
 import Statusbar from "./statusbar";
@@ -9,6 +9,7 @@ import Menubar from "./menubar";
 import { useGlobalState, useProjectManager } from "@/hooks";
 import { NextSeo } from "next-seo"
 import { useSearchParams } from "next/navigation";
+import AiPanel from "./views/components/ai-panel";
 
 
 export default function Layout() {
@@ -16,6 +17,16 @@ export default function Layout() {
     const manager = useProjectManager()
     const sidebarDrawerRef = useRef<ImperativePanelHandle>();
     const searchParams = useSearchParams()
+    const aiPanel = useRef<ImperativePanelHandle>()
+
+
+    useEffect(() => {
+        if (globalState.isAiPanelOpen) {
+            aiPanel.current.expand()
+        } else {
+            aiPanel.current.collapse()
+        }
+    }, [aiPanel, globalState.isAiPanelOpen])
 
     useEffect(() => {
         const urlParams = new URLSearchParams(Array.from(searchParams.entries()));
@@ -85,6 +96,10 @@ export default function Layout() {
                 <ResizableHandle />
                 <ResizablePanel>
                     <View />
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={0} maxSize={30} minSize={5} collapsible ref={aiPanel} onCollapse={() => globalState.setIsAiPanelOpen(false)} onExpand={() => globalState.setIsAiPanelOpen(true)}>
+                    <AiPanel />
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>
