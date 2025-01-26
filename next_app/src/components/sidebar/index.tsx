@@ -21,6 +21,9 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
                 case "SETTINGS":
                     globalState.setActiveView("SETTINGS")
                     break;
+                case "AI_CHAT":
+                    globalState.setIsAiPanelOpen(!globalState.isAiPanelOpen)
+                    break;
                 // above: donot toggle sidebar drawer
                 // below: toggle sidebar drawer
                 case "MARKETPLACE":

@@ -23,6 +23,7 @@ export default function Layout() {
     useEffect(() => {
         if (globalState.isAiPanelOpen) {
             aiPanel.current.expand()
+            aiPanel.current.resize(25)
         } else {
             aiPanel.current.collapse()
         }

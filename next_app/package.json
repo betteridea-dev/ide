@@ -51,6 +51,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^0.2.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "gh-pages": "^6.1.1",
     "graphql-request": "^6.1.0",
@@ -58,6 +59,7 @@
     "lua-format": "^1.4.1",
     "lucide-react": "^0.372.0",
     "monaco-editor": "^0.48.0",
+    "monacopilot": "^0.17.0",
     "next": "14.2.2",
     "next-seo": "^6.5.0",
     "next-themes": "^0.3.0",
@@ -82,6 +84,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20",
     "@types/plotly.js": "^2.29.4",
