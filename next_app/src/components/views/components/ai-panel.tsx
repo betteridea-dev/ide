@@ -47,7 +47,7 @@ export default function AiPanel() {
             setChatMessages(prev => [...prev, { role: "user", content: inputText }])
             setInputText("")
 
-            const response = await fetch("http://localhost:3001/chat", {
+            const response = await fetch("https://api.betteridea.dev/chat", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
