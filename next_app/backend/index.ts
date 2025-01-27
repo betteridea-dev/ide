@@ -285,7 +285,7 @@ app.post("/complete", async (req, res) => {
 
         if (raw) {
             console.log(raw)
-            calculateCost(raw.usage.total_tokens);
+            calculateCost((raw as any).usage.total_tokens);
         }
 
         if (error) {
