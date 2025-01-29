@@ -4,9 +4,16 @@ import { useLocalStorage } from "usehooks-ts";
 
 ///// TYPES /////
 
+export type TCell = {
+  code: string;
+  output: string | any | { __render_gfx: boolean, [key: string]: any };
+  type: "CODE" | "LATEX" | "MARKDOWN";
+  editing: boolean;
+}
+
 export type TFileContent = {
   cellOrder: string[];
-  cells: { [cellId: string]: { code: string; output: string | any, type: "CODE" | "LATEX" | "MARKDOWN", editing: boolean } };
+  cells: { [cellId: string]: TCell };
 };
 
 type TLanguages = "markdown" | "lua" | "plaintext" | "json";

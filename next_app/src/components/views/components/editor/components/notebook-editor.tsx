@@ -203,7 +203,7 @@ const CodeCell = ({
                     fileContent.cells[cellId].output = parsedData;
                     globalState.setLastOutput(outputData.output);
                     console.log(fileContent.cells[cellId].output)
-                    setShowGfx(parsedData.__render_gfx);
+                    setShowGfx(parsedData.__render_gfx || false);
                 }
                 catch {
                     fileContent.cells[cellId].output = outputData.output;
@@ -344,7 +344,7 @@ const CodeCell = ({
                     options={monacoConfig}
                 />
             </div>
-            {cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center ">
+            {cell.output && cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center ">
                 <Plot className={"rounded-lg mx-auto"} data={cell.output.data}
                     layout={{
                         ...cell.output.layout,

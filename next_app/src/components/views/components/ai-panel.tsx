@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useProjectManager } from "@/hooks";
 import { useGlobalState } from "@/hooks/useGlobalState";
+import { TCell } from "@/hooks/useProjectManager";
 import Ansi from "ansi-to-react";
-import { Copy, Eraser, Plus } from "lucide-react";
+import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Plus } from "lucide-react";
 import { KeyboardEventHandler, useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { v4 } from "uuid";
 
 interface ChatMessage {
     role: "assistant" | "user",
@@ -19,7 +21,8 @@ const defaultChat: ChatMessage[] = [
 
 export default function AiPanel() {
     const { activeProject, activeFile } = useGlobalState()
-    const { projects } = useProjectManager()
+    const manager = useProjectManager()
+    const projects = manager.projects
     const [inputText, setInputText] = useState("")
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>(defaultChat)
     const [isLoading, setIsLoading] = useState(false)
@@ -100,9 +103,40 @@ export default function AiPanel() {
                                 <Markdown remarkPlugins={[remarkGfm]} components={{
                                     pre: ({ children }) => {
                                         return <div className="border">
-                                            <div className="border-b p-0.5 flex items-center justify-end">
-                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" onClick={() => { navigator.clipboard.writeText((children as any).props.children) }}>
-                                                    <Copy size={16} /></Button>
+                                            <div className="border-b p-0.5 flex items-center justify-end gap-1">
+                                                {projects[activeProject].files[activeFile].type == "NORMAL" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new file"
+                                                    onClick={() => {
+                                                        // const project = manager.getProject(activeProject)
+                                                        // project.files({
+                                                        //     name: v4(),
+                                                        //     type: "NORMAL",
+                                                        //     initialContent: (children as any).props.children
+                                                        // })
+                                                        // manager.saveProjects(manager.projects)
+                                                    }}>
+                                                    <FilePlus2 size={16} />
+                                                </Button>}
+                                                {projects[activeProject].files[activeFile].type == "NOTEBOOK" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new cell"
+                                                    onClick={() => {
+                                                        const newCell: TCell = {
+                                                            code: (children as any).props.children,
+                                                            output: null,
+                                                            type: "CODE",
+                                                            editing: true,
+                                                        }
+                                                        const newCellId = v4()
+                                                        projects[activeProject].files[activeFile].content.cells[newCellId] = newCell
+                                                        projects[activeProject].files[activeFile].content.cellOrder.push(newCellId)
+                                                        manager.saveProjects(manager.projects)
+                                                        console.log(projects[activeProject].files[activeFile].content)
+                                                    }}
+                                                >
+                                                    <BetweenHorizonalStart size={16} />
+                                                </Button>}
+                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Copy to clipboard"
+                                                    onClick={() => { navigator.clipboard.writeText((children as any).props.children) }}>
+                                                    <Copy size={16} />
+                                                </Button>
                                             </div>
                                             <pre className="overflow-scroll p-1 bg-primary/10">{children}</pre>
                                         </div>
