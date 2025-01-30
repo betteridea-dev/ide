@@ -10,7 +10,7 @@ import Templates from "./marketplace"
 import AiChat from "./ai-chat"
 
 export type TSidebarItem = {
-    icon: LucideIcon;
+    icon: LucideIcon | ((props: React.SVGProps<SVGSVGElement>) => JSX.Element);
     label: string;
     value: TSidebarOptions;
 }

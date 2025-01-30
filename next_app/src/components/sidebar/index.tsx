@@ -39,16 +39,16 @@ export default function Sidebar({ drawerRef }: { drawerRef: MutableRefObject<Imp
         }
     }
 
-    return <div className="w-[50px] border-r flex flex-col items-center justify-start overflow-x-clip overflow-y-scroll bg-foreground/[3%]">
+    return <div className="w-[50px] border-r flex flex-col items-center justify-start overflow-visible overflow-y-scroll bg-foreground/[3%]">
         {
             sidebarItems.map((Item, i) => <TooltipProvider key={i} delayDuration={0}>
                 <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger className="overflow-visible">
                         <Button variant="ghost" data-active={globalState.activeSidebarItem == Item.value}
-                            className="rounded-none h-12 w-12 flex items-center justify-center p-0 data-[active=true]:bg-primary"
+                            className="rounded-none h-12 w-12 flex items-center justify-center p-0 data-[active=true]:bg-primary overflow-visible"
                             onClick={sidebarButtonClicked(Item.value)}
                         ><Item.icon strokeWidth={1.5} data-active={globalState.activeSidebarItem == Item.value}
-                            className="data-[active=true]:text-white"
+                            className="data-[active=true]:text-white overflow-visible"
                             />
                         </Button>
                     </TooltipTrigger>

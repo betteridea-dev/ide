@@ -4,7 +4,7 @@ import { useProjectManager } from "@/hooks";
 import { useGlobalState } from "@/hooks/useGlobalState";
 import { TCell } from "@/hooks/useProjectManager";
 import Ansi from "ansi-to-react";
-import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Plus } from "lucide-react";
+import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Loader2, Plus } from "lucide-react";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,39 +16,28 @@ interface ChatMessage {
     content: string
 }
 
-const defaultChat: ChatMessage[] = [
-    { role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development. What's on your mind? Do you have a specific question or topic you'd like to discuss? 😊" },
-]
-
 interface CommandOption {
     label: string;
     value: string;
     description?: string;
 }
 
+const defaultChat: ChatMessage[] = [
+    { role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" },
+]
+
 export default function AiPanel() {
+
     const { activeProject, activeFile } = useGlobalState()
     const manager = useProjectManager()
     const projects = manager.projects
     const [inputText, setInputText] = useState("")
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>(defaultChat)
     const [isLoading, setIsLoading] = useState(false)
-    const [showPopup, setShowPopup] = useState(false)
 
     useEffect(() => {
         document.getElementById("chat-messages")?.scrollTo({ top: document.getElementById("chat-messages")?.scrollHeight, behavior: "smooth" })
     }, [chatMessages])
-
-    function handleInput(e: ChangeEvent<HTMLInputElement>) {
-        const value = e.target.value
-        setInputText(value)
-
-        const position = e.target.selectionStart;
-        const lastChar = value.charAt(position - 1);
-        const prevChar = value.charAt(position - 2);
-
-        setShowPopup(lastChar === '@' && (position === 1 || prevChar === ' '));
-    }
 
     async function handleInference() {
         if (!inputText.trim() || isLoading) return;
@@ -122,16 +111,16 @@ export default function AiPanel() {
 
     return <div className="flex flex-col items-center justify-start h-full max-h-[calc(100vh-50px)]">
         <div className="flex gap-2 w-full border-b">
-            <Button variant="ghost" className="rounded-none">CHAT</Button>
+            <Button variant="ghost" className="rounded-none">AI CHAT</Button>
             {/* clear btn */}
             <Button variant="ghost" className="rounded-none ml-auto" onClick={() => { setChatMessages(defaultChat) }}><Eraser size={16} /></Button>
         </div>
-        <div id="chat-messages" className="w-full p-1 flex flex-col gap-1 overflow-y-scroll text-sm">
+        <div id="chat-messages" className="w-full flex flex-col gap-1 overflow-y-scroll text-sm">
             {
                 chatMessages.map(msg => {
                     switch (msg.role) {
                         case "assistant":
-                            return <pre className="p-1 whitespace-break-spaces break-words text-justify">
+                            return <pre className="p-1.5 whitespace-break-spaces break-words text-justify">
                                 <Markdown remarkPlugins={[remarkGfm]} components={{
                                     pre: ({ children }) => {
                                         return <div className="border">
@@ -176,7 +165,10 @@ export default function AiPanel() {
                                 }}>{msg.content}</Markdown>
                             </pre>
                         case "user":
-                            return <div className="bg-muted/10 mt-5 text-muted p-1 px-2 whitespace-break-spaces break-words">{msg.content}</div>
+                            return <div className="bg-muted/10 mt-5 text-muted p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
+                                {isLoading && <Loader2 className="animate-spin" size={14} />}
+                                {msg.content}
+                            </div>
                         default:
                             "shrug"
                     }
@@ -185,6 +177,7 @@ export default function AiPanel() {
         </div>
         <div className="w-full h-fit bg-black/5">
             <MentionsInput
+                disabled={isLoading}
                 value={inputText}
                 onChange={handleInputChange}
                 placeholder="Ask AI here"
@@ -192,7 +185,6 @@ export default function AiPanel() {
                 onKeyDown={handleKeyDown}
                 allowSuggestionsAboveCursor
                 forceSuggestionsAboveCursor
-
                 style={{
                     control: {
                         backgroundColor: 'transparent',
@@ -214,7 +206,6 @@ export default function AiPanel() {
                         index,
                         focused
                     ) => {
-                        console.log(suggestion, search, highlightedDisplay, index, focused)
                         return (
                             <div data-focused={focused} className="p-1 px-2 bg-primary/20 dark:text-background data-[focused=true]:bg-primary/50">
                                 {suggestion.display}
@@ -225,57 +216,26 @@ export default function AiPanel() {
                     data={Object.values(projects[activeProject].files).map(file => ({ id: `file:${file.name}`, display: file.name }))}
                 />
                 {/* cell mentions in active file */}
-                <Mention trigger="@@"
-                    appendSpaceOnAdd
-                    renderSuggestion={(
-                        suggestion,
-                        search,
-                        highlightedDisplay,
-                        index,
-                        focused
-                    ) => {
-                        console.log(suggestion, search, highlightedDisplay, index, focused)
-                        return (
-                            <div data-focused={focused} className="p-1 px-2 bg-primary/20 dark:text-background data-[focused=true]:bg-primary/50">
-                                {suggestion.display}
-                            </div>
-                        )
-                    }}
-                    className="bg-primary/50"
-                    data={Object.values(projects[activeProject].files[activeFile].content.cellOrder).map((cellId, index) => ({ id: `${cellId}`, display: `cell:${index + 1}` }))}
-                />
-            </MentionsInput>
-            {/* <textarea
-                ref={inputRef}
-                className="w-full rounded-none placeholder:text-muted focus-visible:ring-0 bg-muted/10 resize-none p-2"
-                placeholder="Ask AI here"
-                value={inputText}
-                onKeyDown={handleKeyDown}
-                onChange={handleInputChange}
-                rows={1}
-            />
-            {showPopup && (
-                <div
-                    ref={popupRef}
-                    className="absolute z-50 w-64 bg-background border rounded-lg shadow-lg"
-                >
-                    <div className="py-1">
-                        {menuItems.map((item, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handleSelectItem(item)}
-                                className="w-full px-4 py-2 text-left hover:bg-muted flex items-center gap-2"
-                            >
-                                <span>{item.icon}</span>
-                                <div className="flex flex-col">
-                                    <span>{item.label}</span>
-                                    <span className="text-xs text-muted-foreground">{item.description}</span>
+                {projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
+                    <Mention trigger="@@"
+                        appendSpaceOnAdd
+                        renderSuggestion={(
+                            suggestion,
+                            search,
+                            highlightedDisplay,
+                            index,
+                            focused
+                        ) => {
+                            return (
+                                <div data-focused={focused} className="p-1 px-2 bg-primary/20 dark:text-background data-[focused=true]:bg-primary/50">
+                                    {suggestion.display}
                                 </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )} */}
+                            )
+                        }}
+                        className="bg-primary/50"
+                        data={Object.values(projects[activeProject].files[activeFile].content.cellOrder).map((cellId, index) => ({ id: `${cellId}`, display: `cell:${index + 1}` }))}
+                    />}
+            </MentionsInput>
         </div>
     </div>
 }

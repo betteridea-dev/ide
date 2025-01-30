@@ -90,7 +90,7 @@ export default function Layout() {
         <Menubar />
         <div className="flex h-full">
             <Sidebar drawerRef={sidebarDrawerRef} />
-            <ResizablePanelGroup direction="horizontal">
+            <ResizablePanelGroup direction="horizontal" className="!z-0">
                 <ResizablePanel defaultSize={20} maxSize={70} minSize={5} collapsible ref={sidebarDrawerRef}>
                     <SidebarDrawer />
                 </ResizablePanel>

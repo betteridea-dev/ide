@@ -1,9 +1,16 @@
 import { TSidebarItem } from ".";
-import { Files, MessageCircleHeart } from "lucide-react"
+import { BotMessageSquare, MessageCircleHeart } from "lucide-react"
 import { useGlobalState } from "@/hooks";
 
 const item: TSidebarItem = {
-    icon: MessageCircleHeart,
+    icon: () => (
+        <div className="relative flex flex-col items-center">
+            <BotMessageSquare />
+            <div className="-mt-2 bg-primary text-primary-foreground px-1.5 rounded-full font-semibold text-[10px]">
+                NEW
+            </div>
+        </div>)
+    ,
     label: "AI Chat",
     value: "AI_CHAT"
 }
