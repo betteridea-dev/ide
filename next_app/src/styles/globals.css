@@ -90,6 +90,10 @@
     /* transition:all 0.05s */
 }
 
+input, textarea {
+    outline: none;
+}
+
 *::-webkit-scrollbar {
     display: none;
     /* Safari and Chrome */
@@ -130,3 +134,8 @@ button:active {
     opacity: 0.6;
     scale: 0.99;
 }
+
+/* MENTIONS */
+
+
+  /* //MENTIONS */
