@@ -24,7 +24,7 @@ echo "Generating tree structure..."
 echo "Processing markdown files..."
 
 # Directories to ignore
-IGNORE_DIRS="node_modules|dist|build|.git|zh|ja|kr|ru"
+IGNORE_DIRS="node_modules|dist|build|.git|zh|ja|kr|ru|0rbit|betteridea|aos|aoconnect|dev-cli|editor-setup.md|testnet-info"
 
 # Use tree to list only .md files, respecting .gitignore, excluding specific directories
 tree -if --noreport --gitignore -I "$IGNORE_DIRS" | grep '\.md$' | sed 's|^./||' | while read -r file; do
