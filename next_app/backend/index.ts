@@ -7,10 +7,28 @@ import { Copilot } from "monacopilot";
 import { SYSTEM_PROMPT } from "./systemPrompt";
 import { INLINE_SYSTEM_PROMPT } from "./inlineSystemPrompt";
 import { INLINE_SYSTEM_CONTEXT } from "./inlineSystemContext";
-
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import fs from "fs";
+const SYSTEM_INSTRUCTION = fs.readFileSync("./backend/cookbook.md", "utf8");
 
 sqlite3.verbose();
 const db = new sqlite3.Database('./analytics.db');
+
+// Initialize the Google AI client
+const apiKey = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(apiKey);
+
+const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash-8b",
+    systemInstruction: SYSTEM_INSTRUCTION,
+    generationConfig: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 8192,
+        responseMimeType: "text/plain"
+    }
+});
 
 const copilot = new Copilot(process.env.GROQ_API_KEY, {
     provider: "groq",
@@ -272,40 +290,60 @@ app.post('/analytics', async (req, res) => {
 
 ///////////////////////////////////////////////
 
-app.post("/complete", async (req, res) => {
+// app.post("/complete", async (req, res) => {
+//     try {
+//         const { completion, error, raw } = await copilot.complete({
+//             body: req.body,
+//             options: {
+//                 customPrompt: metadata => ({
+//                     system: INLINE_SYSTEM_CONTEXT + "\n" + INLINE_SYSTEM_PROMPT,
+//                 }),
+//             },
+//         });
+
+//         if (raw) {
+//             console.log(raw)
+//             calculateCost((raw as any).usage.total_tokens);
+//         }
+
+//         if (error) {
+//             console.error("Completion error:", error);
+//             return res.status(500).json({ completion: null, error });
+//         }
+
+//         res.header("Access-Control-Allow-Origin", req.headers.origin);
+//         res.header("Access-Control-Allow-Credentials", "true");
+
+//         return res.status(200).json({ completion });
+//     } catch (err) {
+//         console.error("Server error:", err);
+//         return res.status(500).json({
+//             completion: null,
+//             error: "Internal server error",
+//         });
+//     }
+// });
+
+app.post("/chat", async (req, res) => {
+    const { message, chat } = req.body;
+
     try {
-        const { completion, error, raw } = await copilot.complete({
-            body: req.body,
-            options: {
-                customPrompt: metadata => ({
-                    system: INLINE_SYSTEM_CONTEXT + "\n" + INLINE_SYSTEM_PROMPT,
-                }),
-            },
+
+        const chatSession = model.startChat({
+            history: chat,
         });
 
-        if (raw) {
-            console.log(raw)
-            calculateCost((raw as any).usage.total_tokens);
-        }
+        const result = await chatSession.sendMessage(message);
 
-        if (error) {
-            console.error("Completion error:", error);
-            return res.status(500).json({ completion: null, error });
-        }
-
-        res.header("Access-Control-Allow-Origin", req.headers.origin);
-        res.header("Access-Control-Allow-Credentials", "true");
-
-        return res.status(200).json({ completion });
+        res.status(200).send(result.response.text());
     } catch (err) {
-        console.error("Server error:", err);
+        console.error("Chat error:", err);
         return res.status(500).json({
-            completion: null,
-            error: "Internal server error",
+            response: null,
+            error: err.message,
         });
     }
-});
-
+})
 
 
 app.post("/chat", async (req, res) => {

@@ -12,19 +12,11 @@ import { v4 } from "uuid";
 import { MentionsInput, Mention } from 'react-mentions'
 
 interface ChatMessage {
-    role: "assistant" | "user",
-    content: string
+    role: "model" | "user",
+    parts: { text: string }[]
 }
 
-interface CommandOption {
-    label: string;
-    value: string;
-    description?: string;
-}
-
-const defaultChat: ChatMessage[] = [
-    { role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" },
-]
+const defaultChat: ChatMessage[] = []
 
 export default function AiPanel() {
 
@@ -68,43 +60,30 @@ export default function AiPanel() {
 
             console.log(processedInput)
 
-            const chatHistory = chatMessages.map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'assistant',
-                content: msg.content
-            }));
-
-            chatHistory.push({
-                role: 'user',
-                content: processedInput  // Use processed input instead of raw inputText
-            });
-
-            setChatMessages(prev => [...prev, { role: "user", content: processedInput }]);
             setInputText("");
+            setChatMessages(prev => [...prev, { role: 'user', parts: [{ text: processedInput }] }]);
 
-            const response = await fetch("https://api.betteridea.dev/chat", {
+
+            const prod_endpoint = "https://api.betteridea.dev/chat"
+            const dev_endpoint = "http://localhost:3001/chat"
+            // if running on localhost, use dev_endpoint
+            const response = await fetch(window.location.hostname === "localhost" ? dev_endpoint : prod_endpoint, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     message: processedInput,
-                    chat: chatHistory,
-                    fileContext: projects[activeProject].files[activeFile].type == "NORMAL"
-                        ? projects[activeProject].files[activeFile].content.cells[0].code
-                        : Object.values(projects[activeProject].files[activeFile].content.cells).map(cell => cell.code).join("\n\n"),
-                    currentFile: projects[activeProject].files[activeFile].name,
-                    visibleRange: projects[activeProject].files[activeFile].type == "NORMAL"
-                        ? projects[activeProject].files[activeFile].content.cells[0].code
-                        : Object.values(projects[activeProject].files[activeFile].content.cells).map(cell => cell.code).join("\n\n"),
+                    chat: chatMessages
                 })
             })
-            const data = await response.json()
-            setChatMessages(prev => [...prev, { role: "assistant", content: data.response }])
+            const data = await response.text()
+            setChatMessages(prev => [...prev, { role: "model", parts: [{ text: data }] }])
         } catch (error) {
             console.error('Error:', error)
             setChatMessages(prev => [...prev, {
-                role: "assistant",
-                content: "Sorry, there was an error processing your request."
+                role: "model",
+                parts: [{ text: "Sorry, there was an error processing your request." }]
             }])
         } finally {
             setIsLoading(false)
@@ -140,9 +119,9 @@ export default function AiPanel() {
         </div>
         <div id="chat-messages" className="w-full flex flex-col gap-1 overflow-y-scroll text-sm">
             {
-                chatMessages.map(msg => {
+                [{ role: "model", parts: [{ text: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" }] }, ...chatMessages].map((msg, i) => {
                     switch (msg.role) {
-                        case "assistant":
+                        case "model":
                             return <pre className="p-1.5 whitespace-break-spaces break-words text-justify">
                                 <Markdown remarkPlugins={[remarkGfm]} components={{
                                     pre: ({ children }) => {
@@ -186,11 +165,10 @@ export default function AiPanel() {
                                             <pre className="overflow-scroll p-1 bg-primary/10">{children}</pre>
                                         </div>
                                     }
-                                }}>{msg.content}</Markdown>
+                                }}>{msg.parts[0].text}</Markdown>
                             </pre>
                         case "user":
                             return <div className="bg-muted/10 mt-5 text-muted-foreground/80 p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
-                                {isLoading && <Loader2 className="animate-spin" size={14} />}
                                 <pre className="w-full">
                                     <Markdown
                                         className="w-full"
@@ -201,7 +179,7 @@ export default function AiPanel() {
                                                 </div>
                                             }
                                         }}
-                                        remarkPlugins={[remarkGfm]}>{msg.content}</Markdown>
+                                        remarkPlugins={[remarkGfm]}>{msg.parts[0].text}</Markdown>
                                 </pre>
                             </div>
                         default:
@@ -210,6 +188,10 @@ export default function AiPanel() {
                 })
             }
         </div>
+        {isLoading && <div className="w-full h-fit bg-muted/10 flex items-center justify-start gap-2 p-2">
+            <Loader2 className="animate-spin" size={14} />
+            <span className="text-muted-foreground">Thinking...</span>
+        </div>}
         <div className="w-full h-fit bg-black/5">
             <MentionsInput
                 disabled={isLoading}
