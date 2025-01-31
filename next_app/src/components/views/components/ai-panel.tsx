@@ -12,11 +12,12 @@ import { v4 } from "uuid";
 import { MentionsInput, Mention } from 'react-mentions'
 
 interface ChatMessage {
-    role: "model" | "user",
-    parts: { text: string }[]
+    role: "assistant" | "user",
+    // parts: { text: string }[]
+    content: string
 }
 
-const defaultChat: ChatMessage[] = []
+const defaultChat: ChatMessage[] = [{ role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" }]
 
 export default function AiPanel() {
 
@@ -61,7 +62,8 @@ export default function AiPanel() {
             console.log(processedInput)
 
             setInputText("");
-            setChatMessages(prev => [...prev, { role: 'user', parts: [{ text: processedInput }] }]);
+            // setChatMessages(prev => [...prev, { role: 'user', content: processedInput }]);
+            const newChat = [...chatMessages, { role: 'user', content: processedInput }]
 
 
             const prod_endpoint = "https://api.betteridea.dev/chat"
@@ -74,16 +76,16 @@ export default function AiPanel() {
                 },
                 body: JSON.stringify({
                     message: processedInput,
-                    chat: chatMessages
+                    chat: newChat
                 })
             })
-            const data = await response.text()
-            setChatMessages(prev => [...prev, { role: "model", parts: [{ text: data }] }])
+            const data = await response.json()
+            setChatMessages([...newChat, { role: "assistant", content: data.response }] as ChatMessage[])
         } catch (error) {
             console.error('Error:', error)
             setChatMessages(prev => [...prev, {
-                role: "model",
-                parts: [{ text: "Sorry, there was an error processing your request." }]
+                role: "assistant",
+                content: "Sorry, there was an error processing your request."
             }])
         } finally {
             setIsLoading(false)
@@ -119,9 +121,9 @@ export default function AiPanel() {
         </div>
         <div id="chat-messages" className="w-full flex flex-col gap-1 overflow-y-scroll text-sm">
             {
-                [{ role: "model", parts: [{ text: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" }] }, ...chatMessages].map((msg, i) => {
+                chatMessages.map((msg, i) => {
                     switch (msg.role) {
-                        case "model":
+                        case "assistant":
                             return <pre className="p-1.5 whitespace-break-spaces break-words text-justify">
                                 <Markdown remarkPlugins={[remarkGfm]} components={{
                                     pre: ({ children }) => {
@@ -165,7 +167,7 @@ export default function AiPanel() {
                                             <pre className="overflow-scroll p-1 bg-primary/10">{children}</pre>
                                         </div>
                                     }
-                                }}>{msg.parts[0].text}</Markdown>
+                                }}>{msg.content}</Markdown>
                             </pre>
                         case "user":
                             return <div className="bg-muted/10 mt-5 text-muted-foreground/80 p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
@@ -179,7 +181,7 @@ export default function AiPanel() {
                                                 </div>
                                             }
                                         }}
-                                        remarkPlugins={[remarkGfm]}>{msg.parts[0].text}</Markdown>
+                                        remarkPlugins={[remarkGfm]}>{msg.content}</Markdown>
                                 </pre>
                             </div>
                         default:
