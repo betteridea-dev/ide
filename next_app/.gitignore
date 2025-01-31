@@ -3,6 +3,7 @@
 archive/
 dist-*
 .env
+ao-cookbook/
 
 # dependencies
 /node_modules

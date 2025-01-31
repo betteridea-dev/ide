@@ -44,19 +44,42 @@ export default function AiPanel() {
 
         setIsLoading(true)
         try {
-            // Create chat history array
+            // Process cell mentions
+            let processedInput = inputText.replace(
+                /@\[cell:\d+\]\(([\w-]+)\)/g,
+                (match, cellId) => {
+                    const cell = projects[activeProject].files[activeFile].content.cells[cellId];
+                    return cell ? `\n\`\`\`\n${cell.code}\n\`\`\`\n` : match;
+                }
+            );
+
+            // Process file mentions
+            processedInput = processedInput.replace(
+                /@\[([^\]]+)\]\(([^\)]+)\)/g,
+                (match, label, fileName) => {
+                    const file = projects[activeProject].files[fileName];
+                    if (!file) return match;
+                    const code = file.type === "NORMAL"
+                        ? file.content.cells[0].code
+                        : Object.values(file.content.cells).map(cell => cell.code).join("\n\n");
+                    return `\n\`\`\`\n${code}\n\`\`\`\n`;
+                }
+            );
+
+            console.log(processedInput)
+
             const chatHistory = chatMessages.map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'assistant',
                 content: msg.content
-            }))
+            }));
 
             chatHistory.push({
                 role: 'user',
-                content: inputText
-            })
+                content: processedInput  // Use processed input instead of raw inputText
+            });
 
-            setChatMessages(prev => [...prev, { role: "user", content: inputText }])
-            setInputText("")
+            setChatMessages(prev => [...prev, { role: "user", content: processedInput }]);
+            setInputText("");
 
             const response = await fetch("https://api.betteridea.dev/chat", {
                 method: "POST",
@@ -64,7 +87,7 @@ export default function AiPanel() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: inputText,
+                    message: processedInput,
                     chat: chatHistory,
                     fileContext: projects[activeProject].files[activeFile].type == "NORMAL"
                         ? projects[activeProject].files[activeFile].content.cells[0].code
@@ -165,9 +188,20 @@ export default function AiPanel() {
                                 }}>{msg.content}</Markdown>
                             </pre>
                         case "user":
-                            return <div className="bg-muted/10 mt-5 text-muted p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
+                            return <div className="bg-muted/10 mt-5 text-muted-foreground/80 p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
                                 {isLoading && <Loader2 className="animate-spin" size={14} />}
-                                {msg.content}
+                                <pre className="w-full">
+                                    <Markdown
+                                        className="w-full"
+                                        components={{
+                                            pre: ({ children }) => {
+                                                return <div className="border w-full">
+                                                    <pre className="overflow-scroll p-1 w-full">{children}</pre>
+                                                </div>
+                                            }
+                                        }}
+                                        remarkPlugins={[remarkGfm]}>{msg.content}</Markdown>
+                                </pre>
                             </div>
                         default:
                             "shrug"
@@ -213,10 +247,10 @@ export default function AiPanel() {
                         )
                     }}
                     className="bg-primary/50"
-                    data={Object.values(projects[activeProject].files).map(file => ({ id: `file:${file.name}`, display: file.name }))}
+                    data={Object.values(projects[activeProject].files).map(file => ({ id: `${file.name}`, display: `${file.name}` }))}
                 />
                 {/* cell mentions in active file */}
-                {projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
+                {activeFile && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
                     <Mention trigger="@@"
                         appendSpaceOnAdd
                         renderSuggestion={(
