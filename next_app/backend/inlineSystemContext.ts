@@ -28,12 +28,12 @@ Standard Variables:
   Handlers: {},   // Handler functions
   ao: {           // Core module
     id: string,   // Process ID
-    send: function,
-    spawn: function
+    send: function, // Function to send messages to other processes
+    spawn: function // Function to spawn new processes
   }
 }
 
-4. MESSAGE STRUCTURE
+4. INBOX MESSAGE STRUCTURE
 =================
 Standard Message Format:
 {
