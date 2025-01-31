@@ -61,7 +61,7 @@ export default function AiPanel() {
                     if (!file) return match;
                     const code = file.type === "NORMAL"
                         ? file.content.cells[0].code
-                        : Object.values(file.content.cells).map(cell => cell.code).join("\n\n");
+                        : file.content.cellOrder.map(cellId => projects[activeProject].files[activeFile].content.cells[cellId].code).join("\n\n");
                     return `\n\`\`\`\n${code}\n\`\`\`\n`;
                 }
             );
@@ -148,31 +148,32 @@ export default function AiPanel() {
                                     pre: ({ children }) => {
                                         return <div className="border">
                                             <div className="border-b p-0.5 flex items-center justify-end gap-1">
-                                                {projects[activeProject].files[activeFile].type == "NORMAL" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new file"
+                                                {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NORMAL" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Append to end of file"
                                                     onClick={() => {
-                                                        // const project = manager.getProject(activeProject)
-                                                        // project.files({
-                                                        //     name: v4(),
-                                                        //     type: "NORMAL",
-                                                        //     initialContent: (children as any).props.children
-                                                        // })
-                                                        // manager.saveProjects(manager.projects)
+                                                        const project = manager.getProject(activeProject)
+                                                        const file = project.getFile(activeFile)
+                                                        file.content.cells[0].code += (children as any).props.children
+                                                        manager.updateFile(project, { file: file, content: file.content })
                                                     }}>
                                                     <FilePlus2 size={16} />
                                                 </Button>}
-                                                {projects[activeProject].files[activeFile].type == "NOTEBOOK" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new cell"
+                                                {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new cell"
                                                     onClick={() => {
+                                                        const project = manager.getProject(activeProject)
+                                                        const file = project.getFile(activeFile)
+
                                                         const newCell: TCell = {
                                                             code: (children as any).props.children,
                                                             output: null,
                                                             type: "CODE",
                                                             editing: true,
                                                         }
+
                                                         const newCellId = v4()
-                                                        projects[activeProject].files[activeFile].content.cells[newCellId] = newCell
-                                                        projects[activeProject].files[activeFile].content.cellOrder.push(newCellId)
-                                                        manager.saveProjects(manager.projects)
-                                                        console.log(projects[activeProject].files[activeFile].content)
+                                                        file.content.cells[newCellId] = newCell
+                                                        file.content.cellOrder.push(newCellId)
+                                                        manager.updateFile(project, { file: file, content: file.content })
+
                                                     }}
                                                 >
                                                     <BetweenHorizonalStart size={16} />
@@ -250,7 +251,7 @@ export default function AiPanel() {
                     data={Object.values(projects[activeProject].files).map(file => ({ id: `${file.name}`, display: `${file.name}` }))}
                 />
                 {/* cell mentions in active file */}
-                {activeFile && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
+                {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
                     <Mention trigger="@@"
                         appendSpaceOnAdd
                         renderSuggestion={(
