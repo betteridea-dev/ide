@@ -92,6 +92,7 @@ export const modules = {
   "SQLite64 (AOS 1)": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
   "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
   "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
+  "AOLearn":"qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY",
 }
 
 const CommonTags = [
