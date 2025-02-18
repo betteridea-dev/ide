@@ -16,7 +16,7 @@ export default function Statusbar() {
     const [mounted, setMounted] = useState(false)
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
-
+    const fileType = project?.files[globalState.activeFile]?.type
 
     async function connectWallet() {
         if (!window.arweaveWallet)
@@ -104,7 +104,7 @@ export default function Statusbar() {
             {/* <Image src={Icons.disconnectSVG} alt="disconnect" width={20} height={20} className="invert dark:invert-0" /> */}
             <Unplug size={16} className="text-destructive-foreground" />
         </Button>}
-        {/* <code id="vim-status" className="w-fit text-sm h-fit ml-2 bg-primary px-1 text-white">--</code> */}
+        {fileType == "NORMAL" && <code id="vim-status" className="w-fit text-sm h-fit ml-2 bg-primary px-1 text-white"></code>}
         <div className="grow"></div>
         {project && project.process && (
             <Button

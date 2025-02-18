@@ -43,6 +43,27 @@ export default function SingleFileEditor() {
                 );
                 if (theme == "dark") monaco.editor.setTheme("notebook");
                 else monaco.editor.setTheme("vs-light");
+
+                const vimMode = localStorage.getItem("vimMode") == "true"
+                if (vimMode) {
+                    console.log("vimMode", vimMode)
+                    // setup monaco-vim
+                    // @ts-ignore
+                    window.require.config({
+                        paths: {
+                            "monaco-vim": "https://unpkg.com/monaco-vim/dist/monaco-vim"
+                        }
+                    });
+
+                    // @ts-ignore
+                    window.require(["monaco-vim"], function (MonacoVim) {
+                        const statusNode = document.querySelector(`#vim-status`);
+                        // const statusNode = document.getElementById(`vim-status`) as HTMLDivElement
+                        const vim = MonacoVim.initVimMode(editor, statusNode)
+                        console.log(vim)
+                    });
+                }
+
                 // set font family
                 // editor.updateOptions({ fontFamily: "DM Mono" });
                 // monaco.editor.remeasureFonts();
