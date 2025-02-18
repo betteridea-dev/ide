@@ -105,13 +105,13 @@ export default function AiPanel() {
 
     };
 
-    if (!activeFile) {
-        return <div className="p-6 text-center h-2/3 flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">
-                Open a file to use AI
-            </div>
-        </div>
-    }
+    // if (!activeFile) {
+    //     return <div className="p-6 text-center h-2/3 flex items-center justify-center">
+    //         <div className="text-sm text-muted-foreground">
+    //             Open a file to use AI
+    //         </div>
+    //     </div>
+    // }
 
     return <div className="flex flex-col items-center justify-start h-full max-h-[calc(100vh-50px)]">
         <div className="flex gap-2 w-full border-b">
@@ -232,7 +232,7 @@ export default function AiPanel() {
                         )
                     }}
                     className="bg-primary/50"
-                    data={Object.values(projects[activeProject].files).map(file => ({ id: `${file.name}`, display: `${file.name}` }))}
+                    data={activeProject ? Object.values(projects[activeProject].files).map(file => ({ id: `${file.name}`, display: `${file.name}` })) : []}
                 />
                 {/* cell mentions in active file */}
                 {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" &&
@@ -252,7 +252,7 @@ export default function AiPanel() {
                             )
                         }}
                         className="bg-primary/50"
-                        data={Object.values(projects[activeProject].files[activeFile].content.cellOrder).map((cellId, index) => ({ id: `${cellId}`, display: `cell:${index + 1}` }))}
+                        data={activeProject ? Object.values(projects[activeProject].files[activeFile].content.cellOrder).map((cellId, index) => ({ id: `${cellId}`, display: `cell:${index + 1}` })) : []}
                     />}
             </MentionsInput>
         </div>

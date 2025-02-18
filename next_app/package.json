@@ -60,6 +60,7 @@
     "lua-format": "^1.4.1",
     "lucide-react": "^0.372.0",
     "monaco-editor": "^0.48.0",
+    "monaco-vim": "^0.4.2",
     "monacopilot": "^0.17.0",
     "next": "14.2.2",
     "next-seo": "^6.5.0",

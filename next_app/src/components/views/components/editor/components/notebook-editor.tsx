@@ -279,70 +279,118 @@ const CodeCell = ({
                         <div><Image draggable={false} src={runIcon} alt="Run" width={30} height={30} className="block min-w-[25px] bg-foreground/10 rounded-full p-1.5" /></div>
                     }
                 </Button>
-                <Editor
-                    data-cellId={cellId}
-                    onMount={(editor, monaco) => {
-                        thisEditor.current = editor
-                        monaco.editor.defineTheme(
-                            "notebook",
-                            notebookTheme as editor.IStandaloneThemeData
-                        );
-                        if (theme == "dark") monaco.editor.setTheme("notebook");
-                        else monaco.editor.setTheme("vs-light");
-                        // set font family
-                        // editor.updateOptions({ fontFamily: "DM Mono" });
+                <div className="w-full h-full text-xs grow relative bg-background">
+                    <Editor
+                        data-cellId={cellId}
+                        onMount={(editor, monaco) => {
+                            thisEditor.current = editor
+                            monaco.editor.defineTheme(
+                                "notebook",
+                                notebookTheme as editor.IStandaloneThemeData
+                            );
+                            if (theme == "dark") monaco.editor.setTheme("notebook");
+                            else monaco.editor.setTheme("vs-light");
 
-                        // add command only to this particular cell
-                        editor.getContainerDomNode().addEventListener("keydown", async (e) => {
-                            // console.log(e.key)
-                            if (e.shiftKey && e.key == "Enter" && !e.metaKey) {
-                                e.preventDefault()
-                                const runbtn = document.getElementById(`run-cell-${cellId}`)
-                                // console.log(cellId, runbtn)
-                                runbtn?.click()
-                            } else if (e.ctrlKey && e.key == ".") {
-                                e.preventDefault()
-                                generateAiSuggestions()
+                            const vimMode = localStorage.getItem("vimMode") == "true"
+                            if (vimMode) {
+                                console.log("vimMode", vimMode)
+                                // setup monaco-vim
+                                // @ts-ignore
+                                window.require.config({
+                                    paths: {
+                                        "monaco-vim": "https://unpkg.com/monaco-vim/dist/monaco-vim"
+                                    }
+                                });
+
+                                // @ts-ignore
+                                window.require(["monaco-vim"], function (MonacoVim) {
+                                    const statusNode = document.querySelector(`#status-${cellId}`);
+                                    // const statusNode = document.getElementById(`vim-status`) as HTMLDivElement
+                                    const vim = MonacoVim.initVimMode(editor, statusNode)
+                                    console.log(vim)
+
+                                    // vim.on("vim-mode-change", ({ mode, subMode }) => {
+                                    //     // console.log(mode, subMode)
+
+                                    //     let text = ""
+                                    //     if (mode === "visual") {
+                                    //         if (subMode === "linewise") {
+                                    //             text = "--VISUAL LINE--"
+                                    //         } else if (subMode === "blockwise") {
+                                    //             text = "--VISUAL BLOCK--"
+                                    //         } else {
+                                    //             text = "--VISUAL--"
+                                    //         }
+                                    //     } else {
+                                    //         text = `--${mode.toUpperCase()}--`
+                                    //     }
+                                    //     // statusNode.textContent = text
+
+                                    //     window.dispatchEvent(new CustomEvent("set-vim-mode", { detail: { mode, subMode } }))
+                                    // })
+
+                                    // window.addEventListener("set-vim-mode", (e: CustomEvent) => {
+                                    //     console.log("event", e.detail)
+                                    //     vim.ctxInsert.set(e.detail.mode == "insert")
+                                    // })
+                                });
                             }
-                        })
+                            // set font family
+                            // editor.updateOptions({ fontFamily: "DM Mono" });
 
-                        editor.addAction({
-                            id: "format-code",
-                            label: "Format Code",
-                            contextMenuGroupId: "navigation",
-                            run: async function (editor) {
-                                const luamin = require('lua-format')
-                                const input = editor.getValue()
-                                console.log("formatting code")
-                                const output: string = luamin.Beautify(input, {
-                                    RenameVariables: false,
-                                    RenameGlobals: false,
-                                    SolveMath: true
+                            // add command only to this particular cell
+                            editor.getContainerDomNode().addEventListener("keydown", async (e) => {
+                                // console.log(e.key)
+                                if (e.shiftKey && e.key == "Enter" && !e.metaKey) {
+                                    e.preventDefault()
+                                    const runbtn = document.getElementById(`run-cell-${cellId}`)
+                                    // console.log(cellId, runbtn)
+                                    runbtn?.click()
+                                } else if (e.ctrlKey && e.key == ".") {
+                                    e.preventDefault()
+                                    generateAiSuggestions()
+                                }
+                            })
 
-                                })
-                                // remove source first line
-                                editor.setValue(output.split("\n").slice(1).join("\n").trimStart())
-                            },
-                        })
-                    }}
-                    onChange={(value) => {
-                        // console.log(value);
-                        const newContent = { ...file.content };
-                        newContent.cells[cellId] = { ...cell, code: value };
-                        manager.updateFile(project, { file, content: newContent });
-                        setActive(true)
-                    }}
-                    height={
-                        expand ? cell.code.split("\n").length * 20 :
-                            (cell.code.split("\n").length > 15 ? 15 : cell.code.split("\n").length) * 20
-                    }
-                    width="94%"
-                    className="min-h-[70px] py-0 font-btr-code overflow-y-clip"
-                    value={cell.code}
-                    defaultValue={cell.code}
-                    language={file.language}
-                    options={monacoConfig}
-                />
+                            editor.addAction({
+                                id: "format-code",
+                                label: "Format Code",
+                                contextMenuGroupId: "navigation",
+                                run: async function (editor) {
+                                    const luamin = require('lua-format')
+                                    const input = editor.getValue()
+                                    console.log("formatting code")
+                                    const output: string = luamin.Beautify(input, {
+                                        RenameVariables: false,
+                                        RenameGlobals: false,
+                                        SolveMath: true
+
+                                    })
+                                    // remove source first line
+                                    editor.setValue(output.split("\n").slice(1).join("\n").trimStart())
+                                },
+                            })
+                        }}
+                        onChange={(value) => {
+                            // console.log(value);
+                            const newContent = { ...file.content };
+                            newContent.cells[cellId] = { ...cell, code: value };
+                            manager.updateFile(project, { file, content: newContent });
+                            setActive(true)
+                        }}
+                        height={
+                            expand ? Math.max(cell.code.split("\n").length * 20, 60) :
+                                (cell.code.split("\n").length > 15 ? 15 * 20 : Math.max((cell.code.split("\n").length) * 20, 60))
+                        }
+                        width="100%"
+                        className="min-h-[60px] block py-0 font-btr-code overflow-y-clip"
+                        value={cell.code}
+                        defaultValue={cell.code}
+                        language={file.language}
+                        options={monacoConfig}
+                    />
+                    <div id={`status-${cellId}`} className="h-fit text-[10px] grow ml-10 z-20 bg-inherit w-fit text-left flex items-start justify-start"></div>
+                </div>
             </div>
             {cell.output && cell.output.__render_gfx ? <div className="relative w-full flex items-center justify-center ">
                 <Plot className={"rounded-lg mx-auto"} data={cell.output.data}
@@ -434,7 +482,7 @@ const VisualCell = (
                 </Button>
             </div>
         )}
-        {editing ? <div className="min-h-[69px]">
+        {editing ? <div className="min-h-[69px] m-0.5 rounded-sm overflow-clip bg-background">
             <Editor
                 // beforeMount={(m) => {
                 //   m.editor.remeasureFonts()
@@ -454,6 +502,22 @@ const VisualCell = (
                         setEditing(false);
                     });
                     editor.focus();
+
+                    const vimMode = localStorage.getItem("vimMode") == "true"
+                    if (vimMode) {
+                        // @ts-ignore
+                        window.require.config({
+                            paths: {
+                                "monaco-vim": "https://unpkg.com/monaco-vim/dist/monaco-vim"
+                            }
+                        });
+
+                        // @ts-ignore
+                        window.require(["monaco-vim"], function (MonacoVim) {
+                            const statusNode = document.querySelector(`#status-${cellId}`);
+                            const vim = MonacoVim.initVimMode(editor, statusNode)
+                        });
+                    }
                 }}
                 onChange={(value) => {
                     // console.log(value);
@@ -461,19 +525,24 @@ const VisualCell = (
                     newContent.cells[cellId] = { ...file.content.cells[cellId], code: value };
                     manager.updateFile(project, { file, content: newContent });
                 }}
+                // height={
+                //     expand ? file.content.cells[cellId].code.split("\n").length * 20 :
+                //         (file.content.cells[cellId].code.split("\n").length > 15
+                //             ? 15
+                //             : file.content.cells[cellId].code.split("\n").length) * 20
+                // }
                 height={
-                    expand ? file.content.cells[cellId].code.split("\n").length * 20 :
-                        (file.content.cells[cellId].code.split("\n").length > 15
-                            ? 15
-                            : file.content.cells[cellId].code.split("\n").length) * 20
+                    expand ? Math.max(file.content.cells[cellId].code.split("\n").length * 20, 60) :
+                        (file.content.cells[cellId].code.split("\n").length > 15 ? 15 * 20 : Math.max((file.content.cells[cellId].code.split("\n").length) * 20, 60))
                 }
                 width="100%"
-                className="min-h-[69px] block p-1 font-btr-code"
+                className="min-h-[60px] block font-btr-code overflow-y-clip !rounded-sm"
                 value={file.content.cells[cellId].code}
                 defaultValue={file.content.cells[cellId].code}
                 language={file.content.cells[cellId].type == "MARKDOWN" ? "markdown" : "latex"}
                 options={monacoConfig}
             />
+            <div id={`status-${cellId}`} className="h-fit text-[10px] ml-10 grow z-20 w-fit bg-inherit text-left flex items-start justify-start"></div>
         </div> : <div className="markdown m-5" onClick={checkDoubleClick}>
             {cellType == "MARKDOWN" ? <Markdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => <a {...props} className="text-primary hover:underline" /> }}>
                 {file.content.cells[cellId].code}

@@ -143,6 +143,9 @@ importers:
       monaco-editor:
         specifier: ^0.48.0
         version: 0.48.0
+      monaco-vim:
+        specifier: ^0.4.2
+        version: 0.4.2(monaco-editor@0.48.0)
       monacopilot:
         specifier: ^0.17.0
         version: 0.17.0
@@ -3946,6 +3949,11 @@ packages:
 
   monaco-editor@0.48.0:
     resolution: {integrity: sha512-goSDElNqFfw7iDHMg8WDATkfcyeLTNpBHQpO8incK6p5qZt5G/1j41X0xdGzpIkGojGXM+QiRQyLjnfDVvrpwA==}
+
+  monaco-vim@0.4.2:
+    resolution: {integrity: sha512-rdbQC3O2rmpwX2Orzig/6gZjZfH7q7TIeB+uEl49sa+QyNm3jCKJOw5mwxBdFzTqbrPD+URfg6A2lEkuL5kymw==}
+    peerDependencies:
+      monaco-editor: '*'
 
   monacopilot@0.17.0:
     resolution: {integrity: sha512-n5w+vFQsOxdbdPxtHmIji5RaBAokw7W2thduhaqsQZMESe4CdBFhAJ9vQpsfV3OHX5mtm/o2OgVPAB2jIxI34A==}
@@ -9658,6 +9666,10 @@ snapshots:
       obliterator: 2.0.4
 
   monaco-editor@0.48.0: {}
+
+  monaco-vim@0.4.2(monaco-editor@0.48.0):
+    dependencies:
+      monaco-editor: 0.48.0
 
   monacopilot@0.17.0: {}
 

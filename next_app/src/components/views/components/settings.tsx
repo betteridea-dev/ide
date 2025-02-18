@@ -12,6 +12,9 @@ import { modules as AOModules, AOModule, runLua, spawnProcess } from "@/lib/ao-v
 import { useState } from "react";
 import { GraphQLClient, gql } from "graphql-request";
 import { PFile } from "@/hooks/useProjectManager";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useLocalStorage } from "usehooks-ts";
 
 function Title({ title }: { title: string }) {
     return (
@@ -119,11 +122,12 @@ function Settings() {
     const [manualPid, setManualPid] = useState("");
     const [manualModule, setManualModule] = useState("");
     const [changeDefaultProcessVisible, setChangeDefaultProcessVisible] = useState(false);
+    const [vimMode, setVimMode] = useLocalStorage("vimMode", false, { initializeWithValue: true });
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
     const files: { [name: string]: PFile } = project ? project.files : {};
     const filesWithProcesses = Object.keys(files).filter((f) => files[f].process);
-    console.log(files, filesWithProcesses);
+    // console.log(files, filesWithProcesses);
 
     async function fetchProcesses() {
         if (!window.arweaveWallet) return
@@ -257,16 +261,20 @@ function Settings() {
                 <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
             </Button>
+            {/* VIM mode enable switch */}
+            <Label htmlFor="vim-mode">Enable VIM mode</Label>
+            <Switch id="vim-mode" checked={vimMode} onCheckedChange={setVimMode} />
+
             <details className="col-span-3">
                 <summary className="-ml-6"><span className="pl-2 cursor-pointer">Experimental</span></summary>
-                <div className="grid grid-cols-3 gap-y-5">
+                <div className="grid grid-cols-3 gap-y-5 mt-5">
                     <div>
-                        Gemini AI code suggestions (beta)<br />
+                        Gemini AI code suggestions (deprecated for <Button variant="link" className="text-primary p-0" onClick={() => { document.getElementById("AI_CHAT").click() }}>AI Chat</Button>)<br />
                         <span className="text-sm text-foreground/50">This is a beta feature and may not work correctly. If you are using this, we would love some feedback on our <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="text-primary underline underline-offset-2">discord</Link></span>
                     </div>
                     <div className="flex gap-2 col-span-2 items-center">
-                        <Input type="text" className="w-full" id="gem-api-key" placeholder="Paste your gemini api key to use ai completions" defaultValue={"*".repeat(localStorage.getItem('geminiApiKey')?.length || 0) || ""} />
-                        <Button size="sm" className="w-fit" onClick={saveGeminiKey}>Save</Button>
+                        <Input disabled type="text" className="w-full" id="gem-api-key" placeholder="Paste your gemini api key to use ai completions" defaultValue={"*".repeat(localStorage.getItem('geminiApiKey')?.length || 0) || ""} />
+                        <Button disabled size="sm" className="w-fit" onClick={saveGeminiKey}>Save</Button>
                     </div>
                 </div>
             </details>
