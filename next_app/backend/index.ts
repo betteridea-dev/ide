@@ -368,7 +368,8 @@ app.post("/chat", async (req, res) => {
                 },
                 body: JSON.stringify({
                     messages: newChat,
-                    model: "llama3-8b-8192",
+                    // model: "llama3-8b-8192",
+                    model: "qwen-2.5-coder-32b",
                     temperature: 1,
                     max_tokens: 1024,
                     top_p: 1,
