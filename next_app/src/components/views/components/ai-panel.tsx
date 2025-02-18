@@ -62,8 +62,33 @@ export default function AiPanel() {
             console.log(processedInput)
 
             setInputText("");
-            // setChatMessages(prev => [...prev, { role: 'user', content: processedInput }]);
-            const newChat = [...chatMessages, { role: 'user', content: processedInput }]
+            setChatMessages(prev => [...prev, { role: 'user', content: processedInput }]);
+            // const newChat = [...chatMessages, { role: 'user', content: processedInput }]
+
+            let payload = {}
+            if (activeProject && activeFile) {
+                const file = manager.getProject(activeProject).getFile(activeFile)
+
+                if (file.type == "NORMAL") {
+                    payload = {
+                        message: processedInput,
+                        fileContext: file.content.cells[0].code,
+                        chat: chatMessages
+                    }
+                } else {
+                    payload = {
+                        message: processedInput,
+                        fileContext: file.content.cellOrder.map(cellId => file.content.cells[cellId].code).join("\n---\n"),
+                        chat: chatMessages
+                    }
+                }
+            } else {
+                payload = {
+                    message: processedInput,
+                    fileContext: "",
+                    chat: chatMessages
+                }
+            }
 
 
             const prod_endpoint = "https://api.betteridea.dev/chat"
@@ -74,13 +99,10 @@ export default function AiPanel() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    message: processedInput,
-                    chat: newChat
-                })
+                body: JSON.stringify(payload)
             })
             const data = await response.json()
-            setChatMessages([...newChat, { role: "assistant", content: data.response }] as ChatMessage[])
+            setChatMessages(prev => [...prev, { role: "assistant", content: data.response }] as ChatMessage[])
         } catch (error) {
             console.error('Error:', error)
             setChatMessages(prev => [...prev, {

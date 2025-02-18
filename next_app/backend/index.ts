@@ -348,19 +348,15 @@ app.post("/complete", async (req, res) => {
 
 app.post("/chat", async (req, res) => {
     try {
-        const { message, fileContext, visibleRange, chat } = req.body;
+        const { message, fileContext, chat } = req.body;
 
-        //const prompt = constructPrompt(
-        //  message,
-        //  fileContext,
-        //  //currentFile,
-        //  visibleRange,
-        //);
+        const prompt = constructPrompt({
+            message,
+            fileContext,
+        });
 
-        // const system = { role: "system", content: SYSTEM_PROMPT };
-
-        // chat is a json array, append system prompt to the beginning of the array
-        // const messages = chat ? [system, ...chat] : [system];
+        const system = { role: "system", content: SYSTEM_PROMPT };
+        const newChat = [system, ...(chat || []), { role: "user", content: prompt }]
 
         const response = await fetch(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -371,7 +367,7 @@ app.post("/chat", async (req, res) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    messages: chat,
+                    messages: newChat,
                     model: "llama3-8b-8192",
                     temperature: 1,
                     max_tokens: 1024,
@@ -415,20 +411,16 @@ app.post("/chat", async (req, res) => {
 });
 
 // Helper Functions
-function constructPrompt(message: string, fileContext: any, currentFile: string = "", visibleRange: any) {
+function constructPrompt({ message, fileContext = "" }: { message: string, fileContext: string }) {
     let contextualPrompt = "";
 
-    if (currentFile) {
-        contextualPrompt += `Current file: ${currentFile}\n`;
-    }
     if (fileContext) {
-        contextualPrompt += `File context: ${JSON.stringify(fileContext)}\n`;
-    }
-    if (visibleRange) {
-        contextualPrompt += `Visible range: ${JSON.stringify(visibleRange)}\n`;
+        contextualPrompt += `File context: ${fileContext}\n`;
     }
 
     contextualPrompt += `\nUser message: ${message}`;
+
+    contextualPrompt += `\n\nrespond as concise as possible`
     return contextualPrompt;
 }
 
