@@ -99,7 +99,7 @@ export default function Layout() {
                     <View />
                 </ResizablePanel>
                 <ResizableHandle />
-                <ResizablePanel defaultSize={0} maxSize={30} minSize={5} collapsible ref={aiPanel} onCollapse={() => globalState.setIsAiPanelOpen(false)} onExpand={() => globalState.setIsAiPanelOpen(true)}>
+                <ResizablePanel defaultSize={0} maxSize={50} minSize={5} collapsible ref={aiPanel} onCollapse={() => globalState.setIsAiPanelOpen(false)} onExpand={() => globalState.setIsAiPanelOpen(true)}>
                     <AiPanel />
                 </ResizablePanel>
             </ResizablePanelGroup>

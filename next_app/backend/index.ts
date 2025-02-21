@@ -14,6 +14,14 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/ge
 sqlite3.verbose();
 const db = new sqlite3.Database('./analytics.db');
 
+const availableModels = {
+    "Qwen 2.5 coder": "qwen-2.5-coder-32b",
+    "Deepseek R1": "deepseek-r1-distill-llama-70b",
+    "Llama 3": "llama3-70b-8192",
+    "Llama 3.3 70b": "llama-3.3-70b-versatile",
+    "Gemma 2": "gemma2-9b-it"
+}
+
 // Initialize the Google AI client
 // const apiKey = process.env.GEMINI_API_KEY;
 // const genAI = new GoogleGenerativeAI(apiKey);
@@ -30,10 +38,10 @@ const db = new sqlite3.Database('./analytics.db');
 //     }
 // });
 
-const copilot = new Copilot(process.env.GROQ_API_KEY, {
-    provider: "groq",
-    model: "llama-3-70b",
-});
+// const copilot = new Copilot(process.env.GROQ_API_KEY, {
+//     provider: "groq",
+//     model: "llama-3-70b",
+// });
 
 const app = express();
 app.use(express.json());
@@ -290,39 +298,39 @@ app.post('/analytics', async (req, res) => {
 
 ///////////////////////////////////////////////
 
-app.post("/complete", async (req, res) => {
-    try {
-        const { completion, error, raw } = await copilot.complete({
-            body: req.body,
-            options: {
-                customPrompt: metadata => ({
-                    system: INLINE_SYSTEM_CONTEXT + "\n" + INLINE_SYSTEM_PROMPT,
-                }),
-            },
-        });
+// app.post("/complete", async (req, res) => {
+//     try {
+//         const { completion, error, raw } = await copilot.complete({
+//             body: req.body,
+//             options: {
+//                 customPrompt: metadata => ({
+//                     system: INLINE_SYSTEM_CONTEXT + "\n" + INLINE_SYSTEM_PROMPT,
+//                 }),
+//             },
+//         });
 
-        if (raw) {
-            console.log(raw)
-            calculateCost((raw as any).usage.total_tokens);
-        }
+//         if (raw) {
+//             console.log(raw)
+//             calculateCost((raw as any).usage.total_tokens);
+//         }
 
-        if (error) {
-            console.error("Completion error:", error);
-            return res.status(500).json({ completion: null, error });
-        }
+//         if (error) {
+//             console.error("Completion error:", error);
+//             return res.status(500).json({ completion: null, error });
+//         }
 
-        res.header("Access-Control-Allow-Origin", req.headers.origin);
-        res.header("Access-Control-Allow-Credentials", "true");
+//         res.header("Access-Control-Allow-Origin", req.headers.origin);
+//         res.header("Access-Control-Allow-Credentials", "true");
 
-        return res.status(200).json({ completion });
-    } catch (err) {
-        console.error("Server error:", err);
-        return res.status(500).json({
-            completion: null,
-            error: "Internal server error",
-        });
-    }
-});
+//         return res.status(200).json({ completion });
+//     } catch (err) {
+//         console.error("Server error:", err);
+//         return res.status(500).json({
+//             completion: null,
+//             error: "Internal server error",
+//         });
+//     }
+// });
 
 // app.post("/chat", async (req, res) => {
 //     const { message, chat } = req.body;
@@ -348,7 +356,13 @@ app.post("/complete", async (req, res) => {
 
 app.post("/chat", async (req, res) => {
     try {
-        const { message, fileContext, chat } = req.body;
+        const { message, fileContext, chat, model } = req.body;
+
+        if (!Object.values(availableModels).includes(model)) {
+            res.status(400).json({
+                error: "unknown model"
+            })
+        }
 
         const prompt = constructPrompt({
             message,
@@ -369,7 +383,7 @@ app.post("/chat", async (req, res) => {
                 body: JSON.stringify({
                     messages: newChat,
                     // model: "llama3-8b-8192",
-                    model: "qwen-2.5-coder-32b",
+                    model: model || "qwen-2.5-coder-32b",
                     temperature: 1,
                     max_tokens: 1024,
                     top_p: 1,

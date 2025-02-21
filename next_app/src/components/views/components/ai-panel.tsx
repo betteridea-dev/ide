@@ -4,12 +4,14 @@ import { useProjectManager } from "@/hooks";
 import { useGlobalState } from "@/hooks/useGlobalState";
 import { TCell } from "@/hooks/useProjectManager";
 import Ansi from "ansi-to-react";
-import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Loader2, Plus } from "lucide-react";
+import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Loader2, Plus, Wand2 } from "lucide-react";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { v4 } from "uuid";
 import { MentionsInput, Mention } from 'react-mentions'
+import { useLocalStorage } from "usehooks-ts";
+import type { Components } from 'react-markdown'
 
 interface ChatMessage {
     role: "assistant" | "user",
@@ -17,7 +19,44 @@ interface ChatMessage {
     content: string
 }
 
+interface ThinkProps {
+    children: React.ReactNode;
+}
+
+type CustomComponents = Components & {
+    think: React.ComponentType<{ children: React.ReactNode }>
+}
+
+const availableModels = {
+    "Qwen 2.5 coder": "qwen-2.5-coder-32b",
+    "Deepseek R1": "deepseek-r1-distill-llama-70b",
+    "Llama 3": "llama3-70b-8192",
+    "Llama 3.3 70b": "llama-3.3-70b-versatile",
+    "Gemma 2": "gemma2-9b-it"
+}
+
 const defaultChat: ChatMessage[] = [{ role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" }]
+
+const ThinkDropdown = ({ children }: ThinkProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="my-1 border rounded">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full p-2 text-left bg-muted/20 hover:bg-muted/30 flex items-center justify-between"
+            >
+                <span>AI Thought Process</span>
+                <span className="text-xs">{isOpen ? '▼' : '▶'}</span>
+            </button>
+            {isOpen && (
+                <div className="p-2 text-sm text-muted-foreground">
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default function AiPanel() {
 
@@ -27,6 +66,7 @@ export default function AiPanel() {
     const [inputText, setInputText] = useState("")
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>(defaultChat)
     const [isLoading, setIsLoading] = useState(false)
+    const [activeModel, setActiveModel] = useLocalStorage("active-model", Object.keys(availableModels)[0], { initializeWithValue: true })
 
     useEffect(() => {
         document.getElementById("chat-messages")?.scrollTo({ top: document.getElementById("chat-messages")?.scrollHeight, behavior: "smooth" })
@@ -90,6 +130,8 @@ export default function AiPanel() {
                 }
             }
 
+            payload['model'] = availableModels[activeModel]
+
 
             const prod_endpoint = "https://api.betteridea.dev/chat"
             const dev_endpoint = "http://localhost:3001/chat"
@@ -148,14 +190,25 @@ export default function AiPanel() {
                         case "assistant":
                             return <pre className="p-1.5 whitespace-break-spaces break-words text-justify">
                                 <Markdown remarkPlugins={[remarkGfm]} components={{
-                                    pre: ({ children }) => {
+                                    pre: (props) => {
+                                        // Get the language from the className which is typically format: "language-python" etc.
+                                        const language = (props.children as any).props.className?.replace('language-', '') || ''
+
+                                        if (language == "think") {
+                                            // small dropdown
+                                            return <details className="text-muted text-xs cursor-pointer" open={false}>
+                                                <summary>AI thought process</summary>
+                                                <pre className="mt-4 font-light italic overflow-scroll whitespace-normal max-h-40">{props.children}</pre>
+                                            </details>
+                                        }
+
                                         return <div className="border">
                                             <div className="border-b p-0.5 flex items-center justify-end gap-1">
                                                 {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NORMAL" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Append to end of file"
                                                     onClick={() => {
                                                         const project = manager.getProject(activeProject)
                                                         const file = project.getFile(activeFile)
-                                                        file.content.cells[0].code += (children as any).props.children
+                                                        file.content.cells[0].code += (props.children as any).props.children
                                                         manager.updateFile(project, { file: file, content: file.content })
                                                     }}>
                                                     <FilePlus2 size={16} />
@@ -166,7 +219,7 @@ export default function AiPanel() {
                                                         const file = project.getFile(activeFile)
 
                                                         const newCell: TCell = {
-                                                            code: (children as any).props.children,
+                                                            code: (props.children as any).props.children,
                                                             output: null,
                                                             type: "CODE",
                                                             editing: true,
@@ -182,14 +235,17 @@ export default function AiPanel() {
                                                     <BetweenHorizonalStart size={16} />
                                                 </Button>}
                                                 <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Copy to clipboard"
-                                                    onClick={() => { navigator.clipboard.writeText((children as any).props.children) }}>
+                                                    onClick={() => { navigator.clipboard.writeText((props.children as any).props.children) }}>
                                                     <Copy size={16} />
                                                 </Button>
                                             </div>
-                                            <pre className="overflow-scroll p-1 bg-primary/10">{children}</pre>
+                                            <pre className="overflow-scroll p-1 bg-primary/10">{props.children}</pre>
                                         </div>
-                                    }
-                                }}>{msg.content}</Markdown>
+                                    },
+                                    // think: ({ children }) => {
+                                    //     return <ThinkDropdown>{children}</ThinkDropdown>
+                                    // }
+                                }}>{(msg.content as string).replace("<think>", "```think").replace("</think>", "```")}</Markdown>
                             </pre>
                         case "user":
                             return <div className="bg-muted/10 mt-5 text-muted-foreground/80 p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
@@ -216,7 +272,7 @@ export default function AiPanel() {
             <Loader2 className="animate-spin" size={14} />
             <span className="text-muted-foreground">Thinking...</span>
         </div>}
-        <div className="w-full h-fit bg-black/5">
+        <div className="w-full h-fit bg-black/5 flex flex-col">
             <MentionsInput
                 disabled={isLoading}
                 value={inputText}
@@ -277,6 +333,17 @@ export default function AiPanel() {
                         data={activeProject ? Object.values(projects[activeProject].files[activeFile].content.cellOrder).map((cellId, index) => ({ id: `${cellId}`, display: `cell:${index + 1}` })) : []}
                     />}
             </MentionsInput>
+            <div className="bg-black/5 pl-0.5">
+                <select className="relative bottom-1 text-xs outline-none bg-transparent text-muted .text-muted-foreground/50" value={activeModel} onChange={(e) => setActiveModel(e.target.value)}>
+                    {
+                        Object.keys(availableModels).map(model => {
+                            return <option key={model}>
+                                {model}
+                            </option>
+                        })
+                    }
+                </select>
+            </div>
         </div>
     </div>
 }
