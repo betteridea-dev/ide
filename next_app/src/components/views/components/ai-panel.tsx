@@ -173,6 +173,7 @@ export default function AiPanel() {
             const handleKeyDown = (e: KeyboardEvent) => {
                 if (e.key === 'Escape') {
                     endCellSelection();
+                    toast.info("Cell selection cancelled", { duration: 5000, style: { backgroundColor: "white" } });
                 }
             };
 
@@ -367,9 +368,9 @@ export default function AiPanel() {
                                             </details>
                                         }
 
-                                        const file = manager.getProject(activeProject).getFile(activeFile)
+                                        const file = activeProject ? manager.getProject(activeProject).getFile(activeFile) : null
                                         const status = { genCellId: "", genCellNumber: -1 }
-                                        if (file.type == "NOTEBOOK") {
+                                        if (file && file.type == "NOTEBOOK") {
                                             // console.log(language)
                                             // if language is in the format [ignore-id:<ID>]
                                             // <ID> is the id of the cell
@@ -384,10 +385,10 @@ export default function AiPanel() {
                                                 status.genCellNumber = file.content.cellOrder.findIndex(cellId => cellId == status.genCellId)
                                             }
                                         }
-                                        console.log(status.genCellNumber)
+                                        console.log(status)
 
                                         return <div className="border rounded-sm">
-                                            <div className="border-b p-0.5 flex items-center justify-end gap-1">
+                                            {activeProject && activeFile && <div className="border-b p-0.5 flex items-center justify-end gap-1">
                                                 <Button id={`apply-${i}`} variant="ghost" className="p-0 px-0.5 pr-1 h-5 rounded-sm" title="Apply to file"
                                                     onClick={() => {
                                                         const project = manager.getProject(activeProject)
@@ -464,7 +465,7 @@ export default function AiPanel() {
                                                     onClick={() => { navigator.clipboard.writeText((props.children as any).props.children) }}>
                                                     <Copy size={16} />
                                                 </Button>
-                                            </div>
+                                            </div>}
                                             <pre className="overflow-scroll p-1 bg-primary/10">{props.children}</pre>
                                         </div>
                                     },
