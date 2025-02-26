@@ -542,7 +542,7 @@ export default function AiPanel() {
                             </pre>
                         case "user":
                             return <div key={i} className="bg-muted/10 mt-5 text-muted-foreground/80 p-1.5 whitespace-break-spaces break-words flex items-center gap-1">
-                                <pre className="w-full">
+                                <pre className="w-full whitespace-normal">
                                     <Markdown
                                         className="w-full"
                                         components={{
