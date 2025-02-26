@@ -233,6 +233,20 @@ const CodeCell = ({
         // event('run_code')
     }
 
+    useEffect(() => {
+        // event handler for cmd+enter and cmd+esc to accept/reject changes
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.metaKey && e.key == "Enter") {
+                document.getElementById(`accept-changes-btn-${cellId}`)?.click()
+            } else if (e.metaKey && e.key == "Backspace") {
+                document.getElementById(`reject-changes-btn-${cellId}`)?.click()
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [cellId])
+
     return (
         <div
             className="rounded-md relative bg-accent/60 flex flex-col border border-border/30"
