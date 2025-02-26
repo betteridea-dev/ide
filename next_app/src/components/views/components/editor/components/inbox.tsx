@@ -26,30 +26,55 @@ export default function Inbox() {
     const [selectedInboxProcess, setSelectedInboxProcess] = useState("")
 
     const project = globalState.activeProject && manager.projects[globalState.activeProject]
-    const processes = project ? Object.values(project.files).map(f => { return { name: f.name, process: f.process } }) : []
+    const processes = project ? Object.values(project.files)
+        .filter(f => f && f.name)
+        .map(f => ({ name: f.name, process: f.process }))
+        : []
 
-    async function fetchInbox(): Promise<TInboxMessage[]> {
+    async function fetchInbox(): Promise<TInboxMessage[] | undefined> {
         if (!project) return
-        if (!project.process) { toast.error("No process found. Please assign one from settings"); return }
-        setFetchingInbox(true)
-        const res = await runLua(`return require("json").encode(Inbox)`, selectedInboxProcess || project.process, [
-            { name: "BetterIDEa-Function", value: "Inbox" }
-        ])
-        setFetchingInbox(false)
-        console.log(res)
-        if (res.Error) toast.error(res.Error);
-        else {
-            let { Output: { data: { output } } } = res
-            if (!output) output = res.Output.data
-            globalState.setPrompt(res.Output.prompt || res.Output.data.prompt)
-            setInbox(JSON.parse(output))
-            return JSON.parse(output)
+        if (!project.process) {
+            toast.error("No process found. Please assign one from settings")
+            return
+        }
+
+        try {
+            setFetchingInbox(true)
+            const res = await runLua(`return require("json").encode(Inbox)`, selectedInboxProcess || project.process, [
+                { name: "BetterIDEa-Function", value: "Inbox" }
+            ])
+
+            if (res.Error) {
+                toast.error(res.Error)
+                return
+            }
+
+            let output
+            try {
+                const { Output } = res
+                output = Output.data.output || Output.data
+                globalState.setPrompt(Output.prompt || Output.data.prompt)
+
+                const parsedOutput = JSON.parse(output)
+                setInbox(Array.isArray(parsedOutput) ? parsedOutput : [])
+                return parsedOutput
+            } catch (e) {
+                toast.error("Failed to parse inbox data")
+                return []
+            }
+        } catch (e) {
+            toast.error("Failed to fetch inbox")
+            return []
+        } finally {
+            setFetchingInbox(false)
         }
     }
 
     useEffect(() => {
-        fetchInbox()
-    }, [project.process, selectedInboxProcess])
+        if (project?.process || selectedInboxProcess) {
+            fetchInbox()
+        }
+    }, [project?.process, selectedInboxProcess])
 
     function InboxItem({ item }: { item: TInboxMessage }) {
         const hasData = item.Data
@@ -69,7 +94,7 @@ export default function Inbox() {
                     Viewing Inbox Message
                 </AlertDialogHeader>
                 <pre className="font-btr-code max-h-[50vh] overflow-scroll text-xs ring-1 ring-border rounded-md p-1">
-                    <Ansi>{JSON.stringify(item, null, 2)}</Ansi>
+                    {item && <Ansi>{JSON.stringify(item, null, 2)}</Ansi>}
                 </pre>
                 <AlertDialogCancel>close</AlertDialogCancel>
             </AlertDialogContent>
@@ -78,16 +103,30 @@ export default function Inbox() {
 
     return <>
         <div className="flex p-1">
-            <Combobox triggerClassName="" defaultValue={`${processes[0].name} - ${processes[0].process || "Default"}`} options={processes.map(p => { return { label: `${p.name} - ${p.process || "Default"}`, value: p.process } })} onChange={e => setSelectedInboxProcess(e)} className="w-full" placeholder="Showing Inbox for default process" />
-            <Button variant="link" onClick={() => fetchInbox()}
-                className=" !z-20 rounded-none bg-background text-foreground">
+            <Combobox
+                triggerClassName=""
+                defaultValue={processes.length > 0 ? `${processes[0].name} - ${processes[0].process || "Default"}` : undefined}
+                options={processes.map(p => ({
+                    label: `${p.name} - ${p.process || "Default"}`,
+                    value: p.process
+                }))}
+                onChange={e => setSelectedInboxProcess(e)}
+                className="w-full"
+                placeholder="Showing Inbox for default process"
+            />
+            <Button
+                variant="link"
+                onClick={() => fetchInbox()}
+                className=" !z-20 rounded-none bg-background text-foreground"
+                disabled={fetchingInbox}
+            >
                 {fetchingInbox ? <><LoaderIcon className="w-5 h-5 mr-1 animate-spin" /> Fetching...</> : "refresh"}
             </Button>
         </div>
-        {
-            inbox.length > 0 ? inbox.toReversed().map((item, i) => <InboxItem key={i} item={item} />)
-                :
-                <>{!fetchInbox && <div>No messages in inbox</div>}</>
-        }
+        {Array.isArray(inbox) && (
+            inbox.length > 0
+                ? inbox.toReversed().map((item, i) => item && <InboxItem key={i} item={item} />)
+                : <>{!fetchingInbox && <div>No messages in inbox</div>}</>
+        )}
     </>
 }

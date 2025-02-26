@@ -36,7 +36,7 @@ const availableModels = {
     "Gemma 2": "gemma2-9b-it"
 }
 
-const defaultChat: ChatMessage[] = [{ role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell (only in notebooks)" }]
+const defaultChat: ChatMessage[] = [{ role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell" }]
 
 const ThinkDropdown = ({ children }: ThinkProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -411,7 +411,7 @@ export default function AiPanel() {
 
     return <div className="flex flex-col items-center justify-start h-full max-h-[calc(100vh-50px)]">
         <div className="flex gap-2 w-full border-b">
-            <Button variant="ghost" className="rounded-none">AI CHAT</Button>
+            <Button variant="ghost" className="rounded-none">AO Companion</Button>
             {/* clear btn */}
             <Button variant="ghost" className="rounded-none ml-auto" onClick={() => { setChatMessages(defaultChat) }}><Eraser size={16} /></Button>
         </div>

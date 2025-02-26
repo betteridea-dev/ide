@@ -11,7 +11,7 @@ const item: TSidebarItem = {
             </div>
         </div>)
     ,
-    label: "AI Chat",
+    label: "AO Companion",
     value: "AI_CHAT"
 }
 
