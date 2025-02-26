@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useGlobalState } from "@/hooks";
 import useProjectManager, { PFile, ProjectManager, Project } from "@/hooks/useProjectManager";
 import { runLua } from "@/lib/ao-vars";
-import { Editor, useMonaco } from "@monaco-editor/react";
+import { DiffEditor, Editor, useMonaco } from "@monaco-editor/react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
@@ -61,6 +61,11 @@ const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
     },
     renderLineHighlight: "none",
     smoothScrolling: true,
+}
+
+const diffMonacoConfig: editor.IDiffEditorConstructionOptions = {
+    ...monacoConfig,
+    renderSideBySide: false,
 }
 
 const CodeCell = ({
@@ -231,6 +236,7 @@ const CodeCell = ({
     return (
         <div
             className="rounded-md relative bg-accent/60 flex flex-col border border-border/30"
+            data-cellid={cellId}
             onMouseEnter={() => setMouseHovered(true)}
             onMouseLeave={() => setMouseHovered(false)}
         >
@@ -280,7 +286,73 @@ const CodeCell = ({
                     }
                 </Button>
                 <div className="w-full h-full text-xs grow relative bg-background">
-                    <Editor
+                    {cell.diffNew ? <>
+                        <div className="flex items-center justify-start">
+                            <Button
+                                variant="ghost"
+                                id={`reject-changes-btn-${cellId}`}
+                                className="text-sm p-2 h-5 rounded-none bg-none hover:bg-transparent text-destructive-foreground/60 hover:text-destructive-foreground/80"
+                                onClick={() => {
+                                    if (file && project) {
+                                        console.log("reject changes")
+                                        const newContent = { ...file.content };
+                                        // clear the diffNew value
+                                        newContent.cells[cellId].diffNew = undefined
+                                        manager.updateFile(project, { file, content: newContent });
+                                    }
+                                }}
+                            >
+                                Reject Changes {/Mac/.test(navigator.userAgent) ? '⌘⌫' : 'Ctrl+⌫'}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                id={`accept-changes-btn-${cellId}`}
+                                className="text-sm p-2 h-5 rounded-none bg-none hover:bg-transparent text-primary/60 hover:text-primary"
+                                onClick={() => {
+                                    if (file && project) {
+                                        console.log("accept changes")
+                                        const newContent = { ...file.content };
+                                        // set the code to the diffNew value and clear the diffNew value
+                                        newContent.cells[cellId].code = newContent.cells[cellId].diffNew
+                                        newContent.cells[cellId].diffNew = undefined
+                                        manager.updateFile(project, { file, content: newContent });
+                                    }
+                                }}
+                            >
+                                Accept Changes {/Mac/.test(navigator.userAgent) ? '⌘⏎' : 'Ctrl⏎'}
+                            </Button>
+                        </div>
+                        <DiffEditor
+                            data-cellId={cellId}
+                            original={cell.code}
+                            modified={cell.diffNew}
+                            language="lua"
+                            options={diffMonacoConfig}
+                            height={
+                                2 * (expand ? Math.max(cell.code.split("\n").length * 20, 60) :
+                                    (cell.code.split("\n").length > 15 ? 15 * 20 : Math.max((cell.code.split("\n").length) * 20, 60)))
+                            }
+                            onMount={(editor, monaco) => {
+                                monaco.editor.defineTheme(
+                                    "notebook",
+                                    notebookTheme as editor.IStandaloneThemeData
+                                );
+                                if (theme == "dark") monaco.editor.setTheme("notebook");
+                                else monaco.editor.setTheme("vs-light");
+
+                                editor.getContainerDomNode().addEventListener("keydown", async (e) => {
+                                    if (e.metaKey && e.key == "Enter") {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        document.getElementById(`accept-changes-btn-${cellId}`)?.click()
+                                    } else if (e.metaKey && e.key == "Backspace") {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        document.getElementById(`reject-changes-btn-${cellId}`)?.click()
+                                    }
+                                })
+                            }}
+                        /></> : <Editor
                         data-cellId={cellId}
                         onMount={(editor, monaco) => {
                             thisEditor.current = editor
@@ -388,7 +460,7 @@ const CodeCell = ({
                         defaultValue={cell.code}
                         language={file.language}
                         options={monacoConfig}
-                    />
+                    />}
                     <div id={`status-${cellId}`} className="h-fit text-[10px] grow ml-10 z-20 bg-inherit w-fit text-left flex items-start justify-start"></div>
                 </div>
             </div>

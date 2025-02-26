@@ -6,6 +6,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 export type TCell = {
   code: string;
+  diffNew?: string;
   output: string | any | { __render_gfx: boolean, [key: string]: any };
   type: "CODE" | "LATEX" | "MARKDOWN";
   editing: boolean;
@@ -170,7 +171,7 @@ export class PFile {
     if (initialContent) {
       this.content = {
         cellOrder: ["0"],
-        cells: { "0": { code: initialContent, output: "", type: "CODE", editing: true } },
+        cells: { "0": { code: initialContent, output: "", type: "CODE", editing: true, diffNew: "" } },
       };
     }
     if (content) {

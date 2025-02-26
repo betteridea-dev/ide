@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useProjectManager } from "@/hooks";
 import { useGlobalState } from "@/hooks/useGlobalState";
-import { TCell } from "@/hooks/useProjectManager";
+import { TCell, TFileContent } from "@/hooks/useProjectManager";
 import Ansi from "ansi-to-react";
-import { BetweenHorizonalStart, Copy, Eraser, FilePlus2, Loader2, Plus, Wand2 } from "lucide-react";
+import { BetweenHorizonalStart, Copy, Eraser, FileInput, FilePlus, FilePlus2, Loader2, Play, Plus, Wand2 } from "lucide-react";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -12,6 +12,7 @@ import { v4 } from "uuid";
 import { MentionsInput, Mention } from 'react-mentions'
 import { useLocalStorage } from "usehooks-ts";
 import type { Components } from 'react-markdown'
+import { toast } from "sonner";
 
 interface ChatMessage {
     role: "assistant" | "user",
@@ -70,6 +71,9 @@ export default function AiPanel() {
     const [isRateLimited, setIsRateLimited] = useState(false)
     const [rateLimitCountdown, setRateLimitCountdown] = useState(0)
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const [selectingCell, setSelectingCell] = useState(false);
+    const [codeToApply, setCodeToApply] = useState<string | null>(null);
+    const [selectionMessageId, setSelectionMessageId] = useState<number | null>(null);
 
     useEffect(() => {
         document.getElementById("chat-messages")?.scrollTo({ top: document.getElementById("chat-messages")?.scrollHeight, behavior: "smooth" })
@@ -103,6 +107,93 @@ export default function AiPanel() {
         setRateLimitCountdown(seconds);
     };
 
+    useEffect(() => {
+        if (selectingCell && codeToApply) {
+            // Create a style element for the cell selection overlay
+            const styleEl = document.createElement('style');
+            styleEl.id = 'cell-selection-overlay-style';
+            styleEl.innerHTML = `
+                [data-cellid] {
+                    position: relative;
+                }
+                
+                [data-cellid]::after {
+                    content: "Click to apply";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(59, 130, 246, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 16px;
+                    cursor: pointer;
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                }
+                
+                [data-cellid]:hover::after {
+                    opacity: 1;
+                }
+            `;
+            document.head.appendChild(styleEl);
+
+            // Add click handlers to all code cells
+            const handleCellClick = (e: MouseEvent) => {
+                // Find the closest parent with a data-cellid attribute
+                const cell = (e.target as HTMLElement).closest('[data-cellid]');
+                if (cell) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const cellId = cell.getAttribute('data-cellid');
+                    if (cellId && codeToApply && activeProject && activeFile) {
+                        const project = manager.getProject(activeProject);
+                        const file = project.getFile(activeFile);
+
+                        // Apply the code to the selected cell
+                        file.content.cells[cellId].diffNew = codeToApply;
+                        manager.updateFile(project, { file: file, content: file.content });
+
+                        // Exit selection mode
+                        endCellSelection();
+                    }
+                }
+            };
+
+            // Add click handler to the document
+            document.addEventListener('click', handleCellClick);
+
+            // Add escape key handler to cancel selection
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    endCellSelection();
+                }
+            };
+
+            document.addEventListener('keydown', handleKeyDown);
+
+            return () => {
+                // Clean up
+                document.removeEventListener('click', handleCellClick);
+                document.removeEventListener('keydown', handleKeyDown);
+                document.getElementById('cell-selection-overlay-style')?.remove();
+            };
+        }
+    }, [selectingCell, codeToApply, activeProject, activeFile, manager]);
+
+    // Add this helper function to cancel cell selection mode
+    const endCellSelection = () => {
+        setSelectingCell(false);
+        setCodeToApply(null);
+        setSelectionMessageId(null);
+    };
+
     async function handleInference() {
         if (!inputText.trim() || isLoading || isRateLimited) return;
 
@@ -113,7 +204,7 @@ export default function AiPanel() {
                 /@\[cell:\d+\]\(([\w-]+)\)/g,
                 (match, cellId) => {
                     const cell = projects[activeProject].files[activeFile].content.cells[cellId];
-                    return cell ? `\n\`\`\`\n${cell.code}\n\`\`\`\n` : match;
+                    return cell ? `\n\`\`\`[ignore-id:${cellId}]\n${cell.code}\n\`\`\`\n` : match;
                 }
             );
 
@@ -276,39 +367,100 @@ export default function AiPanel() {
                                             </details>
                                         }
 
-                                        return <div className="border">
+                                        const file = manager.getProject(activeProject).getFile(activeFile)
+                                        const status = { genCellId: "", genCellNumber: -1 }
+                                        if (file.type == "NOTEBOOK") {
+                                            // console.log(language)
+                                            // if language is in the format [ignore-id:<ID>]
+                                            // <ID> is the id of the cell
+                                            // <ID> will either be 0 or a uuid (50619c7e-7120-465a-9352-67dd1c69deec)
+                                            if (language.includes("ignore-id:")) {
+                                                status.genCellId = language.split("ignore-id:")[1].split("]")[0]
+                                            } else {
+                                                status.genCellId = ""
+                                                status.genCellNumber = -1
+                                            }
+                                            if (status.genCellId) {
+                                                status.genCellNumber = file.content.cellOrder.findIndex(cellId => cellId == status.genCellId)
+                                            }
+                                        }
+                                        console.log(status.genCellNumber)
+
+                                        return <div className="border rounded-sm">
                                             <div className="border-b p-0.5 flex items-center justify-end gap-1">
-                                                {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NORMAL" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Append to end of file"
+                                                <Button id={`apply-${i}`} variant="ghost" className="p-0 px-0.5 pr-1 h-5 rounded-sm" title="Apply to file"
                                                     onClick={() => {
                                                         const project = manager.getProject(activeProject)
                                                         const file = project.getFile(activeFile)
-                                                        file.content.cells[0].code += (props.children as any).props.children
+                                                        const newContent = (props.children as any).props.children
+
+                                                        if (file.type === "NORMAL") {
+                                                            // For normal files, just apply directly
+                                                            file.content.cells[0].diffNew = newContent;
+                                                            manager.updateFile(project, { file: file, content: file.content });
+                                                        } else {
+                                                            // For notebook files
+                                                            if (status.genCellNumber >= 0 && status.genCellId && status.genCellNumber < file.content.cellOrder.length) {
+                                                                // We have a specific cell ID to apply to
+                                                                file.content.cells[status.genCellId].diffNew = newContent;
+                                                                manager.updateFile(project, { file: file, content: file.content });
+                                                            } else {
+                                                                // Start cell selection mode
+                                                                setCodeToApply(newContent);
+                                                                setSelectingCell(true);
+                                                                setSelectionMessageId(i);
+
+                                                                // Show a toast notification to guide the user
+                                                                toast.info("Click on a code cell to apply the generated code, or press ESC to cancel.", { duration: 15000, style: { backgroundColor: "white" } })
+                                                            }
+                                                        }
+                                                    }}>
+                                                    <Play size={16} className="mr-1" />
+                                                    {selectingCell && selectionMessageId === i
+                                                        ? "Select a cell..."
+                                                        : `apply to ${status.genCellNumber >= 0 ? `cell ${status.genCellNumber + 1}` : activeFile}`}
+                                                </Button>
+                                                <div className="grow" />
+
+                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-sm" title="Create new file"
+                                                    onClick={() => {
+                                                        const project = manager.getProject(activeProject)
+                                                        // const file = project.getFile(activeFile)
+                                                        // file.content.cells[0].code += (props.children as any).props.children
+                                                        // manager.updateFile(project, { file: file, content: file.content })
+                                                        manager.newFile(project, {
+                                                            name: `ai-output-${Object.keys(project.files).length}.lua`,
+                                                            type: "NORMAL",
+                                                            initialContent: (props.children as any).props.children
+                                                        })
+                                                    }}>
+                                                    <FilePlus size={16} />
+                                                </Button>
+                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-sm" title="Append to end of this file"
+                                                    onClick={() => {
+                                                        const project = manager.getProject(activeProject)
+                                                        const file = project.getFile(activeFile)
+                                                        if (file.type == "NORMAL") {
+                                                            file.content.cells[0].code += "\n\n" + (props.children as any).props.children
+                                                            manager.updateFile(project, { file: file, content: file.content })
+                                                        } else {
+
+                                                            const newCell: TCell = {
+                                                                code: (props.children as any).props.children,
+                                                                output: null,
+                                                                type: "CODE",
+                                                                editing: true,
+                                                            }
+
+                                                            const newCellId = v4()
+                                                            file.content.cells[newCellId] = newCell
+                                                            file.content.cellOrder.push(newCellId)
+                                                        }
                                                         manager.updateFile(project, { file: file, content: file.content })
                                                     }}>
-                                                    <FilePlus2 size={16} />
-                                                </Button>}
-                                                {activeProject && projects[activeProject].files[activeFile] && projects[activeProject].files[activeFile].type == "NOTEBOOK" && <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Insert into new cell"
-                                                    onClick={() => {
-                                                        const project = manager.getProject(activeProject)
-                                                        const file = project.getFile(activeFile)
-
-                                                        const newCell: TCell = {
-                                                            code: (props.children as any).props.children,
-                                                            output: null,
-                                                            type: "CODE",
-                                                            editing: true,
-                                                        }
-
-                                                        const newCellId = v4()
-                                                        file.content.cells[newCellId] = newCell
-                                                        file.content.cellOrder.push(newCellId)
-                                                        manager.updateFile(project, { file: file, content: file.content })
-
-                                                    }}
-                                                >
-                                                    <BetweenHorizonalStart size={16} />
-                                                </Button>}
-                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-none" title="Copy to clipboard"
+                                                    <FileInput size={16} />
+                                                </Button>
+                                                <Button variant="ghost" className="p-0 w-5 h-5 rounded-sm" title="Copy to clipboard"
                                                     onClick={() => { navigator.clipboard.writeText((props.children as any).props.children) }}>
                                                     <Copy size={16} />
                                                 </Button>
@@ -328,7 +480,7 @@ export default function AiPanel() {
                                         className="w-full"
                                         components={{
                                             pre: ({ children }) => {
-                                                return <div className="border w-full">
+                                                return <div className="border w-full rounded-sm">
                                                     <pre className="overflow-scroll p-1 w-full">{children}</pre>
                                                 </div>
                                             }
