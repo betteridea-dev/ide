@@ -228,7 +228,11 @@ export default function AiPanel() {
             setChatMessages(prev => [...prev, { role: 'user', content: processedInput }]);
             // const newChat = [...chatMessages, { role: 'user', content: processedInput }]
 
-            let payload = {}
+            let payload = {
+                message: processedInput,
+                fileContext: "",
+                chat: chatMessages
+            }
             if (activeProject && activeFile) {
                 const file = manager.getProject(activeProject).getFile(activeFile)
 
@@ -247,16 +251,76 @@ export default function AiPanel() {
                         chat: chatMessages
                     }
                 }
-            } else {
-                payload = {
-                    message: processedInput,
-                    fileContext: "",
-                    chat: chatMessages
-                }
             }
 
             payload['model'] = availableModels[activeModel]
 
+            // The tokens per minute limit for the LLM is 6000, including input and output,
+            // assuming input is maximum 3500 tokens and the rest for the output
+            // Ensure that when sending a request, the combined tokens don't exceed the tpm_limit
+            const tpm_limit = 3500;
+
+            // Estimate token count (rough approximation: 1 token ≈ 4 chars)
+            const estimateTokens = (text) => Math.ceil((text || "").length / 4);
+
+            // Calculate total tokens in the payload
+            const messageTokens = estimateTokens(processedInput);
+            const fileContextTokens = estimateTokens(payload.fileContext);
+            const chatHistoryTokens = payload.chat.reduce((sum, msg) =>
+                sum + estimateTokens(msg.content), 0);
+
+            const totalTokens = messageTokens + fileContextTokens + chatHistoryTokens;
+
+            // Check if we're exceeding the token limit
+            if (totalTokens > tpm_limit) {
+                console.warn("Token limit exceeded. Trimming content to fit within limits.");
+
+                // First, try trimming chat history
+                let trimmedChat = [...payload.chat];
+                let trimmedFileContext = payload.fileContext;
+                let trimmedInput = processedInput;
+
+                // Step 1: Trim chat history first (but keep at least the last user message)
+                while (
+                    trimmedChat.length > 1 &&
+                    (estimateTokens(trimmedInput) + estimateTokens(trimmedFileContext) +
+                        trimmedChat.reduce((sum, msg) => sum + estimateTokens(msg.content), 0)) > tpm_limit
+                ) {
+                    trimmedChat.shift();
+                }
+
+                // Step 2: If still over limit, trim file context
+                if ((estimateTokens(trimmedInput) + estimateTokens(trimmedFileContext) +
+                    trimmedChat.reduce((sum, msg) => sum + estimateTokens(msg.content), 0)) > tpm_limit) {
+                    // Trim file context completely if needed
+                    trimmedFileContext = "";
+                }
+
+                // Step 3: If still over limit, trim the input message (keep at least 75%)
+                const currentTokens = estimateTokens(trimmedInput) + estimateTokens(trimmedFileContext) +
+                    trimmedChat.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
+
+                if (currentTokens > tpm_limit) {
+                    const excessTokens = currentTokens - tpm_limit;
+                    const charsToTrim = excessTokens * 4;
+                    const maxTrimChars = Math.floor(trimmedInput.length * 0.25); // Don't trim more than 25%
+
+                    if (charsToTrim <= maxTrimChars) {
+                        trimmedInput = trimmedInput.slice(0, trimmedInput.length - charsToTrim);
+                    } else {
+                        trimmedInput = trimmedInput.slice(0, trimmedInput.length - maxTrimChars);
+                    }
+                }
+
+                // Update payload with trimmed content
+                payload.chat = trimmedChat;
+                payload.fileContext = trimmedFileContext;
+                processedInput = trimmedInput;
+                payload.message = processedInput;
+
+                // Show warning to user
+                toast.warning("Token limits have been reached, some context will be trimmed");
+            }
 
             const prod_endpoint = "https://api.betteridea.dev/chat"
             const dev_endpoint = "http://localhost:3001/chat"
@@ -387,11 +451,11 @@ export default function AiPanel() {
                                                 status.genCellNumber = file.content.cellOrder.findIndex(cellId => cellId == status.genCellId)
                                             }
                                         }
-                                        console.log(status)
+                                        // console.log(status)
 
                                         return <div className="border rounded-sm">
                                             {activeProject && activeFile && <div className="border-b p-0.5 flex items-center justify-end gap-1">
-                                                <Button id={`apply-${i}`} variant="ghost" className="p-0 px-0.5 pr-1 h-5 rounded-sm" title="Apply to file"
+                                                <Button id={`apply-${i}`} variant="ghost" className="p-0 px-0.5 pr-1 h-5 rounded-sm bg-primary/70 text-primary-foreground hover:text-primary" title="Apply to file"
                                                     onClick={() => {
                                                         const project = manager.getProject(activeProject)
                                                         const file = project.getFile(activeFile)
