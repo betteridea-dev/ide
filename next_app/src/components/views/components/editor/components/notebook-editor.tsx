@@ -305,7 +305,7 @@ const CodeCell = ({
                             <Button
                                 variant="ghost"
                                 id={`reject-changes-btn-${cellId}`}
-                                className="text-sm p-2 h-5 rounded-none bg-none hover:bg-transparent text-destructive-foreground/60 hover:text-destructive-foreground/80"
+                                className="text-sm p-2 h-5 rounded-none bg-none hover:bg-transparent text-destructive-foreground/40 hover:text-destructive-foreground/80"
                                 onClick={() => {
                                     if (file && project) {
                                         console.log("reject changes")

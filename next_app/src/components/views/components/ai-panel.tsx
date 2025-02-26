@@ -235,13 +235,15 @@ export default function AiPanel() {
                 if (file.type == "NORMAL") {
                     payload = {
                         message: processedInput,
-                        fileContext: file.content.cells[0].code,
+                        // fileContext: file.content.cells[0].code,
+                        fileContext: "",
                         chat: chatMessages
                     }
                 } else {
                     payload = {
                         message: processedInput,
-                        fileContext: file.content.cellOrder.map(cellId => file.content.cells[cellId].code).join("\n---\n"),
+                        fileContext: "",
+                        // fileContext: file.content.cellOrder.map(cellId => file.content.cells[cellId].code).join("\n---\n"),
                         chat: chatMessages
                     }
                 }
