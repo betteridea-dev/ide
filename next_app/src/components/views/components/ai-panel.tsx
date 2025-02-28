@@ -29,12 +29,15 @@ type CustomComponents = Components & {
 }
 
 const availableModels = {
+    "Gemini 2.0 FL (high context)": "gemini-2.0-flash-lite",
     "Qwen 2.5 coder": "qwen-2.5-coder-32b",
     "Deepseek R1": "deepseek-r1-distill-llama-70b",
     "Llama 3": "llama3-70b-8192",
     "Llama 3.3 70b": "llama-3.3-70b-versatile",
     "Gemma 2": "gemma2-9b-it"
 }
+
+const largeModels = ["Gemini 2.0 FL (high context)"]
 
 const defaultChat: ChatMessage[] = [{ role: "assistant", content: "👋 Hello! I'm happy to help with any questions or issues you have regarding AO  / aos development.\n\nWhat's on your mind? Do you have a specific question or topic you'd like to discuss? 😊\n\nTip: use @ to mention a file and @@ to mention a cell" }]
 
@@ -258,7 +261,10 @@ export default function AiPanel() {
             // The tokens per minute limit for the LLM is 6000, including input and output,
             // assuming input is maximum 3500 tokens and the rest for the output
             // Ensure that when sending a request, the combined tokens don't exceed the tpm_limit
-            const tpm_limit = 3500;
+            let tpm_limit = 3500;
+            if (largeModels.includes(activeModel)) {
+                tpm_limit = 100000;
+            }
 
             // Estimate token count (rough approximation: 1 token ≈ 4 chars)
             const estimateTokens = (text) => Math.ceil((text || "").length / 4);

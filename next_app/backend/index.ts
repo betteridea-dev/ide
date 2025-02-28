@@ -4,9 +4,9 @@ import sqlite3 from 'sqlite3';
 
 import "dotenv/config";
 import { Copilot } from "monacopilot";
-import { SYSTEM_PROMPT } from "./systemPrompt";
-import { INLINE_SYSTEM_PROMPT } from "./inlineSystemPrompt";
-import { INLINE_SYSTEM_CONTEXT } from "./inlineSystemContext";
+import { SYSTEM_PROMPT, SYSTEM_PROMPT_SMALL } from "./systemPrompt";
+// import { INLINE_SYSTEM_PROMPT } from "./inlineSystemPrompt";
+// import { INLINE_SYSTEM_CONTEXT } from "./inlineSystemContext";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 // import fs from "fs";
 // const SYSTEM_INSTRUCTION = fs.readFileSync("./backend/cookbook.md", "utf8");
@@ -15,6 +15,7 @@ sqlite3.verbose();
 const db = new sqlite3.Database('./analytics.db');
 
 const availableModels = {
+    "Gemini 2.0 FL (high context)": "gemini-2.0-flash-lite",
     "Qwen 2.5 coder": "qwen-2.5-coder-32b",
     "Deepseek R1": "deepseek-r1-distill-llama-70b",
     "Llama 3": "llama3-70b-8192",
@@ -22,21 +23,23 @@ const availableModels = {
     "Gemma 2": "gemma2-9b-it"
 }
 
-// Initialize the Google AI client
-// const apiKey = process.env.GEMINI_API_KEY;
-// const genAI = new GoogleGenerativeAI(apiKey);
+const largeModels = ["gemini-2.0-flash-lite"];
 
-// const model = genAI.getGenerativeModel({
-//     model: "gemini-1.5-flash-8b",
-//     systemInstruction: SYSTEM_INSTRUCTION,
-//     generationConfig: {
-//         temperature: 1,
-//         topP: 0.95,
-//         topK: 40,
-//         maxOutputTokens: 8192,
-//         responseMimeType: "text/plain"
-//     }
-// });
+// Initialize the Google AI client
+const apiKey = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(apiKey);
+
+const gemini = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash-lite",
+    systemInstruction: SYSTEM_PROMPT,
+    generationConfig: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 8192,
+        responseMimeType: "text/plain"
+    }
+});
 
 // const copilot = new Copilot(process.env.GROQ_API_KEY, {
 //     provider: "groq",
@@ -369,8 +372,35 @@ app.post("/chat", async (req, res) => {
             fileContext,
         });
 
-        const system = { role: "system", content: SYSTEM_PROMPT };
+
+        if (largeModels.includes(model)) {
+            //replace role system with role model, and content with parts:[{text: content}], remove any other fields
+            let newChat = chat.map((c: any) => ({ role: c.role === "assistant" ? "model" : c.role, parts: [{ text: c.content }] }))
+            // remove first message if it is from model
+            if (newChat[0].role === "model") {
+                newChat.shift()
+            }
+
+            // console.log(newChat)
+
+            const session = gemini.startChat({
+                history: newChat || [],
+            });
+
+            const result = await session.sendMessage(prompt);
+
+            // log usage 
+            console.log("Gemini usage:", result.response.usageMetadata.totalTokenCount)
+            return res.status(200).json({
+                response: result.response.text(),
+            });
+        }
+
+        //small model
+        const system = { role: "system", content: SYSTEM_PROMPT_SMALL };
         const newChat = [system, ...(chat || []), { role: "user", content: prompt }]
+
+
 
         const response = await fetch(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -382,7 +412,6 @@ app.post("/chat", async (req, res) => {
                 },
                 body: JSON.stringify({
                     messages: newChat,
-                    // model: "llama3-8b-8192",
                     model: model || "qwen-2.5-coder-32b",
                     temperature: 1,
                     max_tokens: 1024,
