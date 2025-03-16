@@ -1,13 +1,15 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
-export const AppVersion = "3.0.0";
-export const AOModule = "Do_Uc2Sju_ffp6Ev0AnLVdPtot15rvMjP-a9VVaA5fM"; // aos 2.0.1
+export const AppVersion = process.env.version;
+export const AOModule = "JArYBF-D8q2OmZ4Mok00sD2Y_6SYEQ7Hjx-6VZ_jl3g"; // aos 2.0.3
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
 export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak";
 
 export const BetterIDEaWallet = "MnZ8JrR5SoswAwWtX-HTnl4Kq5k6Kx1Y7vPxmlAyl_g"
+
+// deleted the webhook coz someone spammed it with woke stuff, can't have good things :(
 export const SponsorWebhookUrl = "https://discord.com/api/webhooks/1258731411033030726/T6rl7Ciuw8cgiR30MOVeOsbEcvAEWM45IRpc37TqAoXBbH3ZQDoxQzLAW0bmgcsxnCI9"
 
 export const BAZAR = {
@@ -86,13 +88,13 @@ export const BAZAR_TAGS = {
 };
 
 export const modules = {
-  "AOS 2 (Default)": AOModule,
+  "AOS 2.0.3 (Default)": AOModule,
   // "AOS 0.2.1": "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo",
-  "SQLite64 (AOS 2)": "2qIQBC_mo5ywHZcTbC3Z-OTqyzserEhHAXscCjqOc1k",
-  "SQLite64 (AOS 1)": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
-  "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
-  "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
-  "AOLearn":"qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY",
+  "SQLite64": "33d-3X8mpv6xYBlVB-eXMrPfH5Kzf6Hiwhcv0UA10sw", // aos 2.0.3 sqlite module
+  // "SQLite64 (AOS 1)": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
+  // "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
+  // "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
+  "AOLearn": "qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY",
 }
 
 const CommonTags = [

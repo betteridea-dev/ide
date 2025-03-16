@@ -106,7 +106,7 @@ export default function Statusbar() {
         </Button>}
         {fileType == "NORMAL" && <code id="vim-status" className="w-fit text-sm h-fit ml-2 bg-primary px-1 text-white"></code>}
         <div className="grow"></div>
-        {project && project.process && (
+        {(project && project.process) ? (
             <Button
                 variant="ghost"
                 className="p-1 text-xs"
@@ -117,6 +117,12 @@ export default function Statusbar() {
             >
                 AO Process: {project.process}
             </Button>
+        ) : (
+            <code className="text-xs text-muted-foreground mr-2">
+                v{process.env.version} - <Link href={`https://github.com/betteridea/BetterIDEa/commit/${process.env.gitHash}`} target="_blank" className="hover:underline">
+                    {process.env.gitHash}
+                </Link>
+            </code>
         )}
     </div>
 }
