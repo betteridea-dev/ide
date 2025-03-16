@@ -1,7 +1,7 @@
 import { Combobox } from "@/components/ui/combo-box";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useGlobalState, useProjectManager, useWallet } from "@/hooks";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import { PFile } from "@/hooks/useProjectManager";
 import { AOTemplates } from "@/templates";
 import JSZip from "jszip";
@@ -14,8 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LoaderIcon } from "lucide-react";
 import { pushToRecents } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import { useConnection, useActiveAddress } from "arweave-wallet-kit";
 
 type possibleUnits = "seconds" | "minutes" | "hours" | "blocks"
 const cronUnits = ["seconds", "minutes", "hours", "blocks"]
@@ -23,7 +23,8 @@ const cronUnits = ["seconds", "minutes", "hours", "blocks"]
 export default function NewProject() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const wallet = useWallet()
+    const { connected, connect, disconnect } = useConnection()
+    const address = useActiveAddress()
     const [popupOpen, setPopupOpen] = useState(false);
     const [newProjName, setNewProjName] = useState("");
     const [processUsed, setProcessUsed] = useState("NEW_PROCESS");
@@ -47,7 +48,6 @@ export default function NewProject() {
     async function fetchProcesses() {
         if (!window.arweaveWallet) return;
         const client = new GraphQLClient("https://arweave.net/graphql");
-        const address = wallet.address;
 
         const query = gql`
       query {
@@ -84,7 +84,7 @@ export default function NewProject() {
 
     async function createProject() {
         if (!window.arweaveWallet) return toast.error("Cant find ArConnect wallet extension. Install from arconnect.io")
-        if (!wallet.isConnected) return toast.error("Connect wallet before creating a project")
+        if (!connected) return toast.error("Connect wallet before creating a project")
         if (!newProjName)
             return toast.error("Need a project name 😑", {
                 description: "A new project always needs a name", id: "error"
@@ -96,7 +96,7 @@ export default function NewProject() {
         if (cronInterval <= 0) return toast.error("Cron interval must be greater than 0", { id: "error" })
         if (!cronUnit) return toast.error("Cron unit not set", { id: "error" })
 
-        const ownerWallet = await window.arweaveWallet.getActiveAddress();
+        const ownerWallet = address;
         setLoadingProcess(true);
         const p = manager.newProject({
             name: newProjName,

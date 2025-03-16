@@ -1,4 +1,4 @@
-import { useGlobalState, useProjectManager, useWallet } from "@/hooks";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import { TDrawerItem } from "."
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,12 @@ import { Combobox } from "@/components/ui/combo-box";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useLocalStorage } from "usehooks-ts";
-
+import { useConnection, useActiveAddress } from "arweave-wallet-kit";
 function Interact() {
     const manager = useProjectManager();
     const globalState = useGlobalState();
-    const wallet = useWallet()
+    const { connected, connect, disconnect } = useConnection()
+    const address = useActiveAddress()
     const project = globalState.activeProject ? manager.projects[globalState.activeProject] : null;
     const [options, setOptions] = useState<{ label: string, value: string }[]>(Object.keys(manager.projects).filter(pid => { return manager.projects[pid].process }).map(pid => ({ label: `${pid}: ${manager.projects[pid].process}`, value: manager.projects[pid].process })));
     const [target, setTarget] = useState<string>(project?.process || "");
@@ -56,7 +57,7 @@ function Interact() {
         setOutput("...")
         setId("...")
         try {
-            const res = await runLua(eqLua, project?.process || wallet.address);
+            const res = await runLua(eqLua, project?.process || address);
             console.log(res);
             if (res.Error) return toast.error(res.Error);
             setId((res as any).id);

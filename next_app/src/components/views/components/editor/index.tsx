@@ -1,6 +1,6 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { TView } from ".."
-import { useGlobalState, useProjectManager, useWallet } from "@/hooks";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import SingleFileEditor from "./components/single-file-editor";
 import NotebookEditor from "./components/notebook-editor";
@@ -19,11 +19,12 @@ import PackageView from "./components/package";
 import TableView from "./components/table";
 import Interact from "./components/interact";
 import History from "./components/history";
-
+import { useConnection, useActiveAddress } from "arweave-wallet-kit";
 function Editor() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
-    const wallet = useWallet();
+    const { connected, connect, disconnect } = useConnection()
+    const address = useActiveAddress()
     const [running, setRunning] = useState(false);
     // const [prompt, setPrompt] = useState("");
     const [commandOutputs, setCommandOutputs] = useState([]);
@@ -75,9 +76,9 @@ function Editor() {
         const p = manager.getProject(project.name);
         if (!p.process) return toast("No process found for this project");
         const ownerAddress = p.ownerWallet;
-        const activeAddress = wallet.address;
+        const activeAddress = address;
         // if (ownerAddress != activeAddress) return toast({ title: "The owner wallet for this project is differnet", description: `It was created with ${shortAddress}.\nSome things might be broken` })
-        if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${wallet.shortAddress}.\nSome things might be broken`)
+        if (ownerAddress != activeAddress) return toast.error(`The owner wallet for this project is differnet\nIt was created with ${activeAddress}.\nSome things might be broken`)
 
         const file = project.files[globalState.activeFile];
         if (!file) return;

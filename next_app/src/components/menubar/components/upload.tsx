@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useGlobalState, useProjectManager, useWallet } from "@/hooks";
+import { useGlobalState, useProjectManager } from "@/hooks";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Arweave from "arweave";
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader } from "lucide-react";
 import { GraphQLClient, gql } from "graphql-request";
 import Link from "next/link";
+import { useConnection, useActiveAddress } from "arweave-wallet-kit";
 
 type Transaction = {
     id: string;
@@ -18,7 +19,8 @@ type Transaction = {
 }
 
 export default function Upload() {
-    const wallet = useWallet()
+    const { connected, connect, disconnect } = useConnection()
+    const address = useActiveAddress()
     const [popupOpen, setPopupOpen] = useState(false);
     const [fileDragOver, setFileDragOver] = useState(false);
     const [price, setPrice] = useState<string>();
@@ -67,7 +69,7 @@ export default function Upload() {
         reader.onload = async (e) => {
             const bytes = new Uint8Array(e.target?.result as ArrayBuffer);
             console.log(bytes)
-            const price = ar.ar.winstonToAr(await ar.transactions.getPrice(bytes.byteLength, wallet.address))
+            const price = ar.ar.winstonToAr(await ar.transactions.getPrice(bytes.byteLength, address))
             setPrice(price)
             setFile(file)
         }
@@ -81,12 +83,12 @@ export default function Upload() {
     }
 
     async function getUploadHistory() {
-        if (!wallet.isConnected) return
-        if (!wallet.address) return
+        if (!connected) return
+        if (!address) return
         const query = `
 query {
     transactions(
-        owners: ["${wallet.address}"],
+        owners: ["${address}"],
         tags: [
           	{
                 name: "App-Name",
@@ -122,7 +124,7 @@ query {
 
     useEffect(() => {
         getUploadHistory()
-    }, [wallet.isConnected, wallet.address])
+    }, [connected, address])
 
     return (
         <Dialog open={popupOpen} onOpenChange={(e) => { setPopupOpen(e) }}>

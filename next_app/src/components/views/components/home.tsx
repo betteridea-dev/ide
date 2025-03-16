@@ -1,4 +1,4 @@
-import { useGlobalState, useProfile, useProjectManager, useWallet } from "@/hooks"
+import { useGlobalState, useProfile, useProjectManager } from "@/hooks"
 import { TView } from "."
 import { toast } from "sonner"
 import Link from "next/link"
@@ -24,7 +24,7 @@ import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { BAZAR, runLua, spawnProcess } from "@/lib/ao-vars"
-
+import { useConnection, useActiveAddress } from "arweave-wallet-kit"
 const words = [
     "(^･o･^)ﾉ' ",
     "ฅ^•ﻌ•^ฅ",
@@ -267,7 +267,8 @@ function ProfileComponent() {
 }
 
 function Home() {
-    const wallet = useWallet()
+    const { connected, connect, disconnect } = useConnection()
+    const address = useActiveAddress()
     const globalState = useGlobalState()
     const manager = useProjectManager()
     const profile = useProfile()
@@ -278,13 +279,13 @@ function Home() {
     useEffect(() => {
         profile.setLoading(true)
         async function fetchProfile() {
-            if (!wallet.address) return
-            const res = await getProfileByWalletAddress({ address: wallet.address })
+            if (!address) return
+            const res = await getProfileByWalletAddress({ address: address })
             profile.setProfile(res)
             profile.setLoading(false)
         }
         fetchProfile()
-    }, [wallet.address])
+    }, [address])
 
     function openRecent(pname: string) {
         try {
@@ -335,7 +336,7 @@ function Home() {
                 }
             </p>
 
-            {!wallet.isConnected && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
+            {!connected && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
 
             <div className="flex flex-col text-left my-6 gap-1">
                 <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-project")?.click()}>
