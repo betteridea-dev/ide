@@ -140,7 +140,7 @@ export default function Statusbar() {
             </Button>
         ) : (
             <code className="text-xs text-muted-foreground mr-2">
-                v{process.env.version} - <Link href={`https://github.com/betteridea/BetterIDEa/commit/${process.env.gitHash}`} target="_blank" className="hover:underline">
+                v{process.env.version} - <Link href={`https://github.com/betteridea-dev/ide/commit/${process.env.gitHash}`} target="_blank" className="hover:underline">
                     {process.env.gitHash}
                 </Link>
             </code>
