@@ -382,7 +382,7 @@ function Home() {
         <div className="p-5 overflow-scroll my-auto flex flex-col justify-start items-start">
 
             <div className="min-h-[200px]">
-                {profile.loading ? <div className="flex items-center space-x-4">
+                {/* {profile.loading ? <div className="flex items-center space-x-4">
                     <Skeleton className="h-12 w-12 rounded-full" />
                     <div className="space-y-2">
                         <Skeleton className="h-4 w-[250px]" />
@@ -392,10 +392,16 @@ function Home() {
                     {(profile.avatar && profile.avatar != "None") ? <Image src={`https://arweave.net/${profile.avatar}`} alt="profile-picture" className="rounded-full aspect-square" width={69} height={69} /> : <UserRound size={60} className="block bg-muted/20 rounded-full p-2" />}
                     <div>
                         <div className="text-2xl">gm<span className="font-bold text-3xl">{profile.displayName && " " + profile.displayName}</span><i>!</i></div>
-                        {profile.id ? <div className="mt-1">How are you doing today?</div> : <ProfileComponent />}
-                        {/* <Button variant="link" className="h-5 p-0 text-xs">{profile.displayName ? "Edit Profile" : "Create Profile"}</Button> */}
+                        <div className="mt-1">How are you doing today?</div>
                     </div>
-                </div>}
+                </div>} */}
+                <div className="flex gap-5 items-center justify-center">
+                    {(profile.avatar && profile.avatar != "None") ? <Image src={`https://arweave.net/${profile.avatar}`} alt="profile-picture" className="rounded-full aspect-square" width={69} height={69} /> : <UserRound size={60} className="block bg-muted/20 rounded-full p-2" />}
+                    <div>
+                        <div className="text-2xl">gm<span className="font-bold text-3xl">{profile.displayName && " " + profile.displayName}</span><i>!</i></div>
+                        <div className="mt-1">How are you doing today?</div>
+                    </div>
+                </div>
             </div>
 
             <div className="mb-auto">

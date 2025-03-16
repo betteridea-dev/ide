@@ -1,4 +1,6 @@
+"use client"
 import { BAZAR, readHandler } from "./ao-vars";
+import { ARIO } from "@ar.io/sdk/web"
 
 export type AOProfileType = {
     id: string;
@@ -50,6 +52,9 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
                 action: 'Info',
                 data: null,
             });
+            const ario = ARIO.init()
+            const arnsPrimaryName = await ario.getPrimaryName({ address: args.address })
+            console.log(arnsPrimaryName)
 
             if (fetchedProfile) {
                 return {
@@ -62,7 +67,9 @@ export async function getProfileByWalletAddress(args: { address: string }): Prom
                     banner: fetchedProfile.Profile.CoverImage || null,
                     version: fetchedProfile.Profile.Version || null
                 };
-            } else return emptyProfile;
+            } else {
+                return emptyProfile
+            };
         } else return emptyProfile;
     } catch (e: any) {
         throw new Error(e);

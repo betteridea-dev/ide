@@ -49,7 +49,6 @@ export default function PublishTemplateBtn() {
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject)
     const files = project && project.files
-    console.log(files)
     const [selectedFiles, setSelectedFiles] = useState<string[]>(Object.keys(files || {}))
 
     async function publishTemplateHandler() {

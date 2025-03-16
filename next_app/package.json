@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.24",
+    "@ar.io/sdk": "^3.8.4",
     "@arweave-wallet-kit/browser-wallet-strategy": "^0.1.1",
     "@arweave-wallet-kit/core": "^0.1.1",
     "@arweave-wallet-kit/othent-strategy": "^0.1.1",
@@ -105,6 +106,7 @@
     "@types/uuid": "^9.0.8",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.2",
+    "node-polyfill-webpack-plugin": "^4.1.0",
     "nodemon": "^3.1.4",
     "postcss": "^8.4.38",
     "react-icons": "^5.2.1",
