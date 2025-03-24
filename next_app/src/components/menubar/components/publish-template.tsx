@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useGlobalState, useProfile, useProjectManager } from "@/hooks";
 import { PFile } from "@/hooks/useProjectManager";
-import { AppVersion, BAZAR, BAZAR_TAGS, runLua, spawnProcess, Tag } from "@/lib/ao-vars";
+import { AppVersion, runLua, spawnProcess, Tag } from "@/lib/ao-vars";
+import { BAZAR, BAZAR_TAGS } from "@/lib/bazar";
 import { cleanProcessField } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea"
 import {

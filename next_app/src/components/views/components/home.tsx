@@ -23,7 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { BAZAR, runLua, spawnProcess } from "@/lib/ao-vars"
+import { runLua, spawnProcess } from "@/lib/ao-vars"
+import { BAZAR } from "@/lib/bazar"
 import { useConnection, useActiveAddress } from "arweave-wallet-kit"
 const words = [
     "(^･o･^)ﾉ' ",
