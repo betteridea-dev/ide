@@ -1,8 +1,8 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 // import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
-import { createData, ArweaveSigner, DataItem } from 'warp-arbundles'
-// import { createData, ArweaveSigner } from "@dha-team/arbundles"
+// import { createData, ArweaveSigner, DataItem } from 'warp-arbundles'
+import { createData, ArweaveSigner, DataItem } from "@dha-team/arbundles"
 
 
 export function createDataItemSignerManual(wallet) {
