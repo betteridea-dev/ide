@@ -2,19 +2,15 @@ import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 // import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 import { createData, ArweaveSigner } from 'warp-arbundles'
+// import { createData, ArweaveSigner } from "@dha-team/arbundles"
 
 
-/**
- * A function that builds a signer using a wallet jwk interface
- * commonly used in node-based dApps
- *
- * This is provided as a convenience for consumers of the SDK
- * to use, but consumers can also implement their own signer
- *
- * @returns {Types['signer']}
- */
 export function createDataItemSignerManual(wallet) {
   const signer = async ({ data, tags, target, anchor }) => {
+    console.log("data", data)
+    console.log("tags", tags)
+    console.log("target", target)
+    console.log("anchor", anchor)
     const signer = new ArweaveSigner(wallet)
     const dataItem = createData(data, signer, { tags, target, anchor })
     return dataItem.sign(signer)

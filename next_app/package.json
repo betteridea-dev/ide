@@ -25,6 +25,7 @@
     "@arweave-wallet-kit/wander-strategy": "^0.1.2",
     "@arweave-wallet-kit/webwallet-strategy": "0.0.1-beta.4",
     "@betteridea/codecell": "^1.4.4",
+    "@dha-team/arbundles": "^1.0.1",
     "@google/generative-ai": "^0.21.0",
     "@monaco-editor/react": "^4.6.0",
     "@next/third-parties": "^14.2.3",
