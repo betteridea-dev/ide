@@ -11,7 +11,7 @@ import { useSessionStorage } from "usehooks-ts";
 function PackageList() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
-    const ao = connect();
+    const ao = connect({ MODE: "legacy" });
     const [packages, setPackages] = useSessionStorage<TPackage[]>("packages", [], { initializeWithValue: true });
     const [loading, setLoading] = useState(false);
     const [activePackage, setActivePackage] = useState<TPackage | null>(null);

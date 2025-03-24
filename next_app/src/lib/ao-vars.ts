@@ -1,11 +1,18 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
 // import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
-import { createData, ArweaveSigner } from 'warp-arbundles'
+import { createData, ArweaveSigner, DataItem } from 'warp-arbundles'
 // import { createData, ArweaveSigner } from "@dha-team/arbundles"
 
 
 export function createDataItemSignerManual(wallet) {
+  const newSigner = async (create, createDataItem = (buf) => new DataItem(buf)) => {
+    console.log("create", create)
+    console.log("createDataItem", createDataItem)
+
+    const { data, tags, target, anchor } = await create({ alg: 'rsa-v1_5-sha256', passthrough: true })
+    return signer({ data, tags, target, anchor })
+  }
   const signer = async ({ data, tags, target, anchor }) => {
     console.log("data", data)
     console.log("tags", tags)
@@ -20,7 +27,7 @@ export function createDataItemSignerManual(wallet) {
       }))
   }
 
-  return signer
+  return newSigner
 }
 
 export const AppVersion = process.env.version;
@@ -168,8 +175,8 @@ export type TPackage = {
   installed: boolean
 }
 
+const ao = connect({ MODE: "legacy" });
 export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule?: string) {
-  const ao = connect();
 
   if (tags) {
     tags = [...CommonTags, ...tags];
@@ -190,7 +197,6 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
 }
 
 export async function runLua(code: string, process: string, tags?: Tag[]) {
-  const ao = connect();
 
   if (tags) {
     tags = [...CommonTags, ...tags];
@@ -223,7 +229,6 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
 }
 
 export async function getResults(process: string, cursor = "") {
-  const ao = connect();
 
   const r = await ao.results({
     process,
@@ -242,7 +247,6 @@ export async function getResults(process: string, cursor = "") {
 }
 
 export async function monitor(process: string) {
-  const ao = connect();
 
   const r = await ao.monitor({
     process,
@@ -253,7 +257,6 @@ export async function monitor(process: string) {
 }
 
 export async function unmonitor(process: string) {
-  const ao = connect();
 
   const r = await ao.unmonitor({
     process,
@@ -291,7 +294,7 @@ export async function readHandler(args: {
   tags?: Tag[];
   data?: any;
 }): Promise<any> {
-  const ao = connect();
+
   const tags = [{ name: 'Action', value: args.action }];
   if (args.tags) tags.push(...args.tags);
   let data = JSON.stringify(args.data || {});

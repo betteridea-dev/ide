@@ -15,7 +15,7 @@ import { useLocalStorage } from "usehooks-ts"
 export default function PackageView() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const ao = connect()
+    const ao = connect({ MODE: "legacy" })
     const [installed, setInstalled] = useLocalStorage<{ [pname: string]: { [packageName: string]: string } }>("installed-packages", {}, { initializeWithValue: true })
     // const [installed, setInstalled] = useState(false)
     const [fullData, setFullData] = useState<TPackage | null>(null)

@@ -25,7 +25,7 @@ importers:
         version: 0.1.1(@arweave-wallet-kit/core@0.1.1)(arweave@1.15.1)(axios@1.7.2)(encoding@0.1.13)(warp-arbundles@1.0.4)
       '@arweave-wallet-kit/react':
         specifier: ^0.2.1
-        version: 0.2.1(@arweave-wallet-kit/core@0.1.1)(@arweave-wallet-kit/styles@0.1.1)(@permaweb/aoconnect@0.0.57)(arweave@1.15.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+        version: 0.2.1(@arweave-wallet-kit/core@0.1.1)(@arweave-wallet-kit/styles@0.1.1)(@permaweb/aoconnect@0.0.77(encoding@0.1.13))(arweave@1.15.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@arweave-wallet-kit/styles':
         specifier: ^0.1.1
         version: 0.1.1
@@ -51,8 +51,8 @@ importers:
         specifier: ^14.2.3
         version: 14.2.3(next@15.2.2(@babel/core@7.26.10)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@permaweb/aoconnect':
-        specifier: ^0.0.57
-        version: 0.0.57
+        specifier: ^0.0.77
+        version: 0.0.77(encoding@0.1.13)
       '@radix-ui/react-alert-dialog':
         specifier: ^1.0.5
         version: 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1648,6 +1648,13 @@ packages:
   '@permaweb/aoconnect@0.0.57':
     resolution: {integrity: sha512-l1+47cZuQ8pOIMOdRXymcegCmefXjqR8Bc2MY6jIzWv9old/tG6mfCue2W1QviGyhjP3zEVQgr7YofkY2lq35Q==}
     engines: {node: '>=18', yarn: please-use-npm}
+
+  '@permaweb/aoconnect@0.0.77':
+    resolution: {integrity: sha512-uPBOH9vuJhg+tui6t8IjY7Sa2FaEuDoxlcET3m6E+cTE4zSpcR7tdQPSqWmcfQrlgpfiiIdQOKXBCfpbZ0GLog==}
+    engines: {node: '>=18'}
+
+  '@permaweb/protocol-tag-utils@0.0.2':
+    resolution: {integrity: sha512-2IiKu71W7pkHKIzxabCGQ5q8DSppZaE/sPcPF2hn+OWwfe04M7b5X5LHRXQNPRuxHWuioieGdPQb3F7apOlffQ==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -4676,6 +4683,9 @@ packages:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
 
+  http-message-signatures@1.0.4:
+    resolution: {integrity: sha512-gavCQWnxHFg0BVlKs6CmYK7hNSH1o0x0mHTC68yBAHYOYuTVXPv52mEE7QuT5TenfiagTdOa/zPJzen4lEX7Rg==}
+
   http-proxy-agent@4.0.1:
     resolution: {integrity: sha512-k0zdNgqWTGA6aeIRVpvfVob4fL52dTfaehylg0Y4UvSySvOq/Y+BOyPrgpUrA7HylqvU8vIZGsRuXmspskV0Tg==}
     engines: {node: '>= 6'}
@@ -6710,6 +6720,14 @@ packages:
   strongly-connected-components@1.0.1:
     resolution: {integrity: sha512-i0TFx4wPcO0FwX+4RkLJi1MxmcTv90jNZgxMu9XRnMXMeFUY1VJlIoXpZunPUvUUqbCT1pg5PEkFqqpcaElNaA==}
 
+  structured-headers@1.0.1:
+    resolution: {integrity: sha512-QYBxdBtA4Tl5rFPuqmbmdrS9kbtren74RTJTcs0VSQNVV5iRhJD4QlYTLD0+81SBwUQctjEQzjTRI3WG4DzICA==}
+    engines: {node: '>= 14', npm: '>=6'}
+
+  structured-headers@2.0.0:
+    resolution: {integrity: sha512-qX9utDaDolZWTcAep0EZDSQASTu4mx16Jh5dBSpplfvK3ro1CF8mWqRByAwncRojnlaCCUZA2jPcCqKNnp7uCA==}
+    engines: {node: '>=18', npm: '>=6'}
+
   stubs@3.0.0:
     resolution: {integrity: sha512-PdHt7hHUJKxvTCgbKX9C1V/ftOcjJQgz8BZwNfV5c4B6dcGqlpelTbJ999jBGZ2jYiPAwcX5dP6oBwVlBlUbxw==}
 
@@ -7456,7 +7474,7 @@ snapshots:
       '@dha-team/arbundles': 1.0.1(encoding@0.1.13)
       '@permaweb/aoconnect': 0.0.57
       arweave: 1.15.5
-      axios: 1.7.9
+      axios: 1.7.9(debug@4.4.0)
       axios-retry: 4.5.0(axios@1.7.9)
       commander: 12.1.0
       eventemitter3: 5.0.1
@@ -7489,7 +7507,7 @@ snapshots:
       - supports-color
       - warp-arbundles
 
-  '@arweave-wallet-kit/react@0.2.1(@arweave-wallet-kit/core@0.1.1)(@arweave-wallet-kit/styles@0.1.1)(@permaweb/aoconnect@0.0.57)(arweave@1.15.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)':
+  '@arweave-wallet-kit/react@0.2.1(@arweave-wallet-kit/core@0.1.1)(@arweave-wallet-kit/styles@0.1.1)(@permaweb/aoconnect@0.0.77(encoding@0.1.13))(arweave@1.15.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)':
     dependencies:
       '@arweave-wallet-kit/core': 0.1.1
       '@arweave-wallet-kit/styles': 0.1.1
@@ -7497,7 +7515,7 @@ snapshots:
       '@iconicicons/react': 1.5.1(react@18.2.0)
       '@linaria/core': 6.2.0
       '@linaria/react': 6.2.1(react@18.2.0)
-      '@permaweb/aoconnect': 0.0.57
+      '@permaweb/aoconnect': 0.0.77(encoding@0.1.13)
       '@wyw-in-js/babel-preset': 0.4.1(typescript@5.4.5)
       arweave: 1.15.1
       framer-motion: 8.1.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -9067,6 +9085,29 @@ snapshots:
       zod: 3.24.2
     transitivePeerDependencies:
       - supports-color
+
+  '@permaweb/aoconnect@0.0.77(encoding@0.1.13)':
+    dependencies:
+      '@dha-team/arbundles': 1.0.1(encoding@0.1.13)
+      '@permaweb/ao-scheduler-utils': 0.0.25
+      '@permaweb/protocol-tag-utils': 0.0.2
+      axios: 1.7.9(debug@4.4.0)
+      base64url: 3.0.1
+      buffer: 6.0.3
+      debug: 4.4.0
+      http-message-signatures: 1.0.4
+      hyper-async: 1.1.2
+      mnemonist: 0.39.8
+      ramda: 0.30.1
+      structured-headers: 2.0.0
+      zod: 3.24.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+
+  '@permaweb/protocol-tag-utils@0.0.2': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -10864,20 +10905,20 @@ snapshots:
 
   axios-retry@4.5.0(axios@1.7.9):
     dependencies:
-      axios: 1.7.9
+      axios: 1.7.9(debug@4.4.0)
       is-retry-allowed: 2.2.0
 
   axios@1.7.2:
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.4.0)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
-  axios@1.7.9:
+  axios@1.7.9(debug@4.4.0):
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.4.0)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -12308,7 +12349,9 @@ snapshots:
 
   fn.name@1.1.0: {}
 
-  follow-redirects@1.15.6: {}
+  follow-redirects@1.15.6(debug@4.4.0):
+    optionalDependencies:
+      debug: 4.4.0
 
   font-atlas@2.1.0:
     dependencies:
@@ -12847,6 +12890,10 @@ snapshots:
       setprototypeof: 1.2.0
       statuses: 2.0.1
       toidentifier: 1.0.1
+
+  http-message-signatures@1.0.4:
+    dependencies:
+      structured-headers: 1.0.1
 
   http-proxy-agent@4.0.1:
     dependencies:
@@ -15399,6 +15446,10 @@ snapshots:
       escape-string-regexp: 1.0.5
 
   strongly-connected-components@1.0.1: {}
+
+  structured-headers@1.0.1: {}
+
+  structured-headers@2.0.0: {}
 
   stubs@3.0.0: {}
 
