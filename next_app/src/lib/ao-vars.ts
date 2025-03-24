@@ -1,5 +1,31 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
-import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
+// import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
+
+import { createData, ArweaveSigner } from 'warp-arbundles'
+
+
+/**
+ * A function that builds a signer using a wallet jwk interface
+ * commonly used in node-based dApps
+ *
+ * This is provided as a convenience for consumers of the SDK
+ * to use, but consumers can also implement their own signer
+ *
+ * @returns {Types['signer']}
+ */
+export function createDataItemSignerManual(wallet) {
+  const signer = async ({ data, tags, target, anchor }) => {
+    const signer = new ArweaveSigner(wallet)
+    const dataItem = createData(data, signer, { tags, target, anchor })
+    return dataItem.sign(signer)
+      .then(async () => ({
+        id: await dataItem.id,
+        raw: await dataItem.getRaw()
+      }))
+  }
+
+  return signer
+}
 
 export const AppVersion = process.env.version;
 export const AOModule = "JArYBF-D8q2OmZ4Mok00sD2Y_6SYEQ7Hjx-6VZ_jl3g"; // aos 2.0.3
@@ -161,7 +187,7 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
     module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,
     tags,
-    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
   });
 
   return result;
@@ -190,7 +216,7 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
   const message = await ao.message({
     process,
     data: code,
-    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
     tags,
   });
 
@@ -224,7 +250,7 @@ export async function monitor(process: string) {
 
   const r = await ao.monitor({
     process,
-    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
   });
 
   return r;
@@ -235,7 +261,7 @@ export async function unmonitor(process: string) {
 
   const r = await ao.unmonitor({
     process,
-    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+    signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
   });
 
   return r;
