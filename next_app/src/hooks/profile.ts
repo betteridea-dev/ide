@@ -44,3 +44,5 @@ export const useProfile = create<State>((set) => ({
     setProfileId: (id) => set((state) => ({ ...state, id })),
     setProfileWalletAddress: (walletAddress) => set((state) => ({ ...state, walletAddress })),
 }));
+
+export default useProfile;

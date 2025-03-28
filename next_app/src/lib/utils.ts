@@ -397,3 +397,82 @@ export function extractHandlerNames(luaCode: string) {
 
   return handlers;
 }
+
+// Error handling utilities
+export class AppError extends Error {
+  public code: string;
+  public details?: any;
+
+  constructor(message: string, code: string, details?: any) {
+    super(message);
+    this.name = 'AppError';
+    this.code = code;
+    this.details = details;
+  }
+}
+
+export const ErrorCodes = {
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  API_ERROR: 'API_ERROR',
+  AUTH_ERROR: 'AUTH_ERROR',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  FILE_ERROR: 'FILE_ERROR',
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+};
+
+export async function apiRequest<T>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+      let errorData = null;
+
+      try {
+        errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (e) {
+        // Ignore JSON parsing error
+      }
+
+      throw new AppError(
+        errorMessage,
+        response.status === 401 || response.status === 403
+          ? ErrorCodes.AUTH_ERROR
+          : ErrorCodes.API_ERROR,
+        { status: response.status, data: errorData }
+      );
+    }
+
+    return await response.json() as T;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new AppError(
+        'Network connection error. Please check your internet connection.',
+        ErrorCodes.NETWORK_ERROR,
+        error
+      );
+    }
+
+    throw new AppError(
+      error.message || 'An unknown error occurred',
+      ErrorCodes.UNKNOWN_ERROR,
+      error
+    );
+  }
+}

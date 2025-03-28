@@ -20,12 +20,6 @@ import { v4 } from "uuid";
 import dynamic from "next/dynamic";
 import runIcon from "@/assets/icons/run.svg";
 
-// AI AUTOCOMPLETE (PERMAHACKS BOUNTY)
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
-import { CompletionFormatter } from "@/lib/ai-completion-formatter";
-import { generateContext } from "@/lib/ai";
-
 const Plot = dynamic(
     () =>
         import('react-plotly.js'),
@@ -34,16 +28,6 @@ const Plot = dynamic(
         loading: () => <>Loading Graph...</>,
     },
 );
-
-type AiSuggestion = {
-    insertText: string,
-    range: {
-        startLineNumber: number,
-        startColumn: number,
-        endLineNumber: number,
-        endColumn: number
-    }
-}
 
 const monacoConfig: editor.IStandaloneEditorConstructionOptions = {
     fontSize: 14,
@@ -72,21 +56,12 @@ const CodeCell = ({
     file,
     cellId,
     manager,
-    project,
-    inferenceFunction,
-    aiSuggestions
+    project
 }: {
     file: PFile;
     cellId: string;
     manager: ProjectManager;
     project: Project;
-    inferenceFunction?: (textBeforeCursor: string, textBeforeCursorOnCurrentLine: string, range: {
-        startLineNumber: number,
-        startColumn: number,
-        endLineNumber: number,
-        endColumn: number
-    }) => Promise<void>;
-    aiSuggestions: AiSuggestion[]
 }) => {
     const [mouseHovered, setMouseHovered] = useState(false);
     const [running, setRunning] = useState(false);
@@ -99,60 +74,6 @@ const CodeCell = ({
     const globalState = useGlobalState();
     const thisEditor = useRef<editor.IStandaloneCodeEditor>()
     const [active, setActive] = useState(false)
-    const [generating, setGenerating] = useState(false)
-
-    function generateAiSuggestions() {
-        if (!thisEditor.current) return
-        const val = thisEditor.current.getValue()
-        const model = thisEditor.current.getModel()
-        const position = thisEditor.current.getPosition()
-        const currentLine = model.getLineContent(position.lineNumber)
-        const offset = model.getOffsetAt(position)
-        const textBeforeCursor = val.substring(0, offset - currentLine.length)
-        const textBeforeCursorOnCurrentLine = currentLine.substring(0, position.column - 1)
-        if (!textBeforeCursor) return
-        setGenerating(true)
-        inferenceFunction(textBeforeCursor, textBeforeCursorOnCurrentLine, {
-            startLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column
-        })
-        setGenerating(false)
-    }
-
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         if (active) {
-    //             generateAiSuggestions()
-    //             setActive(false)
-    //         }
-    //     }, 1000)
-    //     return () => clearInterval(interval)
-    // }, [active])
-
-    useEffect(() => {
-        console.log("aiSuggestions", aiSuggestions)
-        if (!monaco && !(aiSuggestions.length > 0)) return
-        const cmp = monaco.languages.registerInlineCompletionsProvider("lua", {
-            provideInlineCompletions(model, position, context, token) {
-                const suggestionItems = aiSuggestions.filter(s => {
-                    return s.insertText.startsWith(model.getValueInRange(s.range))
-                }).filter(s => {
-                    return s.range.startLineNumber == position.lineNumber && s.range.startColumn >= position.column - 3
-                }).map(s => {
-                    return new CompletionFormatter(model, position).format(s.insertText, s.range)
-                })
-                if (suggestionItems.length > 0) console.log(suggestionItems)
-
-                return Promise.resolve({
-                    items: suggestionItems
-                })
-            },
-            freeInlineCompletions() { },
-        })
-        return () => cmp.dispose()
-    }, [aiSuggestions, monaco])
 
     const runCellCode = async () => {
         // get file state, run code get output, read latest file state and add output
@@ -394,47 +315,15 @@ const CodeCell = ({
                                     // const statusNode = document.getElementById(`vim-status`) as HTMLDivElement
                                     const vim = MonacoVim.initVimMode(editor, statusNode)
                                     console.log(vim)
-
-                                    // vim.on("vim-mode-change", ({ mode, subMode }) => {
-                                    //     // console.log(mode, subMode)
-
-                                    //     let text = ""
-                                    //     if (mode === "visual") {
-                                    //         if (subMode === "linewise") {
-                                    //             text = "--VISUAL LINE--"
-                                    //         } else if (subMode === "blockwise") {
-                                    //             text = "--VISUAL BLOCK--"
-                                    //         } else {
-                                    //             text = "--VISUAL--"
-                                    //         }
-                                    //     } else {
-                                    //         text = `--${mode.toUpperCase()}--`
-                                    //     }
-                                    //     // statusNode.textContent = text
-
-                                    //     window.dispatchEvent(new CustomEvent("set-vim-mode", { detail: { mode, subMode } }))
-                                    // })
-
-                                    // window.addEventListener("set-vim-mode", (e: CustomEvent) => {
-                                    //     console.log("event", e.detail)
-                                    //     vim.ctxInsert.set(e.detail.mode == "insert")
-                                    // })
                                 });
                             }
-                            // set font family
-                            // editor.updateOptions({ fontFamily: "DM Mono" });
 
                             // add command only to this particular cell
                             editor.getContainerDomNode().addEventListener("keydown", async (e) => {
-                                // console.log(e.key)
                                 if (e.shiftKey && e.key == "Enter" && !e.metaKey) {
                                     e.preventDefault()
                                     const runbtn = document.getElementById(`run-cell-${cellId}`)
-                                    // console.log(cellId, runbtn)
                                     runbtn?.click()
-                                } else if (e.ctrlKey && e.key == ".") {
-                                    e.preventDefault()
-                                    generateAiSuggestions()
                                 }
                             })
 
@@ -657,7 +546,6 @@ const CellUtilButtons = ({ defaultVisible = false, position, addNewCell }: { def
 export default function NotebookEditor() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
-    const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([])
 
     const project = manager.getProject(globalState.activeProject);
     const file = project.files[globalState.activeFile];
@@ -690,45 +578,6 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
         manager.updateFile(p, { file: f, content: newContent });
     }
 
-    async function inferenceFunction(textBeforeCursor: string, textBeforeCursorOnCurrentLine: string, range: {
-        startLineNumber: number,
-        startColumn: number,
-        endLineNumber: number,
-        endColumn: number
-    }) {
-        const geminiApiKey = localStorage.getItem("geminiApiKey") || ""
-        if (!geminiApiKey) {
-            toast.error("No Gemini API key found\nPlease add your Gemini API key in the settings")
-            throw new Error("No Gemini API key found")
-        }
-
-        const model = createGoogleGenerativeAI({
-            apiKey: geminiApiKey,
-        })("models/gemini-1.5-flash-latest")
-
-        console.log(textBeforeCursor, textBeforeCursorOnCurrentLine, range)
-
-        const res = await generateText({
-            model,
-            prompt: generateContext(textBeforeCursor, textBeforeCursorOnCurrentLine),
-        })
-        console.log(res.text)
-        const newSuggestion = {
-            insertText: res.text,
-            range: {
-                startLineNumber: range.startLineNumber,
-                startColumn: range.startColumn,
-                endLineNumber: range.endLineNumber + (res.text.match(/\n/g) || []).length,
-                endColumn: range.endColumn + res.text.length
-            }
-        }
-        setAiSuggestions((prev) => [...prev, newSuggestion])
-        // setAiSuggestions((prev) => [...prev, res.text])
-        // console.log(res.text)
-        // return { current: res.text, all: [...aiSuggestions, res.text] }
-    }
-
-
     return <div className="h-full w-full relative overflow-y-scroll overflow-x-clip flex flex-col gap-2 p-4">
         {file.content.cellOrder.map((cellId, index) => {
             const cellType = file?.content?.cells[cellId!]?.type
@@ -748,8 +597,6 @@ $$\\int_a^b f'(x) dx = f(b)- f(a)$$`,
                         cellId={cellId}
                         manager={manager}
                         project={project}
-                        inferenceFunction={inferenceFunction}
-                        aiSuggestions={aiSuggestions}
                     />}
             </>
         })}

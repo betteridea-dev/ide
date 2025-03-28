@@ -1,3 +1,4 @@
+// Constants
 export const luaCompletionPretext = `
 ## Task: Code Completion
 
@@ -22,9 +23,63 @@ export const luaCompletionPretext = `
     - If you do not have a suggestion, return an empty string.
 `
 
-export function generateContext(textbeforecursor: string, textbeforecursoroncurrentline) {
-    return `${luaCompletionPretext}
-TEXT BEFORE CURSOR: ${textbeforecursor}
+// Types
+export interface CompletionContext {
+    textBeforeCursor: string;
+    textBeforeCursorOnCurrentLine: string;
+    language?: SupportedLanguage;
+}
 
-TEXT BEFORE CURSOR ON CURRENT LINE: ${textbeforecursoroncurrentline}
-`}
+export type SupportedLanguage = 'lua' | 'javascript' | 'typescript' | 'json';
+
+export interface AICompletionRequest {
+    context: CompletionContext;
+    model?: string;
+}
+
+export interface AICompletionResponse {
+    completion: string;
+    error?: string;
+}
+
+// Utility functions
+export function generateContext({ textBeforeCursor, textBeforeCursorOnCurrentLine, language = 'lua' }: CompletionContext): string {
+    const pretext = language === 'lua' ? luaCompletionPretext : luaCompletionPretext; // Add more languages as needed
+
+    return `${pretext}
+TEXT BEFORE CURSOR: ${textBeforeCursor}
+
+TEXT BEFORE CURSOR ON CURRENT LINE: ${textBeforeCursorOnCurrentLine}
+`;
+}
+
+// API call function
+export async function getCompletion({ context, model = 'default' }: AICompletionRequest): Promise<AICompletionResponse> {
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: generateContext(context),
+                model,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`AI completion failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return {
+            completion: data.response || '',
+        };
+    } catch (error) {
+        console.error('AI completion error:', error);
+        return {
+            completion: '',
+            error: error.message,
+        };
+    }
+}
