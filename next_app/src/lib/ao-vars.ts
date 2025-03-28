@@ -38,6 +38,11 @@ export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak";
 
 export const BetterIDEaWallet = "MnZ8JrR5SoswAwWtX-HTnl4Kq5k6Kx1Y7vPxmlAyl_g"
 
+export const DEFAULT_CU_URL = "https://cu.ao-testnet.xyz";
+export const DEFAULT_MU_URL = "https://mu.ao-testnet.xyz";
+// export const DEFAULT_CU_URL = "https://cu.ardrive.io";
+export const DEFAULT_GATEWAY_URL = "https://arweave.net";
+
 // deleted the webhook coz someone spammed it with woke stuff, can't have good things :(
 export const SponsorWebhookUrl = "https://discord.com/api/webhooks/1258731411033030726/T6rl7Ciuw8cgiR30MOVeOsbEcvAEWM45IRpc37TqAoXBbH3ZQDoxQzLAW0bmgcsxnCI9"
 
@@ -100,8 +105,50 @@ export type TPackage = {
   installed: boolean
 }
 
-const ao = connect({ MODE: "legacy" });
+// export function getCuUrl() {
+//   const customCU = localStorage.getItem("ao-cu-url");
+//   if (!customCU || customCU == '""') {
+//     return DEFAULT_CU_URL;
+//   } else {
+//     // make sure this is a valid url
+//     try {
+//       new URL(JSON.parse(customCU));
+//       return JSON.parse(customCU);
+//     } catch (e) {
+//       console.error("Invalid custom cu url", e);
+//       return DEFAULT_CU_URL;
+//     }
+//   }
+// }
+
+// export function getGatewayUrl() {
+//   const customGateway = localStorage.getItem("ao-gateway-url");
+//   if (!customGateway || customGateway == '""') {
+//     return DEFAULT_GATEWAY_URL;
+//   } else {
+//     return JSON.parse(customGateway);
+//   }
+// }
+
+export function getCustomUrls(): { cu: string, mu: string, gateway: string } {
+  const customCU = JSON.parse(localStorage.getItem("ao-cu-url") || `""`) || DEFAULT_CU_URL;
+  const customMU = JSON.parse(localStorage.getItem("ao-mu-url") || `""`) || DEFAULT_MU_URL;
+  const customGateway = JSON.parse(localStorage.getItem("ao-gateway-url") || `""`) || DEFAULT_GATEWAY_URL;
+
+  try { new URL(customCU) } catch (e) { console.error("Invalid custom cu url", e) }
+  try { new URL(customMU) } catch (e) { console.error("Invalid custom mu url", e) }
+  try { new URL(customGateway) } catch (e) { console.error("Invalid custom gateway url", e) }
+
+  if (customCU != DEFAULT_CU_URL) console.log("Using custom cu url", customCU)
+  if (customMU != DEFAULT_MU_URL) console.log("Using custom mu url", customMU)
+  if (customGateway != DEFAULT_GATEWAY_URL) console.log("Using custom gateway url", customGateway)
+
+  return { cu: customCU, mu: customMU, gateway: customGateway };
+}
+
 export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule?: string) {
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
 
   if (tags) {
     tags = [...CommonTags, ...tags];
@@ -122,7 +169,8 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
 }
 
 export async function runLua(code: string, process: string, tags?: Tag[]) {
-
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
   if (tags) {
     tags = [...CommonTags, ...tags];
   } else {
@@ -146,7 +194,8 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
     signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
     tags,
   });
-
+  // delay 100ms before getting result
+  await new Promise(resolve => setTimeout(resolve, 100));
   const result = await ao.result({ process, message });
   // console.log(result);
   (result as any).id = message;
@@ -154,7 +203,8 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
 }
 
 export async function getResults(process: string, cursor = "") {
-
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway }); // using default since custom cu url seems to fail with invalid request
   const r = await ao.results({
     process,
     from: cursor,
@@ -172,7 +222,8 @@ export async function getResults(process: string, cursor = "") {
 }
 
 export async function monitor(process: string) {
-
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
   const r = await ao.monitor({
     process,
     signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
@@ -182,7 +233,8 @@ export async function monitor(process: string) {
 }
 
 export async function unmonitor(process: string) {
-
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
   const r = await ao.unmonitor({
     process,
     signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
@@ -219,11 +271,12 @@ export async function readHandler(args: {
   tags?: Tag[];
   data?: any;
 }): Promise<any> {
-
   const tags = [{ name: 'Action', value: args.action }];
   if (args.tags) tags.push(...args.tags);
   let data = JSON.stringify(args.data || {});
 
+  const { cu, mu, gateway } = getCustomUrls();
+  const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
   const response = await ao.dryrun({
     process: args.processId,
     tags: tags,
