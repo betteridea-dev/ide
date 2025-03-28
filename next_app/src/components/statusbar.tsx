@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 import { Button } from "./ui/button";
-import { Unplug } from "lucide-react"
+import { Database, File, UnplugIcon, Wallet2 } from "lucide-react"
 import { getResults } from "@/lib/ao-vars";
 import { stripAnsiCodes } from "@/lib/utils";
 import { ConnectButton, useConnection, useActiveAddress, useProfileModal, useStrategy } from "arweave-wallet-kit"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default function Statusbar() {
-    // const wallet = useWallet();
     const { connected, connect, disconnect } = useConnection()
     const { open, setOpen } = useProfileModal()
     const strategy = useStrategy()
@@ -19,9 +19,50 @@ export default function Statusbar() {
     const globalState = useGlobalState();
     const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true })
     const [mounted, setMounted] = useState(false)
+    const [performance, setPerformance] = useState({ memory: 0 })
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
     const fileType = project?.files[globalState.activeFile]?.type
+
+    // Get language mode based on file type
+    const getLanguageMode = () => {
+        if (!globalState.activeFile) return "Plain Text"
+        const extension = globalState.activeFile.split('.').pop()?.toLowerCase()
+        const languageMap: { [key: string]: string } = {
+            'js': 'JavaScript',
+            'lua': 'Lua',
+            'md': 'Markdown',
+            'json': 'JSON',
+            'txt': 'Plain Text',
+            'luanb': 'Lua Notebook'
+        }
+        return languageMap[extension] || 'Plain Text'
+    }
+
+    // Shorten address or process ID
+    const shortenId = (id: string) => {
+        if (!id) return ""
+        if (id.length <= 8) return id
+        return `${id.slice(0, 4)}...${id.slice(-4)}`
+    }
+
+    // Update performance metrics
+    useEffect(() => {
+        const updatePerformance = () => {
+            if (typeof window !== 'undefined') {
+                const performance = window.performance as any
+                const memory = performance.memory
+                if (memory) {
+                    setPerformance({
+                        memory: Math.round(memory.usedJSHeapSize / 1024 / 1024)
+                    })
+                }
+            }
+        }
+
+        const interval = setInterval(updatePerformance, 1000)
+        return () => clearInterval(interval)
+    }, [])
 
     useEffect(() => {
         if (connected) {
@@ -31,46 +72,6 @@ export default function Statusbar() {
             }
         }
     }, [connected, strategy, disconnect])
-
-    // async function connectWallet() {
-    //     // if (!window.arweaveWallet)
-    //     //     return toast.error("No Arweave wallet found, please install ArConnect and try again");
-    //     //     wallet.connect().then((res) => {
-    //     //     toast.success(`Connected to ${res.shortAddress}`, { id: "connected" });
-    //     //     setAutoconnect(true);
-    //     // })
-    //     await connect()
-    //     if (connected) {
-    //         toast.success(`Connected to ${address}`, { id: "connected" });
-    //         setAutoconnect(true);
-    //     }
-    // }
-
-    // async function disconnectWallet() {
-    //     if (!window.arweaveWallet) return;
-    //     // wallet.disconnect();
-    //     await disconnect()
-    //     setAutoconnect(false);
-    // }
-
-    // useEffect(() => {
-    //     if (autoconnect) {
-    //         if (!window.arweaveWallet) { toast.error("No Arweave wallet found, please install ArConnect and try again"); return }
-    //         if (!mounted)
-    //             setTimeout(() => {
-    //                 addEventListener("walletSwitch", connectWallet)
-    //                 window.arweaveWallet.getActiveAddress().then((addr: string) => {
-    //                     connectWallet()
-    //                     setMounted(true);
-    //                 }).catch(() => {
-    //                     setAutoconnect(false);
-    //                 });
-    //             }, 150);
-    //     }
-    //     else {
-    //         disconnectWallet();
-    //     }
-    // }, [autoconnect, mounted]);
 
     // INCOMING MESSAGS NOTIFICATION
     useEffect(() => {
@@ -94,7 +95,6 @@ export default function Statusbar() {
                     console.log(res)
                     results.forEach((result) => {
                         if (typeof result.Output == "object") {
-                            // globalState.setPrompt(result.Output.prompt || result.Output?.data?.prompt! || globalState.prompt)
                             if (result.Output.print) {
                                 toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(`${result.Output.data}`)}</div>, { style: { borderRadius: "7px" } })
                                 globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
@@ -116,34 +116,61 @@ export default function Statusbar() {
         }
     }, [project, address, connected])
 
-    return <div className="border-t h-[20px] text-xs flex items-center overflow-clip gap-0.5 px-2">
-        <Button variant="ghost" data-connected={connected} className="p-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary text-xs"
-            onClick={() => connected ? setOpen(true) : connect()} id="connect-btn">
-            {connected ? ` ${address}` : "Connect"}
+    return <div className="border-t h-[20px] text-xs flex items-center overflow-clip gap-2 px-3 bg-background/50 backdrop-blur-sm">
+        {/* Left Section - Connection Status */}
+        <Button
+            variant="ghost"
+            // data-connected={connected}
+            // className="h-full px-2 gap-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary hover:bg-accent/50"
+            className="h-full px-2 gap-1 rounded-none hover:bg-primary text-foreground hover:text-background"
+            onClick={() => connected ? setOpen(true) : connect()}
+            id="connect-btn"
+        >
+
+            <Wallet2 className="w-3.5 h-3.5" color={connected ? "green" : "red"} />
+            {connected ? "connected: " + shortenId(address) : "connect"}
         </Button>
-        {/* <ConnectButton /> */}
-        {/* {connected && <Button variant="ghost" className="p-1 rounded-none text-xs " onClick={disconnect}>
-            <Unplug size={16} className="text-destructive-foreground" />
-        </Button>} */}
-        {fileType == "NORMAL" && <code id="vim-status" className="w-fit text-sm h-fit ml-2 bg-primary px-1 text-white"></code>}
+
+        {/* Middle Section - File Information */}
+
+        {/* Right Section - Project Info and Performance */}
         <div className="grow"></div>
-        {(project && project.process) ? (
-            <Button
-                variant="ghost"
-                className="p-1 text-xs"
-                onClick={() => {
-                    navigator.clipboard.writeText(project.process);
-                    toast.info("Copied to clipboard");
-                }}
-            >
-                AO Process: {project.process}
-            </Button>
-        ) : (
-            <code className="text-xs text-muted-foreground mr-2">
-                v{process.env.version} - <Link href={`https://github.com/betteridea-dev/ide/commit/${process.env.gitHash}`} target="_blank" className="hover:underline">
-                    {process.env.gitHash}
-                </Link>
-            </code>
-        )}
+        <div className="flex items-center gap-3">
+            {/* Memory Usage */}
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Database size={12} />
+                <span>{performance.memory}MB</span>
+            </div>
+            |
+            {/* Project Information */}
+            {(project && project.process) ? (
+                <Button
+                    variant="ghost"
+                    className="h-full px-1.5 -mx-1.5 rounded-none hover:bg-accent/50 gap-1"
+                    onClick={() => {
+                        navigator.clipboard.writeText(project.process);
+                        toast.info("Copied to clipboard");
+                    }}
+                >
+                    {shortenId(project.files[globalState.activeFile]?.process || project.process)}
+                    {project.files[globalState.activeFile]?.process && <File strokeWidth={2.2} className="w-3.5 h-3.5" />}
+
+                </Button>
+            ) : (
+                <code className="text-xs text-muted-foreground font-extralight flex items-center gap-1">
+
+                    <Link href={`https://github.com/betteridea-dev/ide/commit/${process.env.gitHash}`} target="_blank" className="hover:underline font-btr-code">
+                        v{process.env.version} {" · "}
+                        {shortenId(process.env.gitHash)}
+                    </Link>
+                </code>
+            )}
+
+            {/* {globalState.activeFile && <>
+                | <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground font-medium">{getLanguageMode()}</span>
+                </div>
+            </>} */}
+        </div>
     </div>
 }
