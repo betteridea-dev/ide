@@ -29,9 +29,9 @@ type CustomComponents = Components & {
 }
 
 const availableModels = {
-    "Qwen 2.5 coder": "qwen-2.5-coder-32b",
-    "Gemini 2.0 FL (high context)": "gemini-2.0-flash-lite",
     "Deepseek R1": "deepseek-r1-distill-llama-70b",
+    // "Qwen 2.5 coder": "qwen-2.5-coder-32b",
+    "Gemini 2.0 FL (high context)": "gemini-2.0-flash-lite",
     "Llama 3": "llama3-70b-8192",
     "Llama 3.3 70b": "llama-3.3-70b-versatile",
     "Gemma 2": "gemma2-9b-it"
