@@ -126,7 +126,7 @@ function Settings() {
     const [vimMode, setVimMode] = useLocalStorage("vimMode", false, { initializeWithValue: true });
     const [customCuUrl, setCustomCuUrl] = useLocalStorage("ao-cu-url", "", { initializeWithValue: true });
     const [customMuUrl, setCustomMuUrl] = useLocalStorage("ao-mu-url", "", { initializeWithValue: true });
-    const [customGatewayUrl, setCustomGatewayUrl] = useLocalStorage("ao-gateway-url", "", { initializeWithValue: true });
+    const [customGatewayUrl, setCustomGatewayUrl] = useLocalStorage("gateway-url", "https://arweave.net", { initializeWithValue: true });
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
     const files: { [name: string]: PFile } = project ? project.files : {};
@@ -135,7 +135,7 @@ function Settings() {
 
     async function fetchProcesses() {
         if (!window.arweaveWallet) return
-        const client = new GraphQLClient("https://arweave.net/graphql");
+        const client = new GraphQLClient("https://arnode.asia/graphql");
         const address = await window.arweaveWallet.getActiveAddress();
 
         const query = gql`

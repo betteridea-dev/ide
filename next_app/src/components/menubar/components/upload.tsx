@@ -8,14 +8,23 @@ import Arweave from "arweave";
 import { useLocalStorage } from "usehooks-ts";
 import { AppVersion, Tag } from "@/lib/ao-vars";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader } from "lucide-react";
+import { Loader, Upload as UploadIcon, X, FileText, CheckCircle2 } from "lucide-react";
 import { GraphQLClient, gql } from "graphql-request";
 import Link from "next/link";
 import { useConnection, useActiveAddress } from "arweave-wallet-kit";
+import { cn } from "@/lib/utils";
 
 type Transaction = {
     id: string;
     tags: Tag[];
+    timestamp?: number;
+}
+
+type UploadState = {
+    file: File | null;
+    price: string | null;
+    status: 'idle' | 'uploading' | 'success' | 'error';
+    error: string | null;
 }
 
 export default function Upload() {
@@ -23,10 +32,14 @@ export default function Upload() {
     const address = useActiveAddress()
     const [popupOpen, setPopupOpen] = useState(false);
     const [fileDragOver, setFileDragOver] = useState(false);
-    const [price, setPrice] = useState<string>();
-    const [file, setFile] = useState<File>();
-    const [uploading, setUploading] = useState(false);
+    const [uploadState, setUploadState] = useState<UploadState>({
+        file: null,
+        price: null,
+        status: 'idle',
+        error: null
+    });
     const [history, setHistory] = useLocalStorage<Transaction[]>("upload-history", [], { initializeWithValue: true });
+    const [activeTab, setActiveTab] = useState<"upload" | "history">("upload");
 
     const ar = new Arweave({
         host: 'arweave.net',
@@ -34,144 +47,302 @@ export default function Upload() {
         protocol: 'https',
     });
 
-
     async function upload() {
-        setUploading(true)
-        const txn = await ar.createTransaction({
-            data: new Uint8Array(await file?.arrayBuffer())
-        }, "use_wallet")
-        txn.addTag("Content-Type", file?.type || "application/octet-stream")
-        txn.addTag("App-Name", "BetterIDEa")
-        txn.addTag("App-Version", AppVersion)
-        txn.addTag("BetterIDEa-Function", "Upload-Utility")
-        txn.addTag("File-Name", file?.name || "unknown")
-        console.log(txn)
+        if (!uploadState.file) return;
+
+        setUploadState(prev => ({ ...prev, status: 'uploading', error: null }));
+
         try {
-            await ar.transactions.sign(txn, "use_wallet")
-            console.log(txn)
-            await ar.transactions.post(txn)
+            const txn = await ar.createTransaction({
+                data: new Uint8Array(await uploadState.file.arrayBuffer())
+            }, "use_wallet");
+
+            txn.addTag("Content-Type", uploadState.file.type || "application/octet-stream");
+            txn.addTag("App-Name", "BetterIDEa");
+            txn.addTag("App-Version", AppVersion);
+            txn.addTag("BetterIDEa-Function", "Upload-Utility");
+            txn.addTag("File-Name", uploadState.file.name || "unknown");
+
+            await ar.transactions.sign(txn, "use_wallet");
+            await ar.transactions.post(txn);
+
+            // Clear the file and price after successful upload
+            setUploadState({
+                file: null,
+                price: null,
+                status: 'success',
+                error: null
+            });
+
+            // Reset the file input
+            (document.getElementById('upload-to-ar') as HTMLInputElement).value = '';
+
+            setHistory(prev => [...prev, {
+                id: txn.id,
+                tags: txn.tags,
+                timestamp: Date.now()
+            }]);
+
+            toast.success("File uploaded successfully!", {
+                description: `Transaction ID: ${txn.id}`,
+                action: {
+                    label: "View",
+                    onClick: () => window.open(`https://arweave.net/${txn.id}`, '_blank')
+                }
+            });
         } catch (e) {
-            console.error(e)
-            toast.error(e, { id: "error" })
-        } finally {
-            // setHistory([...history, id])
-            setUploading(false)
+            const error = e instanceof Error ? e.message : 'Failed to upload file';
+            setUploadState(prev => ({ ...prev, status: 'error', error }));
+            toast.error("Upload failed", { description: error });
         }
     }
 
-    async function handleFileDrop(e: any) {
+    async function handleFileDrop(e: React.DragEvent<HTMLLabelElement> | React.ChangeEvent<HTMLInputElement>) {
         e.preventDefault();
-        setFileDragOver(false)
-        const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-        if (files.length == 0) return toast.error("No files dropped", { id: "error" })
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const bytes = new Uint8Array(e.target?.result as ArrayBuffer);
-            console.log(bytes)
-            const price = ar.ar.winstonToAr(await ar.transactions.getPrice(bytes.byteLength, address))
-            setPrice(price)
-            setFile(file)
+        setFileDragOver(false);
+
+        let files: FileList | null = null;
+        if ('dataTransfer' in e) {
+            files = e.dataTransfer.files;
+        } else {
+            files = e.target.files;
         }
-        reader.readAsArrayBuffer(file);
+
+        if (!files || files.length === 0) {
+            toast.error("No files selected");
+            return;
+        }
+
+        const file = files[0];
+        setUploadState(prev => ({ ...prev, file }));
+
+        try {
+            const bytes = new Uint8Array(await file.arrayBuffer());
+            const price = ar.ar.winstonToAr(await ar.transactions.getPrice(bytes.byteLength, address));
+            setUploadState(prev => ({ ...prev, price }));
+        } catch (e) {
+            const error = e instanceof Error ? e.message : 'Failed to calculate price';
+            setUploadState(prev => ({ ...prev, error }));
+            toast.error("Error calculating price", { description: error });
+        }
     }
 
-    function handleFileDragOver(e: any) {
+    function handleFileDragOver(e: React.DragEvent<HTMLLabelElement>) {
         e.preventDefault();
         setFileDragOver(true);
-        // console.log(e)
     }
 
     async function getUploadHistory() {
-        if (!connected) return
-        if (!address) return
-        const query = `
-query {
-    transactions(
-        owners: ["${address}"],
-        tags: [
-          	{
-                name: "App-Name",
-                values: ["BetterIDEa"]
-            },
-          	{
-              name:"BetterIDEa-Function",
-              values:["Upload-Utility"]
-            },
-            #{
-            #    name:"File-Name",
-            #    values:"*"
-            #}
-        ]
-    ) {
-        edges {
-            node {
-                id,
-                tags{
-                    name,
-                    value
+        if (!connected || !address) return;
+
+        try {
+            const query = `
+                query {
+                    transactions(
+                        owners: ["${address}"],
+                        tags: [
+                            {
+                                name: "App-Name",
+                                values: ["BetterIDEa"]
+                            },
+                            {
+                                name: "BetterIDEa-Function",
+                                values: ["Upload-Utility"]
+                            }
+                        ]
+                    ) {
+                        edges {
+                            node {
+                                id,
+                                tags {
+                                    name,
+                                    value
+                                },
+                                block {
+                                    timestamp
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+            `;
+
+            const client = new GraphQLClient("https://arnode.asia/graphql");
+            const { transactions: { edges } } = await client.request(query) as any;
+
+            setHistory(edges.map((e: any) => ({
+                id: e.node.id,
+                tags: e.node.tags,
+                timestamp: e.node.block?.timestamp
+            })));
+        } catch (e) {
+            console.error("Failed to fetch history:", e);
+            toast.error("Failed to load upload history");
         }
-    }
-}
-    `
-        const client = new GraphQLClient("https://arweave.net/graphql")
-        const { transactions: { edges } } = await client.request(query) as any
-        console.log(edges)
-        setHistory(edges.map((e: any) => e.node))
     }
 
     useEffect(() => {
-        getUploadHistory()
-    }, [connected, address])
+        getUploadHistory();
+    }, [connected, address]);
 
     return (
-        <Dialog open={popupOpen} onOpenChange={(e) => { setPopupOpen(e) }}>
+        <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
             <DialogTrigger className="invisible" id="upload-file">
                 Upload File
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>Upload a file to Arweave</DialogTitle>
                     <DialogDescription>
-                        Uploading a file to Arweave will make it immutable and permanent. Drag and drop the file you want to upload.
+                        Uploading a file to Arweave will make it immutable and permanent.
                     </DialogDescription>
                 </DialogHeader>
-                <Tabs defaultValue="upload" className="w-full">
+
+                <Tabs
+                    defaultValue="upload"
+                    value={activeTab}
+                    onValueChange={(value: "upload" | "history") => {
+                        setActiveTab(value);
+                        if (value === "history") {
+                            getUploadHistory();
+                        }
+                    }}
+                    className="w-full"
+                >
                     <TabsList className="w-full bg-muted/20 text-black">
-                        <TabsTrigger value="upload" className="w-full data-[state=active]:bg-primary data-[state=active]:text-white">Upload</TabsTrigger>
-                        <TabsTrigger value="history" className="w-full data-[state=active]:bg-primary data-[state=active]:text-white">History</TabsTrigger>
+                        <TabsTrigger value="upload" className="w-full data-[state=active]:bg-primary text-foreground">
+                            Upload
+                        </TabsTrigger>
+                        <TabsTrigger value="history" className="w-full data-[state=active]:bg-primary text-foreground">
+                            History
+                        </TabsTrigger>
                     </TabsList>
-                    <TabsContent value="upload">
-                        <input id="upload-to-ar" type="file" accept="*" placeholder="Upload File" hidden onChange={handleFileDrop} />
-                        <label htmlFor="upload-to-ar" className="text-center" onDragOver={handleFileDragOver} onDrop={handleFileDrop} onDragLeave={() => setFileDragOver(false)}>
-                            <div data-draggedover={fileDragOver} className="flex flex-col border border-dashed data-[draggedover=true]:border-primary rounded-lg p-4 text-sm">
-                                {file ? file.name : "Drag a file"}
-                                {file && <Button variant="link" className="text-muted-foreground p-0 h-5 mt-1" onClick={(e) => {
-                                    e.preventDefault()
-                                    // reset input
-                                    setFile(null); setPrice(null);
-                                }}>clear</Button>}
+
+                    <TabsContent value="upload" className="space-y-4">
+                        <input
+                            id="upload-to-ar"
+                            type="file"
+                            accept="*"
+                            hidden
+                            onChange={handleFileDrop}
+                        />
+
+                        <label
+                            htmlFor="upload-to-ar"
+                            className={cn(
+                                "block cursor-pointer transition-colors",
+                                !fileDragOver && "hover:bg-muted/50"
+                            )}
+                            onDragOver={handleFileDragOver}
+                            onDrop={handleFileDrop}
+                            onDragLeave={() => setFileDragOver(false)}
+                        >
+                            <div
+                                className={cn(
+                                    "flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed rounded-lg",
+                                    fileDragOver ? "border-primary bg-primary/5" : "border-muted",
+                                    uploadState.file && "border-primary"
+                                )}
+                            >
+                                {uploadState.file ? (
+                                    <>
+                                        <FileText className="h-8 w-8 text-primary" />
+                                        <span className="font-medium">{uploadState.file.name}</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            {(uploadState.file.size / 1024 / 1024).toFixed(2)} MB
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <UploadIcon className="h-8 w-8 text-muted-foreground" />
+                                        <span className="font-medium">Drag and drop or click to upload</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            Any file type supported
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         </label>
-                        {price && <div className="text-left text-xs text-muted-foreground mt-1">Estimated cost: {price} AR</div>}
-                        <Button disabled={uploading} onClick={() => upload()} className="mt-4">Upload {uploading && <Loader size={18} className="ml-2 animate-spin" />}</Button>
-                    </TabsContent>
-                    <TabsContent value="history" className="grid grid-cols-3 gap-y-2 items-center justify-center max-h-[300px] overflow-scroll">
-                        {/* {
-                            JSON.stringify(history, null, 2)
-                        } */}
-                        {
-                            history.length > 0 && history.map((txn, _) => {
-                                const fileName = txn.tags?.find((tag: Tag) => tag.name === "File-Name")?.value
 
-                                return <>
-                                    {fileName || <span className="text-muted">unnamed</span>}
-                                    <Link href={`https://arweave.net/${txn.id}`} target="_blank" className="text-xs hover:underline col-span-2 truncate">{txn.id}</Link>
+                        {uploadState.file && (
+                            <div className="flex items-center justify-between">
+                                {uploadState.price && (
+                                    <span className="text-sm text-muted-foreground">
+                                        Estimated cost: {uploadState.price} AR
+                                    </span>
+                                )}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setUploadState({ file: null, price: null, status: 'idle', error: null });
+                                        (document.getElementById('upload-to-ar') as HTMLInputElement).value = '';
+                                    }}
+                                >
+                                    Clear
+                                    <X className="h-4 w-4 ml-2" />
+                                </Button>
+
+                            </div>
+                        )}
+
+                        <Button
+                            className="w-full"
+                            disabled={!uploadState.file || uploadState.status === 'uploading'}
+                            onClick={upload}
+                        >
+                            {uploadState.status === 'uploading' ? (
+                                <>
+                                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                                    Uploading...
                                 </>
-                            })
-                        }
+                            ) : uploadState.status === 'success' ? (
+                                <>
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                    Uploaded
+                                </>
+                            ) : (
+                                'Upload'
+                            )}
+                        </Button>
+                    </TabsContent>
+
+                    <TabsContent value="history" className="space-y-4">
+                        <div className="max-h-[300px] overflow-y-auto space-y-2">
+                            {history.length === 0 ? (
+                                <div className="text-center text-muted-foreground py-4">
+                                    No upload history found
+                                </div>
+                            ) : (
+                                history.map((txn) => {
+                                    const fileName = txn.tags?.find(tag => tag.name === "File-Name")?.value;
+                                    const timestamp = txn.timestamp ? new Date(txn.timestamp * 1000).toLocaleString() : 'Unknown date';
+
+                                    return (
+                                        <div
+                                            key={txn.id}
+                                            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50"
+                                        >
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium truncate">
+                                                    {fileName || 'Unnamed file'}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {timestamp}
+                                                </div>
+                                            </div>
+                                            <Link
+                                                href={`https://arweave.net/${txn.id}`}
+                                                target="_blank"
+                                                className="text-xs text-primary hover:underline ml-2"
+                                            >
+                                                View
+                                            </Link>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
                     </TabsContent>
                 </Tabs>
             </DialogContent>
