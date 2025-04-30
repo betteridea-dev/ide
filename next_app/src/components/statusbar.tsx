@@ -9,6 +9,7 @@ import { getResults } from "@/lib/ao-vars";
 import { stripAnsiCodes } from "@/lib/utils";
 import { ConnectButton, useConnection, useActiveAddress, useProfileModal, useStrategy } from "arweave-wallet-kit"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Ansi from "ansi-to-react";
 
 export default function Statusbar() {
     const { connected, connect, disconnect } = useConnection()
@@ -75,7 +76,6 @@ export default function Statusbar() {
 
     // INCOMING MESSAGS NOTIFICATION
     useEffect(() => {
-        if (!connected) return
         if (!project) return
 
         const processes = []
@@ -83,7 +83,7 @@ export default function Statusbar() {
         Object.values(project.files).forEach((file) => {
             if (file.process && !processes.includes(file.process)) processes.push(file.process)
         })
-
+        console.log(processes)
         if (processes.length == 0) return
 
         const resultsInterval = setInterval(async () => {
@@ -91,14 +91,13 @@ export default function Statusbar() {
                 const res = await getResults(process, localStorage.getItem("cursor") || "")
                 if (res.cursor) localStorage.setItem("cursor", res.cursor)
                 const { results } = res
+                console.log(res)
                 if (results.length > 0) {
                     console.log(res)
                     results.forEach((result) => {
-                        if (typeof result.Output == "object") {
-                            if (result.Output.print) {
-                                toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px]">{stripAnsiCodes(`${result.Output.data}`)}</div>, { style: { borderRadius: "7px" } })
-                                globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
-                            }
+                        if (result.Output.print && result.Output.data) {
+                            toast.custom(() => <div className="p-3 bg-primary text-background rounded-[7px] max-h-[300px] overflow-scroll">{stripAnsiCodes(result.Output.data)}</div>, { style: { borderRadius: "7px" } })
+                            globalState.setTerminalOutputs && globalState.setTerminalOutputs((prev) => [...prev, `${result.Output.data}`])
                         }
                     })
                 }
@@ -106,7 +105,7 @@ export default function Statusbar() {
         }, 2000)
 
         return () => { clearInterval(resultsInterval) }
-    }, [project, connected])
+    }, [globalState.activeFile])
 
     // NOTIFICATION FOR WHEN THE CURRENT PROJECT OWNER WALLET AND CONNECTED WALLET ARE DIFFERENT
     useEffect(() => {
