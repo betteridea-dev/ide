@@ -160,9 +160,9 @@ const processHtml = `<!DOCTYPE html>
         } catch (e) {
             console.error("aofetch error:", e);
             const body = document.querySelector("body");
-            body.innerHTML = "<h1>aofetch error</h1>";
+            body.innerHTML = "<h1>error</h1>";
         }
-    </title>
+    </script>
 </head>
 
 <body></body>
