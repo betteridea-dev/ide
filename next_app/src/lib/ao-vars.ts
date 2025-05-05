@@ -105,30 +105,69 @@ export type TPackage = {
   installed: boolean
 }
 
-// export function getCuUrl() {
-//   const customCU = localStorage.getItem("ao-cu-url");
-//   if (!customCU || customCU == '""') {
-//     return DEFAULT_CU_URL;
-//   } else {
-//     // make sure this is a valid url
-//     try {
-//       new URL(JSON.parse(customCU));
-//       return JSON.parse(customCU);
-//     } catch (e) {
-//       console.error("Invalid custom cu url", e);
-//       return DEFAULT_CU_URL;
-//     }
-//   }
-// }
+const processHtml = `<!DOCTYPE html>
+<html lang="en">
 
-// export function getGatewayUrl() {
-//   const customGateway = localStorage.getItem("ao-gateway-url");
-//   if (!customGateway || customGateway == '""') {
-//     return DEFAULT_GATEWAY_URL;
-//   } else {
-//     return JSON.parse(customGateway);
-//   }
-// }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <script type="module">
+        import { aofetch } from "https://unpkg.com/ao-fetch@latest/dist/browser.mjs";
+
+        const process = window.location.pathname.split("/")[1];
+        const path = "/" + window.location.pathname.split("/").splice(2).join("/");
+        window.process = process;
+        window.path = path;
+
+        console.log(process, path);
+
+        try {
+            const res = await aofetch(process + path);
+            if (res && res.status == 200) {
+                console.log(res);
+                try {
+                    const body = document.querySelector("body");
+                    let json;
+                    try {
+                        json = JSON.parse(res.text);
+                        // Add meta tags if not present
+                        const head = document.querySelector('head');
+                        if (!document.querySelector('meta[name="color-scheme"]')) {
+                            const metaColor = document.createElement('meta');
+                            metaColor.setAttribute('name', 'color-scheme');
+                            metaColor.setAttribute('content', 'light dark');
+                            head.appendChild(metaColor);
+                        }
+                        if (!document.querySelector('meta[charset]')) {
+                            const metaCharset = document.createElement('meta');
+                            metaCharset.setAttribute('charset', 'utf-8');
+                            head.appendChild(metaCharset);
+                        }
+                        // Render JSON and add formatter container
+                        body.innerHTML = \`<pre>\${JSON.stringify(json, null, 2)}</pre><div class="json-formatter-container"></div>\`;
+                    } catch (e) {
+                        body.innerHTML = res.text;
+                    }
+                } catch (e) {
+                    console.error("aofetch error:", e);
+                    const body = document.querySelector("body");
+                    body.innerHTML = "<h1>error</h1>";
+                }
+            } else {
+                console.error(res)
+            }
+        } catch (e) {
+            console.error("aofetch error:", e);
+            const body = document.querySelector("body");
+            body.innerHTML = "<h1>error</h1>";
+        }
+    </script>
+</head>
+
+<body></body>
+
+</html>`
 
 export function getCustomUrls(): { cu: string, mu: string, gateway: string } {
   const customCU = JSON.parse(localStorage.getItem("ao-cu-url") || `""`) || DEFAULT_CU_URL;
@@ -156,13 +195,17 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
     tags = CommonTags;
   }
   tags = name ? [...tags, { name: "Name", value: name }] : tags;
-  tags = [...tags, { name: 'Authority', value: 'fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY' }];
+  tags = [...tags,
+  { name: 'Authority', value: 'fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY' },
+  { name: "Content-Type", value: "text/html" }
+  ];
 
   const result = await ao.spawn({
     module: newProcessModule ? newProcessModule : AOModule,
     scheduler: AOScheduler,
     tags,
     signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : createDataItemSignerManual(window.arweaveWallet),
+    data: processHtml
   });
 
   return result;
