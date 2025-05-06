@@ -2,7 +2,7 @@
   "name": "BetterIDEa",
   "license": "GPL-3.0-only",
   "description": "Web based IDE for Arweave and AO",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "private": false,
   "type": "module",
   "scripts": {
@@ -51,6 +51,7 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@wanderapp/embed-sdk": "^0.0.7",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "ai": "^3.2.15",
