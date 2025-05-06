@@ -31,7 +31,7 @@ export default function PackageView() {
         if (!project.process) return
         const res = await runLua(`return require("json").encode(apm.installed or {})`, project.process, [
             { name: "BetterIDEa-Function", value: "Packages" }
-        ])
+        ], false)
         let { Output: { data: { output } } } = res
         if (!output) output = res.Output.data
         const installed = JSON.parse(output)
@@ -81,7 +81,7 @@ export default function PackageView() {
         console.log("Installing apm")
         const res = await fetch('https://raw.githubusercontent.com/betteridea-dev/ao-package-manager/refs/heads/main/client/client.lua');
         const apmSource = await res.text();
-        const loadResp = await runLua(apmSource, p.process, [{ name: "BetterIDEa-Function", value: "Load-APM" }])
+        const loadResp = await runLua(apmSource, p.process, [{ name: "BetterIDEa-Function", value: "Load-APM" }], false)
         console.log(loadResp)
         if (loadResp.Error) return toast.error("Error loading APM", { description: loadResp.Error, id: "error" })
     }
