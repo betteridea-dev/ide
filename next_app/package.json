@@ -66,6 +66,7 @@
     "express": "^4.19.2",
     "gh-pages": "^6.1.1",
     "graphql-request": "^6.1.0",
+    "jsx-lua-transpiler": "^1.1.2",
     "jszip": "^3.10.1",
     "lua-format": "^1.4.1",
     "lucide-react": "^0.372.0",

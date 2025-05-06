@@ -1,8 +1,9 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
+import { transpileLuaX } from "jsx-lua-transpiler"
 // import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
 
 // import { createData, ArweaveSigner, DataItem } from 'warp-arbundles'
-import { createData, ArweaveSigner, DataItem } from "@dha-team/arbundles"
+import { createData, ArweaveSigner, DataItem } from "@dha-team/arbundles/web"
 
 
 export function createDataItemSignerManual(wallet) {
@@ -212,6 +213,8 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
 }
 
 export async function runLua(code: string, process: string, tags?: Tag[]) {
+  code = transpileLuaX(code)
+  console.log(code)
   const { cu, mu, gateway } = getCustomUrls();
   const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
   if (tags) {
