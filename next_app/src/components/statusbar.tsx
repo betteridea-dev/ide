@@ -9,6 +9,7 @@ import { getResults } from "@/lib/ao-vars";
 import { stripAnsiCodes } from "@/lib/utils";
 import { ConnectButton, useConnection, useActiveAddress, useProfileModal, useStrategy } from "arweave-wallet-kit"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+// import { WanderEmbedded } from "@wanderapp/embed-sdk";
 import Ansi from "ansi-to-react";
 
 export default function Statusbar() {
@@ -24,6 +25,26 @@ export default function Statusbar() {
 
     const project = globalState.activeProject && manager.getProject(globalState.activeProject);
     const fileType = project?.files[globalState.activeFile]?.type
+
+    // useEffect(() => {
+
+    //     const wander = new WanderEmbedded({
+    //         clientId: "BetterIDEa",
+    //         iframe: {
+    //             routeLayout: {
+    //                 auth: "modal"
+    //             }
+    //         },
+    //         button: {
+    //             position: "bottom-right",
+    //             theme: "light",
+    //             label: true,
+    //             wanderLogo: "default"
+    //         }
+    //     });
+    //     console.log(wander)
+
+    // }, []);
 
     // Get language mode based on file type
     const getLanguageMode = () => {
