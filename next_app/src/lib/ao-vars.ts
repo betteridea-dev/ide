@@ -213,10 +213,10 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
 }
 
 export async function runLua(code: string, process: string, tags?: Tag[], transpile: boolean = true) {
-  console.log("transpiling", transpile)
-  if (transpile) {
-    code = transpileLuaX(code)
-  }
+  // console.log("transpiling", transpile)
+  // if (transpile) {
+  //   code = transpileLuaX(code)
+  // }
   console.log(code)
   const { cu, mu, gateway } = getCustomUrls();
   const ao = connect({ MODE: "legacy", CU_URL: cu, MU_URL: mu, GATEWAY_URL: gateway });
