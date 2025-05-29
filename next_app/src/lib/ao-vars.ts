@@ -116,15 +116,15 @@ const processHtml = `<!DOCTYPE html>
     <script type="module">
         import { aofetch } from "https://unpkg.com/ao-fetch@latest/dist/browser.mjs";
 
-        const process = window.location.pathname.split("/")[1];
+        const _process = window.location.pathname.split("/")[1];
         const path = "/" + window.location.pathname.split("/").splice(2).join("/");
-        window.process = process;
+        window._process = _process;
         window.path = path;
 
-        console.log(process, path);
+        console.log(_process, path);
 
         try {
-            const res = await aofetch(process + path);
+            const res = await aofetch(_process + path);
             if (res && res.status == 200) {
                 console.log(res);
                 try {
