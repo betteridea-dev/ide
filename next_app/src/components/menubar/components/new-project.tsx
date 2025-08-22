@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { LoaderIcon } from "lucide-react";
 import { pushToRecents } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
-import { useConnection, useActiveAddress } from "arweave-wallet-kit";
+import { useWallet, ConnectionStrategies } from "@/hooks/useWallet";
 
 type possibleUnits = "seconds" | "minutes" | "hours" | "blocks"
 const cronUnits = ["seconds", "minutes", "hours", "blocks"]
@@ -23,8 +23,7 @@ const cronUnits = ["seconds", "minutes", "hours", "blocks"]
 export default function NewProject() {
     const globalState = useGlobalState()
     const manager = useProjectManager()
-    const { connected, connect, disconnect } = useConnection()
-    const address = useActiveAddress()
+    const { connected, address, actions } = useWallet()
     const [popupOpen, setPopupOpen] = useState(false);
     const [newProjName, setNewProjName] = useState("");
     const [processUsed, setProcessUsed] = useState("NEW_PROCESS");

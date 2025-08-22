@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { runLua, spawnProcess } from "@/lib/ao-vars"
 import { BAZAR } from "@/lib/bazar"
-import { useConnection, useActiveAddress } from "arweave-wallet-kit"
+import { useWallet, ConnectionStrategies } from "@/hooks/useWallet"
 const words = [
     "(^･o･^)ﾉ' ",
     "ฅ^•ﻌ•^ฅ",
@@ -268,8 +268,7 @@ function ProfileComponent() {
 }
 
 function Home() {
-    const { connected, connect, disconnect } = useConnection()
-    const address = useActiveAddress()
+    const { connected, address, actions } = useWallet()
     const globalState = useGlobalState()
     const manager = useProjectManager()
     const profile = useProfile()
@@ -337,7 +336,7 @@ function Home() {
                 }
             </p>
 
-            {!connected && <Button onClick={() => document.getElementById("connect-btn")?.click()}>Connect Wallet</Button>}
+            {!connected && <Button onClick={() => actions.connect({ strategy: ConnectionStrategies.ArWallet })}>Connect Wallet</Button>}
 
             <div className="flex flex-col text-left my-6 gap-1">
                 <Button variant="link" className="justify-start items-start h-7 text-foreground/90 gap-1 px-0" onClick={() => document.getElementById("new-project")?.click()}>

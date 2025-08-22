@@ -19,12 +19,11 @@ import PackageView from "./components/package";
 import TableView from "./components/table";
 import Interact from "./components/interact";
 import History from "./components/history";
-import { useConnection, useActiveAddress } from "arweave-wallet-kit";
+import { useWallet, ConnectionStrategies } from "@/hooks/useWallet";
 function Editor() {
     const globalState = useGlobalState();
     const manager = useProjectManager();
-    const { connected, connect, disconnect } = useConnection()
-    const address = useActiveAddress()
+    const { connected, address, actions } = useWallet()
     const [running, setRunning] = useState(false);
     // const [prompt, setPrompt] = useState("");
     const [commandOutputs, setCommandOutputs] = useState([]);

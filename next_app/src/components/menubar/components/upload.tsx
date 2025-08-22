@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader, Upload as UploadIcon, X, FileText, CheckCircle2 } from "lucide-react";
 import { GraphQLClient, gql } from "graphql-request";
 import Link from "next/link";
-import { useConnection, useActiveAddress } from "arweave-wallet-kit";
+import { useWallet, ConnectionStrategies } from "@/hooks/useWallet";
 import { cn } from "@/lib/utils";
 
 type Transaction = {
@@ -28,8 +28,7 @@ type UploadState = {
 }
 
 export default function Upload() {
-    const { connected, connect, disconnect } = useConnection()
-    const address = useActiveAddress()
+    const { connected, address, actions } = useWallet()
     const [popupOpen, setPopupOpen] = useState(false);
     const [fileDragOver, setFileDragOver] = useState(false);
     const [uploadState, setUploadState] = useState<UploadState>({

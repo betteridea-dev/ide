@@ -7,19 +7,16 @@ import { Button } from "./ui/button";
 import { Database, File, UnplugIcon, Wallet2 } from "lucide-react"
 import { getResults } from "@/lib/ao-vars";
 import { stripAnsiCodes } from "@/lib/utils";
-import { ConnectButton, useConnection, useActiveAddress, useProfileModal, useStrategy } from "arweave-wallet-kit"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 // import { WanderEmbedded } from "@wanderapp/embed-sdk";
 import Ansi from "ansi-to-react";
+import { useWallet, ConnectionStrategies } from "@/hooks/useWallet";
 
 export default function Statusbar() {
-    const { connected, connect, disconnect } = useConnection()
-    const { open, setOpen } = useProfileModal()
-    const strategy = useStrategy()
-    const address = useActiveAddress()
+    const { address, connected, connectionStrategy, actions } = useWallet()
+    const [walletState] = useLocalStorage("subspace-wallet-connection", { state: { connectionStrategy: null } }, { initializeWithValue: true })
     const manager = useProjectManager();
     const globalState = useGlobalState();
-    const [autoconnect, setAutoconnect] = useLocalStorage("autoconnect", false, { initializeWithValue: true })
     const [mounted, setMounted] = useState(false)
     const [performance, setPerformance] = useState({ memory: 0 })
 
@@ -86,14 +83,21 @@ export default function Statusbar() {
         return () => clearInterval(interval)
     }, [])
 
+    // Auto-connect if wallet was previously connected
     useEffect(() => {
-        if (connected) {
-            if (["webwallet", "othent"].includes(strategy as string)) {
-                toast.info("Connection through Web Wallet has issues, please use Wander Wallet")
-                disconnect()
-            }
+        if (!mounted) {
+            setMounted(true);
+            return;
         }
-    }, [connected, strategy, disconnect])
+        if (!window) return
+
+        console.log(walletState)
+        if (walletState.state.connectionStrategy) {
+            actions.connect({ strategy: ConnectionStrategies.ArWallet })
+        }
+
+
+    }, [mounted, connected, connectionStrategy, actions]);
 
     // INCOMING MESSAGS NOTIFICATION
     useEffect(() => {
@@ -143,7 +147,7 @@ export default function Statusbar() {
             // data-connected={connected}
             // className="h-full px-2 gap-1 rounded-none data-[connected=false]:text-white data-[connected=false]:bg-primary hover:bg-accent/50"
             className="h-full px-2 gap-1 rounded-none hover:bg-primary text-foreground hover:text-background"
-            onClick={() => connected ? setOpen(true) : connect()}
+            onClick={() => connected ? actions.disconnect() : actions.connect({ strategy: ConnectionStrategies.ArWallet })}
             id="connect-btn"
         >
 
