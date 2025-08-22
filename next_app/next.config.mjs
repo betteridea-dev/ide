@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import packageJson from "./package.json" assert { type: "json" };
+import packageJson from "./package.json" with { type: "json" };
 import NodePolyfillPlugin from "node-polyfill-webpack-plugin"
 
 // fetch local gitHash
