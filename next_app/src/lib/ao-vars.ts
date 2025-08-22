@@ -32,10 +32,13 @@ export function createDataItemSignerManual(wallet) {
 }
 
 export const AppVersion = process.env.version;
-export const AOModule = "JArYBF-D8q2OmZ4Mok00sD2Y_6SYEQ7Hjx-6VZ_jl3g"; // aos 2.0.3
+export const AOModule = "ISShJH1ij-hPPt9St5UFFr_8Ys3Kj5cyg7zrMGt7H9s"; // aos 2.0.4
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 
-export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak";
+export const AOModule_mainnet = "";
+export const AOScheduler_mainnet = "";
+
+export const APM_ID = "RLvG3tclmALLBCrwc17NqzNFqZCrUf3-RKZ5v8VRHiU";
 
 export const BetterIDEaWallet = "MnZ8JrR5SoswAwWtX-HTnl4Kq5k6Kx1Y7vPxmlAyl_g"
 
@@ -48,13 +51,17 @@ export const DEFAULT_GATEWAY_URL = "https://arweave.net";
 export const SponsorWebhookUrl = "https://discord.com/api/webhooks/1258731411033030726/T6rl7Ciuw8cgiR30MOVeOsbEcvAEWM45IRpc37TqAoXBbH3ZQDoxQzLAW0bmgcsxnCI9"
 
 export const modules = {
-  "AOS 2.0.3 (Default)": AOModule,
+  "aos 2.0.4 (Default)": AOModule,
   // "AOS 0.2.1": "cNlipBptaF9JeFAf4wUmpi43EojNanIBos3EfNrEOWo",
-  "SQLite64": "33d-3X8mpv6xYBlVB-eXMrPfH5Kzf6Hiwhcv0UA10sw", // aos 2.0.3 sqlite module
+  "sqlite 2.0.4": "ei1VSwheQnNIG87iqlwxiQk-sWY5ikj4DFBxcpFZ-S4", // aos 2.0.4 sqlite module
   // "SQLite64 (AOS 1)": "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54",
   // "WASM32 (old)": "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0",
   // "SQLite32 (old)": "GYrbbe0VbHim_7Hi6zrOpHQXrSQz07XNtwCnfbFo2I0",
-  "AOLearn": "qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY",
+  "aolearn": "qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY",
+}
+
+export const mainnet_modules = {
+  "hyper-aos": "xVcnPK8MPmcocS6zwq1eLmM2KhfyarP8zzmz3UVi1g4"
 }
 
 const CommonTags = [
@@ -367,4 +374,17 @@ export async function getRawBlueprint(path: string) {
   } else {
     return undefined;
   }
+}
+
+
+// ////////////////////////////
+// mainnet
+// ////////////////////////////
+
+export async function spawnMainnetProcess(name?: string, tags?: Tag[], newProcessModule?: string,) {
+
+}
+
+export async function runMainnetLua(code: string, process: string, tags?: Tag[], transpile: boolean = true) {
+
 }

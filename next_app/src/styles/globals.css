@@ -90,7 +90,8 @@
     /* transition:all 0.05s */
 }
 
-input, textarea {
+input,
+textarea {
     outline: none;
 }
 
@@ -113,6 +114,10 @@ pre {
 
 .xterm-rows>div {
     font-family: "DM Mono", monospace !important;
+}
+
+.nextjs-toast {
+    display: none !important;
 }
 
 
@@ -138,4 +143,4 @@ button:active {
 /* MENTIONS */
 
 
-  /* //MENTIONS */
+/* //MENTIONS */
