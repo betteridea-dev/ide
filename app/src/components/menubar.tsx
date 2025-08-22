@@ -1,0 +1,413 @@
+
+import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6"
+import { Link } from "react-router"
+import { Menubar as MainMenubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger, MenubarSub, MenubarSubTrigger, MenubarSubContent } from "@/components/ui/menubar"
+import { useGlobalState } from "@/hooks/use-global-state"
+import { useProjects, type Project } from "@/hooks/use-projects"
+import { useState } from "react"
+import { toast } from "sonner"
+import {
+    FileText,
+    FolderPlus,
+    FolderOpen,
+    Copy,
+    Edit3,
+    Share,
+    Trash2,
+    Plus,
+    X
+} from "lucide-react"
+
+const link = [
+    {
+        label: "Twitter",
+        icon: FaXTwitter,
+        link: "https://x.com/betteridea_dev"
+    },
+    {
+        label: "GitHub",
+        icon: FaGithub,
+        link: "https://github.com/betteridea-dev"
+    },
+    {
+        label: "Discord",
+        icon: FaDiscord,
+        link: "https://discord.gg/nm6VKUQBrA"
+    }
+]
+
+export default function Menubar() {
+    const { activeProject, activeFile, activeView, actions: globalActions } = useGlobalState()
+    const { projects, actions: projectActions } = useProjects()
+    const [isCreatingProject, setIsCreatingProject] = useState(false)
+
+    const handleNewProject = () => {
+        const projectName = prompt("Enter project name:")
+        if (projectName && projectName.trim()) {
+            const trimmedName = projectName.trim()
+
+            // Check if project already exists
+            if (projects[trimmedName]) {
+                toast.error("Project with this name already exists")
+                return
+            }
+
+            const newProject: Project = {
+                name: trimmedName,
+                files: {
+                    "main.lua": {
+                        name: "main.lua",
+                        cellOrder: ["init"],
+                        cells: {
+                            "init": {
+                                id: "init",
+                                content: "-- Welcome to your new project\nprint('Hello, ao!')",
+                                output: "",
+                                type: "CODE",
+                                editing: false
+                            }
+                        },
+                        isMainnet: false,
+                        ownerAddress: ""
+                    }
+                },
+                process: "",
+                ownerAddress: "",
+                isMainnet: false
+            } satisfies Project
+
+            projectActions.setProject(newProject)
+            globalActions.setActiveProject(trimmedName)
+            globalActions.setActiveFile("main.lua")
+            globalActions.setActiveView(null)
+            projectActions.addRecent(trimmedName)
+            toast.success(`Project "${trimmedName}" created successfully`)
+        }
+    }
+
+    const handleOpenProject = () => {
+        globalActions.setActiveView("project")
+        globalActions.setActiveTab("files")
+    }
+
+    const handleNewFile = () => {
+        if (!activeProject) {
+            toast.error("No active project. Please select or create a project first.")
+            return
+        }
+
+        const fileName = prompt("Enter file name (with extension):")
+        if (fileName && fileName.trim()) {
+            const trimmedName = fileName.trim()
+
+            // Check if file already exists
+            if (projects[activeProject]?.files[trimmedName]) {
+                toast.error("File with this name already exists")
+                return
+            }
+
+            const newFile = {
+                name: trimmedName,
+                cellOrder: ["init"],
+                cells: {
+                    "init": {
+                        id: "init",
+                        content: "-- New file\n",
+                        output: "",
+                        type: "CODE" as const,
+                        editing: false
+                    }
+                },
+                isMainnet: false,
+                ownerAddress: ""
+            }
+
+            projectActions.setFile(activeProject, newFile)
+            globalActions.setActiveFile(trimmedName)
+            globalActions.setActiveView(null)
+            toast.success(`File "${trimmedName}" created successfully`)
+        }
+    }
+
+    const handleRenameProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        const newName = prompt("Enter new project name:", activeProject)
+        if (newName && newName.trim() && newName.trim() !== activeProject) {
+            const trimmedName = newName.trim()
+
+            // Check if project with new name already exists
+            if (projects[trimmedName]) {
+                toast.error("Project with this name already exists")
+                return
+            }
+
+            const project = projects[activeProject]
+            if (project) {
+                // Create new project with new name
+                const renamedProject = { ...project, name: trimmedName }
+                projectActions.setProject(renamedProject)
+
+                // Delete old project
+                projectActions.deleteProject(activeProject)
+
+                // Update active project
+                globalActions.setActiveProject(trimmedName)
+
+                // Update recents
+                projectActions.removeRecent(activeProject)
+                projectActions.addRecent(trimmedName)
+
+                toast.success(`Project renamed to "${trimmedName}"`)
+            }
+        }
+    }
+
+    const handleDuplicateProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        const newName = prompt("Enter name for duplicated project:", `${activeProject} (Copy)`)
+        if (newName && newName.trim()) {
+            const trimmedName = newName.trim()
+
+            // Check if project with new name already exists
+            if (projects[trimmedName]) {
+                toast.error("Project with this name already exists")
+                return
+            }
+
+            const project = projects[activeProject]
+            if (project) {
+                const duplicatedProject = {
+                    ...project,
+                    name: trimmedName,
+                    process: "" // Reset process for duplicated project
+                }
+                projectActions.setProject(duplicatedProject)
+                toast.success(`Project duplicated as "${trimmedName}"`)
+            }
+        }
+    }
+
+    const handleShareProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        // For now, just copy project data to clipboard as JSON
+        const project = projects[activeProject]
+        if (project) {
+            const shareData = JSON.stringify(project, null, 2)
+            navigator.clipboard.writeText(shareData).then(() => {
+                toast.success("Project data copied to clipboard")
+            }).catch(() => {
+                toast.error("Failed to copy to clipboard")
+            })
+        }
+    }
+
+    const handleCloseProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        globalActions.closeProject()
+        toast.success(`Project "${activeProject}" closed`)
+    }
+
+    const handleDeleteProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        const confirmation = confirm(`Are you sure you want to delete project "${activeProject}"? This action cannot be undone.`)
+        if (confirmation) {
+            projectActions.deleteProject(activeProject)
+            projectActions.removeRecent(activeProject)
+            globalActions.closeProject()
+            toast.success(`Project "${activeProject}" deleted`)
+        }
+    }
+
+    return <div className="h-[25px] flex items-center border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pr-2">
+        <Link to="https://betteridea.dev" target="_blank" className="h-full w-10 hover:bg-accent/80 flex items-center justify-center transition-colors">
+            <img src="/icon.svg" alt="logo" className="w-6 h-6 p-0.5 pl-1" />
+        </Link>
+
+        {/* Main Menubar */}
+        <MainMenubar className="h-[24px] border-none shadow-none bg-transparent p-0">
+            {/* File Menu */}
+            <MenubarMenu>
+                <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
+                    File
+                </MenubarTrigger>
+                <MenubarContent sideOffset={0} alignOffset={0} className="min-w-[180px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
+                    <MenubarItem
+                        onClick={handleNewProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                    >
+                        <FolderPlus className="w-4 h-4 text-muted-foreground" />
+                        New Project
+                        <MenubarShortcut className="text-muted-foreground">⌘N</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarItem
+                        onClick={handleOpenProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                    >
+                        <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                        Open Project
+                        <MenubarShortcut className="text-muted-foreground">⌘O</MenubarShortcut>
+                    </MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
+
+            {/* Project Menu */}
+            <MenubarMenu>
+                <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
+                    Project
+                </MenubarTrigger>
+                <MenubarContent sideOffset={0} alignOffset={0} className="min-w-[180px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
+                    <MenubarItem
+                        onClick={handleRenameProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Edit3 className="w-4 h-4 text-muted-foreground" />
+                        Rename Project
+                    </MenubarItem>
+                    <MenubarItem
+                        onClick={handleDuplicateProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        Duplicate Project
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleShareProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Share className="w-4 h-4 text-muted-foreground" />
+                        Share Project
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleCloseProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                        Close Project
+                        <MenubarShortcut className="text-muted-foreground">⌘W</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleDeleteProject}
+                        disabled={!activeProject}
+                        variant="destructive"
+                        className="gap-2 cursor-pointer focus:bg-destructive/10 focus:text-destructive data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed dark:focus:bg-destructive/20"
+                    >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                        Delete Project
+                    </MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
+
+            {/* File Menu */}
+            <MenubarMenu>
+                <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
+                    Edit
+                </MenubarTrigger>
+                <MenubarContent sideOffset={0} alignOffset={0} className="min-w-[180px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
+                    <MenubarItem
+                        onClick={handleNewFile}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                        New File
+                        <MenubarShortcut className="text-muted-foreground">⌘⇧N</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                        onClick={() => {
+                            // Handle rename file
+                            if (!activeProject || !activeFile) {
+                                toast.error("No file selected")
+                                return
+                            }
+                            const newName = prompt("Enter new file name:", activeFile)
+                            if (newName && newName.trim() && newName.trim() !== activeFile) {
+                                // TODO: Implement file rename logic
+                                console.log('Rename file:', activeFile, 'to:', newName.trim())
+                                toast.success(`File renamed to "${newName.trim()}"`)
+                            }
+                        }}
+                    >
+                        <Edit3 className="w-4 h-4 text-muted-foreground" />
+                        Rename File
+                    </MenubarItem>
+                    <MenubarItem
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                        onClick={() => {
+                            // Handle duplicate file
+                            if (!activeProject || !activeFile) {
+                                toast.error("No file selected")
+                                return
+                            }
+                            // TODO: Implement file duplicate logic
+                            console.log('Duplicate file:', activeFile)
+                            toast.success(`File "${activeFile}" duplicated`)
+                        }}
+                    >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        Duplicate File
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        disabled={!activeProject}
+                        variant="destructive"
+                        className="gap-2 cursor-pointer focus:bg-destructive/10 focus:text-destructive data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed dark:focus:bg-destructive/20"
+                        onClick={() => {
+                            // Handle delete file
+                            if (!activeProject || !activeFile) {
+                                toast.error("No file selected")
+                                return
+                            }
+                            const confirmation = confirm(`Are you sure you want to delete "${activeFile}"? This action cannot be undone.`)
+                            if (confirmation) {
+                                // TODO: Implement file delete logic
+                                console.log('Delete file:', activeFile)
+                                toast.success(`File "${activeFile}" deleted`)
+                            }
+                        }}
+                    >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                        Delete File
+                    </MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
+        </MainMenubar>
+
+        <div className="grow"></div>
+        {link.map((item, index) => (
+            <Link key={index} to={item.link} target="_blank" className="h-full w-6 hover:bg-accent/80 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground">
+                <item.icon size={16} />
+            </Link>
+        ))}
+    </div>
+}
