@@ -13,6 +13,7 @@ interface GlobalStateActions {
     setActiveView: (view: ViewOptions | null) => void
     addOpenedFile: (fileName: string) => void
     closeOpenedFile: (fileName: string) => void
+    renameOpenedFile: (oldFileName: string, newFileName: string) => void
     closeProject: () => void
     setFile: (projectId: string, file: File) => void
     setOutput: (output: string) => void
@@ -66,6 +67,10 @@ export const useGlobalState = create<GlobalState>((set) => ({
                     state.openedFiles[state.openedFiles.indexOf(fileName) + 1] || ""
                     : "")
                 : state.activeFile
+        })),
+        renameOpenedFile: (oldFileName: string, newFileName: string) => set((state) => ({
+            openedFiles: state.openedFiles.map(f => f === oldFileName ? newFileName : f),
+            activeFile: state.activeFile === oldFileName ? newFileName : state.activeFile
         })),
         closeProject: () => set({
             activeProject: "",

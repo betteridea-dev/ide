@@ -7,6 +7,7 @@ import { useProjects, type Project } from "@/hooks/use-projects"
 import { useState } from "react"
 import { toast } from "sonner"
 import NewProject from "./menubar/new-project"
+import NewFile from "./menubar/new-file"
 
 import {
     FileText,
@@ -74,41 +75,10 @@ export default function Menubar() {
     }
 
     const handleNewFile = () => {
-        if (!activeProject) {
-            toast.error("No active project. Please select or create a project first.")
-            return
-        }
-
-        const fileName = prompt("Enter file name (with extension):")
-        if (fileName && fileName.trim()) {
-            const trimmedName = fileName.trim()
-
-            // Check if file already exists
-            if (projects[activeProject]?.files[trimmedName]) {
-                toast.error("File with this name already exists")
-                return
-            }
-
-            const newFile = {
-                name: trimmedName,
-                cellOrder: ["init"],
-                cells: {
-                    "init": {
-                        id: "init",
-                        content: "-- New file\n",
-                        output: "",
-                        type: "CODE" as const,
-                        editing: false
-                    }
-                },
-                isMainnet: true,
-                ownerAddress: ""
-            }
-
-            projectActions.setFile(activeProject, newFile)
-            globalActions.setActiveFile(trimmedName)
-            globalActions.setActiveView(null)
-            toast.success(`File "${trimmedName}" created successfully`)
+        // Trigger the new file dialog
+        const trigger = document.getElementById("new-file")
+        if (trigger) {
+            trigger.click()
         }
     }
 
@@ -270,11 +240,47 @@ export default function Menubar() {
             toast.error("No file selected")
             return
         }
-        const newName = prompt("Enter new file name:", activeFile)
-        if (newName && newName.trim() && newName.trim() !== activeFile) {
-            // TODO: Implement file rename logic
-            console.log('Rename file:', activeFile, 'to:', newName.trim())
-            toast.success(`File renamed to "${newName.trim()}"`)
+
+        // Extract name without extension for the prompt
+        const lastDotIndex = activeFile.lastIndexOf('.')
+        const nameWithoutExt = lastDotIndex > 0 ? activeFile.substring(0, lastDotIndex) : activeFile
+        const extension = lastDotIndex > 0 ? activeFile.substring(lastDotIndex) : ''
+
+        const newName = prompt("Enter new file name:", nameWithoutExt)
+        if (newName && newName.trim() && newName.trim() !== nameWithoutExt) {
+            const trimmedName = newName.trim()
+
+            // Determine final file name
+            let finalName: string
+            if (trimmedName.includes('.')) {
+                // User provided extension, use as-is
+                finalName = trimmedName
+            } else {
+                // No extension provided, preserve original extension
+                finalName = trimmedName + extension
+            }
+
+            // Check if file with new name already exists
+            if (projects[activeProject]?.files[finalName]) {
+                toast.error("File with this name already exists")
+                return
+            }
+
+            const project = projects[activeProject]
+            if (project) {
+                // Create new file with new name
+                const fileData = project.files[activeFile]
+                const renamedFile = { ...fileData, name: finalName }
+
+                // Add new file and delete old one
+                projectActions.setFile(activeProject, renamedFile)
+                projectActions.deleteFile(activeProject, activeFile)
+
+                // Update opened files and active file if this file was opened
+                globalActions.renameOpenedFile(activeFile, finalName)
+
+                toast.success(`File renamed to "${finalName}"`)
+            }
         }
     }
 
@@ -283,9 +289,37 @@ export default function Menubar() {
             toast.error("No file selected")
             return
         }
-        // TODO: Implement file duplicate logic
-        console.log('Duplicate file:', activeFile)
-        toast.success(`File "${activeFile}" duplicated`)
+
+        const project = projects[activeProject]
+        if (project) {
+            // Generate a unique name for the duplicate
+            let duplicateName = `${activeFile} (Copy)`
+            let counter = 1
+
+            // Keep incrementing until we find a unique name
+            while (project.files[duplicateName]) {
+                counter++
+                duplicateName = `${activeFile} (Copy ${counter})`
+            }
+
+            // Create duplicate file
+            const originalFile = project.files[activeFile]
+            const duplicateFile = {
+                ...originalFile,
+                name: duplicateName,
+                // Generate new cell IDs to avoid conflicts
+                cellOrder: originalFile.cellOrder.map(cellId => `${cellId}-copy-${Date.now()}`),
+                cells: Object.fromEntries(
+                    Object.entries(originalFile.cells).map(([cellId, cell]) => {
+                        const newCellId = `${cellId}-copy-${Date.now()}`
+                        return [newCellId, { ...cell, id: newCellId }]
+                    })
+                )
+            }
+
+            projectActions.setFile(activeProject, duplicateFile)
+            toast.success(`File duplicated as "${duplicateName}"`)
+        }
     }
 
     const handleDeleteFile = () => {
@@ -295,9 +329,13 @@ export default function Menubar() {
         }
         const confirmation = confirm(`Are you sure you want to delete "${activeFile}"? This action cannot be undone.`)
         if (confirmation) {
-            // TODO: Implement file delete logic
-            console.log('Delete file:', activeFile)
-            toast.success(`File "${activeFile}" deleted`)
+            // Delete the file
+            projectActions.deleteFile(activeProject, activeFile)
+
+            // Close the file if it's currently opened in editor
+            globalActions.closeOpenedFile(activeFile)
+
+            toast.success(`File "${activeFile}" deleted successfully`)
         }
     }
 
@@ -524,6 +562,7 @@ export default function Menubar() {
         {/* all other buttons will be a proxy to these items */}
         <div className="">
             <NewProject />
+            <NewFile />
         </div>
 
 

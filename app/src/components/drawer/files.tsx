@@ -1,6 +1,7 @@
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useProjects } from "@/hooks/use-projects"
 import { Button } from "../ui/button"
+import { toast } from "sonner"
 import {
     PlusSquare,
     FileStack,
@@ -30,7 +31,8 @@ import {
 
 export default function DrawerFiles() {
     const { activeFile, activeProject, actions } = useGlobalState()
-    const project = useProjects((p) => p.projects[activeProject])
+    const { projects, actions: projectActions } = useProjects()
+    const project = projects[activeProject]
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
 
     // Note: No project handling is now done at the drawer level
@@ -56,7 +58,13 @@ export default function DrawerFiles() {
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0 hover:bg-accent"
-                        onClick={() => { }}
+                        onClick={() => {
+                            // Trigger the new file dialog
+                            const trigger = document.getElementById("new-file")
+                            if (trigger) {
+                                trigger.click()
+                            }
+                        }}
                     >
                         <Plus className="w-3.5 h-3.5" />
                     </Button>
@@ -72,7 +80,13 @@ export default function DrawerFiles() {
                             variant="ghost"
                             size="sm"
                             className="h-7 text-xs gap-1.5"
-                            onClick={() => { }}
+                            onClick={() => {
+                                // Trigger the new file dialog
+                                const trigger = document.getElementById("new-file")
+                                if (trigger) {
+                                    trigger.click()
+                                }
+                            }}
                         >
                             <PlusSquare className="w-3 h-3" />
                             New File
@@ -138,8 +152,44 @@ export default function DrawerFiles() {
                                         <ContextMenuSeparator />
                                         <ContextMenuItem
                                             onClick={() => {
-                                                // Handle rename
-                                                console.log('Rename file:', fileName)
+                                                // Extract name without extension for the prompt
+                                                const lastDotIndex = fileName.lastIndexOf('.')
+                                                const nameWithoutExt = lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName
+                                                const extension = lastDotIndex > 0 ? fileName.substring(lastDotIndex) : ''
+
+                                                const newName = prompt("Enter new file name:", nameWithoutExt)
+                                                if (newName && newName.trim() && newName.trim() !== nameWithoutExt) {
+                                                    const trimmedName = newName.trim()
+
+                                                    // Determine final file name
+                                                    let finalName: string
+                                                    if (trimmedName.includes('.')) {
+                                                        // User provided extension, use as-is
+                                                        finalName = trimmedName
+                                                    } else {
+                                                        // No extension provided, preserve original extension
+                                                        finalName = trimmedName + extension
+                                                    }
+
+                                                    // Check if file with new name already exists
+                                                    if (project.files[finalName]) {
+                                                        toast.error("File with this name already exists")
+                                                        return
+                                                    }
+
+                                                    // Create new file with new name
+                                                    const fileData = project.files[fileName]
+                                                    const renamedFile = { ...fileData, name: finalName }
+
+                                                    // Add new file and delete old one
+                                                    projectActions.setFile(activeProject, renamedFile)
+                                                    projectActions.deleteFile(activeProject, fileName)
+
+                                                    // Update opened files and active file if this file was opened
+                                                    actions.renameOpenedFile(fileName, finalName)
+
+                                                    toast.success(`File renamed to "${finalName}"`)
+                                                }
                                             }}
                                         >
                                             <Edit3 className="w-4 h-4" />
@@ -147,8 +197,33 @@ export default function DrawerFiles() {
                                         </ContextMenuItem>
                                         <ContextMenuItem
                                             onClick={() => {
-                                                // Handle duplicate
-                                                console.log('Duplicate file:', fileName)
+                                                // Generate a unique name for the duplicate
+                                                let duplicateName = `${fileName} (Copy)`
+                                                let counter = 1
+
+                                                // Keep incrementing until we find a unique name
+                                                while (project.files[duplicateName]) {
+                                                    counter++
+                                                    duplicateName = `${fileName} (Copy ${counter})`
+                                                }
+
+                                                // Create duplicate file
+                                                const originalFile = project.files[fileName]
+                                                const duplicateFile = {
+                                                    ...originalFile,
+                                                    name: duplicateName,
+                                                    // Generate new cell IDs to avoid conflicts
+                                                    cellOrder: originalFile.cellOrder.map(cellId => `${cellId}-copy-${Date.now()}`),
+                                                    cells: Object.fromEntries(
+                                                        Object.entries(originalFile.cells).map(([cellId, cell]) => {
+                                                            const newCellId = `${cellId}-copy-${Date.now()}`
+                                                            return [newCellId, { ...cell, id: newCellId }]
+                                                        })
+                                                    )
+                                                }
+
+                                                projectActions.setFile(activeProject, duplicateFile)
+                                                toast.success(`File duplicated as "${duplicateName}"`)
                                             }}
                                         >
                                             <Copy className="w-4 h-4" />
@@ -156,8 +231,40 @@ export default function DrawerFiles() {
                                         </ContextMenuItem>
                                         <ContextMenuItem
                                             onClick={() => {
-                                                // Handle download
-                                                console.log('Download file:', fileName)
+                                                const fileData = project.files[fileName]
+
+                                                // Convert file content to downloadable format
+                                                let content = ""
+                                                let mimeType = "text/plain"
+
+                                                if (fileName.endsWith('.luanb')) {
+                                                    // For notebook files, export as JSON
+                                                    content = JSON.stringify({
+                                                        cells: fileData.cellOrder.map(cellId => ({
+                                                            id: cellId,
+                                                            type: fileData.cells[cellId].type.toLowerCase(),
+                                                            content: fileData.cells[cellId].content,
+                                                            output: fileData.cells[cellId].output
+                                                        }))
+                                                    }, null, 2)
+                                                    mimeType = "application/json"
+                                                } else {
+                                                    // For other files, export cell content concatenated
+                                                    content = fileData.cellOrder
+                                                        .map(cellId => fileData.cells[cellId].content)
+                                                        .join('\n\n')
+                                                }
+
+                                                // Create and trigger download
+                                                const blob = new Blob([content], { type: mimeType })
+                                                const url = URL.createObjectURL(blob)
+                                                const link = document.createElement('a')
+                                                link.href = url
+                                                link.download = fileName
+                                                link.click()
+                                                URL.revokeObjectURL(url)
+
+                                                toast.success(`File "${fileName}" downloaded successfully`)
                                             }}
                                         >
                                             <Download className="w-4 h-4" />
@@ -167,8 +274,16 @@ export default function DrawerFiles() {
                                         <ContextMenuItem
                                             variant="destructive"
                                             onClick={() => {
-                                                // Handle delete
-                                                console.log('Delete file:', fileName)
+                                                const confirmation = confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)
+                                                if (confirmation) {
+                                                    // Delete the file
+                                                    projectActions.deleteFile(activeProject, fileName)
+
+                                                    // Close the file if it's currently opened in editor
+                                                    actions.closeOpenedFile(fileName)
+
+                                                    toast.success(`File "${fileName}" deleted successfully`)
+                                                }
                                             }}
                                         >
                                             <Trash2 className="w-4 h-4" />

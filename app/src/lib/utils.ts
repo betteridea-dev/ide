@@ -368,7 +368,7 @@ export function createNewProject(
         cells: {
           "init": {
             id: "init",
-            content: "-- Welcome to your new project\nprint('Hello, ao!')",
+            content: 'print("Hello AO!")',
             output: "",
             type: "CODE",
             editing: false
