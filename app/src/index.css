@@ -155,7 +155,7 @@
   /* Dark theme colors migrated from globals.css */
   --background: oklch(0.18 0 0);
   --foreground: oklch(0.81 0 0);
-  --card: oklch(0.239 0.024 285.82);
+  --card: oklch(0.18 0.001 135);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.98 0 0);

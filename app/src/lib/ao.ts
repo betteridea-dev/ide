@@ -1,6 +1,10 @@
 import { connect, createSigner } from "@permaweb/aoconnect";
-import type { Tag } from "arweave/web/lib/transaction";
 import Constants from "./constants";
+
+export type Tag = {
+    name: string,
+    value: string
+}
 
 const assoc = (k: string, v: any, o: any) => {
     o[k] = v
@@ -84,12 +88,13 @@ export class MainnetAO {
         return connect({
             MODE: "mainnet",
             URL: this.hbUrl,
+            GATEWAY_URL: this.gatewayUrl,
             signer: this.signer,
             device: "process@1.0",
         })
     }
 
-    sanitizeResponse(res: Record<string, any>) {
+    sanitizeResponse(input: Record<string, any>) {
         const blockedKeys = new Set<string>([
             'accept',
             'accept-bundle',
@@ -122,16 +127,18 @@ export class MainnetAO {
             'cf-visitor',
             'remote-host',
         ])
+        return Object.fromEntries(
+            Object.entries(input).filter(([key]) => !blockedKeys.has(key))
+        );
     }
 
     async operator(): Promise<string> {
         const scheduler = (await (await fetch(this.hbUrl + '/~meta@1.0/info/address')).text()).trim()
-        console.log(scheduler)
         return scheduler
     }
 
     async read<T>({ path }: { path: string }): Promise<T> {
-        let hashpath = this.hbUrl + path.startsWith("/") ? path : "/" + path
+        let hashpath = this.hbUrl + (path.startsWith("/") ? path : "/" + path)
         hashpath = hashpath + "/~json@1.0/serialize"
 
         const res = await fetch(hashpath)

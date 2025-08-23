@@ -15,6 +15,7 @@ import { MainnetAO, TestnetAO } from "@/lib/ao";
 import { useActiveAddress } from "@arweave-wallet-kit/react";
 import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
+import Inbox from "./inbox";
 
 function FileTabItem({ filename }: { filename: string }) {
     const { activeFile, actions } = useGlobalState();
@@ -263,17 +264,11 @@ export default function Editor() {
                             <Terminal />
                         </TabsContent>
 
-                        <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0 p-2">
-                            {output ? (
-                                <OutputViewer output={output} />
-                            ) : (
-                                <div className="text-sm font-btr-code text-muted-foreground">
-                                    Inbox panel - process inbox messages here
-                                </div>
-                            )}
+                        <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0 p-0">
+                            <Inbox />
                         </TabsContent>
 
-                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-hidden m-0 p-2">
+                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-hidden m-0 p-0">
                             {output ? (
                                 <OutputViewer output={output} className="h-full w-full" />
                             ) : (
@@ -283,7 +278,7 @@ export default function Editor() {
                             )}
                         </TabsContent>
 
-                        <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0 p-2">
+                        <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0 p-0">
                             <div className="text-sm font-btr-code text-muted-foreground">
                                 History panel - execution history will appear here
                             </div>

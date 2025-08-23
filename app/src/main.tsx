@@ -22,11 +22,11 @@ function Main() {
         },
         strategies: [
           new WanderStrategy(),
-          new WAuthStrategy({ provider: WAuthProviders.Github }),
+          // new WAuthStrategy({ provider: WAuthProviders.Github }),
           new AosyncStrategy(),
-          new WAuthStrategy({ provider: WAuthProviders.Discord }),
-          new WAuthStrategy({ provider: WAuthProviders.X }),
-          new WAuthStrategy({ provider: WAuthProviders.Google }),
+          // new WAuthStrategy({ provider: WAuthProviders.Discord }),
+          // new WAuthStrategy({ provider: WAuthProviders.X }),
+          // new WAuthStrategy({ provider: WAuthProviders.Google }),
         ],
         permissions: ["ACCESS_ADDRESS", "SIGNATURE", "SIGN_TRANSACTION"],
       }}
