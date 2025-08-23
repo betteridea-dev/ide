@@ -59,8 +59,11 @@ export default function Welcome() {
     const handleQuickAction = (action: string) => {
         switch (action) {
             case "new-project":
-                // Trigger new project creation - this would typically open a modal
-                console.log("Create new project")
+                // Trigger the new project dialog
+                const trigger = document.getElementById("new-project")
+                if (trigger) {
+                    trigger.click()
+                }
                 break
             case "all-projects":
                 globalState.actions.setActiveView("project")

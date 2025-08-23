@@ -1,23 +1,228 @@
-import { connect } from "@permaweb/aoconnect";
+import { connect, createSigner } from "@permaweb/aoconnect";
+import type { Tag } from "arweave/web/lib/transaction";
+import Constants from "./constants";
+
+const assoc = (k: string, v: any, o: any) => {
+    o[k] = v
+    return o
+}
 
 interface TestnetOptions {
     CU_URL: string;
     GATEWAY_URL: string;
+    signer: any;
 }
 
 interface MainnetOptions {
     GATEWAY_URL: string;
     HB_URL: string;
+    signer?: any;
 }
 
 export class TestnetAO {
-    constructor(params: TestnetOptions) {
+    private cuUrl: string;
+    private gatewayUrl: string;
+    private signer: any;
 
+    constructor(params: TestnetOptions) {
+        this.cuUrl = params.CU_URL;
+        this.gatewayUrl = params.GATEWAY_URL;
+        this.signer = params.signer;
+    }
+
+    ao() {
+        return connect({
+            MODE: "legacy",
+            CU_URL: this.cuUrl,
+            GATEWAY_URL: this.gatewayUrl,
+        })
+    }
+
+    async read({ processId, tags, data, Owner }: { processId: string, tags: Tag[], data: any, Owner: string }) {
+        const res = await this.ao().dryrun({
+            process: processId,
+            tags: tags,
+            data: data,
+            Owner: Owner
+        })
+        return res
+    }
+
+    async write({ processId, tags, data, noResult = false }: { processId: string, tags: Tag[], data: any, noResult?: boolean }) {
+        const mid = await this.ao().message({
+            process: processId,
+            tags: tags,
+            data: data,
+            signer: this.signer
+        })
+
+        if (noResult) {
+            return mid
+        }
+
+        const res1 = await this.ao().result({
+            process: processId,
+            message: mid,
+        })
+
+        return res1
     }
 }
 
 export class MainnetAO {
-    constructor(params: MainnetOptions) {
+    private hbUrl: string;
+    private gatewayUrl: string;
+    private signer?: any;
 
+    constructor(params: MainnetOptions) {
+        this.hbUrl = params.HB_URL;
+        this.gatewayUrl = params.GATEWAY_URL;
+        this.signer = params.signer;
+    }
+
+    ao() {
+        return connect({
+            MODE: "mainnet",
+            URL: this.hbUrl,
+            signer: this.signer,
+            device: "process@1.0",
+        })
+    }
+
+    sanitizeResponse(res: Record<string, any>) {
+        const blockedKeys = new Set<string>([
+            'accept',
+            'accept-bundle',
+            'accept-encoding',
+            'accept-language',
+            'connection',
+            'device',
+            'host',
+            'method',
+            'priority',
+            'sec-ch-ua',
+            'sec-ch-ua-mobile',
+            'sec-ch-ua-platform',
+            'sec-fetch-dest',
+            'sec-fetch-mode',
+            'sec-fetch-site',
+            'sec-fetch-user',
+            'sec-gpc',
+            'upgrade-insecure-requests',
+            'user-agent',
+            'x-forwarded-for',
+            'x-forwarded-proto',
+            'x-real-ip',
+            'origin',
+            'referer',
+            'cdn-loop',
+            'cf-connecting-ip',
+            'cf-ipcountry',
+            'cf-ray',
+            'cf-visitor',
+            'remote-host',
+        ])
+    }
+
+    async operator(): Promise<string> {
+        const scheduler = (await (await fetch(this.hbUrl + '/~meta@1.0/info/address')).text()).trim()
+        console.log(scheduler)
+        return scheduler
+    }
+
+    async read<T>({ path }: { path: string }): Promise<T> {
+        let hashpath = this.hbUrl + path.startsWith("/") ? path : "/" + path
+        hashpath = hashpath + "/~json@1.0/serialize"
+
+        const res = await fetch(hashpath)
+        return (await res.json()) as T
+    }
+
+    async write({ processId, tags, data }: { processId: string, tags?: { name: string; value: string }[], data?: any }) {
+        const params: any = {
+            path: `/${processId}~process@1.0/push/serialize~json@1.0`,
+            method: 'POST',
+            type: 'Message',
+            'data-protocol': 'ao',
+            variant: 'ao.N.1',
+            target: processId,
+            'signing-format': 'ANS-104',
+        }
+
+        // Add tags as properties
+        if (tags) {
+            tags.forEach(tag => {
+                params[tag.name] = tag.value
+            })
+        }
+
+        // Add data if provided
+        if (data) {
+            params.data = data
+        }
+
+        const res = await this.ao().request(params)
+        return JSON.parse(String(res.body))
+    }
+
+    async spawn({ tags, data, module_ }: { tags?: { name: string; value: string }[], data?: any, module_?: string }) {
+        const params: any = {
+            path: '/push',
+            method: 'POST',
+            type: 'Process',
+            device: 'process@1.0',
+            'scheduler-device': 'scheduler@1.0',
+            'push-device': 'push@1.0',
+            'execution-device': 'lua@5.3a',
+            'data-protocol': 'ao',
+            variant: 'ao.N.1',
+            Random: Math.random().toString(),
+            Authority: await this.operator() + ',fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY',
+            'signing-format': 'ANS-104',
+            Module: module_ || Constants.modules.mainnet.hyperAos,
+            scheduler: await this.operator(),
+            ...Constants.tags.common,
+        }
+
+        // Add custom tags as properties
+        if (tags) {
+            tags.forEach(tag => {
+                params[tag.name] = tag.value
+            })
+        }
+
+        // Add data if provided
+        if (data) {
+            params.data = data
+        }
+
+        console.log(params)
+        const res = await this.ao().request(params)
+        // @ts-ignore
+        const process = (res.process)
+        console.log(process)
+
+        // delay 1s to ensure process is ready
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // send an initial message to activate the process
+        const res2 = await this.write({
+            processId: process,
+            tags: [{ name: 'Action', value: 'Eval' }],
+            data: "require('.process')._version"
+        })
+        console.log(res2)
+        return process
+    }
+
+    async runLua({ processId, code }: { processId: string, code: string }) {
+        const res = await this.write({
+            processId,
+            tags: [
+                { name: "Action", value: "Eval" }
+            ],
+            data: code
+        })
+        return res
     }
 }

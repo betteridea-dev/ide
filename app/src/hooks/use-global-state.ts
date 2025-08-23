@@ -15,6 +15,7 @@ interface GlobalStateActions {
     closeOpenedFile: (fileName: string) => void
     closeProject: () => void
     setFile: (projectId: string, file: File) => void
+    setOutput: (output: string) => void
 }
 
 export interface GlobalState {
@@ -24,6 +25,7 @@ export interface GlobalState {
     activeFile: string
     openedFiles: string[]
     drawerOpen: boolean
+    output: string
     actions: GlobalStateActions
 }
 
@@ -34,6 +36,7 @@ export const useGlobalState = create<GlobalState>((set) => ({
     activeFile: "",
     openedFiles: [],
     drawerOpen: true,
+    output: "",
     actions: {
         setActiveTab: (tab: SidebarTabs) => set({ activeDrawer: tab }),
         setDrawerOpen: (open: boolean) => set({ drawerOpen: open }),
@@ -73,6 +76,7 @@ export const useGlobalState = create<GlobalState>((set) => ({
             // This will be handled by the useProjects hook
             // We're adding this here for consistency with the interface
             console.log("setFile called with:", projectId, file);
-        }
+        },
+        setOutput: (output: string) => set({ output })
     }
 }))

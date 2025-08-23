@@ -33,45 +33,10 @@ export default function DrawerFiles() {
     const project = useProjects((p) => p.projects[activeProject])
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
 
+    // Note: No project handling is now done at the drawer level
+    // This component will only render when a project is active
     if (!project) {
-        return (
-            <div className="h-full flex flex-col">
-                {/* Header */}
-                {/* <div className="px-3 py-2 border-b border-border/40 bg-sidebar/50">
-                    <div className="flex items-center gap-2">
-                        <FolderOpen className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                            Explorer
-                        </span>
-                    </div>
-                </div> */}
-
-                {/* No project state */}
-                <div className="flex-1 flex flex-col items-center justify-start p-6 text-center">
-                    <div className="mb-6">
-                        <h3 className="">No Project opened</h3>
-                    </div>
-
-                    <div className="w-full max-w-xs space-y-1">
-                        <p className="text-xs text-muted-foreground">Open a project to view files</p>
-                        <Button
-                            className="w-full h-10 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90"
-                            onClick={() => { }}
-                        >
-                            View all projects
-                        </Button>
-
-                        <p className="text-xs text-muted-foreground mt-6">Or create a new one</p>
-                        <Button
-                            className="w-full h-10 text-sm font-medium bg-primary text-white hover:bg-primary/90 rounded"
-                            onClick={() => { }}
-                        >
-                            Create New Project
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        )
+        return null
     }
 
     const files = Object.entries(project.files)

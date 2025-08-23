@@ -55,7 +55,7 @@ export default function App() {
       <div className="flex grow">
         <LeftSidebar />
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={18} maxSize={40} minSize={3} collapsible ref={drawerRef}>
+          <ResizablePanel defaultSize={25} maxSize={40} minSize={3} collapsible ref={drawerRef}>
             <Drawer />
           </ResizablePanel>
           <ResizableHandle />

@@ -6,6 +6,8 @@ import { useGlobalState } from "@/hooks/use-global-state"
 import { useProjects, type Project } from "@/hooks/use-projects"
 import { useState } from "react"
 import { toast } from "sonner"
+import NewProject from "./menubar/new-project"
+
 import {
     FileText,
     FolderPlus,
@@ -15,7 +17,24 @@ import {
     Share,
     Trash2,
     Plus,
-    X
+    X,
+    Download,
+    Upload,
+    Settings,
+    HelpCircle,
+    Keyboard,
+    Info,
+    Eye,
+    Layout,
+    Palette,
+    Save,
+    FileUp,
+    FileDown,
+    Files,
+    Blocks,
+    Database,
+    FlaskConical,
+    Bot
 } from "lucide-react"
 
 const link = [
@@ -42,46 +61,10 @@ export default function Menubar() {
     const [isCreatingProject, setIsCreatingProject] = useState(false)
 
     const handleNewProject = () => {
-        const projectName = prompt("Enter project name:")
-        if (projectName && projectName.trim()) {
-            const trimmedName = projectName.trim()
-
-            // Check if project already exists
-            if (projects[trimmedName]) {
-                toast.error("Project with this name already exists")
-                return
-            }
-
-            const newProject: Project = {
-                name: trimmedName,
-                files: {
-                    "main.lua": {
-                        name: "main.lua",
-                        cellOrder: ["init"],
-                        cells: {
-                            "init": {
-                                id: "init",
-                                content: "-- Welcome to your new project\nprint('Hello, ao!')",
-                                output: "",
-                                type: "CODE",
-                                editing: false
-                            }
-                        },
-                        isMainnet: false,
-                        ownerAddress: ""
-                    }
-                },
-                process: "",
-                ownerAddress: "",
-                isMainnet: false
-            } satisfies Project
-
-            projectActions.setProject(newProject)
-            globalActions.setActiveProject(trimmedName)
-            globalActions.setActiveFile("main.lua")
-            globalActions.setActiveView(null)
-            projectActions.addRecent(trimmedName)
-            toast.success(`Project "${trimmedName}" created successfully`)
+        // Trigger the new project dialog
+        const trigger = document.getElementById("new-project")
+        if (trigger) {
+            trigger.click()
         }
     }
 
@@ -118,7 +101,7 @@ export default function Menubar() {
                         editing: false
                     }
                 },
-                isMainnet: false,
+                isMainnet: true,
                 ownerAddress: ""
             }
 
@@ -238,6 +221,109 @@ export default function Menubar() {
         }
     }
 
+    const handleImportProject = () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.json'
+        input.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0]
+            if (file) {
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                    try {
+                        const projectData = JSON.parse(e.target?.result as string)
+                        // TODO: Validate project structure
+                        projectActions.setProject(projectData)
+                        toast.success(`Project "${projectData.name}" imported successfully`)
+                    } catch (error) {
+                        toast.error("Invalid project file format")
+                    }
+                }
+                reader.readAsText(file)
+            }
+        }
+        input.click()
+    }
+
+    const handleExportProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+
+        const project = projects[activeProject]
+        if (project) {
+            const dataStr = JSON.stringify(project, null, 2)
+            const dataBlob = new Blob([dataStr], { type: 'application/json' })
+            const url = URL.createObjectURL(dataBlob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `${activeProject}.json`
+            link.click()
+            URL.revokeObjectURL(url)
+            toast.success(`Project "${activeProject}" exported successfully`)
+        }
+    }
+
+    const handleRenameFile = () => {
+        if (!activeProject || !activeFile) {
+            toast.error("No file selected")
+            return
+        }
+        const newName = prompt("Enter new file name:", activeFile)
+        if (newName && newName.trim() && newName.trim() !== activeFile) {
+            // TODO: Implement file rename logic
+            console.log('Rename file:', activeFile, 'to:', newName.trim())
+            toast.success(`File renamed to "${newName.trim()}"`)
+        }
+    }
+
+    const handleDuplicateFile = () => {
+        if (!activeProject || !activeFile) {
+            toast.error("No file selected")
+            return
+        }
+        // TODO: Implement file duplicate logic
+        console.log('Duplicate file:', activeFile)
+        toast.success(`File "${activeFile}" duplicated`)
+    }
+
+    const handleDeleteFile = () => {
+        if (!activeProject || !activeFile) {
+            toast.error("No file selected")
+            return
+        }
+        const confirmation = confirm(`Are you sure you want to delete "${activeFile}"? This action cannot be undone.`)
+        if (confirmation) {
+            // TODO: Implement file delete logic
+            console.log('Delete file:', activeFile)
+            toast.success(`File "${activeFile}" deleted`)
+        }
+    }
+
+    const handleSaveProject = () => {
+        if (!activeProject) {
+            toast.error("No active project selected")
+            return
+        }
+        // TODO: Implement save logic
+        toast.success(`Project "${activeProject}" saved`)
+    }
+
+    const handleSettings = () => {
+        globalActions.setActiveView("settings")
+    }
+
+    const handleShowKeyboardShortcuts = () => {
+        // TODO: Implement keyboard shortcuts modal
+        toast.info("Keyboard shortcuts panel coming soon!")
+    }
+
+    const handleShowAbout = () => {
+        // TODO: Implement about modal
+        toast.info("About BetterIDEa coming soon!")
+    }
+
     return <div className="h-[25px] flex items-center border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pr-2">
         <Link to="https://betteridea.dev" target="_blank" className="h-full w-10 hover:bg-accent/80 flex items-center justify-center transition-colors">
             <img src="/icon.svg" alt="logo" className="w-6 h-6 p-0.5 pl-1" />
@@ -245,7 +331,7 @@ export default function Menubar() {
 
         {/* Main Menubar */}
         <MainMenubar className="h-[24px] border-none shadow-none bg-transparent p-0">
-            {/* File Menu */}
+            {/* File Menu - Project-level operations */}
             <MenubarMenu>
                 <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
                     File
@@ -267,10 +353,94 @@ export default function Menubar() {
                         Open Project
                         <MenubarShortcut className="text-muted-foreground">⌘O</MenubarShortcut>
                     </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleSaveProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Save className="w-4 h-4 text-muted-foreground" />
+                        Save Project
+                        <MenubarShortcut className="text-muted-foreground">⌘S</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleImportProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                    >
+                        <FileUp className="w-4 h-4 text-muted-foreground" />
+                        Import Project
+                    </MenubarItem>
+                    <MenubarItem
+                        onClick={handleExportProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <FileDown className="w-4 h-4 text-muted-foreground" />
+                        Export Project
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleCloseProject}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                        Close Project
+                        <MenubarShortcut className="text-muted-foreground">⌘W</MenubarShortcut>
+                    </MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
 
-            {/* Project Menu */}
+            {/* Edit Menu - File-level operations */}
+            <MenubarMenu>
+                <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
+                    Edit
+                </MenubarTrigger>
+                <MenubarContent sideOffset={0} alignOffset={0} className="min-w-[180px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
+                    <MenubarItem
+                        onClick={handleNewFile}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Plus className="w-4 h-4 text-muted-foreground" />
+                        New File
+                        <MenubarShortcut className="text-muted-foreground">⌘⇧N</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleRenameFile}
+                        disabled={!activeProject || !activeFile}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Edit3 className="w-4 h-4 text-muted-foreground" />
+                        Rename File
+                        <MenubarShortcut className="text-muted-foreground">F2</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarItem
+                        onClick={handleDuplicateFile}
+                        disabled={!activeProject || !activeFile}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        Duplicate File
+                        <MenubarShortcut className="text-muted-foreground">⌘D</MenubarShortcut>
+                    </MenubarItem>
+                    <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleDeleteFile}
+                        disabled={!activeProject || !activeFile}
+                        variant="destructive"
+                        className="gap-2 cursor-pointer focus:bg-destructive/10 focus:text-destructive data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed dark:focus:bg-destructive/20"
+                    >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                        Delete File
+                        <MenubarShortcut className="text-muted-foreground">Del</MenubarShortcut>
+                    </MenubarItem>
+                </MenubarContent>
+            </MenubarMenu>
+
+            {/* Project Menu - Project management operations */}
             <MenubarMenu>
                 <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
                     Project
@@ -303,16 +473,6 @@ export default function Menubar() {
                     </MenubarItem>
                     <MenubarSeparator className="bg-border" />
                     <MenubarItem
-                        onClick={handleCloseProject}
-                        disabled={!activeProject}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
-                    >
-                        <X className="w-4 h-4 text-muted-foreground" />
-                        Close Project
-                        <MenubarShortcut className="text-muted-foreground">⌘W</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarSeparator className="bg-border" />
-                    <MenubarItem
                         onClick={handleDeleteProject}
                         disabled={!activeProject}
                         variant="destructive"
@@ -324,84 +484,48 @@ export default function Menubar() {
                 </MenubarContent>
             </MenubarMenu>
 
-            {/* File Menu */}
+
+
+            {/* Help Menu - Documentation and support */}
             <MenubarMenu>
                 <MenubarTrigger className="h-[24px] px-2 py-0 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors">
-                    Edit
+                    Help
                 </MenubarTrigger>
                 <MenubarContent sideOffset={0} alignOffset={0} className="min-w-[180px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
                     <MenubarItem
-                        onClick={handleNewFile}
-                        disabled={!activeProject}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                        onClick={handleShowKeyboardShortcuts}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                     >
-                        <FileText className="w-4 h-4 text-muted-foreground" />
-                        New File
-                        <MenubarShortcut className="text-muted-foreground">⌘⇧N</MenubarShortcut>
+                        <Keyboard className="w-4 h-4 text-muted-foreground" />
+                        Keyboard Shortcuts
+                        <MenubarShortcut className="text-muted-foreground">⌘K ⌘S</MenubarShortcut>
                     </MenubarItem>
                     <MenubarSeparator className="bg-border" />
                     <MenubarItem
-                        disabled={!activeProject}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
-                        onClick={() => {
-                            // Handle rename file
-                            if (!activeProject || !activeFile) {
-                                toast.error("No file selected")
-                                return
-                            }
-                            const newName = prompt("Enter new file name:", activeFile)
-                            if (newName && newName.trim() && newName.trim() !== activeFile) {
-                                // TODO: Implement file rename logic
-                                console.log('Rename file:', activeFile, 'to:', newName.trim())
-                                toast.success(`File renamed to "${newName.trim()}"`)
-                            }
-                        }}
+                        onClick={() => window.open('https://docs.betteridea.dev', '_blank')}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                     >
-                        <Edit3 className="w-4 h-4 text-muted-foreground" />
-                        Rename File
-                    </MenubarItem>
-                    <MenubarItem
-                        disabled={!activeProject}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
-                        onClick={() => {
-                            // Handle duplicate file
-                            if (!activeProject || !activeFile) {
-                                toast.error("No file selected")
-                                return
-                            }
-                            // TODO: Implement file duplicate logic
-                            console.log('Duplicate file:', activeFile)
-                            toast.success(`File "${activeFile}" duplicated`)
-                        }}
-                    >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
-                        Duplicate File
+                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        Documentation
                     </MenubarItem>
                     <MenubarSeparator className="bg-border" />
                     <MenubarItem
-                        disabled={!activeProject}
-                        variant="destructive"
-                        className="gap-2 cursor-pointer focus:bg-destructive/10 focus:text-destructive data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed dark:focus:bg-destructive/20"
-                        onClick={() => {
-                            // Handle delete file
-                            if (!activeProject || !activeFile) {
-                                toast.error("No file selected")
-                                return
-                            }
-                            const confirmation = confirm(`Are you sure you want to delete "${activeFile}"? This action cannot be undone.`)
-                            if (confirmation) {
-                                // TODO: Implement file delete logic
-                                console.log('Delete file:', activeFile)
-                                toast.success(`File "${activeFile}" deleted`)
-                            }
-                        }}
+                        onClick={handleShowAbout}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                     >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                        Delete File
+                        <Info className="w-4 h-4 text-muted-foreground" />
+                        About BetterIDEa
                     </MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
         </MainMenubar>
+
+        {/* hidden menubar items with actual functionality */}
+        {/* all other buttons will be a proxy to these items */}
+        <div className="">
+            <NewProject />
+        </div>
+
 
         <div className="grow"></div>
         {link.map((item, index) => (

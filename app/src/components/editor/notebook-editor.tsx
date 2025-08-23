@@ -17,6 +17,12 @@ import {
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import notebookTheme from "@/assets/themes/notebook.json";
+import { useSettings } from "@/hooks/use-settings";
+import { MainnetAO, TestnetAO } from "@/lib/ao";
+import { useActiveAddress } from "@arweave-wallet-kit/react";
+import { createAOSigner, parseOutput } from "@/lib/utils";
+import { toast } from "sonner";
+import { OutputViewer } from "@/components/ui/output-viewer";
 
 // Use the Cell interface from use-projects.ts
 type NotebookCell = Cell & {
@@ -334,12 +340,15 @@ const CodeCell: React.FC<CodeCellProps> = ({
 
             {/* Output section */}
             <div className="flex bg-muted/30 dark:bg-muted/20 rounded-b-lg">
-                <div className="w-16 text-center flex items-start pt-3 justify-center text-muted-foreground/60 text-[10px] font-mono">
+                <div className="w-16 text-center flex items-start pt-3 justify-center text-muted-foreground/60 text-[10px] font-btr-code">
                     [{file.cellOrder.indexOf(cellId) + 1}]
                 </div>
-                <pre className="w-full text-sm font-mono max-h-[250px] min-h-[40px] overflow-auto p-3 text-foreground/90 bg-transparent border-l border-border/30">
-                    {typeof cell.output === "object" ? JSON.stringify(cell.output, null, 2) : (cell.output as string) || ""}
-                </pre>
+                <div className="w-full p-3 bg-transparent border-l border-border/30 overflow-hidden">
+                    <OutputViewer
+                        output={typeof cell.output === "object" ? JSON.stringify(cell.output, null, 2) : (cell.output as string) || ""}
+                        className="max-h-[250px] min-h-[40px] w-full"
+                    />
+                </div>
             </div>
         </div>
     );
@@ -520,7 +529,7 @@ const VisualCell: React.FC<VisualCellProps> = ({
                     ) : (
                         <div className="latex">
                             {/* Simple latex rendering - you might want to add a proper latex renderer */}
-                            <div className="whitespace-pre-wrap text-foreground/90 font-mono">{cell.code}</div>
+                            <div className="whitespace-pre-wrap text-foreground/90 font-btr-code">{cell.code}</div>
                         </div>
                     )}
                 </div>
@@ -590,9 +599,11 @@ const CellUtilButtons: React.FC<CellUtilButtonsProps> = ({
 };
 
 export default function NotebookEditor() {
-    const { activeProject, activeFile } = useGlobalState();
+    const { activeProject, activeFile, actions: globalActions } = useGlobalState();
     const { projects, actions } = useProjects();
     const { theme } = useTheme();
+    const settings = useSettings();
+    const activeAddress = useActiveAddress();
 
     // Global Monaco instances registry for theme updates
     const monacoInstancesRef = useRef<Set<typeof import("monaco-editor")>>(new Set());
@@ -753,13 +764,97 @@ export default function NotebookEditor() {
     const runCell = async (cellId: string, code: string) => {
         console.log("Running cell:", cellId, "with code:", code);
 
-        // Update cell output (simulate execution)
-        updateCell(cellId, {
-            output: `Executed: ${code}\nOutput: Hello from Lua!`
-        });
+        if (!code.trim()) {
+            const errorMsg = "No code to execute";
+            updateCell(cellId, { output: errorMsg });
+            globalActions.setOutput(errorMsg);
+            return;
+        }
 
-        // TODO: Implement actual Lua execution logic here
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (!project?.process) {
+            const errorMsg = "Error: No process ID found for this project. Please set a process ID in project settings.";
+            updateCell(cellId, { output: errorMsg });
+            globalActions.setOutput(errorMsg);
+            toast.error("No process ID configured for this project");
+            return;
+        }
+
+        // Clear previous output
+        updateCell(cellId, { output: "" });
+        globalActions.setOutput("");
+
+        try {
+            if (project.isMainnet) {
+                // Mainnet execution
+                if (!activeAddress) {
+                    const errorMsg = "Error: Wallet connection required for mainnet execution";
+                    updateCell(cellId, { output: errorMsg });
+                    globalActions.setOutput(errorMsg);
+                    toast.error("Please connect your wallet to run code on mainnet");
+                    return;
+                }
+
+                const signer = createAOSigner();
+                const ao = new MainnetAO({
+                    GATEWAY_URL: settings.actions.getGatewayUrl(),
+                    HB_URL: settings.actions.getHbUrl(),
+                    signer
+                });
+
+                // Remove the "Running on mainnet..." message
+
+                // Execute the Lua code
+                const result = await ao.runLua({
+                    processId: project.process,
+                    code: code
+                });
+
+                const parsedOutput = parseOutput(result);
+                updateCell(cellId, {
+                    output: parsedOutput
+                });
+                // Also update the global output state so it appears in the main editor's output tab
+                globalActions.setOutput(parsedOutput);
+                console.log("Mainnet execution completed:", result);
+
+            } else {
+                // Testnet execution - COMMENTED OUT
+                // const signer = createAOSigner();
+                // const ao = new TestnetAO({
+                //     CU_URL: settings.actions.getCuUrl(),
+                //     GATEWAY_URL: settings.actions.getGatewayUrl(),
+                //     signer
+                // });
+
+                // updateCell(cellId, { output: "Running on testnet..." });
+
+                // // For testnet, we'll use the write method with eval action
+                // const tags = [
+                //     { name: "Action", value: "Eval", get: () => "Eval" }
+                // ] as any[];
+
+                // const result = await ao.write({
+                //     processId: project.process,
+                //     tags: tags,
+                //     data: code
+                // });
+
+                // updateCell(cellId, { 
+                //     output: `Code executed successfully!\n\nMessage ID: ${result}\n\nCheck the process for results.`
+                // });
+                // console.log("Testnet execution completed:", result);
+
+                updateCell(cellId, { output: "Testnet execution is currently disabled. Please use a mainnet project." });
+                toast.error("Testnet execution is not available");
+            }
+
+        } catch (error) {
+            const errorMessage = `Error: ${error instanceof Error ? error.message : String(error)}`;
+            console.error("Cell execution error:", errorMessage);
+            updateCell(cellId, { output: errorMessage });
+            globalActions.setOutput(errorMessage);
+            toast.error("Failed to execute code");
+        }
     };
 
     const addNewCell = (position?: number, type: "CODE" | "MARKDOWN" | "LATEX" = "CODE") => {

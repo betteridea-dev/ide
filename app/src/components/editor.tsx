@@ -4,12 +4,17 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resiz
 import { useGlobalState } from "@/hooks/use-global-state";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "./ui/button";
-import { X, LoaderIcon } from "lucide-react";
+import { X, LoaderIcon, Play } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import SingleFileEditor from "./editor/single-file-editor";
 import NotebookEditor from "./editor/notebook-editor";
 import { useTheme } from "@/components/theme-provider";
-import { getFileIconElement } from "@/lib/utils";
+import { getFileIconElement, createAOSigner, parseOutput, stripAnsiCodes } from "@/lib/utils";
+import { useSettings } from "@/hooks/use-settings";
+import { MainnetAO, TestnetAO } from "@/lib/ao";
+import { useActiveAddress } from "@arweave-wallet-kit/react";
+import { toast } from "sonner";
+import { OutputViewer } from "@/components/ui/output-viewer";
 
 function FileTabItem({ filename }: { filename: string }) {
     const { activeFile, actions } = useGlobalState();
@@ -96,11 +101,12 @@ function switchFileType(activeFile: string): React.JSX.Element {
 }
 
 export default function Editor() {
-    const { activeProject, activeFile, openedFiles, actions } = useGlobalState();
+    const { activeProject, activeFile, openedFiles, output, actions } = useGlobalState();
     const { projects } = useProjects();
     const { theme } = useTheme();
+    const settings = useSettings();
+    const activeAddress = useActiveAddress();
     const [running, setRunning] = useState(false);
-    const [output, setOutput] = useState<string>("");
 
     const project = projects[activeProject];
     const file = project?.files[activeFile];
@@ -121,7 +127,7 @@ export default function Editor() {
             openedFiles.forEach(fileName => {
                 const fileToSave = project?.files[fileName];
                 if (fileToSave) {
-                    console.log("Auto-saving file before unload:", fileName);
+                    // console.log("Auto-saving file before unload:", fileName);
                 }
             });
         };
@@ -133,9 +139,8 @@ export default function Editor() {
     async function runLuaFile() {
         if (!activeFile || !project || !file) return;
 
-        console.log("Running Lua file:", activeFile);
         setRunning(true);
-        setOutput(""); // Clear previous output
+        actions.setOutput(""); // Clear previous output
 
         try {
             // Get the current file content
@@ -143,25 +148,55 @@ export default function Editor() {
             const code = firstCellId && file.cells?.[firstCellId] ? file.cells[firstCellId].content : "";
 
             if (!code.trim()) {
-                setOutput("No code to execute");
+                actions.setOutput("No code to execute");
                 return;
             }
 
-            setOutput("Executing Lua code...\n");
+            // Check if project has a process ID
+            if (!project.process) {
+                actions.setOutput("Error: No process ID found for this project. Please set a process ID in project settings.");
+                toast.error("No process ID configured for this project");
+                return;
+            }
 
-            // TODO: Implement actual Lua execution logic here
-            // For now, just simulate running with the actual code
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            actions.setOutput("");
 
-            // Simulate some output
-            const simulatedOutput = `Code executed successfully!\n\nExecuted code:\n${code}\n\nOutput: Hello from Lua!`;
-            setOutput(simulatedOutput);
+            // Determine if this is a mainnet or testnet project
+            if (project.isMainnet) {
+                // Mainnet execution
+                if (!activeAddress) {
+                    actions.setOutput("Error: Wallet connection required for mainnet execution");
+                    toast.error("Please connect your wallet to run code on mainnet");
+                    return;
+                }
 
-            console.log("Lua execution completed");
+                const signer = createAOSigner();
+                const ao = new MainnetAO({
+                    GATEWAY_URL: settings.actions.getGatewayUrl(),
+                    HB_URL: settings.actions.getHbUrl(),
+                    signer
+                });
+
+                // Remove the "Running on mainnet..." message
+
+                // Execute the Lua code
+                const result = await ao.runLua({
+                    processId: project.process,
+                    code: code
+                });
+
+                actions.setOutput(parseOutput(result));
+
+            } else {
+                actions.setOutput("Testnet execution is currently disabled. Please use a mainnet project.");
+                toast.error("Testnet execution is not available");
+            }
+
         } catch (error) {
-            const errorMessage = `Error running Lua file: ${error instanceof Error ? error.message : String(error)}`;
+            const errorMessage = `Error running Lua code: ${error instanceof Error ? error.message : String(error)}`;
             console.error(errorMessage);
-            setOutput(errorMessage);
+            actions.setOutput(`Error: ${errorMessage}`);
+            toast.error("Failed to execute code");
         } finally {
             setRunning(false);
         }
@@ -171,7 +206,7 @@ export default function Editor() {
         <ResizablePanelGroup direction="vertical">
             <ResizablePanel collapsible defaultSize={50} minSize={10}>
                 {/* FILE BAR */}
-                <div className="h-[35px] flex overflow-x-auto border-b bg-card/30 backdrop-blur-sm relative scrollbar-hide">
+                <div className="h-[36px] flex overflow-x-auto border-b bg-card/30 backdrop-blur-sm relative scrollbar-hide">
                     <div className="flex h-full">
                         {openedFiles.map((file) => (
                             <FileTabItem key={file} filename={file} />
@@ -182,17 +217,15 @@ export default function Editor() {
                             <Button
                                 variant="ghost"
                                 id="run-code-btn"
-                                className="h-[35px] w-[35px] p-0 hover:bg-primary/15 dark:hover:bg-primary/10 transition-all duration-150"
+                                className="h-[35px] w-[35px] p-0  rounded-none hover:bg-primary/15 dark:hover:bg-primary/10 transition-all duration-150"
                                 onClick={runLuaFile}
                                 disabled={running}
                                 title={`Run ${activeFile} (Shift+Enter)`}
                             >
                                 {running ? (
-                                    <LoaderIcon size={16} className="animate-spin text-primary" />
+                                    <LoaderIcon size={20} className="animate-spin text-primary" />
                                 ) : (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary">
-                                        <path d="M8 5v14l11-7z" fill="currentColor" />
-                                    </svg>
+                                    <Play size={20} className="text-primary fill-primary" />
                                 )}
                             </Button>
                         </div>
@@ -231,19 +264,27 @@ export default function Editor() {
                         </TabsContent>
 
                         <TabsContent value="inbox" className="h-[calc(100%-30px)] overflow-scroll m-0 p-2">
-                            <div className="text-sm font-btr-code whitespace-pre-wrap">
-                                {output || "Inbox panel - process inbox messages here"}
-                            </div>
+                            {output ? (
+                                <OutputViewer output={output} />
+                            ) : (
+                                <div className="text-sm font-btr-code text-muted-foreground">
+                                    Inbox panel - process inbox messages here
+                                </div>
+                            )}
                         </TabsContent>
 
-                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-scroll m-0 p-2">
-                            <div className="text-sm font-btr-code whitespace-pre-wrap">
-                                {output || "Output panel - execution results will appear here"}
-                            </div>
+                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-hidden m-0 p-2">
+                            {output ? (
+                                <OutputViewer output={output} className="h-full w-full" />
+                            ) : (
+                                <div className="text-sm font-btr-code text-muted-foreground">
+                                    Output panel - execution results will appear here
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0 p-2">
-                            <div className="text-sm font-btr-code">
+                            <div className="text-sm font-btr-code text-muted-foreground">
                                 History panel - execution history will appear here
                             </div>
                         </TabsContent>

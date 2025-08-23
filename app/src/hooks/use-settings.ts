@@ -5,9 +5,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export const DEFAULT_SETTINGS = {
     // Network URLs
     CU_URL: "https://cu.arnode.asia",
-    MU_URL: "https://mu.ao-testnet.xyz",
     GATEWAY_URL: "https://arweave.net",
-    HB_URL: "", // Heartbeat URL - keeping for compatibility
+    HB_URL: "https://hb.arnode.asia", // Hyperbeam URL
 
     // Editor preferences
     VIM_MODE: false,
@@ -25,7 +24,6 @@ export type ThemePreference = typeof DEFAULT_SETTINGS.THEME_PREFERENCE;
 interface SettingsState {
     // Network URLs
     CU_URL: string;
-    MU_URL: string;
     GATEWAY_URL: string;
     HB_URL: string;
 
@@ -45,7 +43,6 @@ interface SettingsState {
 interface SettingsActions {
     // Network URL setters
     setCU_URL: (url: string) => void;
-    setMU_URL: (url: string) => void;
     setGATEWAY_URL: (url: string) => void;
     setHB_URL: (url: string) => void;
 
@@ -66,8 +63,8 @@ interface SettingsActions {
 
     // Individual URL resets
     resetCuUrl: () => void;
-    resetMuUrl: () => void;
     resetGatewayUrl: () => void;
+    resetHbUrl: () => void;
 
     // Validation functions
     isValidUrl: (url: string) => boolean;
@@ -75,8 +72,8 @@ interface SettingsActions {
 
     // Getters with fallbacks
     getCuUrl: () => string;
-    getMuUrl: () => string;
     getGatewayUrl: () => string;
+    getHbUrl: () => string;
     getVimMode: () => boolean;
     getGeminiApiKey: () => string;
     getThemePreference: () => ThemePreference;
@@ -111,11 +108,6 @@ export const useSettings = create<SettingsState>()(
             setCU_URL: (url: string) => {
                 if (isValidUrl(url)) {
                     set({ CU_URL: url });
-                }
-            },
-            setMU_URL: (url: string) => {
-                if (isValidUrl(url)) {
-                    set({ MU_URL: url });
                 }
             },
             setGATEWAY_URL: (url: string) => {
@@ -154,8 +146,8 @@ export const useSettings = create<SettingsState>()(
             resetNetworkUrls: () => {
                 set({
                     CU_URL: DEFAULT_SETTINGS.CU_URL,
-                    MU_URL: DEFAULT_SETTINGS.MU_URL,
                     GATEWAY_URL: DEFAULT_SETTINGS.GATEWAY_URL,
+                    HB_URL: DEFAULT_SETTINGS.HB_URL,
                 });
             },
 
@@ -173,8 +165,8 @@ export const useSettings = create<SettingsState>()(
 
             // Individual URL resets
             resetCuUrl: () => set({ CU_URL: DEFAULT_SETTINGS.CU_URL }),
-            resetMuUrl: () => set({ MU_URL: DEFAULT_SETTINGS.MU_URL }),
             resetGatewayUrl: () => set({ GATEWAY_URL: DEFAULT_SETTINGS.GATEWAY_URL }),
+            resetHbUrl: () => set({ HB_URL: DEFAULT_SETTINGS.HB_URL }),
 
             // Validation functions
             isValidUrl,
@@ -182,8 +174,8 @@ export const useSettings = create<SettingsState>()(
 
             // Getters with fallbacks
             getCuUrl: () => get().CU_URL || DEFAULT_SETTINGS.CU_URL,
-            getMuUrl: () => get().MU_URL || DEFAULT_SETTINGS.MU_URL,
             getGatewayUrl: () => get().GATEWAY_URL || DEFAULT_SETTINGS.GATEWAY_URL,
+            getHbUrl: () => get().HB_URL || DEFAULT_SETTINGS.HB_URL,
             getVimMode: () => get().VIM_MODE ?? DEFAULT_SETTINGS.VIM_MODE,
             getGeminiApiKey: () => get().GEMINI_API_KEY || DEFAULT_SETTINGS.GEMINI_API_KEY,
             getThemePreference: () => get().THEME_PREFERENCE || DEFAULT_SETTINGS.THEME_PREFERENCE,
@@ -193,7 +185,6 @@ export const useSettings = create<SettingsState>()(
                 const state = get();
                 return {
                     CU_URL: state.CU_URL,
-                    MU_URL: state.MU_URL,
                     GATEWAY_URL: state.GATEWAY_URL,
                     HB_URL: state.HB_URL,
                     VIM_MODE: state.VIM_MODE,
@@ -214,7 +205,6 @@ export const useSettings = create<SettingsState>()(
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
             CU_URL: state.CU_URL,
-            MU_URL: state.MU_URL,
             GATEWAY_URL: state.GATEWAY_URL,
             HB_URL: state.HB_URL,
             VIM_MODE: state.VIM_MODE,
@@ -226,14 +216,12 @@ export const useSettings = create<SettingsState>()(
             if (state) {
                 // Migrate from old localStorage keys if they exist
                 const oldCuUrl = localStorage.getItem("ao-cu-url");
-                const oldMuUrl = localStorage.getItem("ao-mu-url");
                 const oldGatewayUrl = localStorage.getItem("gateway-url");
                 const oldVimMode = localStorage.getItem("vimMode");
                 const oldGeminiKey = localStorage.getItem("geminiApiKey");
                 const oldTheme = localStorage.getItem("vite-ui-theme");
 
                 if (oldCuUrl && !state.CU_URL) state.CU_URL = oldCuUrl;
-                if (oldMuUrl && !state.MU_URL) state.MU_URL = oldMuUrl;
                 if (oldGatewayUrl && !state.GATEWAY_URL) state.GATEWAY_URL = oldGatewayUrl;
                 if (oldVimMode && state.VIM_MODE === undefined) state.VIM_MODE = oldVimMode === "true";
                 if (oldGeminiKey && !state.GEMINI_API_KEY) state.GEMINI_API_KEY = oldGeminiKey;
