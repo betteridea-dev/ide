@@ -37,10 +37,50 @@ function Switcher() {
 export default function App() {
   const address = useActiveAddress()
   const { disconnect, connected } = useConnection()
-  const { activeDrawer: activeTab, drawerOpen } = useGlobalState()
+  const { activeDrawer: activeTab, drawerOpen, activeProject, activeFile, activeView } = useGlobalState()
+  const { projects } = useProjects()
   const drawerRef = useRef<ImperativePanelHandle>(null)
 
+  // Generate dynamic title based on current state
+  const generateTitle = () => {
+    const baseTitle = "BetterIDEa"
+
+    // If in settings view
+    if (activeView === "settings") {
+      return `Settings | ${baseTitle}`
+    }
+
+    // If in project view (all projects)
+    if (activeView === "project") {
+      return `Projects | ${baseTitle}`
+    }
+
+    // If no project is active
+    if (!activeProject) {
+      return baseTitle
+    }
+
+    // Get project details
+    const project = projects[activeProject]
+    if (!project) {
+      return baseTitle
+    }
+
+    // If no file is active, show just project name
+    if (!activeFile) {
+      return `${project.name} | ${baseTitle}`
+    }
+
+    // Show both project and file name in format: projectname/filename | BetterIDEa
+    return `${project.name}/${activeFile} | ${baseTitle}`
+  }
+
   useEffect(() => fixConnection(address, connected, disconnect), [address, connected, disconnect])
+
+  // Update document title when project, file, or view changes
+  useEffect(() => {
+    document.title = generateTitle()
+  }, [activeProject, activeFile, activeView, projects])
 
   useEffect(() => {
     if (drawerRef.current) {
