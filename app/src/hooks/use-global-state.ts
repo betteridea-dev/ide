@@ -1,8 +1,11 @@
 import type { SidebarTabs } from "@/components/left-sidebar"
 import type { File } from "@/hooks/use-projects"
 import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
 
 export type ViewOptions = "settings" | "project"
+
+
 
 interface GlobalStateActions {
     setActiveTab: (tab: SidebarTabs) => void,
@@ -30,7 +33,7 @@ export interface GlobalState {
     actions: GlobalStateActions
 }
 
-export const useGlobalState = create<GlobalState>((set) => ({
+export const useGlobalState = create<GlobalState>()(persist((set, get) => ({
     activeDrawer: "files",
     activeView: null,
     activeProject: "",
@@ -84,4 +87,13 @@ export const useGlobalState = create<GlobalState>((set) => ({
         },
         setOutput: (output: string) => set({ output })
     }
+}), {
+    name: "betteridea-global-state",
+    storage: createJSONStorage(() => localStorage),
+    partialize: (state) => ({
+        activeProject: state.activeProject,
+        activeFile: state.activeFile,
+        openedFiles: state.openedFiles,
+        drawerOpen: state.drawerOpen
+    })
 }))

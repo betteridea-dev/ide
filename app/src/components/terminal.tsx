@@ -5,6 +5,7 @@ import { ANSI, cn } from '@/lib/utils'
 import { useSettings } from '@/hooks/use-settings'
 import { useProjects } from '@/hooks/use-projects'
 import { useGlobalState } from '@/hooks/use-global-state'
+import { useTerminalState, type TerminalHistoryEntry } from '@/hooks/use-terminal-state'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { Readline } from 'xterm-readline'
@@ -39,6 +40,10 @@ export default function Terminal() {
     const resizeObserverRef = useRef<ResizeObserver | null>(null)
     const [isReady, setIsReady] = useState(false)
     const [prompt, setPrompt] = useState("> ")
+
+    // Terminal state management
+    const { addTerminalEntry, setTerminalPrompt, clearTerminalHistory, getTerminalState } = useTerminalState(s => s.actions)
+    const terminalState = process ? getTerminalState(process) : { history: [], prompt: "> " }
 
     // Spinner state
     const spinnerIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -79,16 +84,96 @@ export default function Terminal() {
         signer: createSigner(api)
     })
 
+    // Function to show initial terminal state (ASCII art + connection message)
+    const showInitialTerminalState = useCallback(() => {
+        if (!xtermRef.current || !process) return
+
+        // Clear terminal first
+        xtermRef.current.clear()
+
+        // Show ASCII art
+        const asciiLines = AOS_ASCII.split('\n')
+        asciiLines.forEach((line, index) => {
+            if (index === 0 && line.trim() === '') return // Skip first empty line
+            xtermRef.current!.write(ANSI.RESET + ANSI.LIGHTBLUE + line + ANSI.RESET)
+            if (index < asciiLines.length - 1) {
+                xtermRef.current!.write('\r\n') // Add proper carriage return + line feed
+            }
+        })
+        xtermRef.current.write("\n" + ANSI.RESET + ANSI.DIM + "Connected to process: " + ANSI.RESET + ANSI.LIGHTBLUE + process + ANSI.RESET)
+        xtermRef.current.write('\n\r\n')
+    }, [process])
+
+    // Function to restore terminal history
+    const restoreTerminalHistory = useCallback(() => {
+        if (!xtermRef.current || !process) return
+
+        const state = getTerminalState(process)
+
+        // Show initial state first
+        showInitialTerminalState()
+
+        // Restore history
+        state.history.forEach(entry => {
+            switch (entry.type) {
+                case 'input':
+                    xtermRef.current!.write(ANSI.RESET + state.prompt + entry.content + '\r\n')
+                    break
+                case 'output':
+                    xtermRef.current!.write(ANSI.RESET + entry.content + '\r\n')
+                    break
+                case 'error':
+                    xtermRef.current!.write(ANSI.RESET + ANSI.RED + entry.content + ANSI.RESET + '\r\n')
+                    break
+                case 'system':
+                    xtermRef.current!.write(ANSI.RESET + ANSI.DIM + entry.content + ANSI.RESET + '\r\n')
+                    break
+            }
+        })
+
+        // Set the current prompt
+        setPrompt(state.prompt)
+
+        // Show the current prompt in the terminal so user knows where to type
+        if (state.history.length > 0) {
+            xtermRef.current!.write(ANSI.RESET + state.prompt)
+        }
+    }, [process, getTerminalState, showInitialTerminalState])
+
+    // Function to clear terminal to initial state
+    const clearTerminalToInitialState = useCallback(() => {
+        if (!process || !xtermRef.current) return
+
+        // Clear the stored history
+        clearTerminalHistory(process)
+
+        // Show initial state
+        showInitialTerminalState()
+
+        // Show the prompt in the terminal so user knows where to type
+        xtermRef.current.write(ANSI.RESET + prompt)
+    }, [process, prompt, clearTerminalHistory, showInitialTerminalState])
+
 
     useEffect(() => {
         if (!process) return
-        const hashpath = `${settings.HB_URL}/${process}/now/results/output/prompt/~json@1.0/serialize`
-        fetch(hashpath).then(res => res.json()).then(data => {
-            setPrompt(data.body || "> ")
-        }).catch(() => {
-            setPrompt("> ")
-        })
-    }, [process, theme])
+
+        // First check if we have a stored prompt, otherwise fetch from server
+        const storedState = getTerminalState(process)
+        if (storedState.prompt && storedState.prompt !== "> ") {
+            setPrompt(storedState.prompt)
+        } else {
+            const hashpath = `${settings.HB_URL}/${process}/now/results/output/prompt/~json@1.0/serialize`
+            fetch(hashpath).then(res => res.json()).then(data => {
+                const newPrompt = data.body || "> "
+                setPrompt(newPrompt)
+                setTerminalPrompt(process, newPrompt)
+            }).catch(() => {
+                setPrompt("> ")
+                setTerminalPrompt(process, "> ")
+            })
+        }
+    }, [process, theme, getTerminalState, setTerminalPrompt])
 
     // Get theme configuration
     const getThemeConfig = (currentTheme: string) => {
@@ -134,6 +219,13 @@ export default function Terminal() {
         xterm.loadAddon(webLinksAddon)
         xterm.loadAddon(readline)
 
+        // Add keyboard handler for Ctrl+L
+        xterm.onKey(({ key, domEvent }) => {
+            if (domEvent.ctrlKey && domEvent.key === 'l') {
+                domEvent.preventDefault()
+                clearTerminalToInitialState()
+            }
+        })
 
         // Open terminal
         xterm.open(terminalRef.current)
@@ -146,19 +238,12 @@ export default function Terminal() {
         // Fit terminal to container
         fitAddon.fit()
 
-        // print the ascii art with proper line breaks
-        const asciiLines = AOS_ASCII.split('\n')
-        asciiLines.forEach((line, index) => {
-            if (index === 0 && line.trim() === '') return // Skip first empty line
-            xterm.write(ANSI.RESET + ANSI.LIGHTBLUE + line + ANSI.RESET)
-            if (index < asciiLines.length - 1) {
-                xterm.write('\r\n') // Add proper carriage return + line feed
-            }
-        })
-        xterm.write("\n" + ANSI.RESET + ANSI.DIM + "Connected to process: " + ANSI.RESET + ANSI.LIGHTBLUE + process + ANSI.RESET)
-        xterm.write('\n\n\r\n')
-
         setIsReady(true)
+
+        // Restore terminal history after terminal is ready
+        setTimeout(() => {
+            restoreTerminalHistory()
+        }, 100)
 
         // Cleanup
         return () => {
@@ -174,7 +259,7 @@ export default function Terminal() {
             readlineRef.current = null
             setIsReady(false)
         }
-    }, [theme])
+    }, [theme, restoreTerminalHistory, clearTerminalToInitialState])
 
 
 
@@ -260,9 +345,18 @@ export default function Terminal() {
 
             switch (text) {
                 case "clear":
-                    xtermRef.current.clear()
+                    clearTerminalToInitialState()
                     break;
                 default:
+                    // Add input to history
+                    if (process) {
+                        addTerminalEntry(process, {
+                            type: 'input',
+                            content: text,
+                            timestamp: Date.now()
+                        })
+                    }
+
                     // Start spinner
                     startSpinner();
 
@@ -280,7 +374,18 @@ export default function Terminal() {
                             if (output.endsWith("\nnil")) output = output.slice(0, -4)
 
                         const newPrompt = result.prompt
-                        setPrompt(typeof newPrompt === 'string' && newPrompt.length > 0 ? newPrompt : "> ")
+                        const finalPrompt = typeof newPrompt === 'string' && newPrompt.length > 0 ? newPrompt : "> "
+                        setPrompt(finalPrompt)
+
+                        // Update stored prompt and add output to history
+                        if (process) {
+                            setTerminalPrompt(process, finalPrompt)
+                            addTerminalEntry(process, {
+                                type: 'output',
+                                content: output,
+                                timestamp: Date.now()
+                            })
+                        }
 
                         // Print the output in place of the cleared lines
                         readlineRef.current.println(output)
@@ -290,7 +395,18 @@ export default function Terminal() {
                         // Move cursor up to overwrite the prompt line
                         clearLines(1)
 
-                        readlineRef.current.println(ANSI.RESET + ANSI.RED + `[Error: ${error.message || 'Unknown error'}]` + ANSI.RESET)
+                        const errorMessage = `[Error: ${error.message || 'Unknown error'}]`
+
+                        // Add error to history
+                        if (process) {
+                            addTerminalEntry(process, {
+                                type: 'error',
+                                content: errorMessage,
+                                timestamp: Date.now()
+                            })
+                        }
+
+                        readlineRef.current.println(ANSI.RESET + ANSI.RED + errorMessage + ANSI.RESET)
                     }
             }
 
@@ -299,7 +415,7 @@ export default function Terminal() {
 
         readLine()
 
-    }, [isReady, readlineRef, xtermRef, prompt, theme])
+    }, [isReady, readlineRef, xtermRef, prompt, theme, process, addTerminalEntry, setTerminalPrompt, clearTerminalHistory, restoreTerminalHistory, clearTerminalToInitialState, ao, startSpinner, stopSpinner])
 
     return (
         <div className={cn("h-full w-full flex flex-col px-1.5 m-0", theme === "dark" ? "bg-black" : "bg-white")}>
