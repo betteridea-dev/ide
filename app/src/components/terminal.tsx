@@ -13,6 +13,19 @@ import { MainnetAO } from '@/lib/ao'
 import { createSigner } from '@permaweb/aoconnect'
 import { useApi } from '@arweave-wallet-kit/react'
 
+const AOS_ASCII = String.raw`
+      ___           ___           ___     
+     /\  \         /\  \         /\  \    
+    /::\  \       /::\  \       /::\  \   
+   /:/\:\  \     /:/\:\  \     /:/\ \  \  
+  /::\~\:\  \   /:/  \:\  \   _\:\~\ \  \ 
+ /:/\:\ \:\__\ /:/__/ \:\__\ /\ \:\ \ \__\
+ \/__\:\/:/  / \:\  \ /:/  / \:\ \:\ \/__/
+      \::/  /   \:\  /:/  /   \:\ \:\__\  
+      /:/  /     \:\/:/  /     \:\/:/  /  
+     /:/  /       \::/  /       \::/  /   
+     \/__/         \/__/         \/__/    
+`
 
 export default function Terminal() {
     const settings = useSettings()
@@ -75,7 +88,7 @@ export default function Terminal() {
         }).catch(() => {
             setPrompt("> ")
         })
-    }, [process])
+    }, [process, theme])
 
     // Get theme configuration
     const getThemeConfig = (currentTheme: string) => {
@@ -132,6 +145,18 @@ export default function Terminal() {
 
         // Fit terminal to container
         fitAddon.fit()
+
+        // print the ascii art with proper line breaks
+        const asciiLines = AOS_ASCII.split('\n')
+        asciiLines.forEach((line, index) => {
+            if (index === 0 && line.trim() === '') return // Skip first empty line
+            xterm.write(ANSI.RESET + ANSI.LIGHTBLUE + line + ANSI.RESET)
+            if (index < asciiLines.length - 1) {
+                xterm.write('\r\n') // Add proper carriage return + line feed
+            }
+        })
+        xterm.write("\n" + ANSI.RESET + ANSI.DIM + "Connected to process: " + ANSI.RESET + ANSI.LIGHTBLUE + process + ANSI.RESET)
+        xterm.write('\n\n\r\n')
 
         setIsReady(true)
 
@@ -277,7 +302,7 @@ export default function Terminal() {
     }, [isReady, readlineRef, xtermRef, prompt, theme])
 
     return (
-        <div className={cn("h-full w-full flex flex-col p-0 m-0", theme === "dark" ? "bg-black" : "bg-white")}>
+        <div className={cn("h-full w-full flex flex-col px-1.5 m-0", theme === "dark" ? "bg-black" : "bg-white")}>
             <div
                 ref={terminalRef}
                 className="flex-1 overflow-hidden"
