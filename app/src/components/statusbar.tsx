@@ -1,13 +1,15 @@
 import { useActiveAddress, useConnection, useProfileModal } from "@arweave-wallet-kit/react";
 import { Button } from "./ui/button";
 import { Database, Wallet, Wallet2, Copy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router";
 import { ThemeToggleButton } from "./theme-toggle";
 import { useGlobalState } from "@/hooks/use-global-state";
 import { useProjects } from "@/hooks/use-projects";
+import { useSettings } from "@/hooks/use-settings";
+import { startLiveMonitoring } from "@/lib/live-mainnet";
 
 export default function Statusbar() {
     const address = useActiveAddress();
@@ -15,8 +17,10 @@ export default function Statusbar() {
     const { setOpen } = useProfileModal()
     const globalState = useGlobalState();
     const projects = useProjects();
+    const settings = useSettings();
     const [mounted, setMounted] = useState(false);
     const [performance, setPerformance] = useState({ memory: 0 });
+    const stopMonitoringRef = useRef<(() => void) | null>(null);
 
     // Get active project and process ID
     const activeProject = globalState.activeProject ? projects.projects[globalState.activeProject] : null;
@@ -64,14 +68,52 @@ export default function Statusbar() {
         setMounted(true);
     }, []);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (!activeProcessId) return;
+    // Function to send output to terminal
+    const sendToTerminal = (output: string) => {
+        // Dispatch custom event to terminal component
+        // Add newline and carriage return to ensure output appears on new line
+        const event = new CustomEvent("log-output", {
+            detail: { output: '\r\n' + output }
+        });
+        window.dispatchEvent(event);
+    };
 
-            console.log(activeProcessId)
-        }, 1000)
-        return () => clearInterval(interval);
-    }, [activeProcessId])
+    useEffect(() => {
+        // Stop any existing monitoring
+        if (stopMonitoringRef.current) {
+            stopMonitoringRef.current();
+            stopMonitoringRef.current = null;
+        }
+
+        // Start monitoring if we have an active mainnet process
+        if (activeProcessId && activeProject?.isMainnet) {
+            const hbUrl = settings.actions.getHbUrl();
+            const gatewayUrl = settings.actions.getGatewayUrl();
+
+            stopMonitoringRef.current = startLiveMonitoring(activeProcessId, {
+                hbUrl,
+                gatewayUrl,
+                intervalMs: 2000,
+                onResult: (result) => {
+                    // Only send to terminal if there's new data with print output [[memory:7037272]]
+                    if (result.hasNewData && result.hasPrint) {
+                        const outputText = result.error || result.output || '';
+                        if (outputText) {
+                            sendToTerminal(outputText);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cleanup function
+        return () => {
+            if (stopMonitoringRef.current) {
+                stopMonitoringRef.current();
+                stopMonitoringRef.current = null;
+            }
+        };
+    }, [activeProcessId, activeProject?.isMainnet, settings])
 
     if (!mounted) {
         return null;

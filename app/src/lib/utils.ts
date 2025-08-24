@@ -299,8 +299,17 @@ export function parseOutput(result: any): string {
     // Check for error status
     if (result.status === "error" || result.error) {
       // For AO errors, check output.data first, then fallback to other error fields
-      const errorMessage = result.output?.data || result.error || result.message || "Unknown error occurred"
-      return `Error: ${errorMessage}`
+      // If output.data exists (even if empty string), use it as-is without adding "Error:" prefix
+      if (result.output?.data !== undefined) {
+        return result.output.data
+      }
+      // Only add error text if there's an actual error message in other fields
+      const errorMessage = result.error || result.message
+      if (errorMessage) {
+        return `Error: ${errorMessage}`
+      }
+      // If status is error but no error text anywhere, return empty string
+      return ""
     }
 
     // Extract output data if available

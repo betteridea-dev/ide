@@ -282,6 +282,31 @@ export default function Terminal() {
             restoreTerminalHistory()
         }, 100)
 
+        function logOutput(event: Event) {
+            const output = (event as CustomEvent<{ output: string }>).detail.output
+            console.log(output)
+            if (xtermRef.current && readlineRef.current && process) {
+                // Clear the current line before logging output
+                xtermRef.current.write(ANSI.CLEARLINE)
+
+                // Add the output to terminal history so it persists
+                addTerminalEntry(process, {
+                    type: 'output',
+                    content: output.trim(),
+                    timestamp: Date.now()
+                })
+
+                // Use println to properly handle the output with newlines
+                readlineRef.current.println(ANSI.RESET + output.trim() + ANSI.RESET)
+
+                // Ensure the prompt is shown after the output
+                const safePrompt = typeof prompt === 'string' && prompt.length > 0 ? prompt : "aos> "
+                xtermRef.current.write(safePrompt)
+            }
+        }
+
+        window.addEventListener("log-output", logOutput)
+
         // Cleanup
         return () => {
             // Clean up spinner
@@ -298,6 +323,8 @@ export default function Terminal() {
             fitAddonRef.current = null
             readlineRef.current = null
             setIsReady(false)
+
+            window.removeEventListener("log-output", logOutput)
         }
     }, [theme, restoreTerminalHistory, clearTerminalToInitialState])
 
