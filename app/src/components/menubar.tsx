@@ -2,9 +2,11 @@
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6"
 import { Link } from "react-router"
 import { Menubar as MainMenubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger, MenubarSub, MenubarSubTrigger, MenubarSubContent } from "@/components/ui/menubar"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useProjects, type Project } from "@/hooks/use-projects"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import NewProject from "./menubar/new-project"
 import NewFile from "./menubar/new-file"
@@ -40,6 +42,8 @@ import {
     FileCodeIcon,
     Cannabis
 } from "lucide-react"
+import { fetchProjectFromProcess, isValidArweaveId, validateArweaveId } from "@/lib/utils"
+import { useSettings } from "@/hooks/use-settings"
 
 const link = [
     {
@@ -81,6 +85,72 @@ export default function Menubar() {
     const { activeProject, activeFile, activeView, actions: globalActions } = useGlobalState()
     const { projects, actions: projectActions } = useProjects()
     const [isCreatingProject, setIsCreatingProject] = useState(false)
+    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+    const [processId, setProcessId] = useState("")
+    const [isDragOver, setIsDragOver] = useState(false)
+    const [projectPreview, setProjectPreview] = useState<Project | null>(null)
+    const [isLoadingPreview, setIsLoadingPreview] = useState(false)
+    const [previewError, setPreviewError] = useState<string | null>(null)
+    const settings = useSettings()
+
+    // Use the Arweave ID validator from utils.ts for process ID validation
+    const isValidProcessId = (id: string) => {
+        return isValidArweaveId(id)
+    }
+
+    const fetchProjectPreview = async (processIdValue: string) => {
+        if (!processIdValue.trim()) return
+
+        setIsLoadingPreview(true)
+        setPreviewError(null)
+        setProjectPreview(null)
+
+        try {
+            const res: Project = await fetchProjectFromProcess({
+                procesId: processIdValue.trim(),
+                HB_URL: settings.actions.getHbUrl()
+            })
+
+            if (res && res.name) {
+                setProjectPreview(res)
+                // Don't show separate confirmation dialog, show in same popup
+            } else {
+                setPreviewError("Invalid project data received")
+            }
+        } catch (error) {
+            console.error("Failed to fetch project:", error)
+            setPreviewError("Failed to fetch project. Please check the process ID and try again.")
+        } finally {
+            setIsLoadingPreview(false)
+        }
+    }
+
+    // Debounced function to fetch project preview
+    const debouncedFetchProject = useCallback(
+        (() => {
+            let timeoutId: NodeJS.Timeout
+            return (processIdValue: string) => {
+                clearTimeout(timeoutId)
+                timeoutId = setTimeout(() => {
+                    if (isValidProcessId(processIdValue)) {
+                        fetchProjectPreview(processIdValue)
+                    }
+                }, 500) // 500ms delay
+            }
+        })(),
+        [settings]
+    )
+
+    // Auto-fetch project when process ID changes
+    useEffect(() => {
+        if (processId.trim() && isValidProcessId(processId.trim())) {
+            debouncedFetchProject(processId.trim())
+        } else if (processId.trim() && processId.trim().length > 10) {
+            // Clear previous data if ID is not valid but user is typing
+            setProjectPreview(null)
+            setPreviewError(null)
+        }
+    }, [processId, debouncedFetchProject])
 
     const handleNewProject = () => {
         // Trigger the new project dialog
@@ -213,6 +283,33 @@ export default function Menubar() {
     }
 
     const handleImportProject = () => {
+        setIsImportDialogOpen(true)
+    }
+
+    const validateAndPreviewProject = (projectData: any) => {
+        try {
+            // Basic validation
+            if (!projectData || typeof projectData !== 'object') {
+                throw new Error("Invalid project format")
+            }
+
+            if (!projectData.name || typeof projectData.name !== 'string') {
+                throw new Error("Project must have a valid name")
+            }
+
+            if (!projectData.files || typeof projectData.files !== 'object') {
+                throw new Error("Project must have files")
+            }
+
+            // Set preview in same dialog
+            setProjectPreview(projectData as Project)
+            setPreviewError(null)
+        } catch (error) {
+            setPreviewError(error instanceof Error ? error.message : "Invalid project file format")
+        }
+    }
+
+    const handleImportFromJSON = () => {
         const input = document.createElement('input')
         input.type = 'file'
         input.accept = '.json'
@@ -223,17 +320,95 @@ export default function Menubar() {
                 reader.onload = (e) => {
                     try {
                         const projectData = JSON.parse(e.target?.result as string)
-                        // TODO: Validate project structure
-                        projectActions.setProject(projectData)
-                        toast.success(`Project "${projectData.name}" imported successfully`)
+                        validateAndPreviewProject(projectData)
                     } catch (error) {
-                        toast.error("Invalid project file format")
+                        setPreviewError("Invalid JSON file format")
                     }
                 }
                 reader.readAsText(file)
             }
         }
         input.click()
+    }
+
+
+
+
+
+    const confirmImportProject = () => {
+        if (!projectPreview) return
+
+        // Create a copy of the project and clear the process ID
+        const projectToImport = { ...projectPreview }
+        projectToImport.process = ""
+
+        let name = projectToImport.name
+        const existingProject = projects[name]
+        if (existingProject) {
+            const timestamp = Date.now()
+            projectToImport.name = `${name}_${timestamp}`
+            name = projectToImport.name
+        }
+
+        projectActions.setProject(projectToImport)
+        projectActions.addRecent(name)
+        globalActions.setActiveProject(name)
+        toast.success(`Project "${name}" imported successfully`)
+
+        // Reset state
+        setProcessId("")
+        setProjectPreview(null)
+        setIsImportDialogOpen(false)
+    }
+
+    const cancelImport = () => {
+        setProjectPreview(null)
+        setPreviewError(null)
+        setIsLoadingPreview(false)
+    }
+
+    const getFileCount = (project: Project) => {
+        return Object.keys(project.files || {}).length
+    }
+
+    const truncateAddress = (address: string, length = 8) => {
+        if (!address) return "Unknown"
+        return address.length > length * 2
+            ? `${address.slice(0, length)}...${address.slice(-length)}`
+            : address
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(false)
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(false)
+
+        const files = Array.from(e.dataTransfer.files)
+        const jsonFile = files.find(file => file.type === 'application/json' || file.name.endsWith('.json'))
+
+        if (jsonFile) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                try {
+                    const projectData = JSON.parse(e.target?.result as string)
+                    validateAndPreviewProject(projectData)
+                } catch (error) {
+                    setPreviewError("Invalid JSON file format")
+                }
+            }
+            reader.readAsText(jsonFile)
+        } else {
+            setPreviewError("Please drop a valid JSON file")
+        }
     }
 
     const handleExportProject = () => {
@@ -596,6 +771,253 @@ export default function Menubar() {
             <NewProject />
             <NewFile />
         </div>
+
+        {/* Import Project Dialog */}
+        <AlertDialog open={isImportDialogOpen} onOpenChange={(open) => {
+            setIsImportDialogOpen(open)
+            if (!open) {
+                // Reset state when dialog is closed
+                setProcessId("")
+                setProjectPreview(null)
+                setPreviewError(null)
+                setIsLoadingPreview(false)
+            }
+        }}>
+            <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Import Project</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Drag and drop a JSON file or enter a process ID to import your project.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className="space-y-6">
+                    {/* Drag and Drop Zone - only show if no project preview */}
+                    {!projectPreview && (
+                        <div
+                            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${isDragOver
+                                ? 'border-primary bg-primary/5'
+                                : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                                }`}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onClick={handleImportFromJSON}
+                        >
+                            <FileUp className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground mb-1">
+                                Drag and drop your project JSON file here
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                or click to browse files
+                            </p>
+                        </div>
+                    )}
+
+                    {/* JSON Project Preview */}
+                    {projectPreview && !processId && (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h3 className="font-medium text-sm">Project Name</h3>
+                                        <p className="text-sm text-muted-foreground font-btr-code">{projectPreview.name}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground">Files</h4>
+                                        <p className="text-sm font-btr-code">{getFileCount(projectPreview)}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground">Network</h4>
+                                        <p className="text-sm font-btr-code">{projectPreview.isMainnet ? "Mainnet" : "Testnet"}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-medium text-xs text-muted-foreground">Process ID</h4>
+                                    <p className="text-sm text-muted-foreground font-btr-code break-all">
+                                        {projectPreview.process || "Not specified"}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-medium text-xs text-muted-foreground">Owner</h4>
+                                    <p className="text-sm text-muted-foreground font-btr-code">
+                                        {truncateAddress(projectPreview.ownerAddress)}
+                                    </p>
+                                </div>
+
+                                {Object.keys(projectPreview.files).length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground mb-1">Files</h4>
+                                        <div className="max-h-20 overflow-y-auto space-y-1">
+                                            {Object.keys(projectPreview.files).slice(0, 5).map((fileName) => (
+                                                <p key={fileName} className="text-xs text-muted-foreground font-btr-code">
+                                                    {fileName}
+                                                </p>
+                                            ))}
+                                            {Object.keys(projectPreview.files).length > 5 && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    ... and {Object.keys(projectPreview.files).length - 5} more files
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={confirmImportProject}
+                                className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                            >
+                                <Download className="w-4 h-4 mr-2" />
+                                Import Project
+                            </button>
+                        </div>
+                    )}
+
+                    {/* OR Separator - only show if no project preview */}
+                    {!projectPreview && (
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-muted-foreground/25" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">OR</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Process ID Input - only show if no JSON project preview */}
+                    {(!projectPreview || processId) && (
+                        <div className="space-y-3">
+                            <label className="text-sm font-medium">Import from Process ID</label>
+                            <div className="relative">
+                                <Input
+                                    placeholder="Paste process ID here (auto-fetches on valid ID)..."
+                                    value={processId}
+                                    onChange={(e) => setProcessId(e.target.value)}
+                                    disabled={isLoadingPreview}
+                                    className="pr-10"
+                                />
+                                {isLoadingPreview && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    </div>
+                                )}
+                                {processId && !isLoadingPreview && !isValidProcessId(processId) && processId.length > 10 && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <X className="w-4 h-4 text-destructive" />
+                                    </div>
+                                )}
+                                {processId && !isLoadingPreview && isValidProcessId(processId) && !projectPreview && !previewError && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <Database className="w-4 h-4 text-muted-foreground" />
+                                    </div>
+                                )}
+                            </div>
+                            {processId && !isValidProcessId(processId) && processId.length > 10 && (
+                                <p className="text-xs text-destructive">
+                                    {validateArweaveId(processId, "Process ID").error}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Loading State */}
+                    {isLoadingPreview && (
+                        <div className="flex items-center justify-center p-8">
+                            <div className="flex flex-col items-center space-y-3">
+                                <div className="w-8 h-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                <p className="text-sm text-muted-foreground">Fetching project data...</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Project Preview */}
+                    {projectPreview && !isLoadingPreview && (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h3 className="font-medium text-sm">Project Name</h3>
+                                        <p className="text-sm text-muted-foreground font-btr-code">{projectPreview.name}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground">Files</h4>
+                                        <p className="text-sm font-btr-code">{getFileCount(projectPreview)}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground">Network</h4>
+                                        <p className="text-sm font-btr-code">{projectPreview.isMainnet ? "Mainnet" : "Testnet"}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-medium text-xs text-muted-foreground">Process ID</h4>
+                                    <p className="text-sm text-muted-foreground font-btr-code break-all">
+                                        {projectPreview.process || "Not specified"}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-medium text-xs text-muted-foreground">Owner</h4>
+                                    <p className="text-sm text-muted-foreground font-btr-code">
+                                        {truncateAddress(projectPreview.ownerAddress)}
+                                    </p>
+                                </div>
+
+                                {Object.keys(projectPreview.files).length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-xs text-muted-foreground mb-1">Files</h4>
+                                        <div className="max-h-20 overflow-y-auto space-y-1">
+                                            {Object.keys(projectPreview.files).slice(0, 5).map((fileName) => (
+                                                <p key={fileName} className="text-xs text-muted-foreground font-btr-code">
+                                                    {fileName}
+                                                </p>
+                                            ))}
+                                            {Object.keys(projectPreview.files).length > 5 && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    ... and {Object.keys(projectPreview.files).length - 5} more files
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={confirmImportProject}
+                                className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                            >
+                                <Download className="w-4 h-4 mr-2" />
+                                Import Project
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Error Display */}
+                    {previewError && (
+                        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                            <p className="text-sm text-destructive">{previewError}</p>
+                        </div>
+                    )}
+                </div>
+
+                <AlertDialogFooter>
+                    <AlertDialogCancel className="w-full">Cancel</AlertDialogCancel>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
 
 
         <div className="grow"></div>

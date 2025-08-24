@@ -3,13 +3,17 @@ import { Button } from "./ui/button";
 import { Database, Wallet, Wallet2, Copy } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, stripAnsiCodes } from "@/lib/utils";
 import { Link } from "react-router";
 import { ThemeToggleButton } from "./theme-toggle";
 import { useGlobalState } from "@/hooks/use-global-state";
 import { useProjects } from "@/hooks/use-projects";
 import { useSettings } from "@/hooks/use-settings";
+import { useTerminalState } from "@/hooks/use-terminal-state";
 import { startLiveMonitoring } from "@/lib/live-mainnet";
+import { MainnetAO } from "@/lib/ao";
+import { createSigner } from "@permaweb/aoconnect";
+import { useApi } from "@arweave-wallet-kit/react";
 
 export default function Statusbar() {
     const address = useActiveAddress();
@@ -18,9 +22,11 @@ export default function Statusbar() {
     const globalState = useGlobalState();
     const projects = useProjects();
     const settings = useSettings();
+    const { hasShownSlot, addShownSlot } = useTerminalState(s => s.actions);
     const [mounted, setMounted] = useState(false);
     const [performance, setPerformance] = useState({ memory: 0 });
     const stopMonitoringRef = useRef<(() => void) | null>(null);
+    const api = useApi();
 
     // Get active project and process ID
     const activeProject = globalState.activeProject ? projects.projects[globalState.activeProject] : null;
@@ -94,12 +100,15 @@ export default function Statusbar() {
                 hbUrl,
                 gatewayUrl,
                 intervalMs: 2000,
+                hasShownSlot: (slot: number) => hasShownSlot(activeProcessId, slot),
+                markSlotAsShown: (slot: number) => addShownSlot(activeProcessId, slot),
                 onResult: (result) => {
-                    // Only send to terminal if there's new data with print output [[memory:7037272]]
+                    // Only send to terminal if there's new data with print output
                     if (result.hasNewData && result.hasPrint) {
                         const outputText = result.error || result.output || '';
                         if (outputText) {
                             sendToTerminal(outputText);
+                            toast.info(stripAnsiCodes(outputText.slice(0, 200)));
                         }
                     }
                 }
@@ -113,7 +122,31 @@ export default function Statusbar() {
                 stopMonitoringRef.current = null;
             }
         };
-    }, [activeProcessId, activeProject?.isMainnet, settings])
+    }, [activeProcessId, activeProject?.isMainnet, settings, hasShownSlot, addShownSlot])
+
+    useEffect(() => {
+        function syncProjectToProcess() {
+            if (!activeProcessId) return;
+            const project = projects.projects[globalState.activeProject];
+            if (!project) return;
+
+            const hbUrl = settings.actions.getHbUrl();
+            const gatewayUrl = settings.actions.getGatewayUrl();
+
+            const ao = new MainnetAO({
+                HB_URL: hbUrl,
+                GATEWAY_URL: gatewayUrl,
+                signer: createSigner(api)
+            })
+
+            // set a variable in the process containing the entire projects json
+            console.log("SYNC")
+            ao.runLua({ processId: activeProcessId, code: `betteridea = [[${JSON.stringify(project)}]]` })
+        }
+
+        const interval = setInterval(syncProjectToProcess, 15000);
+        return () => clearInterval(interval);
+    }, [activeProcessId, projects, globalState.activeProject, settings])
 
     if (!mounted) {
         return null;

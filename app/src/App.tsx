@@ -13,6 +13,7 @@ import Terminal from "./components/terminal";
 import { useGlobalState } from "./hooks/use-global-state";
 import Settings from "./components/settings";
 import Welcome from "./components/welcome";
+import AllProjects from "./components/all-projects";
 import { useProjects } from "./hooks/use-projects";
 import Editor from "./components/editor";
 import type { ImperativePanelHandle } from "react-resizable-panels";
@@ -23,10 +24,12 @@ function Switcher() {
   if (activeView == "settings")
     return <Settings />
 
+  if (activeView == "project")
+    return <AllProjects />
+
   if (activeProject == "" && activeFile == "") {
     return <Welcome />
   }
-
 
   return <Editor />
 }

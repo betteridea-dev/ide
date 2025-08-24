@@ -23,13 +23,17 @@ export function startLiveMonitoring(
         intervalMs?: number
         onResult?: (result: LiveResult) => void
         lastKnownSlot?: number
+        hasShownSlot?: (slot: number) => boolean
+        markSlotAsShown?: (slot: number) => void
     } = {}
 ): () => void {
     const {
         hbUrl = "https://hb.betteridea.dev",
         gatewayUrl = "https://arweave.net",
         intervalMs = 2000,
-        onResult
+        onResult,
+        hasShownSlot,
+        markSlotAsShown
     } = options
 
     let lastSlot: number | undefined = options.lastKnownSlot
@@ -55,6 +59,16 @@ export function startLiveMonitoring(
             // If we're already at the latest slot, no new data
             if (slotToCheck > currentSlotNumber) {
                 // Schedule next check
+                if (isRunning) {
+                    setTimeout(checkForUpdates, intervalMs)
+                }
+                return
+            }
+
+            // Check if this slot has already been shown to avoid duplicates
+            if (hasShownSlot && hasShownSlot(slotToCheck)) {
+                // Update lastSlot and continue to next slot
+                lastSlot = slotToCheck
                 if (isRunning) {
                     setTimeout(checkForUpdates, intervalMs)
                 }
@@ -95,6 +109,11 @@ export function startLiveMonitoring(
 
             // Only call handler and log if there's new data with print output
             if (hasNewData && hasPrint) {
+                // Mark this slot as shown to prevent duplicates
+                if (markSlotAsShown) {
+                    markSlotAsShown(slotToCheck)
+                }
+
                 // Call custom handler if provided
                 if (onResult) {
                     onResult(result)
