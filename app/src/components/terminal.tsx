@@ -30,7 +30,9 @@ export default function Terminal() {
     // Spinner state
     const spinnerIntervalRef = useRef<NodeJS.Timeout | null>(null)
     // const spinnerChars = ['▖', '▘', '▝', '▗']
+    // const spinnerChars = "⢎⡰,⢎⡡,⢎⡑,⢎⠱,⠎⡱,⢊⡱,⢌⡱,⢆⡱".split(",")
     const spinnerChars = "⣷⣯⣟⡿⢿⣻⣽⣾".split("")
+    // const spinnerChars = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏".split("")
     const spinnerIndexRef = useRef(0)
 
     // Spinner functions
@@ -41,7 +43,7 @@ export default function Terminal() {
         spinnerIntervalRef.current = setInterval(() => {
             if (xtermRef.current) {
                 const spinnerChar = spinnerChars[spinnerIndexRef.current++ % spinnerChars.length]
-                xtermRef.current.write(ANSI.RESET + ANSI.LIGHTBLUE + '\r[computing ' + spinnerChar + "]  " + ANSI.RESET)
+                xtermRef.current.write(ANSI.RESET + ANSI.LIGHTBLUE + "\r" + spinnerChar + " computing... " + ANSI.RESET)
             }
         }, 100)
     }, [])
