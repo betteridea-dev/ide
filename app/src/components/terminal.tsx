@@ -61,7 +61,7 @@ export default function Terminal() {
         spinnerIntervalRef.current = setInterval(() => {
             if (xtermRef.current) {
                 const spinnerChar = spinnerChars[spinnerIndexRef.current++ % spinnerChars.length]
-                xtermRef.current.write(ANSI.RESET + ANSI.LIGHTBLUE + "\r" + spinnerChar + " computing... " + ANSI.RESET)
+                xtermRef.current.write(ANSI.RESET + ANSI.GREEN + "\r" + spinnerChar + " computing... " + ANSI.RESET)
             }
         }, 100)
     }, [])
