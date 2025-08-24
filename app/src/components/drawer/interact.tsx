@@ -13,6 +13,7 @@ import {
     Plus,
     Minus,
     Copy,
+    Check,
     Loader2,
     ExternalLink,
     Tag as TagIcon,
@@ -26,6 +27,8 @@ import { useSettings } from "@/hooks/use-settings"
 import { createSigner } from "@permaweb/aoconnect"
 import { useApi } from "@arweave-wallet-kit/react"
 import JsonViewer from "../ui/json-viewer"
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 export default function Interact() {
     const globalState = useGlobalState()
@@ -55,6 +58,7 @@ export default function Interact() {
     const [output, setOutput] = useState<string>("")
     const [messageId, setMessageId] = useState<string>("")
     const [luaCode, setLuaCode] = useState<string>("")
+    const [isCopied, setIsCopied] = useState<boolean>(false)
 
     // No need for auto-save refs anymore
 
@@ -218,6 +222,10 @@ export default function Interact() {
 
     const copyLuaCode = () => {
         navigator.clipboard.writeText(luaCode)
+        setIsCopied(true)
+        setTimeout(() => {
+            setIsCopied(false)
+        }, 1000)
     }
 
     if (!activeProject) {
@@ -266,7 +274,7 @@ export default function Interact() {
             </div>
 
             <ScrollArea className="flex-1 max-h-[calc(100vh-86px)]">
-                <div className="p-3 sm:p-4 space-y-4">
+                <div className="p-2.5 space-y-4">
                     {/* Message Form */}
                     <div className="space-y-4">
                         {/* Target Process */}
@@ -378,20 +386,47 @@ export default function Interact() {
                     <Separator />
 
                     {/* Lua Code Preview */}
-                    <Card>
-                        <CardHeader className="pb-3">
+                    <Card className="gap-1 p-2.5">
+                        <CardHeader className="px-3">
                             <CardTitle className="text-sm flex items-center justify-between">
                                 Lua Code
                                 <Button size="sm" variant="ghost" onClick={copyLuaCode}>
-                                    <Copy className="w-4 h-4" />
-                                    <span className="hidden sm:inline ml-2">Copy</span>
+                                    {isCopied ? (
+                                        <Check className="!w-3 !h-3" size={10} />
+                                    ) : (
+                                        <Copy className="!w-3 !h-3" size={10} />
+                                    )}
                                 </Button>
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto font-btr-code whitespace-pre-wrap break-all">
+                        <CardContent className="px-3 pb-2">
+                            <SyntaxHighlighter
+                                language="lua"
+                                style={oneDark}
+                                wrapLines={true}
+                                wrapLongLines={true}
+                                customStyle={{
+                                    fontSize: '0.75rem',
+                                    fontFamily: 'var(--font-btr-code)',
+                                    margin: 0,
+                                    borderRadius: '0.375rem',
+                                    background: 'hsl(var(--muted))',
+                                    whiteSpace: 'pre-wrap',
+                                    padding: "0px",
+                                    wordBreak: 'break-all',
+                                    overflowWrap: 'break-word',
+                                }}
+                                codeTagProps={{
+                                    style: {
+                                        fontFamily: 'var(--font-btr-code)',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-all',
+                                        overflowWrap: 'break-word',
+                                    }
+                                }}
+                            >
                                 {luaCode}
-                            </pre>
+                            </SyntaxHighlighter>
                         </CardContent>
                     </Card>
 
