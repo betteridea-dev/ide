@@ -42,7 +42,7 @@ export default function Terminal() {
     const [prompt, setPrompt] = useState("aos> ")
 
     // Terminal state management
-    const { addTerminalEntry, setTerminalPrompt, clearTerminalHistory, getTerminalState } = useTerminalState(s => s.actions)
+    const { addTerminalEntry, setTerminalPrompt, clearTerminalHistory, getTerminalState, processQueue } = useTerminalState(s => s.actions)
     const terminalState = process ? getTerminalState(process) : { history: [], prompt: "aos> " }
 
     // Spinner state
@@ -132,12 +132,31 @@ export default function Terminal() {
             }
         })
 
+        // Process queued entries and display them
+        const queuedEntries = processQueue(process)
+        queuedEntries.forEach(entry => {
+            switch (entry.type) {
+                case 'input':
+                    xtermRef.current!.write(ANSI.RESET + state.prompt + entry.content + '\r\n')
+                    break
+                case 'output':
+                    xtermRef.current!.write(ANSI.RESET + entry.content + '\r\n')
+                    break
+                case 'error':
+                    xtermRef.current!.write(ANSI.RESET + ANSI.RED + entry.content + ANSI.RESET + '\r\n')
+                    break
+                case 'system':
+                    xtermRef.current!.write(ANSI.RESET + ANSI.DIM + entry.content + ANSI.RESET + '\r\n')
+                    break
+            }
+        })
+
         // Set the current prompt
         setPrompt(state.prompt)
 
         // Always show the current prompt in the terminal so user knows where to type
         xtermRef.current!.write(ANSI.RESET + state.prompt)
-    }, [process, getTerminalState, showInitialTerminalState])
+    }, [process, getTerminalState, showInitialTerminalState, processQueue])
 
     // Function to clear terminal to initial state
     const clearTerminalToInitialState = useCallback(() => {
@@ -283,7 +302,10 @@ export default function Terminal() {
         }, 100)
 
         function logOutput(event: Event) {
-            const output = (event as CustomEvent<{ output: string }>).detail.output
+            const eventDetail = (event as CustomEvent<{ output: string; eventId?: string }>).detail
+            const output = eventDetail.output
+            const eventId = eventDetail.eventId
+
             console.log(output)
             if (xtermRef.current && readlineRef.current && process) {
                 // Clear the current line before logging output
@@ -302,6 +324,12 @@ export default function Terminal() {
                 // Ensure the prompt is shown after the output
                 const safePrompt = typeof prompt === 'string' && prompt.length > 0 ? prompt : "aos> "
                 xtermRef.current.write(safePrompt)
+
+                // Send response back to the triggering component if eventId is provided
+                if (eventId) {
+                    const responseEvent = new CustomEvent(`terminal-response-${eventId}`);
+                    window.dispatchEvent(responseEvent);
+                }
             }
         }
 

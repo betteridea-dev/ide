@@ -153,7 +153,7 @@
 
 .dark {
   /* Dark theme colors migrated from globals.css */
-  --background: oklch(0.18 0 0);
+  --background: oklch(0.2 0 0);
   --foreground: oklch(0.81 0 0);
   --card: oklch(0.18 0.001 135);
   --card-foreground: oklch(0.98 0 0);
@@ -170,7 +170,7 @@
   --destructive: oklch(0.4 0.2 27.33);
   --destructive-foreground: oklch(0.6 0.15 27.33);
   --border: oklch(0.25 0 0);
-  --input: oklch(0.16 0 0);
+  --input: oklch(0.4 0 0);
   --ring: oklch(0.839 0.012 285.82);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);

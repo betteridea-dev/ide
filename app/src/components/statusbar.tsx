@@ -22,7 +22,7 @@ export default function Statusbar() {
     const globalState = useGlobalState();
     const projects = useProjects();
     const settings = useSettings();
-    const { hasShownSlot, addShownSlot } = useTerminalState(s => s.actions);
+    const { hasShownSlot, addShownSlot, addToQueue } = useTerminalState(s => s.actions);
     const [mounted, setMounted] = useState(false);
     const [performance, setPerformance] = useState({ memory: 0 });
     const stopMonitoringRef = useRef<(() => void) | null>(null);
@@ -74,12 +74,46 @@ export default function Statusbar() {
         setMounted(true);
     }, []);
 
-    // Function to send output to terminal
+    // Function to send output to terminal with response waiting and queue fallback
     const sendToTerminal = (output: string) => {
+        if (!activeProcessId) return;
+
+        const terminalEntry = {
+            type: 'output' as const,
+            content: output.trim(),
+            timestamp: Date.now()
+        };
+
+        // Create a unique event ID for this request
+        const eventId = `terminal-output-${Date.now()}-${Math.random()}`;
+
+        // Set up response listener
+        let responseReceived = false;
+        const responseTimeout = setTimeout(() => {
+            if (!responseReceived) {
+                // Terminal didn't respond, add to queue
+                addToQueue(activeProcessId, terminalEntry);
+                console.log('Terminal not responding, added to queue:', output.slice(0, 50));
+            }
+            // Clean up listener
+            window.removeEventListener(`terminal-response-${eventId}`, responseHandler);
+        }, 1000); // 1 second timeout
+
+        const responseHandler = () => {
+            responseReceived = true;
+            clearTimeout(responseTimeout);
+            window.removeEventListener(`terminal-response-${eventId}`, responseHandler);
+        };
+
+        // Listen for terminal response
+        window.addEventListener(`terminal-response-${eventId}`, responseHandler);
+
         // Dispatch custom event to terminal component
-        // Add newline and carriage return to ensure output appears on new line
         const event = new CustomEvent("log-output", {
-            detail: { output: '\r\n' + output }
+            detail: {
+                output: '\r\n' + output,
+                eventId: eventId
+            }
         });
         window.dispatchEvent(event);
     };
@@ -156,8 +190,7 @@ export default function Statusbar() {
         <div className="border-t h-[20px] text-xs flex items-center overflow-clip px-1 pr-3 bg-background/50 backdrop-blur-sm">
             {/* Left Section - Connection Status */}
             <Button
-                variant="ghost"
-                className={cn("h-full px-2 gap-1.5 text-xs font-medium rounded-none", !connected && "bg-primary text-primary-foreground")}
+                className={cn("h-full px-2 gap-1.5 text-xs font-medium rounded-none", connected && "bg-background text-foreground hover:text-background")}
                 onClick={() => {
                     if (connected && address) {
                         setOpen(true)
@@ -173,8 +206,8 @@ export default function Statusbar() {
                 }}
                 id="connect-btn"
             >
-                <Wallet className={cn("w-3 h-3", connected && "text-primary")} />
-                <span className={cn("font-btr-code text-xs", connected && "text-muted-foreground")}>
+                <Wallet className={cn("w-3 h-3")} strokeWidth={1.5} />
+                <span className={cn("font-btr-code text-xs")}>
                     {connected ? shortenId(address || "") : "connect"}
                 </span>
             </Button>

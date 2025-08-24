@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link } from "react-router"
-import { ConnectButton, useConnection } from "@arweave-wallet-kit/react"
+import { ConnectButton, useConnection, useProfileModal } from "@arweave-wallet-kit/react"
 
 const emoticons = [
     "(^･o･^)ﾉ' ",
@@ -54,7 +54,8 @@ export default function Welcome() {
     const globalState = useGlobalState()
     const projects = useProjects()
     const [randomWord] = useState(() => emoticons[Math.floor(Math.random() * emoticons.length)])
-    const { connected } = useConnection()
+    const { connected, connect } = useConnection()
+    const { setOpen } = useProfileModal()
 
     const handleQuickAction = (action: string) => {
         switch (action) {
@@ -128,7 +129,8 @@ export default function Welcome() {
                         <Button variant="link" className="justify-center w-fit items-center h-7 text-foreground gap-2 px-0" onClick={() => handleQuickAction("all-projects")}>
                             <FileStack size={18} /> All Projects
                         </Button>
-                        {!connected && <ConnectButton className="!rounded-md !w-fit !p-0 !bg-primary ml-3 mt-4" />}
+                        {/* {!connected && <ConnectButton className="!rounded-md !w-fit !p-0 !bg-primary text-black ml-3 mt-4" />} */}
+                        {!connected && <Button className="w-fit ml-3 mt-4" onClick={() => connect()}>Connect Wallet</Button>}
                     </div>
                 </div>
 

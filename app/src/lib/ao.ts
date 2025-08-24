@@ -1,5 +1,7 @@
 import { connect, createSigner } from "@permaweb/aoconnect";
+import AOCore from "@permaweb/ao-core-libs"
 import Constants from "./constants";
+import { startLiveMonitoring } from "./live-mainnet";
 
 export type Tag = {
     name: string,
@@ -79,8 +81,8 @@ export class MainnetAO {
     private signer?: any;
 
     constructor(params: MainnetOptions) {
-        this.hbUrl = params.HB_URL;
-        this.gatewayUrl = params.GATEWAY_URL;
+        this.hbUrl = params.HB_URL || "https://hb.arnode.asia";
+        this.gatewayUrl = params.GATEWAY_URL || "https://arnode.asia";
         this.signer = params.signer;
     }
 
@@ -92,6 +94,7 @@ export class MainnetAO {
             signer: this.signer,
             device: "process@1.0",
         })
+        // return AOCore.init({ signer: this.signer, url: this.hbUrl })
     }
 
     sanitizeResponse(input: Record<string, any>) {
@@ -205,6 +208,7 @@ export class MainnetAO {
 
         console.log(params)
         const res = await this.ao().request(params)
+        console.log(res)
         // @ts-ignore
         const process = (res.process)
         console.log(process)
@@ -212,13 +216,27 @@ export class MainnetAO {
         // delay 1s to ensure process is ready
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        // send an initial message to activate the process
-        const res2 = await this.write({
-            processId: process,
-            tags: [{ name: 'Action', value: 'Eval' }],
-            data: "require('.process')._version"
+        // compute slot
+        const slot = startLiveMonitoring(process, {
+            hbUrl: this.hbUrl,
+            gatewayUrl: this.gatewayUrl,
+            intervalMs: 1000,
+            onResult: async (result) => {
+                console.log(result)
+                slot()
+                // send an initial message to activate the process
+                const res2 = await this.write({
+                    processId: process,
+                    tags: [{ name: 'Action', value: 'Eval' }],
+                    data: "require('.process')._version"
+                })
+                console.log(res2)
+                // spawn should return process
+                Promise.resolve(process)
+                return process
+            }
         })
-        console.log(res2)
+
         return process
     }
 

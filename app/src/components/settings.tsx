@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Moon, Sun, Save, RotateCcw, Settings as SettingsIcon, Edit3, Check, X, Plus } from "lucide-react"
+import { ArrowLeft, Moon, Sun, Save, RotateCcw, Settings as SettingsIcon, Edit3, Check, X, Plus, Tag as TagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,6 +39,12 @@ export default function Settings() {
     const [processEditMode, setProcessEditMode] = useState<"paste" | "spawn" | null>(null)
     const [editProcessId, setEditProcessId] = useState("")
     const [isSpawningProcess, setIsSpawningProcess] = useState(false)
+
+    // Custom tags for process spawning
+    const [customTags, setCustomTags] = useState<{ name: string; value: string }[]>([])
+    const [newTagName, setNewTagName] = useState("")
+    const [newTagValue, setNewTagValue] = useState("")
+    const [tagErrors, setTagErrors] = useState<string[]>([])
 
     const activeProject = globalState.activeProject ? projects.projects[globalState.activeProject] : null
 
@@ -117,6 +123,50 @@ export default function Settings() {
         setIsProcessDialogOpen(false)
         setProcessEditMode(null)
         setEditProcessId("")
+        // Reset custom tags state
+        setCustomTags([])
+        setNewTagName("")
+        setNewTagValue("")
+        setTagErrors([])
+    }
+
+    const addTag = () => {
+        if (!newTagName.trim() || !newTagValue.trim()) return
+
+        const tagName = newTagName.trim()
+        const tagValue = newTagValue.trim()
+
+        // Clear previous errors
+        setTagErrors([])
+
+        // Check for reserved tag names
+        const reservedTags = ["Name", "Module", "Scheduler", "SDK"]
+        if (reservedTags.some(reserved => reserved.toLowerCase() === tagName.toLowerCase())) {
+            setTagErrors([`"${tagName}" is a reserved tag name`])
+            return
+        }
+
+        // Check if tag name already exists
+        const existingTag = customTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase())
+        if (existingTag) {
+            setTagErrors(["A tag with this name already exists"])
+            return
+        }
+
+        // Validate tag name format (alphanumeric, hyphens, underscores)
+        if (!/^[a-zA-Z0-9\-_]+$/.test(tagName)) {
+            setTagErrors(["Tag name can only contain letters, numbers, hyphens, and underscores"])
+            return
+        }
+
+        setCustomTags([...customTags, { name: tagName, value: tagValue }])
+        setNewTagName("")
+        setNewTagValue("")
+    }
+
+    const removeTag = (index: number) => {
+        setCustomTags(customTags.filter((_, i) => i !== index))
+        setTagErrors([]) // Clear errors when removing tags
     }
 
     const handleSaveProcess = () => {
@@ -163,7 +213,7 @@ export default function Settings() {
 
             const tags = [
                 { name: "Name", value: activeProject.name },
-                { name: "Authority", value: Constants.authorities[0] }
+                ...customTags
             ]
 
             const processId = await ao.spawn({
@@ -185,7 +235,12 @@ export default function Settings() {
             setTimeout(() => {
                 setIsProcessDialogOpen(false)
                 setProcessEditMode(null)
-            }, 1000) // Small delay to show success message
+                // Reset custom tags state
+                setCustomTags([])
+                setNewTagName("")
+                setNewTagValue("")
+                setTagErrors([])
+            }, 1500) // Delay to show success message
 
         } catch (error) {
             console.error("Failed to spawn process:", error)
@@ -574,11 +629,98 @@ export default function Settings() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Custom Tags Section */}
+                            {!isSpawningProcess && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <TagIcon className="w-4 h-4" />
+                                        <Label className="text-sm font-medium">Custom Tags</Label>
+                                    </div>
+
+                                    {/* Display existing tags */}
+                                    {customTags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {customTags.map((tag, index) => (
+                                                <div key={index} className="group relative inline-flex items-center">
+                                                    <div className="flex items-center border border-border rounded-md overflow-hidden bg-background group-hover:pr-3 transition-all duration-150">
+                                                        <div className="px-2 py-1 text-xs font-medium bg-primary/50 border-r border-border">
+                                                            {tag.name}
+                                                        </div>
+                                                        <div className="px-2 py-1 text-xs font-btr-code">
+                                                            {tag.value}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        className="absolute right-0.5 top-1/2 -translate-y-1/2 p-0.5 mr-0.5 rounded-sm hover:bg-muted/60 dark:hover:bg-muted/40 transition-all duration-150 opacity-0 group-hover:opacity-100"
+                                                        onClick={() => removeTag(index)}
+                                                        aria-label={`Remove ${tag.name} tag`}
+                                                    >
+                                                        <X size={12} className="text-muted-foreground/70 hover:text-foreground/90" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Add new tag form */}
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Tag name"
+                                                value={newTagName}
+                                                onChange={(e) => setNewTagName(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && newTagName.trim() && newTagValue.trim()) {
+                                                        e.preventDefault()
+                                                        addTag()
+                                                    }
+                                                }}
+                                                className="flex-1"
+                                            />
+                                            <Input
+                                                placeholder="Tag value"
+                                                value={newTagValue}
+                                                onChange={(e) => setNewTagValue(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && newTagName.trim() && newTagValue.trim()) {
+                                                        e.preventDefault()
+                                                        addTag()
+                                                    }
+                                                }}
+                                                className="flex-1 font-btr-code"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={addTag}
+                                                disabled={!newTagName.trim() || !newTagValue.trim()}
+                                                className="px-3"
+                                            >
+                                                <Plus className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                        {tagErrors.length > 0 && (
+                                            <div className="space-y-1">
+                                                {tagErrors.map((error, index) => (
+                                                    <p key={index} className="text-sm text-red-500">{error}</p>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <p className="text-xs text-muted-foreground">Press Enter to add tag</p>
+                                    </div>
+                                </div>
+                            )}
+
                             {isSpawningProcess && (
                                 <div className="text-xs text-muted-foreground">
                                     <p>• Creating new process with HyperAOS module</p>
                                     <p>• Updating project with new process ID</p>
                                     <p>• Updating owner to current wallet: {activeAddress?.slice(0, 8)}...{activeAddress?.slice(-8)}</p>
+                                    {customTags.length > 0 && (
+                                        <p>• Adding {customTags.length} custom tag{customTags.length > 1 ? 's' : ''}</p>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -599,12 +741,12 @@ export default function Settings() {
                         )}
 
                         {processEditMode === "spawn" && (
-                            <AlertDialogAction
+                            <Button
                                 onClick={handleSpawnNewProcess}
                                 disabled={isSpawningProcess || !activeProject?.isMainnet || !activeAddress}
                             >
                                 {isSpawningProcess ? "Spawning..." : "Spawn Process"}
-                            </AlertDialogAction>
+                            </Button>
                         )}
                     </AlertDialogFooter>
                 </AlertDialogContent>

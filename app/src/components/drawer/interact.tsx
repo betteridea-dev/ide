@@ -17,7 +17,8 @@ import {
     Loader2,
     ExternalLink,
     Tag as TagIcon,
-    MessageSquare
+    MessageSquare,
+    X
 } from "lucide-react"
 import { MainnetAO, TestnetAO, type Tag } from "@/lib/ao"
 import type { InteractState } from "@/hooks/use-projects"
@@ -359,23 +360,24 @@ export default function Interact() {
 
                             {/* Existing Tags */}
                             {tags.length > 0 && (
-                                <div className="space-y-2">
+                                <div className="flex flex-wrap gap-2">
                                     {tags.map((tag, index) => (
-                                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/20 rounded-md min-w-0 w-full overflow-hidden">
-                                            <Badge className="text-xs shrink-0 max-w-[100px] truncate leading-tight break-all hyphens-auto items-start justify-start  px-1">
-                                                <div className="truncate w-full text-left text-xs">
+                                        <div key={index} className="group relative inline-flex items-center">
+                                            <div className="flex items-center border border-border rounded-md overflow-hidden bg-background group-hover:pr-3 transition-all duration-150">
+                                                <div className="px-2 py-1 text-xs font-medium bg-primary/50 border-r border-border max-w-[100px] truncate">
                                                     {tag.name}
                                                 </div>
-                                            </Badge>
-                                            <span className="text-sm flex-1 text-primary min-w-0 leading-tight break-all hyphens-auto">{tag.value}</span>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
+                                                <div className="px-2 py-1 text-xs font-btr-code max-w-[100px] truncate">
+                                                    {tag.value}
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="absolute right-0.5 top-1/2 -translate-y-1/2 p-0.5 mr-0.5 rounded-sm hover:bg-muted/60 dark:hover:bg-muted/40 transition-all duration-150 opacity-0 group-hover:opacity-100"
                                                 onClick={() => removeTag(index)}
-                                                className="h-6 w-6 p-0 shrink-0 mt-0"
+                                                aria-label={`Remove ${tag.name} tag`}
                                             >
-                                                <Minus className="w-3 h-3" />
-                                            </Button>
+                                                <X size={12} className="text-muted-foreground/70 hover:text-foreground/90" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

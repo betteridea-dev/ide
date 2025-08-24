@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Terminal from "./terminal";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import { type ImperativePanelHandle } from "react-resizable-panels";
 import { useGlobalState } from "@/hooks/use-global-state";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "./ui/button";
-import { X, LoaderIcon, Play } from "lucide-react";
+import { X, LoaderIcon, Play, PanelTopCloseIcon, PanelBottomClose, PanelTopClose } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import SingleFileEditor from "./editor/single-file-editor";
 import NotebookEditor from "./editor/notebook-editor";
 import { useTheme } from "@/components/theme-provider";
 import { getFileIconElement, createAOSigner, parseOutput, stripAnsiCodes, isExecutionError, isErrorText } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
+import { useTerminalState } from "@/hooks/use-terminal-state";
 import { MainnetAO, TestnetAO } from "@/lib/ao";
 import { useActiveAddress } from "@arweave-wallet-kit/react";
 import { toast } from "sonner";
@@ -107,8 +109,10 @@ export default function Editor() {
     const { projects } = useProjects();
     const { theme } = useTheme();
     const settings = useSettings();
+    const { addToQueue } = useTerminalState(s => s.actions);
     const activeAddress = useActiveAddress();
     const [running, setRunning] = useState(false);
+    const bottomPanelRef = useRef<ImperativePanelHandle>(null);
 
     const project = projects[activeProject];
     const file = project?.files[activeFile];
@@ -122,12 +126,47 @@ export default function Editor() {
         activeFile.endsWith(".jsx")
     );
 
-    // Function to send output to terminal
+    // Function to send output to terminal with response waiting and queue fallback
     const sendToTerminal = (output: string) => {
+        const processId = project?.process;
+        if (!processId) return;
+
+        const terminalEntry = {
+            type: 'output' as const,
+            content: output.trim(),
+            timestamp: Date.now()
+        };
+
+        // Create a unique event ID for this request
+        const eventId = `terminal-output-${Date.now()}-${Math.random()}`;
+
+        // Set up response listener
+        let responseReceived = false;
+        const responseTimeout = setTimeout(() => {
+            if (!responseReceived) {
+                // Terminal didn't respond, add to queue
+                addToQueue(processId, terminalEntry);
+                console.log('Terminal not responding, added to queue:', output.slice(0, 50));
+            }
+            // Clean up listener
+            window.removeEventListener(`terminal-response-${eventId}`, responseHandler);
+        }, 1000); // 1 second timeout
+
+        const responseHandler = () => {
+            responseReceived = true;
+            clearTimeout(responseTimeout);
+            window.removeEventListener(`terminal-response-${eventId}`, responseHandler);
+        };
+
+        // Listen for terminal response
+        window.addEventListener(`terminal-response-${eventId}`, responseHandler);
+
         // Dispatch custom event to terminal component
-        // Add newline and carriage return to ensure output appears on new line
         const event = new CustomEvent("log-output", {
-            detail: { output: '\r\n' + output }
+            detail: {
+                output: '\r\n' + output,
+                eventId: eventId
+            }
         });
         window.dispatchEvent(event);
     };
@@ -285,23 +324,24 @@ export default function Editor() {
 
             <ResizableHandle />
 
-            <ResizablePanel defaultSize={20} minSize={5} collapsible className="relative">
+            <ResizablePanel defaultSize={20} minSize={5} collapsible className="relative" ref={bottomPanelRef}>
                 {/* BOTTOM PANEL WITH TABS */}
                 <div className="h-full">
                     <Tabs className="h-full relative gap-0" defaultValue="terminal">
-                        <TabsList className="h-[29px] border-b rounded-none w-full justify-start overflow-clip bg-transparent p-0">
-                            <TabsTrigger value="terminal" className="rounded-none data-[state=active]:!bg-primary data-[state=active]:!text-white">
+                        <TabsList className="h-[25px] border-b rounded-none w-full justify-center items-center overflow-clip bg-transparent p-0">
+                            <TabsTrigger value="terminal" className="h-[25px] rounded-none hover:bg-accent data-[state=active]:!bg-primary data-[state=active]:!text-background transition-all duration-150">
                                 Terminal
                             </TabsTrigger>
-                            <TabsTrigger value="inbox" className="rounded-none data-[state=active]:!bg-primary data-[state=active]:!text-white">
+                            <TabsTrigger value="inbox" className="h-[25px] rounded-none hover:bg-accent data-[state=active]:!bg-primary data-[state=active]:!text-background transition-all duration-150">
                                 Inbox
                             </TabsTrigger>
-                            <TabsTrigger value="output" className="rounded-none data-[state=active]:!bg-primary data-[state=active]:!text-white">
+                            <TabsTrigger value="output" className="h-[25px] rounded-none hover:bg-accent data-[state=active]:!bg-primary data-[state=active]:!text-background transition-all duration-150">
                                 Output
                             </TabsTrigger>
-                            <TabsTrigger value="history" className="rounded-none data-[state=active]:!bg-primary data-[state=active]:!text-white">
+                            <TabsTrigger value="history" className="h-[25px] rounded-none hover:bg-accent data-[state=active]:!bg-primary data-[state=active]:!text-background transition-all duration-150">
                                 History
                             </TabsTrigger>
+                            <PanelBottomClose strokeWidth={1.5} className="w-7 h-6.5 px-1 cursor-pointer hover:bg-accent transition-all duration-150" onClick={() => bottomPanelRef.current?.collapse()} />
                         </TabsList>
 
                         <TabsContent value="terminal" className="h-[calc(100%-30px)] overflow-hidden m-0 p-0">

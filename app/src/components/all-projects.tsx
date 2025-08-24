@@ -146,12 +146,6 @@ export default function AllProjects() {
                                                     <FileCodeIcon size={12} />
                                                     {fileCount} file{fileCount !== 1 ? 's' : ''}
                                                 </div>
-                                                {project.isMainnet && (
-                                                    <div className="flex items-center gap-1">
-                                                        <ExternalLinkIcon size={12} />
-                                                        Mainnet
-                                                    </div>
-                                                )}
                                             </div>
                                             {project.ownerAddress && (
                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">

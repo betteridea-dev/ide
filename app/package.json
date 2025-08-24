@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "NODE_OPTIONS='--max-old-space-size=8192' tsc -b && NODE_OPTIONS='--max-old-space-size=8192' vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "DEPLOY_KEY=$(base64 -i wallet.json) permaweb-deploy --deploy-folder ./out --arns-name betteridea --undername hyper"
   },
   "dependencies": {
     "@ar.io/sdk": "^3.18.3",
@@ -99,6 +100,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "permaweb-deploy": "^2.5.1",
     "tw-animate-css": "^1.3.7",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.40.0",
