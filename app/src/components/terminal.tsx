@@ -260,8 +260,19 @@ export default function Terminal() {
         fitAddonRef.current = fitAddon
         readlineRef.current = readline
 
-        // Fit terminal to container
-        fitAddon.fit()
+        // Fit terminal to container (with safety check)
+        setTimeout(() => {
+            if (terminalRef.current) {
+                const rect = terminalRef.current.getBoundingClientRect()
+                if (rect.width > 0 && rect.height > 0) {
+                    try {
+                        fitAddon.fit()
+                    } catch (error) {
+                        console.warn('Initial terminal fit error:', error)
+                    }
+                }
+            }
+        }, 10)
 
         setIsReady(true)
 
@@ -293,14 +304,21 @@ export default function Terminal() {
 
     // Fit terminal to container with debouncing
     const fitTerminal = useCallback(() => {
-        if (fitAddonRef.current && xtermRef.current && isReady) {
-            try {
-                fitAddonRef.current.fit()
-            } catch (error) {
-                console.warn('Terminal fit error:', error)
+        if (fitAddonRef.current && xtermRef.current && isReady && terminalRef.current) {
+            // Check if the terminal container has proper dimensions
+            const container = terminalRef.current
+            const rect = container.getBoundingClientRect()
+
+            // Only fit if container has actual dimensions
+            if (rect.width > 0 && rect.height > 0) {
+                try {
+                    fitAddonRef.current.fit()
+                } catch (error) {
+                    console.warn('Terminal fit error:', error)
+                }
             }
         }
-    }, [isReady])
+    }, [isReady, xtermRef, terminalRef, fitAddonRef])
 
     // Update theme when it changes
     useEffect(() => {
@@ -331,7 +349,7 @@ export default function Terminal() {
         window.addEventListener('resize', handleWindowResize)
 
         // Initial fit after a short delay to ensure DOM is ready
-        setTimeout(fitTerminal, 100)
+        setTimeout(fitTerminal, 150)
 
         return () => {
             clearTimeout(resizeTimeout)

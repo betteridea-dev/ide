@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import { PostHogProvider } from 'posthog-js/react'
 import { ThemeProvider } from '@/components/theme-provider.tsx'
 import { BrowserRouter, HashRouter, Route, Routes } from "react-router";
 import { ArweaveWalletKit } from "@arweave-wallet-kit/react"
@@ -10,10 +11,10 @@ import AosyncStrategy from "@vela-ventures/aosync-strategy"
 
 import App from './App'
 
-
+const usePosthog = (import.meta.env.MODE !== "development")
 
 function Main() {
-  return (
+  const content = (
     <ArweaveWalletKit
       config={{
         appInfo: {
@@ -41,6 +42,24 @@ function Main() {
       </ThemeProvider>
     </ArweaveWalletKit>
   )
+
+  if (usePosthog) {
+    return (
+      <PostHogProvider
+        apiKey="phc_AuCH0eUwOQrmAEOdKZFQnKpZuYBepgVq9zRjr3AlSZq"
+        options={{
+          api_host: "https://eu.i.posthog.com",
+          defaults: '2025-05-24',
+          capture_exceptions: true,
+          debug: usePosthog,
+        }}
+      >
+        {content}
+      </PostHogProvider>
+    )
+  }
+
+  return content
 }
 
 createRoot(document.getElementById('root')!).render(<Main />)
