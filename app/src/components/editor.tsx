@@ -122,6 +122,16 @@ export default function Editor() {
         activeFile.endsWith(".jsx")
     );
 
+    // Function to send output to terminal
+    const sendToTerminal = (output: string) => {
+        // Dispatch custom event to terminal component
+        // Add newline and carriage return to ensure output appears on new line
+        const event = new CustomEvent("log-output", {
+            detail: { output: '\r\n' + output }
+        });
+        window.dispatchEvent(event);
+    };
+
     // Auto-save functionality
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -150,13 +160,17 @@ export default function Editor() {
             const code = firstCellId && file.cells?.[firstCellId] ? file.cells[firstCellId].content : "";
 
             if (!code.trim()) {
-                actions.setOutput("No code to execute");
+                const message = "No code to execute";
+                actions.setOutput(message);
+                sendToTerminal(message);
                 return;
             }
 
             // Check if project has a process ID
             if (!project.process) {
-                actions.setOutput("Error: No process ID found for this project. Please set a process ID in project settings.");
+                const message = "Error: No process ID found for this project. Please set a process ID in project settings.";
+                actions.setOutput(message);
+                sendToTerminal(message);
                 toast.error("No process ID configured for this project");
                 return;
             }
@@ -167,7 +181,9 @@ export default function Editor() {
             if (project.isMainnet) {
                 // Mainnet execution
                 if (!activeAddress) {
-                    actions.setOutput("Error: Wallet connection required for mainnet execution");
+                    const message = "Error: Wallet connection required for mainnet execution";
+                    actions.setOutput(message);
+                    sendToTerminal(message);
                     toast.error("Please connect your wallet to run code on mainnet");
                     return;
                 }
@@ -192,6 +208,11 @@ export default function Editor() {
                 const hasError = isExecutionError(result);
                 actions.setOutput(parsedOutput);
 
+                // Send output to terminal
+                if (parsedOutput) {
+                    sendToTerminal(parsedOutput);
+                }
+
                 // Add to history
                 actions.addHistoryEntry({
                     fileName: activeFile,
@@ -208,14 +229,18 @@ export default function Editor() {
                 }
 
             } else {
-                actions.setOutput("Testnet execution is currently disabled. Please use a mainnet project.");
+                const message = "Testnet execution is currently disabled. Please use a mainnet project.";
+                actions.setOutput(message);
+                sendToTerminal(message);
                 toast.error("Testnet execution is not available");
             }
 
         } catch (error) {
             const errorMessage = `Error running Lua code: ${error instanceof Error ? error.message : String(error)}`;
             console.error(errorMessage);
-            actions.setOutput(`Error: ${errorMessage}`);
+            const fullErrorMessage = `Error: ${errorMessage}`;
+            actions.setOutput(fullErrorMessage);
+            sendToTerminal(fullErrorMessage);
             toast.error("Failed to execute code");
         } finally {
             setRunning(false);

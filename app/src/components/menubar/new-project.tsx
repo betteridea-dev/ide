@@ -5,7 +5,7 @@ import { Badge } from "../ui/badge"
 import { useEffect, useState } from "react"
 import Constants from "@/lib/constants"
 import { useProjects } from "@/hooks/use-projects"
-import { CheckCircle, AlertCircle } from "lucide-react"
+import { CheckCircle, AlertCircle, X, Plus } from "lucide-react"
 import { validateArweaveId, createNewProject, createAOSigner } from "@/lib/utils"
 import { MainnetAO } from "@/lib/ao"
 type SimpleTag = { name: string; value: string }
@@ -25,6 +25,9 @@ export default function NewProject() {
     const [processType, setProcessType] = useState<"new" | "existing">("new")
     const [existingProcessId, setExistingProcessId] = useState("")
     const [customModuleId, setCustomModuleId] = useState("")
+    const [customTags, setCustomTags] = useState<SimpleTag[]>([])
+    const [newTagName, setNewTagName] = useState("")
+    const [newTagValue, setNewTagValue] = useState("")
     const [errors, setErrors] = useState<ValidationError[]>([])
     const [isCreating, setIsCreating] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string>("")
@@ -63,7 +66,51 @@ export default function NewProject() {
             setSuccessMessage("")
             setGeneralError("")
         }
-    }, [projectName, network, module_, processType, existingProcessId, customModuleId])
+    }, [projectName, network, module_, processType, existingProcessId, customModuleId, customTags])
+
+    const addTag = () => {
+        if (newTagName.trim() && newTagValue.trim()) {
+            const tagName = newTagName.trim()
+            const tagValue = newTagValue.trim()
+
+            // Check for reserved tag names
+            const reservedTags = ["Name", "Module", "Scheduler", "SDK"]
+            if (reservedTags.some(reserved => reserved.toLowerCase() === tagName.toLowerCase())) {
+                setErrors([{
+                    field: "tagName",
+                    message: `"${tagName}" is a reserved tag name`
+                }])
+                return
+            }
+
+            // Check if tag name already exists
+            const existingTag = customTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase())
+            if (existingTag) {
+                setErrors([{
+                    field: "tagName",
+                    message: "A tag with this name already exists"
+                }])
+                return
+            }
+
+            // Validate tag name format (alphanumeric, hyphens, underscores)
+            if (!/^[a-zA-Z0-9\-_]+$/.test(tagName)) {
+                setErrors([{
+                    field: "tagName",
+                    message: "Tag name can only contain letters, numbers, hyphens, and underscores"
+                }])
+                return
+            }
+
+            setCustomTags([...customTags, { name: tagName, value: tagValue }])
+            setNewTagName("")
+            setNewTagValue("")
+        }
+    }
+
+    const removeTag = (index: number) => {
+        setCustomTags(customTags.filter((_, i) => i !== index))
+    }
 
     const validateForm = (): ValidationError[] => {
         const validationErrors: ValidationError[] = []
@@ -172,9 +219,11 @@ export default function NewProject() {
                 const moduleId = customModuleId || module_
                 const tags: SimpleTag[] = [
                     { name: "Name", value: projectName.trim() },
+                    ...customTags
                 ]
 
                 console.log("Spawning process with module:", moduleId)
+                console.log("Tags:", tags)
                 processId = await ao.spawn({
                     tags,
                     module_: moduleId
@@ -207,6 +256,9 @@ export default function NewProject() {
                 setProjectName("")
                 setExistingProcessId("")
                 setCustomModuleId("")
+                setCustomTags([])
+                setNewTagName("")
+                setNewTagValue("")
                 setErrors([])
                 setSuccessMessage("")
                 setGeneralError("")
@@ -228,6 +280,17 @@ export default function NewProject() {
         setIsDialogOpen(open)
         if (open) {
             // Reset form state when dialog opens
+            setErrors([])
+            setSuccessMessage("")
+            setGeneralError("")
+        } else {
+            // Reset all form fields when dialog closes
+            setProjectName("")
+            setExistingProcessId("")
+            setCustomModuleId("")
+            setCustomTags([])
+            setNewTagName("")
+            setNewTagValue("")
             setErrors([])
             setSuccessMessage("")
             setGeneralError("")
@@ -362,6 +425,81 @@ export default function NewProject() {
                                 {getFieldError("customModuleId") && (
                                     <p className="text-sm text-red-500 ml-auto">{getFieldError("customModuleId")}</p>
                                 )}
+                            </div>
+                        )}
+
+                        {processType === "new" && (
+                            <div className="space-y-3">
+                                <div className="text-muted-foreground text-sm">Custom Tags</div>
+
+                                {/* Display existing tags */}
+                                {customTags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {customTags.map((tag, index) => (
+                                            <div key={index} className="group relative inline-flex items-center">
+                                                <div className="flex items-center border border-border rounded-md overflow-hidden bg-background group-hover:pr-3 transition-all duration-150">
+                                                    <div className="px-2 py-1 text-xs font-medium bg-primary/50 border-r border-border">
+                                                        {tag.name}
+                                                    </div>
+                                                    <div className="px-2 py-1 text-xs font-btr-code">
+                                                        {tag.value}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    className="absolute right-0.5 top-1/2 -translate-y-1/2 p-0.5 mr-0.5 rounded-sm hover:bg-muted/60 dark:hover:bg-muted/40 transition-all duration-150 opacity-0 group-hover:opacity-100"
+                                                    onClick={() => removeTag(index)}
+                                                    aria-label={`Remove ${tag.name} tag`}
+                                                >
+                                                    <X size={12} className="text-muted-foreground/70 hover:text-foreground/90" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Add new tag form */}
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <Input
+                                            placeholder="Tag name"
+                                            value={newTagName}
+                                            onChange={(e) => setNewTagName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && newTagName.trim() && newTagValue.trim()) {
+                                                    e.preventDefault()
+                                                    addTag()
+                                                }
+                                            }}
+                                            className={`flex-1 ${getFieldError("tagName") ? "border-red-500" : ""}`}
+                                        />
+                                        <Input
+                                            placeholder="Tag value"
+                                            value={newTagValue}
+                                            onChange={(e) => setNewTagValue(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && newTagName.trim() && newTagValue.trim()) {
+                                                    e.preventDefault()
+                                                    addTag()
+                                                }
+                                            }}
+                                            className="flex-1 font-btr-code"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={addTag}
+                                            disabled={!newTagName.trim() || !newTagValue.trim()}
+                                            className="px-3"
+                                        >
+                                            <Plus className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                    {getFieldError("tagName") && (
+                                        <p className="text-sm text-red-500">{getFieldError("tagName")}</p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">Press Enter to add tag</p>
+                                </div>
                             </div>
                         )}
                     </div>
