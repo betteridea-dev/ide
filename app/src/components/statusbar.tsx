@@ -64,6 +64,15 @@ export default function Statusbar() {
         setMounted(true);
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!activeProcessId) return;
+
+            console.log(activeProcessId)
+        }, 1000)
+        return () => clearInterval(interval);
+    }, [activeProcessId])
+
     if (!mounted) {
         return null;
     }

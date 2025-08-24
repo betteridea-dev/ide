@@ -36,7 +36,7 @@ export const useTerminalState = create<TerminalState>()(persist((set, get) => ({
                         ...(state.terminalStates[processId]?.history || []),
                         entry
                     ],
-                    prompt: state.terminalStates[processId]?.prompt || "> "
+                    prompt: state.terminalStates[processId]?.prompt || "aos> "
                 }
             }
         })),
@@ -57,14 +57,14 @@ export const useTerminalState = create<TerminalState>()(persist((set, get) => ({
                 ...state.terminalStates,
                 [processId]: {
                     history: [],
-                    prompt: "> "
+                    prompt: state.terminalStates[processId]?.prompt || "aos> "
                 }
             }
         })),
 
         getTerminalState: (processId: string) => {
             const state = get()
-            return state.terminalStates[processId] || { history: [], prompt: "> " }
+            return state.terminalStates[processId] || { history: [], prompt: "aos> " }
         }
     }
 }), {

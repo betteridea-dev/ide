@@ -39,11 +39,11 @@ export default function Terminal() {
     const readlineRef = useRef<Readline | null>(null)
     const resizeObserverRef = useRef<ResizeObserver | null>(null)
     const [isReady, setIsReady] = useState(false)
-    const [prompt, setPrompt] = useState("> ")
+    const [prompt, setPrompt] = useState("aos> ")
 
     // Terminal state management
     const { addTerminalEntry, setTerminalPrompt, clearTerminalHistory, getTerminalState } = useTerminalState(s => s.actions)
-    const terminalState = process ? getTerminalState(process) : { history: [], prompt: "> " }
+    const terminalState = process ? getTerminalState(process) : { history: [], prompt: "aos> " }
 
     // Spinner state
     const spinnerIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -134,43 +134,51 @@ export default function Terminal() {
         // Set the current prompt
         setPrompt(state.prompt)
 
-        // Show the current prompt in the terminal so user knows where to type
-        if (state.history.length > 0) {
-            xtermRef.current!.write(ANSI.RESET + state.prompt)
-        }
+        // Always show the current prompt in the terminal so user knows where to type
+        xtermRef.current!.write(ANSI.RESET + state.prompt)
     }, [process, getTerminalState, showInitialTerminalState])
 
     // Function to clear terminal to initial state
     const clearTerminalToInitialState = useCallback(() => {
         if (!process || !xtermRef.current) return
 
-        // Clear the stored history
+        // Get current prompt before clearing
+        const currentPrompt = prompt
+
+        // Clear the stored history but preserve the prompt
         clearTerminalHistory(process)
+
+        // Restore the prompt that was cleared
+        setTerminalPrompt(process, currentPrompt)
 
         // Show initial state
         showInitialTerminalState()
 
-        // Show the prompt in the terminal so user knows where to type
-        xtermRef.current.write(ANSI.RESET + prompt)
-    }, [process, prompt, clearTerminalHistory, showInitialTerminalState])
+        // Show the current prompt in the terminal so user knows where to type
+        xtermRef.current.write(ANSI.RESET + currentPrompt)
+    }, [process, prompt, clearTerminalHistory, setTerminalPrompt, showInitialTerminalState])
 
 
     useEffect(() => {
         if (!process) return
 
-        // First check if we have a stored prompt, otherwise fetch from server
+        // Always use stored prompt first, then fetch from server if needed
         const storedState = getTerminalState(process)
-        if (storedState.prompt && storedState.prompt !== "> ") {
-            setPrompt(storedState.prompt)
-        } else {
+
+        // Set the stored prompt immediately
+        setPrompt(storedState.prompt)
+
+        // Only fetch from server if we don't have a stored prompt or it's the default
+        if (!storedState.prompt || storedState.prompt === "aos> ") {
             const hashpath = `${settings.HB_URL}/${process}/now/results/output/prompt/~json@1.0/serialize`
             fetch(hashpath).then(res => res.json()).then(data => {
-                const newPrompt = data.body || "> "
+                const newPrompt = data.body || "aos> "
                 setPrompt(newPrompt)
                 setTerminalPrompt(process, newPrompt)
             }).catch(() => {
-                setPrompt("> ")
-                setTerminalPrompt(process, "> ")
+                // Keep the current stored prompt on error
+                const currentPrompt = getTerminalState(process).prompt
+                setPrompt(currentPrompt)
             })
         }
     }, [process, theme, getTerminalState, setTerminalPrompt])
@@ -221,11 +229,28 @@ export default function Terminal() {
 
         // Add keyboard handler for Ctrl+L
         xterm.onKey(({ key, domEvent }) => {
-            if (domEvent.ctrlKey && domEvent.key === 'l') {
+            if (domEvent.ctrlKey && (domEvent.key === 'l' || domEvent.key === 'L')) {
                 domEvent.preventDefault()
+                domEvent.stopPropagation()
                 clearTerminalToInitialState()
+                return false
             }
         })
+
+        // Also add a global keydown listener to catch Ctrl+L before it reaches the browser
+        const handleGlobalKeyDown = (event: KeyboardEvent) => {
+            if (event.ctrlKey && (event.key === 'l' || event.key === 'L')) {
+                // Only handle if the terminal is focused or if we're in the terminal container
+                const terminalContainer = terminalRef.current
+                if (terminalContainer && (document.activeElement === terminalContainer || terminalContainer.contains(document.activeElement))) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    clearTerminalToInitialState()
+                }
+            }
+        }
+
+        document.addEventListener('keydown', handleGlobalKeyDown, true)
 
         // Open terminal
         xterm.open(terminalRef.current)
@@ -252,6 +277,9 @@ export default function Terminal() {
                 clearInterval(spinnerIntervalRef.current)
                 spinnerIntervalRef.current = null
             }
+
+            // Remove global keydown listener
+            document.removeEventListener('keydown', handleGlobalKeyDown, true)
 
             xterm.dispose()
             xtermRef.current = null
@@ -327,7 +355,7 @@ export default function Terminal() {
                 readlineRef.current.println(ANSI.RESET + ANSI.RED + "[No process found on project]" + ANSI.RESET);
                 return
             }
-            const safePrompt = typeof prompt === 'string' && prompt.length > 0 ? prompt : "> "
+            const safePrompt = typeof prompt === 'string' && prompt.length > 0 ? prompt : "aos> "
             readlineRef.current.read(safePrompt).then(processLine);
         }
 
@@ -364,17 +392,15 @@ export default function Terminal() {
                         const result = await ao.runLua({ processId: process, code: text })
                         console.log(result)
 
-                        // Stop spinner and clear the spinner line
+                        // Stop spinner and clear only the spinner line
                         stopSpinner()
-                        // Move cursor up to overwrite the prompt line
-                        clearLines(1)
 
                         let output = result.output.data
                         if (typeof output === "string")
                             if (output.endsWith("\nnil")) output = output.slice(0, -4)
 
                         const newPrompt = result.prompt
-                        const finalPrompt = typeof newPrompt === 'string' && newPrompt.length > 0 ? newPrompt : "> "
+                        const finalPrompt = typeof newPrompt === 'string' && newPrompt.length > 0 ? newPrompt : prompt
                         setPrompt(finalPrompt)
 
                         // Update stored prompt and add output to history
@@ -387,13 +413,11 @@ export default function Terminal() {
                             })
                         }
 
-                        // Print the output in place of the cleared lines
+                        // Print the output on a new line (command remains visible)
                         readlineRef.current.println(output)
                     } catch (error) {
-                        // Stop spinner and clear the spinner line
+                        // Stop spinner and clear only the spinner line
                         stopSpinner()
-                        // Move cursor up to overwrite the prompt line
-                        clearLines(1)
 
                         const errorMessage = `[Error: ${error.message || 'Unknown error'}]`
 
@@ -406,6 +430,7 @@ export default function Terminal() {
                             })
                         }
 
+                        // Print the error on a new line (command remains visible)
                         readlineRef.current.println(ANSI.RESET + ANSI.RED + errorMessage + ANSI.RESET)
                     }
             }
