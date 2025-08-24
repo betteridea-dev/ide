@@ -29,7 +29,7 @@ export default function Drawer() {
     // Show no project state if no active project
     if (!activeProject || !project) {
         return (
-            <div className={cn("w-full h-full bg-background", drawerOpen && "block")}>
+            <div className={cn("w-full h-full bg-background overflow-hidden", drawerOpen && "block")}>
                 <div className="h-full flex flex-col">
                     {/* No project state */}
                     <div className="flex-1 flex flex-col items-center justify-start p-6 text-center">
@@ -93,7 +93,7 @@ export default function Drawer() {
         }
     }
 
-    return <div className={cn("w-full h-full bg-background", drawerOpen && "block")}>
+    return <div className={cn("w-full h-full bg-background overflow-hidden", drawerOpen && "block")}>
         <Switcher />
     </div>
 }

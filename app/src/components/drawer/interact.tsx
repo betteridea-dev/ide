@@ -1,3 +1,458 @@
+import { useState, useEffect, useCallback, useRef } from "react"
+import { useGlobalState } from "@/hooks/use-global-state"
+import { useProjects } from "@/hooks/use-projects"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Send,
+    Plus,
+    Minus,
+    Copy,
+    Loader2,
+    ExternalLink,
+    Tag as TagIcon,
+    MessageSquare
+} from "lucide-react"
+import { MainnetAO, TestnetAO, type Tag } from "@/lib/ao"
+import type { InteractState } from "@/hooks/use-projects"
+import { parseOutput, shortenAddress } from "@/lib/utils"
+import Constants from "@/lib/constants"
+import { useSettings } from "@/hooks/use-settings"
+import { createSigner } from "@permaweb/aoconnect"
+import { useApi } from "@arweave-wallet-kit/react"
+import JsonViewer from "../ui/json-viewer"
+
 export default function Interact() {
-    return <div>Interact</div>
+    const globalState = useGlobalState()
+    const projectsState = useProjects()
+    const settings = useSettings()
+    const api = useApi()
+
+    const activeProject = globalState.activeProject ? projectsState.projects[globalState.activeProject] : null
+    const savedInteractState = activeProject?.interactState
+
+    // Form state - initialize from saved state or defaults
+    const [target, setTarget] = useState<string>(activeProject?.process || "")
+    const [selectedProcess, setSelectedProcess] = useState<string>(
+        savedInteractState?.selectedProcess || activeProject?.process || "custom"
+    )
+    const [customProcessId, setCustomProcessId] = useState<string>(
+        savedInteractState?.customProcessId || ""
+    )
+    const [action, setAction] = useState<string>(savedInteractState?.action || "")
+    const [data, setData] = useState<string>(savedInteractState?.data || "")
+    const [tags, setTags] = useState<Tag[]>(savedInteractState?.tags || [])
+    const [newTagName, setNewTagName] = useState<string>("")
+    const [newTagValue, setNewTagValue] = useState<string>("")
+
+    // Interaction state
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [output, setOutput] = useState<string>("")
+    const [messageId, setMessageId] = useState<string>("")
+    const [luaCode, setLuaCode] = useState<string>("")
+
+    // No need for auto-save refs anymore
+
+
+
+    // Manual save function
+    const saveInteractState = () => {
+        if (!globalState.activeProject) return
+
+        const interactState: InteractState = {
+            action,
+            data,
+            tags,
+            customProcessId,
+            selectedProcess
+        }
+        projectsState.actions.setInteractState(globalState.activeProject, interactState)
+    }
+
+    // Update target when active project changes
+    useEffect(() => {
+        if (activeProject?.process) {
+            setTarget(activeProject.process)
+            // Only update selectedProcess if there's no saved state
+            if (!savedInteractState?.selectedProcess) {
+                setSelectedProcess(activeProject.process)
+            }
+        } else {
+            setTarget("")
+            if (!savedInteractState?.selectedProcess) {
+                setSelectedProcess("custom")
+            }
+        }
+    }, [activeProject, savedInteractState])
+
+    // Update target based on selected process
+    useEffect(() => {
+        if (selectedProcess === "custom") {
+            setTarget(customProcessId)
+        } else {
+            setTarget(selectedProcess)
+        }
+    }, [selectedProcess, customProcessId])
+
+
+
+    // Generate Lua code preview
+    useEffect(() => {
+        const targetProcess = target || activeProject?.process || ""
+        const luaLines = [`send({`]
+        luaLines.push(`    target = "${targetProcess}",`)
+
+        if (action) {
+            luaLines.push(`    action = "${action}",`)
+        }
+
+        if (data) {
+            luaLines.push(`    data = "${data}",`)
+        }
+
+        tags.forEach(tag => {
+            luaLines.push(`    ["${tag.name}"] = "${tag.value}",`)
+        })
+
+        luaLines.push(`})`)
+        setLuaCode(luaLines.join('\n'))
+    }, [target, action, data, tags, activeProject])
+
+    // Get available processes for selection
+    const getProcessOptions = () => {
+        const options: { label: string; value: string }[] = []
+
+        // Add current project process
+        if (activeProject?.process) {
+            options.push({
+                label: `${activeProject.name}: ${shortenAddress(activeProject.process)}`,
+                value: activeProject.process
+            })
+        }
+
+        // Add other project processes
+        Object.entries(projectsState.projects).forEach(([name, project]) => {
+            if (project.process && project.process !== activeProject?.process) {
+                options.push({
+                    label: `${name}: ${shortenAddress(project.process)}`,
+                    value: project.process
+                })
+            }
+        })
+
+        // Add custom option
+        options.push({
+            label: "Custom Process ID",
+            value: "custom"
+        })
+
+        return options
+    }
+
+    const addTag = () => {
+        if (!newTagName.trim() || !newTagValue.trim()) return
+
+        setTags(prev => [...prev, { name: newTagName.trim(), value: newTagValue.trim() }])
+        setNewTagName("")
+        setNewTagValue("")
+    }
+
+    const removeTag = (index: number) => {
+        setTags(prev => prev.filter((_, i) => i !== index))
+    }
+
+    const clearForm = () => {
+        setTarget(activeProject?.process || "")
+        setSelectedProcess(activeProject?.process || "custom")
+        setCustomProcessId("")
+        setAction("")
+        setData("")
+        setTags([])
+    }
+
+    const sendMessage = async () => {
+        if (!target.trim()) return
+
+        setIsLoading(true)
+        setOutput("Sending message...")
+        setMessageId("")
+
+        try {
+            const messageTags: Tag[] = []
+
+            if (action) {
+                messageTags.push({ name: "Action", value: action })
+            }
+
+            messageTags.push(...tags)
+            console.log(api)
+
+            // Use MainnetAO or TestnetAO based on project settings
+            const ao = new MainnetAO({
+                HB_URL: settings.HB_URL,
+                GATEWAY_URL: settings.GATEWAY_URL,
+                signer: createSigner(api)
+            })
+
+            const result = await ao.write({
+                processId: target,
+                tags: messageTags,
+                data: data || undefined
+            })
+            console.log(result)
+
+            setOutput(result)
+
+        } catch (error) {
+            console.error("Failed to send message:", error)
+            setOutput(`Error: ${error}`)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const copyLuaCode = () => {
+        navigator.clipboard.writeText(luaCode)
+    }
+
+    if (!activeProject) {
+        return (
+            <div className="flex items-center justify-center h-full p-6 text-center">
+                <div className="space-y-3">
+                    <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto" />
+                    <h3 className="text-lg font-medium">No Active Project</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Select or create a project to start interacting with AO processes.
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="h-full w-full flex flex-col">
+            <div className="px-3 py-2 border-b border-border/40 bg-sidebar/50">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Interact
+                        </span>
+                    </div>
+                    <div className="flex gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 hover:bg-accent hidden sm:flex"
+                            onClick={saveInteractState}
+                        >
+                            <span className="text-xs">Save</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 hover:bg-accent hidden sm:flex"
+                            onClick={clearForm}
+                        >
+                            <span className="text-xs">Clear</span>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            <ScrollArea className="flex-1 max-h-[calc(100vh-86px)]">
+                <div className="p-3 sm:p-4 space-y-4">
+                    {/* Message Form */}
+                    <div className="space-y-4">
+                        {/* Target Process */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Target Process</label>
+                            <div className="space-y-2">
+                                <Select value={selectedProcess} onValueChange={setSelectedProcess}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select target process" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {getProcessOptions().map(option => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                <span className="truncate">{option.label}</span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {selectedProcess === "custom" && (
+                                    <Input
+                                        placeholder="Enter custom process ID"
+                                        value={customProcessId}
+                                        onChange={(e) => setCustomProcessId(e.target.value)}
+                                        className="text-xs font-mono"
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action & Data - Side by side on larger screens */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Action</label>
+                                <Input
+                                    placeholder="e.g., Info, Balance"
+                                    value={action}
+                                    onChange={(e) => setAction(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Data</label>
+                                <Input
+                                    placeholder="Message data (optional)"
+                                    value={data}
+                                    onChange={(e) => setData(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <TagIcon className="w-4 h-4" />
+                                <label className="text-sm font-medium">Tags</label>
+                            </div>
+
+                            {/* Add Tag Form */}
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Input
+                                    placeholder="Tag name"
+                                    value={newTagName}
+                                    onChange={(e) => setNewTagName(e.target.value)}
+                                    className="flex-1"
+                                />
+                                <Input
+                                    placeholder="Tag value"
+                                    value={newTagValue}
+                                    onChange={(e) => setNewTagValue(e.target.value)}
+                                    className="flex-1"
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={addTag}
+                                    disabled={!newTagName.trim() || !newTagValue.trim()}
+                                    className="w-full sm:w-auto"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span className="sm:hidden ml-2">Add Tag</span>
+                                </Button>
+                            </div>
+
+                            {/* Existing Tags */}
+                            {tags.length > 0 && (
+                                <div className="space-y-2">
+                                    {tags.map((tag, index) => (
+                                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/20 rounded-md min-w-0 w-full overflow-hidden">
+                                            <Badge className="text-xs shrink-0 max-w-[100px] truncate leading-tight break-all hyphens-auto items-start justify-start  px-1">
+                                                <div className="truncate w-full text-left text-xs">
+                                                    {tag.name}
+                                                </div>
+                                            </Badge>
+                                            <span className="text-sm flex-1 text-primary min-w-0 leading-tight break-all hyphens-auto">{tag.value}</span>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => removeTag(index)}
+                                                className="h-6 w-6 p-0 shrink-0 mt-0"
+                                            >
+                                                <Minus className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Lua Code Preview */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center justify-between">
+                                Lua Code
+                                <Button size="sm" variant="ghost" onClick={copyLuaCode}>
+                                    <Copy className="w-4 h-4" />
+                                    <span className="hidden sm:inline ml-2">Copy</span>
+                                </Button>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto font-btr-code whitespace-pre-wrap break-all">
+                                {luaCode}
+                            </pre>
+                        </CardContent>
+                    </Card>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                            onClick={sendMessage}
+                            disabled={isLoading || !target.trim()}
+                            className="flex-1"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4" />
+                                    Send Message
+                                </>
+                            )}
+                        </Button>
+                        <Button
+                            onClick={clearForm}
+                            variant="outline"
+                            className="sm:hidden"
+                        >
+                            Clear Form
+                        </Button>
+                    </div>
+
+                    {/* Results */}
+                    {(output) && (
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm flex items-center justify-between">
+                                    Results
+                                    {messageId && (
+                                        <Button size="sm" variant="ghost" asChild>
+                                            <a
+                                                href={`https://www.ao.link/#/message/${messageId}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                                <span className="hidden sm:inline">ao.link</span>
+                                            </a>
+                                        </Button>
+                                    )}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {typeof output == "string" ? <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto font-mono whitespace-pre-wrap break-all">
+                                    {output}
+                                </pre> : <JsonViewer data={output} />}
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </ScrollArea>
+        </div>
+    )
 }

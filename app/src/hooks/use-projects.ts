@@ -19,12 +19,21 @@ export interface File {
     ownerAddress?: string
 }
 
+export interface InteractState {
+    action: string,
+    data: string,
+    tags: { name: string, value: string }[],
+    customProcessId: string,
+    selectedProcess: string
+}
+
 export interface Project {
     name: string,
     files: { [key: string]: File },
     process: string,
     ownerAddress: string,
     isMainnet: boolean,
+    interactState?: InteractState
 }
 
 interface ProjectsActions {
@@ -33,6 +42,8 @@ interface ProjectsActions {
 
     setFile: (projectId: string, file: File) => void
     deleteFile: (projectId: string, fileName: string) => void
+
+    setInteractState: (projectId: string, interactState: InteractState) => void
 
     addRecent: (projectId: string) => void
     removeRecent: (projectId: string) => void
@@ -53,6 +64,8 @@ export const useProjects = create<ProjectsState>()(persist((set) => ({
 
         setFile: (projectId: string, file: File) => set((state) => ({ projects: { ...state.projects, [projectId]: { ...state.projects[projectId], files: { ...state.projects[projectId].files, [file.name]: file } } } })),
         deleteFile: (projectId: string, fileName: string) => set((state) => ({ projects: { ...state.projects, [projectId]: { ...state.projects[projectId], files: Object.fromEntries(Object.entries(state.projects[projectId].files).filter(([name]) => name !== fileName)) } } })),
+
+        setInteractState: (projectId: string, interactState: InteractState) => set((state) => ({ projects: { ...state.projects, [projectId]: { ...state.projects[projectId], interactState } } })),
 
         addRecent: (projectId: string) => set((state) => ({ recents: [projectId, ...state.recents.filter((id) => id !== projectId)] })),
         removeRecent: (projectId: string) => set((state) => ({ recents: state.recents.filter((id) => id !== projectId) }))

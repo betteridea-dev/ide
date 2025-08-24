@@ -35,7 +35,10 @@ import {
     Blocks,
     Database,
     FlaskConical,
-    Bot
+    Bot,
+    BookOpenIcon,
+    FileCodeIcon,
+    Cannabis
 } from "lucide-react"
 
 const link = [
@@ -53,6 +56,24 @@ const link = [
         label: "Discord",
         icon: FaDiscord,
         link: "https://discord.gg/nm6VKUQBrA"
+    }
+]
+
+const learningResources = [
+    {
+        title: "AO Cookbook",
+        icon: BookOpenIcon,
+        link: "https://cookbook_ao.ar.io",
+    },
+    {
+        title: "Hyperbeam Docs",
+        icon: FileCodeIcon,
+        link: "https://hyperbeam.ar.io",
+    },
+    {
+        title: "LLM Fuel",
+        icon: Cannabis,
+        link: "https://fuel_permawebllms.arweave.net/",
     }
 ]
 
@@ -539,21 +560,32 @@ export default function Menubar() {
                         <MenubarShortcut className="text-muted-foreground">⌘K ⌘S</MenubarShortcut>
                     </MenubarItem>
                     <MenubarSeparator className="bg-border" />
-                    <MenubarItem
-                        onClick={() => window.open('https://docs.betteridea.dev', '_blank')}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
-                    >
-                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                        Documentation
-                    </MenubarItem>
+                    <MenubarSub>
+                        <MenubarSubTrigger className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                            <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                            Documentation
+                        </MenubarSubTrigger>
+                        <MenubarSubContent className="min-w-[200px] bg-popover supports-[backdrop-filter]:bg-popover border-border shadow-md">
+                            <MenubarItem
+                                onClick={() => window.open('https://docs.betteridea.dev', '_blank')}
+                                className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                            >
+                                <FileText className="w-4 h-4 text-muted-foreground" />
+                                BetterIDEa Docs
+                            </MenubarItem>
+                            {learningResources.map((resource, index) => (
+                                <MenubarItem
+                                    key={index}
+                                    onClick={() => window.open(resource.link, '_blank')}
+                                    className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                                >
+                                    <resource.icon className="w-4 h-4 text-muted-foreground" />
+                                    {resource.title}
+                                </MenubarItem>
+                            ))}
+                        </MenubarSubContent>
+                    </MenubarSub>
                     <MenubarSeparator className="bg-border" />
-                    <MenubarItem
-                        onClick={handleShowAbout}
-                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
-                    >
-                        <Info className="w-4 h-4 text-muted-foreground" />
-                        About BetterIDEa
-                    </MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
         </MainMenubar>

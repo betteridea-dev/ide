@@ -47,16 +47,16 @@ const options: LeftSidebarOptions[] = [
 
         }
     },
-    {
-        label: "AO Companion",
-        Icon: Bot,
-        id: "ao-companion",
-        onClick: (params: any) => {
-            // params.sidebarActions.setDrawerOpen(false)
-            params.sidebarActions.setActiveTab(params.activeTab)
-        },
-        isNew: true
-    }
+    // {
+    //     label: "AO Companion",
+    //     Icon: Bot,
+    //     id: "ao-companion",
+    //     onClick: (params: any) => {
+    //         // params.sidebarActions.setDrawerOpen(false)
+    //         params.sidebarActions.setActiveTab(params.activeTab)
+    //     },
+    //     isNew: true
+    // }
 ]
 
 export default function LeftSidebar() {

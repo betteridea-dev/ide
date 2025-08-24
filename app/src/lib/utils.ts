@@ -18,6 +18,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function shortenAddress(address: string) {
+  return address.slice(0, 6) + "..." + address.slice(-6)
+}
+
 /**
  * Get the appropriate file icon component and color classes based on filename
  * @param filename - The name of the file
