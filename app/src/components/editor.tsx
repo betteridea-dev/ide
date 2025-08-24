@@ -113,6 +113,7 @@ export default function Editor() {
     const activeAddress = useActiveAddress();
     const [running, setRunning] = useState(false);
     const bottomPanelRef = useRef<ImperativePanelHandle>(null);
+    const fileTabsContainerRef = useRef<HTMLDivElement>(null);
 
     const project = projects[activeProject];
     const file = project?.files[activeFile];
@@ -170,6 +171,27 @@ export default function Editor() {
         });
         window.dispatchEvent(event);
     };
+
+    // Horizontal scroll handler for file tabs
+    useEffect(() => {
+        const container = fileTabsContainerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            // Only handle vertical scroll events
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                // Convert vertical scroll to horizontal scroll
+                container.scrollLeft += e.deltaY / 10;
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+
+        return () => {
+            container.removeEventListener('wheel', handleWheel);
+        };
+    }, []);
 
     // Auto-save functionality
     useEffect(() => {
@@ -290,26 +312,26 @@ export default function Editor() {
         <ResizablePanelGroup direction="vertical">
             <ResizablePanel collapsible defaultSize={50} minSize={10}>
                 {/* FILE BAR */}
-                <div className="h-[36px] flex overflow-x-auto border-b bg-card/30 backdrop-blur-sm relative scrollbar-hide">
+                <div className="h-[36px] w-full flex overflow-x-auto border-b bg-card/30 backdrop-blur-sm relative scrollbar-hide" ref={fileTabsContainerRef}>
                     <div className="flex h-full">
                         {openedFiles.map((file) => (
                             <FileTabItem key={file} filename={file} />
                         ))}
                     </div>
                     {activeFile && isCodeFile && (
-                        <div className="absolute right-0 top-0 h-[35px] border-l border-border/30 bg-card/80 backdrop-blur-sm flex items-center justify-center">
+                        <div className="sticky bg-background right-0 ml-auto top-0 h-[35px] border-l flex items-center justify-center">
                             <Button
                                 variant="ghost"
                                 id="run-code-btn"
-                                className="h-[35px] w-[35px] p-0 rounded-none hover:bg-primary/15 dark:hover:bg-primary/10 transition-all duration-150"
+                                className="h-[35px] w-[35px] p-0 rounded-none hover:bg-primary/20 bg-primary/10 transition-all duration-150"
                                 onClick={runLuaFile}
                                 disabled={running}
                                 title={`Run ${activeFile} (Shift+Enter)`}
                             >
                                 {running ? (
-                                    <LoaderIcon size={20} className="animate-spin text-primary" />
+                                    <LoaderIcon size={22} className="animate-spin text-primary" />
                                 ) : (
-                                    <Play size={20} className="text-primary fill-primary" />
+                                    <Play size={22} className="text-primary fill-primary" />
                                 )}
                             </Button>
                         </div>
