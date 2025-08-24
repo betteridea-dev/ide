@@ -69,7 +69,6 @@ export default function LeftSidebar() {
                     <Button key={option.id} variant="ghost"
                         className={cn("h-10 w-10 flex flex-col relative items-center justify-center gap-0.5 rounded-none", activeTab === option.id && "!bg-primary !text-white")}
                         onClick={() => {
-                            sidebarActions.setActiveView("project")
                             if (option.id === activeTab) {
                                 sidebarActions.setDrawerOpen(!drawerOpen)
                             } else {

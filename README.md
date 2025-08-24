@@ -40,7 +40,7 @@
 
 ## Tech Stack
 
-- NextJS, Typescript, TailwindCSS, Zustand
+- Vite, Typescript, TailwindCSS, Zustand
 - AOConnect
 - Monaco Editor
 - Xterm.js
