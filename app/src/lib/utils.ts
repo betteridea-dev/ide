@@ -242,6 +242,49 @@ export function detectValueType(value: string): { type: 'number' | 'boolean' | '
 }
 
 /**
+ * Check if a text string contains error patterns
+ * @param text - The text to check for error patterns
+ * @returns true if the text contains error indicators, false otherwise
+ */
+export function isErrorText(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+
+  const lowerText = text.toLowerCase();
+  return lowerText.includes('error:') ||
+    lowerText.includes('error ') ||
+    lowerText.includes('syntax error') ||
+    lowerText.includes('runtime error') ||
+    lowerText.includes('parse error') ||
+    lowerText.includes('compilation error') ||
+    lowerText.startsWith('error') ||
+    lowerText.includes('exception:') ||
+    lowerText.includes('failed:') ||
+    lowerText.includes('invalid:');
+}
+
+/**
+ * Check if AO execution result indicates an error
+ * @param result - The raw result object from AO process execution
+ * @returns true if the result indicates an error, false otherwise
+ */
+export function isExecutionError(result: any): boolean {
+  // Check status field first
+  if (result?.status === "error" || !!result?.error) {
+    return true;
+  }
+
+  // Check output content for error patterns, even if status is "ok"
+  const outputData = result?.output?.data;
+  if (outputData && typeof outputData === 'string') {
+    return isErrorText(outputData);
+  }
+
+  return false;
+}
+
+/**
  * Parse AO process execution output to extract meaningful data or errors
  * @param result - The raw result object from AO process execution
  * @returns Formatted output string showing data or error information
@@ -255,7 +298,9 @@ export function parseOutput(result: any): string {
 
     // Check for error status
     if (result.status === "error" || result.error) {
-      return `Error: ${result.error || result.message || "Unknown error occurred"}`
+      // For AO errors, check output.data first, then fallback to other error fields
+      const errorMessage = result.output?.data || result.error || result.message || "Unknown error occurred"
+      return `Error: ${errorMessage}`
     }
 
     // Extract output data if available

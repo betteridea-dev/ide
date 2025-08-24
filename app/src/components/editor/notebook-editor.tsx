@@ -20,7 +20,7 @@ import notebookTheme from "@/assets/themes/notebook.json";
 import { useSettings } from "@/hooks/use-settings";
 import { MainnetAO, TestnetAO } from "@/lib/ao";
 import { useActiveAddress } from "@arweave-wallet-kit/react";
-import { createAOSigner, parseOutput } from "@/lib/utils";
+import { createAOSigner, parseOutput, isExecutionError, isErrorText } from "@/lib/utils";
 import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
 
@@ -96,6 +96,8 @@ const CodeCell: React.FC<CodeCellProps> = ({
             setRunning(false);
         }
     };
+
+
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -203,7 +205,11 @@ const CodeCell: React.FC<CodeCellProps> = ({
                     {running ? (
                         <LoaderIcon size={20} className="animate-spin text-primary" />
                     ) : (
-                        <Play size={18} className="text-primary/80 group-hover:text-primary transition-colors" fill="currentColor" />
+                        <Play
+                            size={18}
+                            className="text-primary/80 group-hover:text-primary transition-colors"
+                            fill="currentColor"
+                        />
                     )}
                 </Button>
 
@@ -347,6 +353,7 @@ const CodeCell: React.FC<CodeCellProps> = ({
                     <OutputViewer
                         output={typeof cell.output === "object" ? JSON.stringify(cell.output, null, 2) : (cell.output as string) || ""}
                         className="max-h-[250px] min-h-[40px] w-full"
+                        isError={typeof cell.output === "string" && isErrorText(cell.output)}
                     />
                 </div>
             </div>
@@ -810,11 +817,28 @@ export default function NotebookEditor() {
                 });
 
                 const parsedOutput = parseOutput(result);
+                const hasError = isExecutionError(result);
                 updateCell(cellId, {
                     output: parsedOutput
                 });
                 // Also update the global output state so it appears in the main editor's output tab
                 globalActions.setOutput(parsedOutput);
+
+                // Add to history
+                globalActions.addHistoryEntry({
+                    fileName: activeFile,
+                    code: code,
+                    output: parsedOutput,
+                    projectId: activeProject,
+                    isMainnet: true,
+                    isError: hasError
+                });
+
+                // Show error toast if execution failed
+                if (hasError) {
+                    toast.error("Cell execution failed");
+                }
+
                 console.log("Mainnet execution completed:", result);
 
             } else {

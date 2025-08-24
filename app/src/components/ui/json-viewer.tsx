@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface JsonViewerProps {
     data: any;
     className?: string;
+    isError?: boolean;
 }
 
 interface JsonNodeProps {
@@ -12,9 +13,10 @@ interface JsonNodeProps {
     keyName?: string;
     level?: number;
     isLast?: boolean;
+    isError?: boolean;
 }
 
-const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = true }) => {
+const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = true, isError = false }) => {
     // Collapse nested items by default (level > 0), keep root level expanded
     const [isCollapsed, setIsCollapsed] = useState(level > 0);
 
@@ -25,11 +27,13 @@ const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = 
     const isEmpty = isCollapsible && Object.keys(data).length === 0;
 
     const renderValue = (value: any) => {
-        if (value === null) return <span className="text-gray-500 font-btr-code">null</span>;
-        if (typeof value === 'string') return <span className="text-green-600 font-btr-code">"{value}"</span>;
-        if (typeof value === 'number') return <span className="text-blue-600 font-btr-code">{value}</span>;
-        if (typeof value === 'boolean') return <span className="text-purple-600 font-btr-code">{String(value)}</span>;
-        return <span className="font-btr-code">{String(value)}</span>;
+        const baseClasses = isError ? "text-destructive" : "";
+
+        if (value === null) return <span className={cn("text-gray-500 font-btr-code", baseClasses)}>null</span>;
+        if (typeof value === 'string') return <span className={cn("text-green-600 font-btr-code", baseClasses)}>"{value}"</span>;
+        if (typeof value === 'number') return <span className={cn("text-blue-600 font-btr-code", baseClasses)}>{value}</span>;
+        if (typeof value === 'boolean') return <span className={cn("text-purple-600 font-btr-code", baseClasses)}>{String(value)}</span>;
+        return <span className={cn("font-btr-code", baseClasses)}>{String(value)}</span>;
     };
 
     const toggleCollapse = () => {
@@ -39,21 +43,29 @@ const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = 
     };
 
     if (!isCollapsible) {
+        const keyClasses = isError ? "text-destructive" : "text-blue-800 dark:text-blue-300";
+        const punctuationClasses = isError ? "text-destructive" : "text-gray-600";
+
         return (
             <div style={{ marginLeft: indent }} className="font-btr-code text-sm break-all">
                 {keyName && (
                     <>
-                        <span className="text-blue-800 dark:text-blue-300 font-btr-code">"{keyName}"</span>
-                        <span className="text-gray-600 font-btr-code">: </span>
+                        <span className={cn(keyClasses, "font-btr-code")}>"{keyName}"</span>
+                        <span className={cn(punctuationClasses, "font-btr-code")}>: </span>
                     </>
                 )}
                 <span className="font-btr-code">{renderValue(data)}</span>
-                {!isLast && <span className="text-gray-600 font-btr-code">,</span>}
+                {!isLast && <span className={cn(punctuationClasses, "font-btr-code")}>,</span>}
             </div>
         );
     }
 
     const entries = isArray ? data.map((item, index) => [index, item]) : Object.entries(data);
+
+    const keyClasses = isError ? "text-destructive" : "text-blue-800 dark:text-blue-300";
+    const punctuationClasses = isError ? "text-destructive" : "text-gray-600";
+    const chevronClasses = isError ? "text-destructive" : "text-gray-500";
+    const summaryClasses = isError ? "text-destructive" : "text-gray-400";
 
     return (
         <div className="font-btr-code text-sm">
@@ -66,29 +78,29 @@ const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = 
                 onClick={toggleCollapse}
             >
                 {isCollapsible && !isEmpty && (
-                    <span className="mr-0 p-0 text-gray-500 flex items-center justify-center w-5 h-5">
+                    <span className={cn("mr-0 p-0 flex items-center justify-center w-5 h-5", chevronClasses)}>
                         {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
                     </span>
                 )}
                 {keyName && (
                     <>
-                        <span className="text-blue-800 dark:text-blue-300 font-btr-code">"{keyName}"</span>
-                        <span className="text-gray-600 font-btr-code">: </span>
+                        <span className={cn(keyClasses, "font-btr-code")}>"{keyName}"</span>
+                        <span className={cn(punctuationClasses, "font-btr-code")}>: </span>
                     </>
                 )}
-                <span className="text-gray-600 font-btr-code">
+                <span className={cn(punctuationClasses, "font-btr-code")}>
                     {isArray ? '[' : '{'}
                     {isEmpty && (isArray ? ']' : '}')}
                     {!isEmpty && isCollapsed && (
-                        <span className="text-gray-400 ml-1 font-btr-code">
+                        <span className={cn(summaryClasses, "ml-1 font-btr-code")}>
                             ...{entries.length} item{entries.length !== 1 ? 's' : ''}
                         </span>
                     )}
                 </span>
                 {!isEmpty && isCollapsed && (
-                    <span className="text-gray-600 ml-1 font-btr-code">{isArray ? ']' : '}'}</span>
+                    <span className={cn(punctuationClasses, "ml-1 font-btr-code")}>{isArray ? ']' : '}'}</span>
                 )}
-                {!isLast && isCollapsed && <span className="text-gray-600 font-btr-code">,</span>}
+                {!isLast && isCollapsed && <span className={cn(punctuationClasses, "font-btr-code")}>,</span>}
             </div>
 
             {!isCollapsed && !isEmpty && (
@@ -100,9 +112,10 @@ const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = 
                             keyName={isArray ? undefined : String(key)}
                             level={level + 1}
                             isLast={index === entries.length - 1}
+                            isError={isError}
                         />
                     ))}
-                    <div style={{ marginLeft: indent }} className="text-gray-600 font-btr-code">
+                    <div style={{ marginLeft: indent }} className={cn(punctuationClasses, "font-btr-code")}>
                         {isArray ? ']' : '}'}
                         {!isLast && <span className="font-btr-code">,</span>}
                     </div>
@@ -112,10 +125,10 @@ const JsonNode: React.FC<JsonNodeProps> = ({ data, keyName, level = 0, isLast = 
     );
 };
 
-export const JsonViewer: React.FC<JsonViewerProps> = ({ data, className }) => {
+export const JsonViewer: React.FC<JsonViewerProps> = ({ data, className, isError = false }) => {
     return (
         <div className={cn("font-btr-code text-sm overflow-auto", className)}>
-            <JsonNode data={data} />
+            <JsonNode data={data} isError={isError} />
         </div>
     );
 };

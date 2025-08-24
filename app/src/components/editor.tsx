@@ -9,13 +9,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import SingleFileEditor from "./editor/single-file-editor";
 import NotebookEditor from "./editor/notebook-editor";
 import { useTheme } from "@/components/theme-provider";
-import { getFileIconElement, createAOSigner, parseOutput, stripAnsiCodes } from "@/lib/utils";
+import { getFileIconElement, createAOSigner, parseOutput, stripAnsiCodes, isExecutionError, isErrorText } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 import { MainnetAO, TestnetAO } from "@/lib/ao";
 import { useActiveAddress } from "@arweave-wallet-kit/react";
 import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
 import Inbox from "./inbox";
+import History from "./editor/history";
 
 function FileTabItem({ filename }: { filename: string }) {
     const { activeFile, actions } = useGlobalState();
@@ -185,8 +186,26 @@ export default function Editor() {
                     processId: project.process,
                     code: code
                 });
+                console.log("result", result)
 
-                actions.setOutput(parseOutput(result));
+                const parsedOutput = parseOutput(result);
+                const hasError = isExecutionError(result);
+                actions.setOutput(parsedOutput);
+
+                // Add to history
+                actions.addHistoryEntry({
+                    fileName: activeFile,
+                    code: code,
+                    output: parsedOutput,
+                    projectId: activeProject,
+                    isMainnet: true,
+                    isError: hasError
+                });
+
+                // Show toast if execution failed
+                if (hasError) {
+                    toast.error("Code execution failed");
+                }
 
             } else {
                 actions.setOutput("Testnet execution is currently disabled. Please use a mainnet project.");
@@ -218,7 +237,7 @@ export default function Editor() {
                             <Button
                                 variant="ghost"
                                 id="run-code-btn"
-                                className="h-[35px] w-[35px] p-0  rounded-none hover:bg-primary/15 dark:hover:bg-primary/10 transition-all duration-150"
+                                className="h-[35px] w-[35px] p-0 rounded-none hover:bg-primary/15 dark:hover:bg-primary/10 transition-all duration-150"
                                 onClick={runLuaFile}
                                 disabled={running}
                                 title={`Run ${activeFile} (Shift+Enter)`}
@@ -268,9 +287,13 @@ export default function Editor() {
                             <Inbox />
                         </TabsContent>
 
-                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-hidden m-0 p-0">
+                        <TabsContent value="output" className="h-[calc(100%-30px)] overflow-hidden m-0 p-2">
                             {output ? (
-                                <OutputViewer output={output} className="h-full w-full" />
+                                <OutputViewer
+                                    output={output}
+                                    className="h-full w-full"
+                                    isError={isErrorText(output)}
+                                />
                             ) : (
                                 <div className="text-sm font-btr-code text-muted-foreground">
                                     Output panel - execution results will appear here
@@ -278,10 +301,8 @@ export default function Editor() {
                             )}
                         </TabsContent>
 
-                        <TabsContent value="history" className="h-[calc(100%-30px)] overflow-scroll m-0 p-0">
-                            <div className="text-sm font-btr-code text-muted-foreground">
-                                History panel - execution history will appear here
-                            </div>
+                        <TabsContent value="history" className="h-[calc(100%-30px)] overflow-hidden m-0 p-0">
+                            <History />
                         </TabsContent>
                     </Tabs>
                 </div>

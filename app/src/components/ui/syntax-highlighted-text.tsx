@@ -5,12 +5,18 @@ import { cn } from "@/lib/utils";
 interface SyntaxHighlightedTextProps {
     text: string;
     className?: string;
+    isError?: boolean;
 }
 
-export const SyntaxHighlightedText: React.FC<SyntaxHighlightedTextProps> = ({ text, className }) => {
+export const SyntaxHighlightedText: React.FC<SyntaxHighlightedTextProps> = ({ text, className, isError = false }) => {
     const { type, value } = detectValueType(text);
 
     const getColorClass = (valueType: string) => {
+        // If it's an error, always use destructive color
+        if (isError) {
+            return 'text-destructive';
+        }
+
         switch (valueType) {
             case 'number':
                 return 'text-blue-600 dark:text-blue-400';

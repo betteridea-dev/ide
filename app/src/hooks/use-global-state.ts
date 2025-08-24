@@ -5,6 +5,17 @@ import { persist, createJSONStorage } from "zustand/middleware"
 
 export type ViewOptions = "settings" | "project"
 
+export interface HistoryEntry {
+    id: string;
+    timestamp: Date;
+    fileName: string;
+    code: string;
+    output: string;
+    projectId: string;
+    isMainnet: boolean;
+    isError: boolean;
+}
+
 
 
 interface GlobalStateActions {
@@ -20,6 +31,8 @@ interface GlobalStateActions {
     closeProject: () => void
     setFile: (projectId: string, file: File) => void
     setOutput: (output: string) => void
+    addHistoryEntry: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => void
+    clearHistory: () => void
 }
 
 export interface GlobalState {
@@ -30,6 +43,7 @@ export interface GlobalState {
     openedFiles: string[]
     drawerOpen: boolean
     output: string
+    history: HistoryEntry[]
     actions: GlobalStateActions
 }
 
@@ -41,6 +55,7 @@ export const useGlobalState = create<GlobalState>()(persist((set, get) => ({
     openedFiles: [],
     drawerOpen: true,
     output: "",
+    history: [],
     actions: {
         setActiveTab: (tab: SidebarTabs) => set({ activeDrawer: tab }),
         setDrawerOpen: (open: boolean) => set({ drawerOpen: open }),
@@ -85,7 +100,15 @@ export const useGlobalState = create<GlobalState>()(persist((set, get) => ({
             // We're adding this here for consistency with the interface
             console.log("setFile called with:", projectId, file);
         },
-        setOutput: (output: string) => set({ output })
+        setOutput: (output: string) => set({ output }),
+        addHistoryEntry: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => set((state) => ({
+            history: [{
+                ...entry,
+                id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                timestamp: new Date()
+            }, ...state.history]
+        })),
+        clearHistory: () => set({ history: [] })
     }
 }), {
     name: "betteridea-global-state",

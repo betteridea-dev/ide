@@ -1,15 +1,23 @@
 import React from "react";
 import { JsonViewer } from "./json-viewer";
 import { SyntaxHighlightedText } from "./syntax-highlighted-text";
-import { isValidJSON, detectValueType } from "@/lib/utils";
+import { isValidJSON, detectValueType, isErrorText } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface OutputViewerProps {
     output: string;
     className?: string;
+    isError?: boolean;
 }
 
-export const OutputViewer: React.FC<OutputViewerProps> = ({ output, className }) => {
+export const OutputViewer: React.FC<OutputViewerProps> = ({ output, className, isError }) => {
+    // Auto-detect error if not explicitly specified
+    const isErrorOutput = isError || isErrorText(output);
+
+    // Base classes with error styling
+    const baseClasses = isErrorOutput
+        ? "!text-destructive"
+        : "text-foreground/90";
     // Check if the output is valid JSON and is a complex object/array (not just a simple string/number)
     if (output && isValidJSON(output)) {
         try {
@@ -17,8 +25,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({ output, className })
             // Only use JsonViewer for objects and arrays, not for simple values
             if (typeof parsedData === 'object' && parsedData !== null) {
                 return (
-                    <div className={cn("w-full overflow-auto font-btr-code", className)}>
-                        <JsonViewer data={parsedData} />
+                    <div className={cn("w-full overflow-auto font-btr-code", baseClasses, className)}>
+                        <JsonViewer data={parsedData} isError={isErrorOutput} />
                     </div>
                 );
             }
@@ -33,8 +41,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({ output, className })
         if (type !== 'unknown' && output.trim().split('\n').length === 1) {
             // Single line simple value - use syntax highlighting
             return (
-                <div className={cn("w-full text-sm max-h-[250px] min-h-[40px] overflow-auto p-3", className)}>
-                    <SyntaxHighlightedText text={output} />
+                <div className={cn("w-full text-sm max-h-[250px] min-h-[40px] overflow-auto p-3", baseClasses, className)}>
+                    <SyntaxHighlightedText text={output} isError={isErrorOutput} />
                 </div>
             );
         }
@@ -42,7 +50,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({ output, className })
 
     // Fallback to plain text display for complex text and multi-line content
     return (
-        <pre className={cn("w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-auto text-foreground/90 whitespace-pre-wrap break-all", className)}>
+        <pre className={cn("w-full text-sm font-btr-code max-h-[250px] min-h-[40px] overflow-auto whitespace-pre-wrap break-all", baseClasses, className)}>
             {output || ""}
         </pre>
     );

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Terminal as XTerm } from '@xterm/xterm'
 import { useTheme } from './theme-provider'
-import { ANSI, cn } from '@/lib/utils'
+import { ANSI, cn, isExecutionError, parseOutput } from '@/lib/utils'
 import { useSettings } from '@/hooks/use-settings'
 import { useProjects } from '@/hooks/use-projects'
 import { useGlobalState } from '@/hooks/use-global-state'
@@ -93,6 +93,7 @@ export default function Terminal() {
 
         // Show ASCII art
         const asciiLines = AOS_ASCII.split('\n')
+        xtermRef.current.writeln("")
         asciiLines.forEach((line, index) => {
             if (index === 0 && line.trim() === '') return // Skip first empty line
             xtermRef.current!.write(ANSI.RESET + ANSI.LIGHTBLUE + line + ANSI.RESET)
@@ -413,26 +414,30 @@ export default function Terminal() {
                         // Stop spinner and clear only the spinner line
                         stopSpinner()
 
-                        let output = result.output.data
-                        if (typeof output === "string")
-                            if (output.endsWith("\nnil")) output = output.slice(0, -4)
+                        // Check if execution resulted in an error
+                        const hasError = isExecutionError(result)
+                        const parsedOutput = parseOutput(result)
 
-                        const newPrompt = result.prompt
+                        const newPrompt = result.output?.prompt || result.prompt
                         const finalPrompt = typeof newPrompt === 'string' && newPrompt.length > 0 ? newPrompt : prompt
                         setPrompt(finalPrompt)
 
-                        // Update stored prompt and add output to history
+                        // Update stored prompt and add to history with appropriate type
                         if (process) {
                             setTerminalPrompt(process, finalPrompt)
                             addTerminalEntry(process, {
-                                type: 'output',
-                                content: output,
+                                type: hasError ? 'error' : 'output',
+                                content: parsedOutput,
                                 timestamp: Date.now()
                             })
                         }
 
-                        // Print the output on a new line (command remains visible)
-                        readlineRef.current.println(output)
+                        // Print the output with appropriate styling
+                        if (hasError) {
+                            readlineRef.current.println(ANSI.RESET + ANSI.RED + parsedOutput + ANSI.RESET)
+                        } else {
+                            readlineRef.current.println(parsedOutput)
+                        }
                     } catch (error) {
                         // Stop spinner and clear only the spinner line
                         stopSpinner()
