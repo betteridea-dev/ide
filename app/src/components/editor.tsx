@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
 import Inbox from "./inbox";
 import History from "./editor/history";
+import { useGlobalHotkeys } from "@/hooks/use-hotkeys";
 
 function FileTabItem({ filename }: { filename: string }) {
     const { activeFile, actions } = useGlobalState();
@@ -171,6 +172,42 @@ export default function Editor() {
         });
         window.dispatchEvent(event);
     };
+
+    // Toggle terminal panel function
+    const handleToggleTerminal = () => {
+        if (bottomPanelRef.current) {
+            if (bottomPanelRef.current.isCollapsed()) {
+                bottomPanelRef.current.expand();
+            } else {
+                bottomPanelRef.current.collapse();
+            }
+        }
+    };
+
+    // Global hotkey handlers
+    useGlobalHotkeys({
+        toggleTerminal: handleToggleTerminal
+    });
+
+    // Debug: Add a temporary keydown listener to see what keys are being pressed
+    useEffect(() => {
+        // const debugKeyHandler = (event: KeyboardEvent) => {
+        //     // Only log when Ctrl is pressed to reduce noise
+        //     if (event.ctrlKey || event.metaKey) {
+        //         console.log('Key pressed:', {
+        //             key: event.key,
+        //             code: event.code,
+        //             ctrlKey: event.ctrlKey,
+        //             metaKey: event.metaKey,
+        //             altKey: event.altKey,
+        //             shiftKey: event.shiftKey
+        //         });
+        //     }
+        // };
+
+        // document.addEventListener('keydown', debugKeyHandler);
+        // return () => document.removeEventListener('keydown', debugKeyHandler);
+    }, []);
 
     // Horizontal scroll handler for file tabs
     useEffect(() => {

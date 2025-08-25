@@ -18,6 +18,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link } from "react-router"
 import { ConnectButton, useConnection, useProfileModal } from "@arweave-wallet-kit/react"
+import HotkeyReference from "./hotkey-reference"
+import { MenubarShortcut } from "./ui/menubar"
+import { getHotkeyDisplay, HOTKEYS } from "@/lib/hotkeys"
 
 const emoticons = [
     "(^･o･^)ﾉ' ",
@@ -187,11 +190,11 @@ export default function Welcome() {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />
-                            <span className="text-xs text-foreground">Press <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Ctrl+N</kbd> to create a new project</span>
+                            <span className="text-xs text-foreground">Press <kbd className="bg-muted p-0.5 px-1 rounded-md"><MenubarShortcut className="text-muted-foreground">{getHotkeyDisplay(HOTKEYS.NEW_PROJECT.key)}</MenubarShortcut></kbd> to create a new project</span>
                         </div>
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />
-                            <span className="text-xs text-foreground">Use the terminal tab for interactive ao development</span>
+                            <span className="text-xs text-foreground">Toggle the terminal tab with <kbd className="bg-muted p-0.5 px-1 rounded-md"><MenubarShortcut className="text-muted-foreground">{getHotkeyDisplay(HOTKEYS.TOGGLE_TERMINAL.key)}</MenubarShortcut></kbd> for interactive ao development</span>
                         </div>
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />

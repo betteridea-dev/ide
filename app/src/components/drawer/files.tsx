@@ -24,8 +24,11 @@ import {
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuSeparator,
+    ContextMenuShortcut,
     ContextMenuTrigger,
 } from "../ui/context-menu"
+import { HOTKEYS, getHotkeyDisplay } from "@/lib/hotkeys"
+
 
 
 
@@ -42,6 +45,24 @@ export default function DrawerFiles() {
     }
 
     const files = Object.entries(project.files)
+
+    const handleRenameClick = (fileName: string) => {
+        // Set the active file to the one being renamed, then trigger the dialog
+        actions.setActiveFile(fileName)
+        const trigger = document.getElementById("rename-file")
+        if (trigger) {
+            trigger.click()
+        }
+    }
+
+    const handleDeleteClick = (fileName: string) => {
+        // Set the active file to the one being deleted, then trigger the dialog
+        actions.setActiveFile(fileName)
+        const trigger = document.getElementById("delete-file")
+        if (trigger) {
+            trigger.click()
+        }
+    }
 
     return (
         <div className="h-full flex flex-col">
@@ -151,61 +172,25 @@ export default function DrawerFiles() {
                                         </ContextMenuItem>
                                         <ContextMenuSeparator />
                                         <ContextMenuItem
+                                            onClick={() => handleRenameClick(fileName)}
+                                        >
+                                            <Edit3 className="w-4 h-4" />
+                                            Rename
+                                            <ContextMenuShortcut>{getHotkeyDisplay(HOTKEYS.RENAME_FILE.key)}</ContextMenuShortcut>
+                                        </ContextMenuItem>
+                                        <ContextMenuItem
                                             onClick={() => {
-                                                // Extract name without extension for the prompt
+                                                // Generate a unique name for the duplicate using timestamp
+                                                const timestamp = Date.now()
                                                 const lastDotIndex = fileName.lastIndexOf('.')
                                                 const nameWithoutExt = lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName
                                                 const extension = lastDotIndex > 0 ? fileName.substring(lastDotIndex) : ''
 
-                                                const newName = prompt("Enter new file name:", nameWithoutExt)
-                                                if (newName && newName.trim() && newName.trim() !== nameWithoutExt) {
-                                                    const trimmedName = newName.trim()
+                                                // Check if the name already has a timestamp pattern (_numbers at the end)
+                                                const timestampPattern = /_\d+$/
+                                                const baseNameWithoutTimestamp = nameWithoutExt.replace(timestampPattern, '')
 
-                                                    // Determine final file name
-                                                    let finalName: string
-                                                    if (trimmedName.includes('.')) {
-                                                        // User provided extension, use as-is
-                                                        finalName = trimmedName
-                                                    } else {
-                                                        // No extension provided, preserve original extension
-                                                        finalName = trimmedName + extension
-                                                    }
-
-                                                    // Check if file with new name already exists
-                                                    if (project.files[finalName]) {
-                                                        toast.error("File with this name already exists")
-                                                        return
-                                                    }
-
-                                                    // Create new file with new name
-                                                    const fileData = project.files[fileName]
-                                                    const renamedFile = { ...fileData, name: finalName }
-
-                                                    // Add new file and delete old one
-                                                    projectActions.setFile(activeProject, renamedFile)
-                                                    projectActions.deleteFile(activeProject, fileName)
-
-                                                    // Update opened files and active file if this file was opened
-                                                    actions.renameOpenedFile(fileName, finalName)
-
-                                                    toast.success(`File renamed to "${finalName}"`)
-                                                }
-                                            }}
-                                        >
-                                            <Edit3 className="w-4 h-4" />
-                                            Rename
-                                        </ContextMenuItem>
-                                        <ContextMenuItem
-                                            onClick={() => {
-                                                // Generate a unique name for the duplicate
-                                                let duplicateName = `${fileName} (Copy)`
-                                                let counter = 1
-
-                                                // Keep incrementing until we find a unique name
-                                                while (project.files[duplicateName]) {
-                                                    counter++
-                                                    duplicateName = `${fileName} (Copy ${counter})`
-                                                }
+                                                const duplicateName = `${baseNameWithoutTimestamp}_${timestamp}${extension}`
 
                                                 // Create duplicate file
                                                 const originalFile = project.files[fileName]
@@ -228,6 +213,7 @@ export default function DrawerFiles() {
                                         >
                                             <Copy className="w-4 h-4" />
                                             Duplicate
+                                            <ContextMenuShortcut>{getHotkeyDisplay(HOTKEYS.DUPLICATE_FILE.key)}</ContextMenuShortcut>
                                         </ContextMenuItem>
                                         <ContextMenuItem
                                             onClick={() => {
@@ -273,21 +259,11 @@ export default function DrawerFiles() {
                                         <ContextMenuSeparator />
                                         <ContextMenuItem
                                             variant="destructive"
-                                            onClick={() => {
-                                                const confirmation = confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)
-                                                if (confirmation) {
-                                                    // Delete the file
-                                                    projectActions.deleteFile(activeProject, fileName)
-
-                                                    // Close the file if it's currently opened in editor
-                                                    actions.closeOpenedFile(fileName)
-
-                                                    toast.success(`File "${fileName}" deleted successfully`)
-                                                }
-                                            }}
+                                            onClick={() => handleDeleteClick(fileName)}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                             Delete
+                                            <ContextMenuShortcut>{getHotkeyDisplay(HOTKEYS.DELETE_FILE.key)}</ContextMenuShortcut>
                                         </ContextMenuItem>
                                     </ContextMenuContent>
                                 </ContextMenu>
@@ -296,6 +272,8 @@ export default function DrawerFiles() {
                     </div>
                 )}
             </div>
+
+
         </div>
     )
 }
