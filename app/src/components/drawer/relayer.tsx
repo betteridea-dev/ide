@@ -69,9 +69,12 @@ const Relayer = memo(function Relayer() {
     const [luaCode, setLuaCode] = useState<string>("")
     const [isCopied, setIsCopied] = useState<boolean>(false)
 
+    const [monacoWidth, setMonacoWidth] = useState<number>(0)
+
     // Monaco editor ref
     const monacoRef = useRef<typeof import("monaco-editor") | null>(null)
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+    const containerRef = useRef<HTMLDivElement | null>(null)
 
     // Helper function to apply theme
     const applyTheme = useCallback((monaco: typeof import("monaco-editor")) => {
@@ -82,6 +85,18 @@ const Relayer = memo(function Relayer() {
             monaco.editor.setTheme("vs-light");
         }
     }, [theme])
+
+    useEffect(() => {
+        if (!containerRef.current) return
+        const resizeObserver = new ResizeObserver((e: ResizeObserverEntry[]) => {
+            const width = e[0].contentRect.width
+            setMonacoWidth(width)
+        })
+        resizeObserver.observe(containerRef.current)
+        return () => {
+            resizeObserver.disconnect()
+        }
+    }, [containerRef.current])
 
     // Generate Lua code preview
     const generateLuaCode = () => {
@@ -229,7 +244,7 @@ const Relayer = memo(function Relayer() {
     }
 
     return (
-        <div className="h-full w-full flex flex-col">
+        <div className="h-full w-full flex flex-col" ref={containerRef}>
             <div className="px-3 py-2 border-b border-border/40 bg-sidebar/50">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -292,13 +307,18 @@ const Relayer = memo(function Relayer() {
                                 <label className="text-sm font-medium">Request Body</label>
                                 <div className="border border-border rounded-md overflow-hidden bg-background">
                                     <Editor
-                                        width={"100%"}
+                                        width={monacoWidth - 22} // 22 is the padding offset
                                         height={(Math.min(Math.max(relayBody.split("\n").length, 5) * 18, 252))}
                                         language="json"
                                         defaultValue={`{\n\t"foo":"bar"\n}`}
                                         value={relayBody}
                                         onChange={(value) => setRelayBody(value || "")}
-                                        options={monacoConfig}
+                                        options={{
+                                            ...monacoConfig,
+                                            automaticLayout: true,
+                                            wordWrap: "off",
+                                            scrollBeyondLastColumn: 5,
+                                        }}
                                         onMount={(editor, monaco) => {
                                             // Store Monaco instances in refs
                                             monacoRef.current = monaco;
@@ -337,11 +357,11 @@ const Relayer = memo(function Relayer() {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Response Action</label>
                             <Input
-                                placeholder="e.g., HandleApiResponse (optional)"
+                                placeholder="e.g., API-Response (optional)"
                                 value={responseActions}
                                 onChange={(e) => setResponseActions(e.target.value)}
                             />
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                                 Action to send the HTTP response to your process
                             </p>
                         </div>
