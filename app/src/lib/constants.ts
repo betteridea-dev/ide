@@ -17,9 +17,9 @@ const Constants = {
         common: {
             'app-name': 'betteridea',
             // @ts-ignore // populated by vite on build
-            'app-version': version,
+            'app-version': (typeof version !== 'undefined' ? version : "dev"),
             // @ts-ignore // populated by vite on build
-            'app-build': gitCommit
+            'app-build': (typeof gitCommit !== 'undefined' ? gitCommit : "dev")
         }
 
     },

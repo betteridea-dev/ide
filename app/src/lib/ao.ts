@@ -94,7 +94,7 @@ export class MainnetAO {
             signer: this.signer,
             device: "process@1.0",
         })
-        // return AOCore.init({ signer: this.signer, url: this.hbUrl })
+        return AOCore.init({ signer: this.signer, url: this.hbUrl })
     }
 
     sanitizeResponse(input: Record<string, any>) {
@@ -172,7 +172,7 @@ export class MainnetAO {
         }
 
         const res = await this.ao().request(params)
-        return JSON.parse(String(res.body))
+        return await JSON.parse(res.body)
     }
 
     async spawn({ tags, data, module_ }: { tags?: { name: string; value: string }[], data?: any, module_?: string }) {
@@ -208,9 +208,21 @@ export class MainnetAO {
 
         console.log(params)
         const res = await this.ao().request(params)
+        // const body: ReadableStream = res.body
+        // const reader = body.getReader()
+        // const decoder = new TextDecoder()
+        // let result = ''
+        // while (true) {
+        //     const { done, value } = await reader.read()
+        //     if (done) break
+        //     result += decoder.decode(value, { stream: true })
+        // }
         console.log(res)
+
+        // const spawnResJson = await res.json()
+        const spawnResJson = await res
         // @ts-ignore
-        const process = (res.process)
+        const process = (spawnResJson.process)
         console.log(process)
 
         // delay 1s to ensure process is ready
@@ -230,7 +242,7 @@ export class MainnetAO {
                     tags: [{ name: 'Action', value: 'Eval' }],
                     data: "require('.process')._version"
                 })
-                console.log(res2)
+                const res2Json = await res2.json()
                 // spawn should return process
                 Promise.resolve(process)
                 return process
