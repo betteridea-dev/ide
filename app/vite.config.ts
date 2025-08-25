@@ -26,6 +26,6 @@ export default defineConfig({
   base: "./",
   build: {
     outDir: "out",
-    sourcemap: true
+    sourcemap: false
   }
 })
