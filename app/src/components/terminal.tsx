@@ -105,6 +105,22 @@ export default function Terminal() {
         xtermRef.current.write('\n\r\n')
     }, [process])
 
+    // Helper function to write multi-line content with proper formatting
+    const writeMultiLineContent = useCallback((content: string, prefix: string = '', suffix: string = '') => {
+        if (!xtermRef.current) return
+
+        const lines = content.split('\n')
+        lines.forEach((line, index) => {
+            xtermRef.current!.write(prefix + line + suffix)
+            // Only add \r\n if we're not on the last line, or if the last line is not empty
+            if (index < lines.length - 1) {
+                xtermRef.current!.write('\r\n')
+            }
+        })
+        // Always add a final \r\n to end the entry
+        xtermRef.current!.write('\r\n')
+    }, [])
+
     // Function to restore terminal history
     const restoreTerminalHistory = useCallback(() => {
         if (!xtermRef.current || !process) return
@@ -121,13 +137,13 @@ export default function Terminal() {
                     xtermRef.current!.write(ANSI.RESET + state.prompt + entry.content + '\r\n')
                     break
                 case 'output':
-                    xtermRef.current!.write(ANSI.RESET + entry.content + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET)
                     break
                 case 'error':
-                    xtermRef.current!.write(ANSI.RESET + ANSI.RED + entry.content + ANSI.RESET + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET + ANSI.RED, ANSI.RESET)
                     break
                 case 'system':
-                    xtermRef.current!.write(ANSI.RESET + ANSI.DIM + entry.content + ANSI.RESET + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET + ANSI.DIM, ANSI.RESET)
                     break
             }
         })
@@ -140,13 +156,13 @@ export default function Terminal() {
                     xtermRef.current!.write(ANSI.RESET + state.prompt + entry.content + '\r\n')
                     break
                 case 'output':
-                    xtermRef.current!.write(ANSI.RESET + entry.content + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET)
                     break
                 case 'error':
-                    xtermRef.current!.write(ANSI.RESET + ANSI.RED + entry.content + ANSI.RESET + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET + ANSI.RED, ANSI.RESET)
                     break
                 case 'system':
-                    xtermRef.current!.write(ANSI.RESET + ANSI.DIM + entry.content + ANSI.RESET + '\r\n')
+                    writeMultiLineContent(entry.content, ANSI.RESET + ANSI.DIM, ANSI.RESET)
                     break
             }
         })
@@ -156,7 +172,7 @@ export default function Terminal() {
 
         // Always show the current prompt in the terminal so user knows where to type
         xtermRef.current!.write(ANSI.RESET + state.prompt)
-    }, [process, getTerminalState, showInitialTerminalState, processQueue])
+    }, [process, getTerminalState, showInitialTerminalState, processQueue, writeMultiLineContent])
 
     // Function to clear terminal to initial state
     const clearTerminalToInitialState = useCallback(() => {

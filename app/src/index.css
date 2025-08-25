@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
 /* Font imports */
 @font-face {
   font-family: "DM Sans";
@@ -66,6 +67,11 @@
   font-weight: 500;
   font-style: italic;
   font-display: swap;
+}
+
+@font-face {
+  font-family: "codicon";
+  src: url("./assets/fonts/codicon.ttf") format("truetype");
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -313,4 +319,10 @@ textarea {
   font-size: 14px !important;
   line-height: 1.2 !important;
   letter-spacing: normal !important;
+}
+
+#monacoel,
+.codicon,
+.editor-widget {
+  font-family: "codicon" !important;
 }

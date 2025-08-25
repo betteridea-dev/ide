@@ -10,6 +10,7 @@
         "@arweave-wallet-kit/react": "^0.3.2",
         "@arweave-wallet-kit/wander-strategy": "^0.1.2",
         "@dha-team/arbundles": "^1.0.3",
+        "@fortawesome/fontawesome-free": "^5.15.3",
         "@hookform/resolvers": "^5.2.1",
         "@monaco-editor/react": "^4.7.0",
         "@permaweb/ao-core-libs": "^0.0.3",
@@ -336,6 +337,8 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
     "@fontsource/sora": ["@fontsource/sora@5.2.6", "", {}, "sha512-OPknOmn82HIJg32UGg9iEjEVFdC+xOZBqrmQNUgsem6hFwBBrqXnTwIpro7leq/uFRdupkN42hc0JJKH20j22w=="],
+
+    "@fortawesome/fontawesome-free": ["@fortawesome/fontawesome-free@5.15.4", "", {}, "sha512-eYm8vijH/hpzr/6/1CJ/V/Eb1xQFW2nnUKArb3z+yUWv7HTwj6M7SP957oMjfZjAHU6qpoNc2wQvIxBLWYa/Jg=="],
 
     "@hookform/resolvers": ["@hookform/resolvers@5.2.1", "", { "dependencies": { "@standard-schema/utils": "^0.3.0" }, "peerDependencies": { "react-hook-form": "^7.55.0" } }, "sha512-u0+6X58gkjMcxur1wRWokA7XsiiBJ6aK17aPZxhkoYiK5J+HcTx0Vhu9ovXe6H+dVpO6cjrn2FkJTryXEMlryQ=="],
 

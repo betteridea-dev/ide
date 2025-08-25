@@ -1,5 +1,5 @@
-import { connect, createSigner } from "@permaweb/aoconnect";
-import AOCore from "@permaweb/ao-core-libs"
+import { connect } from "@permaweb/aoconnect";
+// import AOCore from "@permaweb/ao-core-libs";
 import Constants from "./constants";
 import { startLiveMonitoring } from "./live-mainnet";
 
@@ -25,6 +25,7 @@ interface MainnetOptions {
     signer?: any;
 }
 
+/// @deprecated
 export class TestnetAO {
     private cuUrl: string;
     private gatewayUrl: string;
@@ -94,7 +95,7 @@ export class MainnetAO {
             signer: this.signer,
             device: "process@1.0",
         })
-        return AOCore.init({ signer: this.signer, url: this.hbUrl })
+        // return AOCore.init({ signer: this.signer, url: this.hbUrl })
     }
 
     sanitizeResponse(input: Record<string, any>) {
@@ -148,33 +149,6 @@ export class MainnetAO {
         return (await res.json()) as T
     }
 
-    async write({ processId, tags, data }: { processId: string, tags?: { name: string; value: string }[], data?: any }) {
-        const params: any = {
-            path: `/${processId}~process@1.0/push/serialize~json@1.0`,
-            method: 'POST',
-            type: 'Message',
-            'data-protocol': 'ao',
-            variant: 'ao.N.1',
-            target: processId,
-            'signing-format': 'ANS-104',
-        }
-
-        // Add tags as properties
-        if (tags) {
-            tags.forEach(tag => {
-                params[tag.name] = tag.value
-            })
-        }
-
-        // Add data if provided
-        if (data) {
-            params.data = data
-        }
-
-        const res = await this.ao().request(params)
-        return await JSON.parse(res.body)
-    }
-
     async spawn({ tags, data, module_ }: { tags?: { name: string; value: string }[], data?: any, module_?: string }) {
         const params: any = {
             path: '/push',
@@ -186,10 +160,10 @@ export class MainnetAO {
             'execution-device': 'lua@5.3a',
             'data-protocol': 'ao',
             variant: 'ao.N.1',
-            Random: Math.random().toString(),
-            Authority: await this.operator() + ',fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY',
+            random: Math.random().toString(),
+            authority: await this.operator() + ',fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY',
             'signing-format': 'ANS-104',
-            Module: module_ || Constants.modules.mainnet.hyperAos,
+            module: module_ || Constants.modules.mainnet.hyperAos,
             scheduler: await this.operator(),
             ...Constants.tags.common,
         }
@@ -219,40 +193,76 @@ export class MainnetAO {
         // }
         console.log(res)
 
-        // const spawnResJson = await res.json()
-        const spawnResJson = await res
+        const process = (res as any).process
+        // const process = await res.headers.get("process")
         // @ts-ignore
-        const process = (spawnResJson.process)
         console.log(process)
 
         // delay 1s to ensure process is ready
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 100))
 
-        // compute slot
-        const slot = startLiveMonitoring(process, {
-            hbUrl: this.hbUrl,
-            gatewayUrl: this.gatewayUrl,
-            intervalMs: 1000,
-            onResult: async (result) => {
-                console.log(result)
-                slot()
-                // send an initial message to activate the process
-                const res2 = await this.write({
-                    processId: process,
-                    tags: [{ name: 'Action', value: 'Eval' }],
-                    data: "require('.process')._version"
-                })
-                const res2Json = await res2.json()
-                // spawn should return process
-                Promise.resolve(process)
-                return process
-            }
+        // compute slot and wait for initialization
+        return new Promise((resolve) => {
+            const slot = startLiveMonitoring(process, {
+                hbUrl: this.hbUrl,
+                gatewayUrl: this.gatewayUrl,
+                intervalMs: 1000,
+                onResult: async (result) => {
+                    console.log(result)
+                    slot() // Stop monitoring
+
+                    // send an initial message to activate the process
+                    try {
+                        const res2 = await this.runLua({
+                            processId: process,
+                            code: "require('.process')._version"
+                        })
+                        console.log("Process initialized:", res2)
+                    } catch (error) {
+                        console.warn("Failed to initialize process:", error)
+                    }
+
+                    // Return the process ID
+                    resolve(process)
+                }
+            })
         })
+    }
 
-        return process
+    async write({ processId, tags, data }: { processId: string, tags?: { name: string; value: string }[], data?: any }) {
+
+        const params: any = {
+            path: `/${processId}~process@1.0/push/serialize~json@1.0`,
+            method: 'POST',
+            type: 'Message',
+            'data-protocol': 'ao',
+            variant: 'ao.N.1',
+            target: processId,
+            'signing-format': 'ANS-104',
+        }
+
+        // Add tags as properties
+        if (tags) {
+            tags.forEach(tag => {
+                params[tag.name] = tag.value
+            })
+        }
+
+        // Add data if provided
+        if (data) {
+            params.data = data
+        }
+
+        const res = await this.ao().request(params)
+        console.log(res)
+        const e = await JSON.parse((res as any).body)
+        // const e = await res.json()
+        console.log(e)
+        return e
     }
 
     async runLua({ processId, code }: { processId: string, code: string }) {
+        console.log("RUNNING LUA")
         const res = await this.write({
             processId,
             tags: [
@@ -260,6 +270,7 @@ export class MainnetAO {
             ],
             data: code
         })
+        console.log(res)
         return res
     }
 }
