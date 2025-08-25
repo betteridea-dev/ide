@@ -190,15 +190,15 @@ export default function Welcome() {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />
-                            <span className="text-xs text-foreground">Press <kbd className="bg-muted p-0.5 px-1 rounded-md"><MenubarShortcut className="text-muted-foreground">{getHotkeyDisplay(HOTKEYS.NEW_PROJECT.key)}</MenubarShortcut></kbd> to create a new project</span>
+                            <span className="text-xs text-foreground">Press <kbd className="bg-muted/60 p-0.5 px-1 rounded-sm"><MenubarShortcut className="text-foreground">{getHotkeyDisplay(HOTKEYS.NEW_PROJECT.key)}</MenubarShortcut></kbd> to create a new project</span>
                         </div>
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />
-                            <span className="text-xs text-foreground">Toggle the terminal tab with <kbd className="bg-muted p-0.5 px-1 rounded-md"><MenubarShortcut className="text-muted-foreground">{getHotkeyDisplay(HOTKEYS.TOGGLE_TERMINAL.key)}</MenubarShortcut></kbd> for interactive ao development</span>
+                            <span className="text-xs text-foreground">Check keybinds with <kbd className="bg-muted/60 p-0.5 px-1 rounded-sm"><MenubarShortcut className="text-foreground">{getHotkeyDisplay(HOTKEYS.SHOW_SHORTCUTS.key)}</MenubarShortcut></kbd></span>
                         </div>
                         <div className="flex items-center gap-2 px-2 py-1">
                             <SparklesIcon size={12} className="text-primary opacity-60" />
-                            <span className="text-xs text-foreground">Check out the examples to get started quickly</span>
+                            <span className="text-xs text-foreground">Hyperbeam is in beta- eat glass and keep building</span>
                         </div>
                     </div>
                 </div>
