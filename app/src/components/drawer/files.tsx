@@ -1,4 +1,4 @@
-import { useGlobalState } from "@/hooks/use-global-state"
+import { useActiveFile, useActiveProject, useGlobalActions } from "@/hooks/use-global-state"
 import { useProjects } from "@/hooks/use-projects"
 import { Button } from "../ui/button"
 import { toast } from "sonner"
@@ -18,7 +18,7 @@ import {
     Plus
 } from "lucide-react"
 import { cn, getFileIcon } from "@/lib/utils"
-import { useState } from "react"
+import { useState, memo, useCallback } from "react"
 import {
     ContextMenu,
     ContextMenuContent,
@@ -32,8 +32,10 @@ import { HOTKEYS, getHotkeyDisplay } from "@/lib/hotkeys"
 
 
 
-export default function DrawerFiles() {
-    const { activeFile, activeProject, actions } = useGlobalState()
+const DrawerFiles = memo(function DrawerFiles() {
+    const activeFile = useActiveFile()
+    const activeProject = useActiveProject()
+    const actions = useGlobalActions()
     const { projects, actions: projectActions } = useProjects()
     const project = projects[activeProject]
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
@@ -46,23 +48,23 @@ export default function DrawerFiles() {
 
     const files = Object.entries(project.files)
 
-    const handleRenameClick = (fileName: string) => {
+    const handleRenameClick = useCallback((fileName: string) => {
         // Set the active file to the one being renamed, then trigger the dialog
         actions.setActiveFile(fileName)
         const trigger = document.getElementById("rename-file")
         if (trigger) {
             trigger.click()
         }
-    }
+    }, [actions])
 
-    const handleDeleteClick = (fileName: string) => {
+    const handleDeleteClick = useCallback((fileName: string) => {
         // Set the active file to the one being deleted, then trigger the dialog
         actions.setActiveFile(fileName)
         const trigger = document.getElementById("delete-file")
         if (trigger) {
             trigger.click()
         }
-    }
+    }, [actions])
 
     return (
         <div className="h-full flex flex-col">
@@ -276,4 +278,6 @@ export default function DrawerFiles() {
 
         </div>
     )
-}
+})
+
+export default DrawerFiles

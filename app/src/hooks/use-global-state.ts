@@ -47,7 +47,7 @@ export interface GlobalState {
     actions: GlobalStateActions
 }
 
-export const useGlobalState = create<GlobalState>()(persist((set, get) => ({
+const globalStateStore = create<GlobalState>()(persist((set, get) => ({
     activeDrawer: "files",
     activeView: null,
     activeProject: "",
@@ -120,3 +120,17 @@ export const useGlobalState = create<GlobalState>()(persist((set, get) => ({
         drawerOpen: state.drawerOpen
     })
 }))
+
+// Main hook that returns the full state
+export const useGlobalState = globalStateStore
+
+// Selective hooks to prevent unnecessary re-renders
+export const useActiveDrawer = () => globalStateStore(state => state.activeDrawer)
+export const useDrawerOpen = () => globalStateStore(state => state.drawerOpen)
+export const useActiveProject = () => globalStateStore(state => state.activeProject)
+export const useActiveFile = () => globalStateStore(state => state.activeFile)
+export const useOpenedFiles = () => globalStateStore(state => state.openedFiles)
+export const useActiveView = () => globalStateStore(state => state.activeView)
+export const useOutput = () => globalStateStore(state => state.output)
+export const useHistory = () => globalStateStore(state => state.history)
+export const useGlobalActions = () => globalStateStore(state => state.actions)

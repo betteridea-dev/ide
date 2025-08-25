@@ -13,10 +13,11 @@ import { useGlobalState } from "@/hooks/use-global-state"
 import { useProjects } from "@/hooks/use-projects"
 import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
-import { cn, validateArweaveId, createAOSigner } from "@/lib/utils"
+import { cn, validateArweaveId } from "@/lib/utils"
 import { MainnetAO } from "@/lib/ao"
 import Constants from "@/lib/constants"
-import { useActiveAddress } from "@arweave-wallet-kit/react"
+import { useActiveAddress, useApi } from "@arweave-wallet-kit/react"
+import { createSigner } from "@permaweb/aoconnect"
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
@@ -24,7 +25,7 @@ export default function Settings() {
     const projects = useProjects()
     const settings = useSettings()
     const activeAddress = useActiveAddress()
-
+    const api = useApi()
     // Local state for UI inputs (for URLs and API key)
     const [customCuUrl, setCustomCuUrl] = useState(settings.actions.getCuUrl())
     const [customHbUrl, setCustomHbUrl] = useState(settings.actions.getHbUrl())
@@ -204,7 +205,7 @@ export default function Settings() {
         setIsSpawningProcess(true)
 
         try {
-            const signer = createAOSigner()
+            const signer = createSigner(api)
             const ao = new MainnetAO({
                 GATEWAY_URL: settings.actions.getGatewayUrl(),
                 HB_URL: settings.actions.getHbUrl(),

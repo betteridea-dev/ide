@@ -19,10 +19,11 @@ import { v4 as uuidv4 } from "uuid";
 import notebookTheme from "@/assets/themes/notebook.json";
 import { useSettings } from "@/hooks/use-settings";
 import { MainnetAO, TestnetAO } from "@/lib/ao";
-import { useActiveAddress } from "@arweave-wallet-kit/react";
-import { createAOSigner, parseOutput, isExecutionError, isErrorText } from "@/lib/utils";
+import { useActiveAddress, useApi } from "@arweave-wallet-kit/react";
+import { parseOutput, isExecutionError, isErrorText } from "@/lib/utils";
 import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
+import { createSigner } from "@permaweb/aoconnect";
 
 // Use the Cell interface from use-projects.ts
 type NotebookCell = Cell & {
@@ -80,7 +81,7 @@ const CodeCell: React.FC<CodeCellProps> = ({
     const [expand, setExpand] = useState(false);
     const { theme } = useTheme();
     const thisEditor = useRef<editor.IStandaloneCodeEditor>(null);
-
+    const api = useApi()
     // Refs to store Monaco instances for theme updates
     const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
     const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
@@ -611,7 +612,7 @@ export default function NotebookEditor() {
     const { theme } = useTheme();
     const settings = useSettings();
     const activeAddress = useActiveAddress();
-
+    const api = useApi()
     // Global Monaco instances registry for theme updates
     const monacoInstancesRef = useRef<Set<typeof import("monaco-editor")>>(new Set());
 
@@ -801,7 +802,7 @@ export default function NotebookEditor() {
                     return;
                 }
 
-                const signer = createAOSigner();
+                const signer = createSigner(api)
                 const ao = new MainnetAO({
                     GATEWAY_URL: settings.actions.getGatewayUrl(),
                     HB_URL: settings.actions.getHbUrl(),
@@ -843,7 +844,6 @@ export default function NotebookEditor() {
 
             } else {
                 // Testnet execution - COMMENTED OUT
-                // const signer = createAOSigner();
                 // const ao = new TestnetAO({
                 //     CU_URL: settings.actions.getCuUrl(),
                 //     GATEWAY_URL: settings.actions.getGatewayUrl(),

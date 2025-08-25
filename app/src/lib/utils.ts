@@ -194,18 +194,6 @@ export function validateArweaveId(id: string, fieldName: string = "ID"): { isVal
 }
 
 /**
- * Create a signer from ArweaveWalletKit for AO operations
- * @returns A signer function for AO operations
- */
-export function createAOSigner() {
-  if (typeof window === 'undefined' || !window.arweaveWallet) {
-    throw new Error('Arweave wallet not available')
-  }
-
-  return createDataItemSigner(window.arweaveWallet)
-}
-
-/**
  * Check if a string is valid JSON
  * @param str - The string to check
  * @returns boolean indicating if the string is valid JSON

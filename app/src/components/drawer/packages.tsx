@@ -1,6 +1,7 @@
 import { Package, Construction } from "lucide-react"
+import { memo } from "react"
 
-export default function Packages() {
+const Packages = memo(function Packages() {
     return (
         <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             <div className="relative mb-4">
@@ -18,4 +19,6 @@ export default function Packages() {
             </div>
         </div>
     )
-}
+})
+
+export default Packages

@@ -10,16 +10,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import SingleFileEditor from "./editor/single-file-editor";
 import NotebookEditor from "./editor/notebook-editor";
 import { useTheme } from "@/components/theme-provider";
-import { getFileIconElement, createAOSigner, parseOutput, stripAnsiCodes, isExecutionError, isErrorText } from "@/lib/utils";
+import { getFileIconElement, parseOutput, stripAnsiCodes, isExecutionError, isErrorText } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 import { useTerminalState } from "@/hooks/use-terminal-state";
 import { MainnetAO, TestnetAO } from "@/lib/ao";
-import { useActiveAddress } from "@arweave-wallet-kit/react";
+import { useActiveAddress, useApi } from "@arweave-wallet-kit/react";
 import { toast } from "sonner";
 import { OutputViewer } from "@/components/ui/output-viewer";
 import Inbox from "./inbox";
 import History from "./editor/history";
 import { useGlobalHotkeys } from "@/hooks/use-hotkeys";
+import { createSigner } from "@permaweb/aoconnect";
 
 function FileTabItem({ filename }: { filename: string }) {
     const { activeFile, actions } = useGlobalState();
@@ -115,7 +116,7 @@ export default function Editor() {
     const [running, setRunning] = useState(false);
     const bottomPanelRef = useRef<ImperativePanelHandle>(null);
     const fileTabsContainerRef = useRef<HTMLDivElement>(null);
-
+    const api = useApi()
     const project = projects[activeProject];
     const file = project?.files[activeFile];
 
@@ -286,7 +287,7 @@ export default function Editor() {
                     return;
                 }
 
-                const signer = createAOSigner();
+                const signer = createSigner(api);
                 const ao = new MainnetAO({
                     GATEWAY_URL: settings.actions.getGatewayUrl(),
                     HB_URL: settings.actions.getHbUrl(),

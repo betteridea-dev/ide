@@ -6,12 +6,13 @@ import { useEffect, useState } from "react"
 import Constants from "@/lib/constants"
 import { useProjects } from "@/hooks/use-projects"
 import { CheckCircle, AlertCircle, X, Plus } from "lucide-react"
-import { validateArweaveId, createNewProject, createAOSigner } from "@/lib/utils"
+import { validateArweaveId, createNewProject } from "@/lib/utils"
 import { MainnetAO } from "@/lib/ao"
 type SimpleTag = { name: string; value: string }
-import { useActiveAddress } from "@arweave-wallet-kit/react"
+import { useActiveAddress, useApi } from "@arweave-wallet-kit/react"
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useSettings } from "@/hooks/use-settings"
+import { createSigner } from "@permaweb/aoconnect"
 
 interface ValidationError {
     field: string
@@ -33,6 +34,7 @@ export default function NewProject() {
     const [successMessage, setSuccessMessage] = useState<string>("")
     const [generalError, setGeneralError] = useState<string>("")
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const api = useApi()
 
     const modules = network === "legacynet" ? Constants.modules.testnet : Constants.modules.mainnet
     const { projects, actions } = useProjects()
@@ -209,7 +211,7 @@ export default function NewProject() {
                 processId = existingProcessId.trim()
             } else if (network === "mainnet") {
                 // Create new process on mainnet
-                const signer = createAOSigner()
+                const signer = createSigner(api)
                 const ao = new MainnetAO({
                     GATEWAY_URL: settings.actions.getGatewayUrl(),
                     HB_URL: settings.actions.getHbUrl(),

@@ -1,30 +1,34 @@
 import { cn } from "@/lib/utils"
-import { useGlobalState } from "../../hooks/use-global-state"
+import { useDrawerOpen, useActiveProject, useGlobalActions, useActiveDrawer } from "../../hooks/use-global-state"
 import { useProjects } from "../../hooks/use-projects"
 import { Button } from "../ui/button"
 import { FolderPlus, FolderOpen } from "lucide-react"
+import { memo, useCallback, useMemo } from "react"
 import Files from "./files"
 import Packages from "./packages"
 import Sqlite from "./sqlite"
 import Interact from "./interact"
+import Relayer from "./relayer"
 
 export default function Drawer() {
-    const { drawerOpen, activeProject, actions: sidebarActions } = useGlobalState()
-    const { projects, actions: projectActions } = useProjects()
+    const drawerOpen = useDrawerOpen()
+    const activeProject = useActiveProject()
+    const sidebarActions = useGlobalActions()
+    const { projects } = useProjects()
     const project = projects[activeProject]
 
-    const handleViewAllProjects = () => {
+    const handleViewAllProjects = useCallback(() => {
         sidebarActions.setActiveView("project")
         sidebarActions.setActiveTab("files")
-    }
+    }, [sidebarActions])
 
-    const handleCreateNewProject = () => {
+    const handleCreateNewProject = useCallback(() => {
         // Trigger the new project dialog
         const trigger = document.getElementById("new-project")
         if (trigger) {
             trigger.click()
         }
-    }
+    }, [])
 
     // Show no project state if no active project
     if (!activeProject || !project) {
@@ -74,24 +78,28 @@ export default function Drawer() {
         )
     }
 
-    const Switcher = () => {
-        const { activeDrawer: activeTab } = useGlobalState()
+    const Switcher = memo(() => {
+        const activeTab = useActiveDrawer()
 
-        switch (activeTab) {
-            case "files":
-                return <Files />
-            case "packages":
-                return <Packages />
-            case "sqlite":
-                return <Sqlite />
-            case "interact":
-                return <Interact />
-            case "ao-companion":
-                return <div className="p-4 text-center text-muted-foreground">AO Companion coming soon...</div>
-            default:
-                return <div className="p-4 text-center text-muted-foreground">Select a tab</div>
-        }
-    }
+        return useMemo(() => {
+            switch (activeTab) {
+                case "files":
+                    return <Files />
+                case "packages":
+                    return <Packages />
+                case "sqlite":
+                    return <Sqlite />
+                case "interact":
+                    return <Interact />
+                case "relayer":
+                    return <Relayer />
+                case "ao-companion":
+                    return <div className="p-4 text-center text-muted-foreground">AO Companion coming soon...</div>
+                default:
+                    return <div className="p-4 text-center text-muted-foreground">Select a tab</div>
+            }
+        }, [activeTab])
+    })
 
     return <div className={cn("w-full h-full bg-background overflow-hidden", drawerOpen && "block")}>
         <Switcher />

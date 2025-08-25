@@ -149,7 +149,7 @@ export class MainnetAO {
         return (await res.json()) as T
     }
 
-    async spawn({ tags, data, module_ }: { tags?: { name: string; value: string }[], data?: any, module_?: string }) {
+    async spawn({ tags, data, module_ }: { tags?: { name: string; value: string }[], data?: any, module_?: string }): Promise<string> {
         const params: any = {
             path: '/push',
             method: 'POST',

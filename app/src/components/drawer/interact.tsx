@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, memo } from "react"
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useProjects } from "@/hooks/use-projects"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,7 @@ import JsonViewer from "../ui/json-viewer"
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-export default function Interact() {
+const Interact = memo(function Interact() {
     const globalState = useGlobalState()
     const projectsState = useProjects()
     const settings = useSettings()
@@ -492,4 +492,6 @@ export default function Interact() {
             </ScrollArea>
         </div>
     )
-}
+})
+
+export default Interact

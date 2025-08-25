@@ -1,5 +1,6 @@
 import { useGlobalState } from "@/hooks/use-global-state"
-import { Blocks, Bot, Database, File, Files, FlaskConical, Settings, TestTubeDiagonal } from "lucide-react"
+import { usePWAInstall } from "@/hooks/use-pwa-install"
+import { Blocks, Bot, Database, Download, EthernetPort, File, Files, FlaskConical, Settings, TestTubeDiagonal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "./ui/button"
 import { useEffect, useState } from "react"
@@ -13,7 +14,7 @@ export interface LeftSidebarOptions {
     isNew?: boolean
 }
 
-export type SidebarTabs = "files" | "packages" | "sqlite" | "interact" | "ao-companion"
+export type SidebarTabs = "files" | "packages" | "sqlite" | "interact" | "relayer" | "ao-companion"
 
 const options: LeftSidebarOptions[] = [
     {
@@ -47,6 +48,14 @@ const options: LeftSidebarOptions[] = [
 
         }
     },
+    {
+        label: "Relayer",
+        Icon: EthernetPort,
+        id: "relayer",
+        onClick: (params: any) => {
+
+        }
+    },
     // {
     //     label: "AO Companion",
     //     Icon: Bot,
@@ -61,6 +70,14 @@ const options: LeftSidebarOptions[] = [
 
 export default function LeftSidebar() {
     const { activeDrawer: activeTab, drawerOpen, actions: sidebarActions } = useGlobalState()
+    const { canInstall, installApp } = usePWAInstall()
+
+    const handleInstallClick = async () => {
+        const success = await installApp()
+        if (success) {
+            console.log('PWA installed successfully')
+        }
+    }
 
     return <div className="h-full w-10 flex flex-col border-r">
         {options.map((option) => (
@@ -88,6 +105,23 @@ export default function LeftSidebar() {
             </Tooltip>
         ))}
         <div className="grow"></div>
+        {/* install app button - only show when installable */}
+        {canInstall && (
+            <Tooltip delayDuration={250}>
+                <TooltipTrigger>
+                    <Button
+                        variant="ghost"
+                        className="h-10 w-10 flex items-center justify-center gap-2 rounded-none text-primary"
+                        onClick={handleInstallClick}
+                    >
+                        <Download strokeWidth={1.5} className="w-4.5 h-4.5" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="rounded">
+                    Install App
+                </TooltipContent>
+            </Tooltip>
+        )}
         <Button variant="ghost" className="h-10 w-10 flex items-center justify-center gap-2 rounded-none"
             onClick={() => {
                 sidebarActions.setActiveView("settings")
