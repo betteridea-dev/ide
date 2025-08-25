@@ -249,10 +249,10 @@ const Relayer = memo(function Relayer() {
                         </Button>
                     </div>
                 </div>
-                <div className="text-[10px] text-muted-foreground mt-1.5">The relay device adds support for HTTP requests within ao processes</div>
+                <div className="text-[10px] text-muted-foreground mt-1.5 truncate">The relay device adds support for HTTP requests within ao processes</div>
             </div>
 
-            <ScrollArea className="flex-1 max-h-[calc(100vh-107px)]">
+            <ScrollArea className="flex-1 max-h-[calc(100vh-107px)] overflow-x-auto">
                 <div className="p-2.5 space-y-4">
 
 
@@ -292,6 +292,7 @@ const Relayer = memo(function Relayer() {
                                 <label className="text-sm font-medium">Request Body</label>
                                 <div className="border border-border rounded-md overflow-hidden bg-background">
                                     <Editor
+                                        width={"100%"}
                                         height={(Math.min(Math.max(relayBody.split("\n").length, 5) * 18, 252))}
                                         language="json"
                                         defaultValue={`{\n\t"foo":"bar"\n}`}
