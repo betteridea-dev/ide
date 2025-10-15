@@ -10,7 +10,8 @@ const Constants = {
             aolearn: "qG-uo90351vUF7WPmUcObFtk7NU1isZYdPS0r2yQdKY"
         },
         mainnet: {
-            hyperAos: "xVcnPK8MPmcocS6zwq1eLmM2KhfyarP8zzmz3UVi1g4"
+            hyperAos: "wal-fUK-YnB9Kp5mN8dgMsSqPSqiGx-0SvwFUSwpDBI"
+            // hyperAos: "xVcnPK8MPmcocS6zwq1eLmM2KhfyarP8zzmz3UVi1g4"
         }
     },
     tags: {
