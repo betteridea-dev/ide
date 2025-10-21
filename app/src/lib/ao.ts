@@ -130,7 +130,7 @@ export class MainnetAO {
             // 'signing-format': 'ans104',
             'signing-format': 'ANS-104',
             module: module_ || Constants.modules.mainnet.hyperAos,
-            scheduler: await this.operator(),
+            scheduler: await this.operator() + ",fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY",
             accept: 'application/json',
             // 'accept-bundle': true,
             ...Constants.tags.common,

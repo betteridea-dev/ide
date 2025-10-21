@@ -98,7 +98,7 @@ export const HOTKEY_CONFIG: SimpleHotkeyConfig[] = [
     {
         action: 'openSettings',
         key: 'Ctrl+,',  // Will show as ⌘+, on Mac
-        description: 'Open settings',
+        description: 'Open project settings (or general settings if no project)',
         category: 'View'
     },
 

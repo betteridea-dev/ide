@@ -14,6 +14,22 @@ const Constants = {
             // hyperAos: "xVcnPK8MPmcocS6zwq1eLmM2KhfyarP8zzmz3UVi1g4"
         }
     },
+    nodes: [
+        "hb.arweave.tech",
+        "hb.arweave.asia",
+        "forward.computer",
+        "scheduler.forward.computer",
+    ],
+    CUs: [
+        "cu.ardrive.io",
+        "cu-af.dataos.so"
+    ],
+    Gateways: [
+        "arweave.tech",
+        "arweave.net",
+        "permagate.io",
+        "ardrive.net"
+    ],
     tags: {
         common: {
             'app-name': 'betteridea',
@@ -25,7 +41,7 @@ const Constants = {
 
     },
     apmProcess: "RLvG3tclmALLBCrwc17NqzNFqZCrUf3-RKZ5v8VRHiU",
-    authorities: ['fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY', "QWg43UIcJhkdZq6ourr1VbnkwcP762Lppd569bKWYKY"]
+    authorities: ['fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY']
 }
 
 export default Constants

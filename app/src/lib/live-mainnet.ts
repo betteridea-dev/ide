@@ -51,7 +51,7 @@ export function startLiveMonitoring(
 
         try {
             // Get the current slot
-            const currentSlotPath = `/${processId}~process@1.0/slot/current/body`
+            const currentSlotPath = `/${processId}/slot/current`
             const currentSlot = await ao.read<{ body: number }>({ path: currentSlotPath })
             const currentSlotNumber = currentSlot.body
 
@@ -77,23 +77,34 @@ export function startLiveMonitoring(
                 return
             }
 
+            type resultBody = {
+                info: string
+                outbox: Record<string, any>[]
+                output: {
+                    data: string
+                    print?: string
+                    prompt: string
+                }
+                status: string
+            }
+
             // Fetch computation results for the slot
-            const resultsPath = `/${processId}~process@1.0/compute&slot=${slotToCheck}/results`
-            const results = await ao.read<any>({ path: resultsPath })
+            const resultsPath = `/${processId}/compute&slot=${slotToCheck}/results`
+            const results = await ao.read<{ body: resultBody }>({ path: resultsPath })
 
             // Check if results have print output
-            const hasPrint = !!(results?.output?.print)
+            const hasPrint = !!(results?.body?.output?.print)
 
             let output: string | undefined
             let error: string | undefined
             let hasNewData = false
 
             if (results && hasPrint) {
-                if (isExecutionError(results)) {
-                    error = parseOutput(results)
-                    output = results.output.data
+                if (isExecutionError(results.body)) {
+                    error = parseOutput(results.body)
+                    output = results?.body?.output?.data
                 } else {
-                    output = parseOutput(results)
+                    output = parseOutput(results?.body?.output?.data)
                 }
                 hasNewData = !!(output || error)
             }

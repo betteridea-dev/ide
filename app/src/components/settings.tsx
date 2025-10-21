@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { ArrowLeft, Moon, Sun, Save, RotateCcw, Settings as SettingsIcon, Edit3, Check, X, Plus, Tag as TagIcon, ChevronDown, ChevronRight, FileText } from "lucide-react"
+import { useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +15,11 @@ import { useProjects } from "@/hooks/use-projects"
 import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
 import { cn, validateArweaveId, pingUrl, pingGraphql } from "@/lib/utils"
+import { MainnetAO } from "@/lib/ao"
+import Constants from "@/lib/constants"
+import { useActiveAddress, useApi } from "@arweave-wallet-kit/react"
+import { createSigner } from "@permaweb/aoconnect"
+import { Badge } from "./ui/badge"
 
 // Custom debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -31,10 +37,6 @@ function useDebounce<T>(value: T, delay: number): T {
 
     return debouncedValue
 }
-import { MainnetAO } from "@/lib/ao"
-import Constants from "@/lib/constants"
-import { useActiveAddress, useApi } from "@arweave-wallet-kit/react"
-import { createSigner } from "@permaweb/aoconnect"
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
@@ -43,6 +45,8 @@ export default function Settings() {
     const settings = useSettings()
     const activeAddress = useActiveAddress()
     const api = useApi()
+    const [searchParams, setSearchParams] = useSearchParams()
+
     // Local state for UI inputs (for URLs and API key)
     const [customCuUrl, setCustomCuUrl] = useState(settings.actions.getCuUrl())
     const [customHbUrl, setCustomHbUrl] = useState(settings.actions.getHbUrl())
@@ -59,8 +63,39 @@ export default function Settings() {
     const debouncedGatewayUrl = useDebounce(customGatewayUrl, 500)
     const debouncedGraphqlUrl = useDebounce(customGraphqlUrl, 500)
 
-    // Tab state
-    const [activeTab, setActiveTab] = useState("general")
+    // Tab state - check URL params for initial tab
+    const [activeTab, setActiveTab] = useState(() => {
+        const tabParam = searchParams.get("tab")
+        return tabParam && ["general", "editor", "network", "project"].includes(tabParam) ? tabParam : "general"
+    })
+
+    // Handle tab changes and update URL
+    const handleTabChange = (newTab: string) => {
+        setActiveTab(newTab)
+        const newParams = new URLSearchParams(searchParams)
+        if (newTab === "general") {
+            newParams.delete("tab") // Remove tab param for default tab
+        } else {
+            newParams.set("tab", newTab)
+        }
+        setSearchParams(newParams)
+    }
+
+    // Listen for URL parameter changes (e.g., browser back/forward)
+    useEffect(() => {
+        const tabParam = searchParams.get("tab")
+        const validTab = tabParam && ["general", "editor", "network", "project"].includes(tabParam) ? tabParam : "general"
+        if (validTab !== activeTab) {
+            setActiveTab(validTab)
+        }
+    }, [searchParams, activeTab])
+
+    // Helper function to handle back navigation
+    const handleBackNavigation = () => {
+        // Clear URL parameters when going back
+        setSearchParams(new URLSearchParams())
+        globalState.actions.setActiveView(null)
+    }
 
     // Ping state
     const [pingResults, setPingResults] = useState<{
@@ -592,7 +627,7 @@ export default function Settings() {
                     variant="ghost"
                     size="sm"
                     className="text-muted-foreground hover:text-foreground"
-                    onClick={() => globalState.actions.setActiveView(null)}
+                    onClick={handleBackNavigation}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Back
@@ -606,7 +641,7 @@ export default function Settings() {
             <div className="flex-1 overflow-auto">
                 <div className="max-w-4xl mx-auto p-6 space-y-6">
 
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                         <TabsList className="grid w-full grid-cols-4 items-center justify-center bg-muted/30">
                             <TabsTrigger
                                 value="general"
@@ -627,6 +662,7 @@ export default function Settings() {
                                 Network
                             </TabsTrigger>
                             <TabsTrigger
+                                id="project-settings"
                                 value="project"
                                 className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                             >
@@ -760,6 +796,18 @@ export default function Settings() {
                                                 <RotateCcw className="h-3 w-3" />
                                             </Button>
                                         </div>
+                                        <div className="space-x-1">
+                                            {Constants.CUs.map((cu) => (
+                                                <Badge
+                                                    key={cu}
+                                                    variant="outline"
+                                                    className={cn("cursor-pointer", customCuUrl.replace("https://", "").replace("http://", "") === cu && "bg-primary text-primary-foreground")}
+                                                    onClick={() => setCustomCuUrl("https://" + cu)}
+                                                >
+                                                    {cu}
+                                                </Badge>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -784,6 +832,18 @@ export default function Settings() {
                                                 <RotateCcw className="h-3 w-3" />
                                             </Button>
                                         </div>
+                                        <div className="space-x-1">
+                                            {Constants.nodes.map((node) => (
+                                                <Badge
+                                                    key={node}
+                                                    variant="outline"
+                                                    className={cn("cursor-pointer", customHbUrl.replace("https://", "").replace("http://", "") === node && "bg-primary text-primary-foreground")}
+                                                    onClick={() => setCustomHbUrl("https://" + node)}
+                                                >
+                                                    {node}
+                                                </Badge>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -807,6 +867,18 @@ export default function Settings() {
                                             >
                                                 <RotateCcw className="h-3 w-3" />
                                             </Button>
+                                        </div>
+                                        <div className="space-x-1">
+                                            {Constants.Gateways.map((gateway) => (
+                                                <Badge
+                                                    key={gateway}
+                                                    variant="outline"
+                                                    className={cn("cursor-pointer", customGatewayUrl.replace("https://", "").replace("http://", "") === gateway && "bg-primary text-primary-foreground")}
+                                                    onClick={() => setCustomGatewayUrl("https://" + gateway)}
+                                                >
+                                                    {gateway}
+                                                </Badge>
+                                            ))}
                                         </div>
                                     </div>
 

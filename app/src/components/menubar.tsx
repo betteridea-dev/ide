@@ -1,6 +1,6 @@
 
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6"
-import { Link } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { Menubar as MainMenubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger, MenubarSub, MenubarSubTrigger, MenubarSubContent } from "@/components/ui/menubar"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
@@ -95,6 +95,7 @@ const learningResources = [
 export default function Menubar() {
     const { activeProject, activeFile, activeView, actions: globalActions, drawerOpen, bottomPanelOpen } = useGlobalState()
     const { projects, actions: projectActions } = useProjects()
+    const [searchParams, setSearchParams] = useSearchParams()
     const [isCreatingProject, setIsCreatingProject] = useState(false)
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
     const [processId, setProcessId] = useState("")
@@ -493,8 +494,24 @@ export default function Menubar() {
         // toast.success(`Project "${activeProject}" saved`)
     }
 
-    const handleSettings = () => {
+    const handleProjectSettings = () => {
+        // Navigate to settings with project tab parameter using React Router
+        const newParams = new URLSearchParams(searchParams)
+        newParams.set("tab", "project")
+        setSearchParams(newParams)
+
+        // Set the view after URL params to ensure proper order
         globalActions.setActiveView("settings")
+    }
+
+    const handleSettings = () => {
+        if (activeProject) {
+            // If there's an active project, open project settings
+            handleProjectSettings()
+        } else {
+            // If no active project, open regular settings
+            globalActions.setActiveView("settings")
+        }
     }
 
     const handleShowKeyboardShortcuts = () => {
@@ -606,6 +623,15 @@ export default function Menubar() {
                         Delete Project
                     </MenubarItem>
                     <MenubarSeparator className="bg-border" />
+                    <MenubarItem
+                        onClick={handleProjectSettings}
+                        disabled={!activeProject}
+                        className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    >
+                        <Settings className="w-4 h-4 text-muted-foreground" />
+                        Project Settings
+                        <MenubarShortcut className="text-muted-foreground">{getHotkeyDisplay(HOTKEYS.SETTINGS.key)}</MenubarShortcut>
+                    </MenubarItem>
                     <MenubarItem
                         onClick={handleCloseProject}
                         disabled={!activeProject}

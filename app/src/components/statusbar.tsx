@@ -226,10 +226,23 @@ export default function Statusbar() {
                 signer: createSigner(api)
             })
 
-            // set a variable in the process containing the entire projects json
-            // Sync logged
-            log({ type: "info", label: "Syncing Project to Process", data: { projectProcessId, project } })
-            await ao.runLua({ processId: projectProcessId, code: `betteridea = [===[${JSON.stringify(project)}]===]` })
+            let stateAreSame = false;
+            try {
+                let prevState = await ao.read({ path: `/${projectProcessId}/now/betteridea` })
+                if ((prevState as any).body as string) {
+                    prevState = JSON.stringify(JSON.parse((prevState as any).body as string))
+                }
+                stateAreSame = prevState == JSON.stringify(project)
+            } catch (error) {
+                stateAreSame = false;
+            }
+
+            if (!stateAreSame) {
+                log({ type: "info", label: "Syncing Project to Process", data: { projectProcessId, project } })
+                await ao.runLua({ processId: projectProcessId, code: `betteridea = [===[${JSON.stringify(project)}]===]` })
+            } else {
+                log({ type: "info", label: "Project state is the same, skipping sync", data: {} })
+            }
         }
 
         const interval = setInterval(syncProjectToProcess, 15000);

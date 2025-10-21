@@ -124,12 +124,12 @@ export default function Inbox() {
         setIsLoading(true);
         try {
             const hashpath = `/${selectedProcessId}/now/Inbox`;
-            const res = await ao.read<Inbox>({ path: hashpath }).then(ao.sanitizeResponse);
-            setInbox(res);
+            const res = await ao.read<{ body: Inbox }>({ path: hashpath }).then(ao.sanitizeResponse);
+            setInbox(res.body);
 
             // Auto-select first message if none selected
-            if (!selectedMessage && res && Object.keys(res).length > 0) {
-                setSelectedMessage(Object.keys(res)[0]);
+            if (!selectedMessage && res.body && Object.keys(res.body).length > 0) {
+                setSelectedMessage(Object.keys(res.body)[0]);
             }
         } catch (error) {
             // Failed to load inbox
