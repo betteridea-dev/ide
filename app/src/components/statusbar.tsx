@@ -29,6 +29,7 @@ export default function Statusbar() {
     const [mounted, setMounted] = useState(false);
     const [performance, setPerformance] = useState({ memory: 0 });
     const stopMonitoringRef = useRef<Map<string, () => void>>(new Map());
+    const syncInProgressRef = useRef<Promise<void> | null>(null);
     const api = useApi();
 
     // Get active project and process ID
@@ -217,31 +218,56 @@ export default function Statusbar() {
             const project = projects.projects[globalState.activeProject];
             if (!project) return;
 
-            const hbUrl = settings.actions.getHbUrl();
-            const gatewayUrl = settings.actions.getGatewayUrl();
-
-            const ao = new MainnetAO({
-                HB_URL: hbUrl,
-                GATEWAY_URL: gatewayUrl,
-                signer: createSigner(api)
-            })
-
-            let stateAreSame = false;
-            try {
-                let prevState = await ao.read({ path: `/${projectProcessId}/now/betteridea` })
-                if ((prevState as any).body as string) {
-                    prevState = JSON.stringify(JSON.parse((prevState as any).body as string))
+            // If a sync is already in progress, wait for it to complete
+            if (syncInProgressRef.current) {
+                log({ type: "info", label: "Sync already in progress, waiting for completion", data: {} });
+                try {
+                    await syncInProgressRef.current;
+                } catch (error) {
+                    // Previous sync failed, we can continue with new sync
+                    log({ type: "warning", label: "Previous sync failed, continuing with new sync", data: { error } });
                 }
-                stateAreSame = prevState == JSON.stringify(project)
-            } catch (error) {
-                stateAreSame = false;
             }
 
-            if (!stateAreSame) {
-                log({ type: "info", label: "Syncing Project to Process", data: { projectProcessId, project } })
-                await ao.runLua({ processId: projectProcessId, code: `betteridea = [===[${JSON.stringify(project)}]===]` })
-            } else {
-                log({ type: "info", label: "Project state is the same, skipping sync", data: {} })
+            // Start new sync and store the promise
+            const syncPromise = (async () => {
+                const hbUrl = settings.actions.getHbUrl();
+                const gatewayUrl = settings.actions.getGatewayUrl();
+
+                const ao = new MainnetAO({
+                    HB_URL: hbUrl,
+                    GATEWAY_URL: gatewayUrl,
+                    signer: createSigner(api)
+                })
+
+                let stateAreSame = false;
+                try {
+                    let prevState = await ao.read({ path: `/${projectProcessId}/now/betteridea` })
+                    if ((prevState as any).body as string) {
+                        prevState = JSON.stringify(JSON.parse((prevState as any).body as string))
+                    }
+                    stateAreSame = prevState == JSON.stringify(project)
+                } catch (error) {
+                    stateAreSame = false;
+                }
+
+                if (!stateAreSame) {
+                    log({ type: "info", label: "Syncing Project to Process", data: { projectProcessId, project } })
+                    await ao.runLua({ processId: projectProcessId, code: `betteridea = [===[${JSON.stringify(project)}]===]` })
+                } else {
+                    log({ type: "info", label: "Project state is the same, skipping sync", data: {} })
+                }
+            })();
+
+            syncInProgressRef.current = syncPromise;
+
+            try {
+                await syncPromise;
+            } catch (error) {
+                log({ type: "error", label: "Sync failed", data: { error } });
+            } finally {
+                // Clear the sync reference when done
+                syncInProgressRef.current = null;
             }
         }
 

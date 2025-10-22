@@ -132,7 +132,7 @@ export class MainnetAO {
             module: module_ || Constants.modules.mainnet.hyperAos,
             scheduler: await this.operator() + ",fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY",
             accept: 'application/json',
-            // 'accept-bundle': true,
+            // 'accept-bundle': "true",
             ...Constants.tags.common,
         }
 
